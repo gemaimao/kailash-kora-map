@@ -502,7 +502,7 @@ function startDwell(secs) {
   clearInterval(STATE.dwellTimer);
   if (secs < 0) {
     // 密集簇：无限等待，用户翻阅后手动继续
-    dwellEl.textContent = "❮ ❯ 翻阅 · ▶ 继续";
+    dwellEl.textContent = "";
   } else {
     STATE.dwellRemaining = secs;
     dwellEl.textContent = "自动继续 " + secs + "s";
@@ -560,7 +560,7 @@ function currentPoiIndex() {
 prevPoiBtn.addEventListener("click", () => {
   if (STATE.dwelling) {
     clearInterval(STATE.dwellTimer); // 用户主动翻阅时停止自动倒计时
-    dwellEl.textContent = "❮ ❯ 翻阅 · ▶ 继续";
+    dwellEl.textContent = "";
   }
   const idx = currentPoiIndex();
   const prev = idx > 0 ? idx - 1 : STATE.uniqueRoutePois.length - 1;
@@ -572,7 +572,7 @@ prevPoiBtn.addEventListener("click", () => {
 nextPoiBtn.addEventListener("click", () => {
   if (STATE.dwelling) {
     clearInterval(STATE.dwellTimer);
-    dwellEl.textContent = "❮ ❯ 翻阅 · ▶ 继续";
+    dwellEl.textContent = "";
   }
   const idx = currentPoiIndex();
   const next = idx < STATE.uniqueRoutePois.length - 1 ? idx + 1 : 0;
