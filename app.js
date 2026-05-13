@@ -669,15 +669,28 @@ if (bgm && bgmBtn) {
 }
 
 async function updateVisitCount() {
+  const NAMESPACE = "kailash-kora-map-2026"; // 统计命名空间
+  const KEY = "visits";
   try {
-    const res = await fetch("/api/visit", { method: "POST" });
+    // 使用公共的 countapi.xyz (或其镜像)
+    // 每次访问 hit 一次
+    const res = await fetch(`https://api.countapi.xyz/hit/${NAMESPACE}/${KEY}`);
     const data = await res.json();
-    if (data.visitCount) {
-      document.getElementById("visitCount").textContent = data.visitCount;
+    if (data.value) {
+      document.getElementById("visitCount").textContent = data.value;
     }
   } catch (err) {
-    console.error("无法获取访客统计:", err);
-    document.getElementById("visitorCounter").style.display = "none";
+    console.warn("公共计数器不可用，尝试备用方案:", err);
+    // 备用方案：如果公共 API 挂了，尝试本地 API（万一是在本地运行）
+    try {
+      const res = await fetch("/api/visit", { method: "POST" });
+      const data = await res.json();
+      if (data.visitCount) {
+        document.getElementById("visitCount").textContent = data.visitCount;
+      }
+    } catch (localErr) {
+      document.getElementById("visitorCounter").style.display = "none";
+    }
   }
 }
 
