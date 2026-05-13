@@ -669,28 +669,53 @@ if (bgm && bgmBtn) {
 }
 
 async function updateVisitCount() {
-  const NAMESPACE = "kailash-kora-map-2026"; // 统计命名空间
+  const NAMESPACE = "kailash-kora-2026";
   const KEY = "visits";
+  
+  // 封装带超时的 fetch
+  const fetchWithTimeout = (url, options, timeout = 5000) => {
+    return Promise.race([
+      fetch(url, options),
+      new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), timeout))
+    ]);
+  };
+
   try {
-    // 使用公共的 countapi.xyz (或其镜像)
-    // 每次访问 hit 一次
-    const res = await fetch(`https://api.countapi.xyz/hit/${NAMESPACE}/${KEY}`);
+    // 换一个更稳定的 API: counterapi.dev
+    const res = await fetchWithTimeout(`https://api.counterapi.dev/v1/${NAMESPACE}/${KEY}/up`);
+    const data = await res.json();
+    if (data.count) {
+      document.getElementById("visitCount").textContent = data.count;
+      return;
+    }
+  } catch (err) {
+    console.warn("公共计数器 1 失败，尝试方案 2:", err);
+  }
+
+  // 备用方案 2: 之前的 countapi.xyz
+  try {
+    const res = await fetchWithTimeout(`https://api.countapi.xyz/hit/${NAMESPACE}/${KEY}`);
     const data = await res.json();
     if (data.value) {
       document.getElementById("visitCount").textContent = data.value;
+      return;
     }
   } catch (err) {
-    console.warn("公共计数器不可用，尝试备用方案:", err);
-    // 备用方案：如果公共 API 挂了，尝试本地 API（万一是在本地运行）
-    try {
-      const res = await fetch("/api/visit", { method: "POST" });
-      const data = await res.json();
-      if (data.visitCount) {
-        document.getElementById("visitCount").textContent = data.visitCount;
-      }
-    } catch (localErr) {
-      document.getElementById("visitorCounter").style.display = "none";
+    console.warn("公共计数器 2 失败，尝试本地备用:", err);
+  }
+
+  // 备用方案 3: 本地 API
+  try {
+    const res = await fetchWithTimeout("/api/visit", { method: "POST" });
+    const data = await res.json();
+    if (data.visitCount) {
+      document.getElementById("visitCount").textContent = data.visitCount;
+    } else {
+      throw new Error("Invalid local response");
     }
+  } catch (localErr) {
+    console.error("所有计数方案均失败");
+    document.getElementById("visitorCounter").style.display = "none";
   }
 }
 
