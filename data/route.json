@@ -1,0 +1,27 @@
+{
+  "name": "冈仁波齐外转山道",
+  "description": "由塔尔钦起点出发，经西转山道—北转山道—东转山道—南转山道返回塔尔钦的完整朝圣环线。",
+  "order": [
+    "tarchen",
+    "serxiong",
+    "poi_1778643234953",
+    "datianzang",
+    "naruoqiongba",
+    "qugu",
+    "matou",
+    "poi_1778641925355",
+    "zhiripu",
+    "gangjia",
+    "xiaotianzang",
+    "zhuomala",
+    "kongxingmu",
+    "dongbei",
+    "zunzhu",
+    "zongdui",
+    "tarchen"
+  ],
+  "epilogue": [
+    "poi_1778644164756",
+    "poi_1778643368238"
+  ]
+}

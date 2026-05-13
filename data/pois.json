@@ -1,0 +1,211 @@
+[
+  {
+    "id": "tarchen",
+    "name": "塔尔钦镇",
+    "type": "转山大本营 / 行政中心",
+    "section": "线路起点和终点",
+    "lat": 30.975861,
+    "lng": 81.289003,
+    "bubble": "神山南麓世俗汇聚之地。南面是旷阔的巴嘎湖区平原与湿地，远方是纳木那尼绵延雪山，中间日月双湖波光湛蓝。拉昂错北部荒野中，柱状龙卷风常在午后狼奔虎逐，天地热力交换的重压下，连乌鸦也只能小回旋贴地短飞。北方的岗仁波齐峰只是稍露一头，显得冷寂，并且遥远。一面是天道往复不息的日升月起，世界般地宏阔无章，浩瀚的无趣感；一面又是久压的朝圣欲望，在每一个内心中最后的纠结，却又想一早跋涉圣途。\nThe secular gathering place at the southern slope of the sacred mountain. To the south lies the vast Bagha Lake plain and wetland, in the distance are the endless snow-capped mountains of Namtso Nani, and in the middle are the twin lakes, their ripples a deep azure blue. In the northern wilderness of Lake Lhakang, towering tornadoes often race about in the afternoon, under the intense pressure of the exchange of terrestrial heat, even crows can only make small circles and short flights close to the ground. The Gangrenboqi peak in the north is barely visible, appearing desolate and distant. On one hand, there is the endless rise and fall of the sun and moon, vast and unordered, a sense of boredom as boundless as the world; on the other hand, there is the long-suppressed desire for pilgrimage, the final entanglement in every heart, yet yearning to embark on the sacred journey early in the morning.",
+    "note": "塔尔钦意为大经幡，现为普兰县巴嘎镇所在地，神山朝圣大本营",
+    "density": "稀疏区"
+  },
+  {
+    "id": "serxiong",
+    "name": "色尔雄大经幡阵",
+    "type": "朝圣集会活动处",
+    "section": "西转山道",
+    "lat": 31.013674,
+    "lng": 81.262727,
+    "bubble": "位于西转山甬道入口，拉曲河东侧黄金草滩旁台地。1680年前后，甘丹才旺率蒙藏大军收复阿里失地，为宣示胜利、告慰将士，于此举行盛大祭山仪式，并树立大经幡柱“甘丹疯旗”，以此告诫胆敢入侵者需遭受甘丹才旺疯狂反击。环形大经幡阵迎风猎猎，灵魂在这里仿佛会受到牵引，沿那条壁立的西甬道，踏上充满希望的赎罪和重生之旅。\nAt the entrance of the Xizhuan Mountain pass, on the terrace beside the Golden Grass Beach on the east side of the Laju River. Around 1680, Gandan Caiwang led the Mongolian and Tibetan forces to recapture the lost land of Ali. To declare victory and comfort the soldiers, a grand mountain sacrifice ceremony was held here, and a large prayer flag pole, the \"Gandan Crazy Flag,\" was erected to warn any invaders of Gandan Caiwang's fierce counterattack. The circular array of large prayer flags fluttered in the wind, as if the souls here were being drawn. Along the vertical west passageway, one embarks on a journey of hope, redemption, and rebirth.",
+    "note": "1680年甘丹才旺率蒙大军击败拉达克收复后阿里后在此举行盛大神山祭拜宣示胜利和告慰将士。现为神山转山节开山仪式场地。",
+    "density": "密集区"
+  },
+  {
+    "id": "datianzang",
+    "name": "大天葬台",
+    "type": "天葬超渡处",
+    "section": "西转山道",
+    "lat": 31.018755,
+    "lng": 81.266213,
+    "bubble": "大经幡阵北头高阶台地，是千百年以来生死的结界，肉体和灵魂得大解之地。传说佛祖曾亲率500阿罗汉化身黄鸭飞临此地以佑神山，并留下西南不动地钉永固圣地。结合甘丹才旺的故事，这里是勇者得解，无关悲欣的新起点。\nThe high-level platform at the north end of the Great Prayer Banner is the boundary of life and death for thousands of years, and the place where the body and soul are greatly released. Legend has it that the Buddha once personally led 500 Arohans to fly here in the incarnation of yellow ducks to bless the divine mountain, and left the southwestern land to nail the eternal holy land. Combined with the story of Gan Dancaiwang, this is a new starting point for the brave to understand, which has nothing to do with sadness and happiness.",
+    "note": "有五百罗汉会供加持的大天葬台",
+    "density": "密集区"
+  },
+  {
+    "id": "naruoqiongba",
+    "name": "那若琼巴修行洞",
+    "type": "宗教遗迹处",
+    "section": "西转山道",
+    "lat": 31.023618,
+    "lng": 81.269612,
+    "bubble": "那若琼巴洞位于大天葬台西北侧壁缘，经天葬台转山的必经地。该洞临近拉曲河，与曲古寺米拉日巴莲花修行洞隔岸相望。以米拉日巴为代表的新生势力在神山圣湖的不断崛起，那若琼巴所代表的苯教大师们则逐步淡出圣地。关于米拉日巴和那若琼巴（为争夺圣地修行主导权而）斗法的故事和遗迹，构成神山转山故事的主体之一。上面是天葬台，下方则是灵泉相伴的修行洞府。看似对立，实为循环一体。\nNa Ruo Qiongba Cave is located on the northwest wall of the Great Heavenly Burial Platform, and it is a must-see place to turn from the mountain through the Heavenly Burial Platform. The cave is close to the Laqu River and across the bank of the Mirazhiba Lotus Practice Cave of Qugu Temple. The new forces represented by Mirajpa continued to rise in the holy lake of Shenshan, and the masters of Bon Buddhism represented by Na Ruo Jomba gradually faded out of the holy place. The story and relics about the fight between Mirajpa and Narojunba (for the leadership of the holy place practice) constitute one of the main subjects of the story of the divine mountain. Above is the heavenly burial platform, and below is the practice cave accompanied by the spiritual spring. It seems to be an opposition, but it is actually a cycle.",
+    "note": "大天葬台中心处的佛足印",
+    "density": "密集区"
+  },
+  {
+    "id": "qugu",
+    "name": "曲古寺",
+    "type": "寺院",
+    "section": "西转山道非必经点",
+    "lat": 31.032434,
+    "lng": 81.267518,
+    "bubble": "转山西甬道入口处，拉曲河西侧，以壁立之姿，越过西甬道两侧山体投下的漫长阴影，与光明处的岗仁波齐峰西侧遥相对望。曲古寺有岗仁波齐护法神岗日拉赞神像。传说中，曲古寺著名的无量光佛塑像是由他迎接而来。\nTurn to the entrance of the west corridor, on the west side of the Laqu River, standing on the wall, cross the long shadows cast by the mountains on both sides of the west corridor, and look at the west side of Gangrenbo Qifeng in the bright place. There is a statue of Gang Rilazan, the god of Gangrenbo Qihufa, in Qugu Temple. Legend has it that the famous Buddha statue of Immeasurable Light in Qugu Temple was welcomed by him.",
+    "note": "曲古意为法（身），是西转山甬道第一寺，有神山护法神岗日拉赞神像、无量光佛塑像和煮茶大锅等寺藏文物",
+    "density": "密集区"
+  },
+  {
+    "id": "matou",
+    "name": "马头明王茶馆",
+    "type": "补给点 / 西北不动钉处",
+    "section": "西转山道",
+    "lat": 31.085223,
+    "lng": 81.288539,
+    "bubble": "经过西甬道东侧几处风化流石滩，快转向北行的位置是马头明王天生石。也是传统的转山途中休息地。至此，西甬道一段略显逼仄和压抑的空间渐次开阔，地势也将一路缓升。好马相伴，后路无忧。在此东望可观察到神山北壁形似眼镜蛇的冰冠，印度教称之为“那迦”。\nAfter passing through several weathered stone beaches on the east side of the West Road, the position of turning north is the Tianshengshi of Matou Mingwang. It is also a traditional resting place on the way to the mountain. At this point, the slightly cramped and oppressive space of Xiying Road will gradually open up, and the terrain will rise slowly all the way. Accompanied by good horses, the back road is worry-free. Looking east here, you can observe the ice crown shaped like a cobra on the north wall of the sacred mountain, which is called \"Naga\" in Hinduism.",
+    "note": "即将进入北转山甬道的补给处，有西北角佛足不动地钉和马头明王天生石",
+    "density": "稀疏区"
+  },
+  {
+    "id": "zhiripu",
+    "name": "哲日浦寺",
+    "type": "寺院",
+    "section": "北转山道非必经点",
+    "lat": 31.107441,
+    "lng": 81.322353,
+    "bubble": "神山转山道开创者竹巴噶举派大师郭仓巴曾得一母牦牛引路寻获此洞，而牦牛则隐入洞中，只余一处形似牛角的岩石槽痕，故得名哲日浦（牦牛幻化洞），后发展为寺院。哲日浦正对岗仁波齐峰北壁，位于贤劫千佛岩壁下方，两者之间形成一种空间的稳定结构：凸与凹，外与里，显与隐，高与低。哲日浦是为神山煨桑祝福的最佳位置。\nGuo Cangba, the master of Zhubagaju School, the founder of the Shenshan Mountain Road, once got a mother yak to lead the way to find this cave, and the yak hid in the cave, leaving only a rock groove in the shape of an ox horn, so it was named Zheripu (Yak Illusion Cave), and later developed into a monastery. Zheripu is on the north wall of Qi Peak in Gang Rinpo, located under the rock wall of Xianjie Qianfu. A stable structure of space is formed between the two: convex and concave, outside and inside, visible and hidden, high and low. Zheripu is the best place to bless Shenshan simmered mulberry.",
+    "note": "郭仓巴开创神山转山传统时修形的山洞，内有母牦牛角印记山洞",
+    "density": "密集区"
+  },
+  {
+    "id": "gangjia",
+    "name": "冈加旅馆",
+    "type": "旅馆 / 北壁补给点",
+    "section": "北转山道",
+    "lat": 31.10225,
+    "lng": 81.322605,
+    "bubble": "塔尔钦镇西侧的冈加村人历代在此经营旅馆营生，照拂朝圣路人。同时，这里也是传统的转山休憩地。冈加一侧的冰川漂砾滩多呈红色，漂砾岩体千姿百态，如有奇幻。冈加再往东，将会一路爬升，直到卓玛拉山口。\nThe people of Ganga Village on the west side of Tarchin Town have run hotels here for generations and take care of pilgrimage passers-by. At the same time, it is also a traditional mountain turning resting place. The glacial gravel flats on one side of Ganga are mostly red, and the gravel rocks are all kinds of shapes, such as fantasy. If you go to the east, you will climb all the way to the Chomara Pass.",
+    "note": "神山北面重要的补给点和住宿处",
+    "density": "密集区"
+  },
+  {
+    "id": "xiaotianzang",
+    "name": "小天葬台",
+    "type": "天葬超渡处",
+    "section": "北转山道",
+    "lat": 31.097028,
+    "lng": 81.348754,
+    "bubble": "位于北段上坡途中的小天葬台，本身也是最为艰险且事故频发的地段。朝圣者容易在此处因高原反应和意外伤痛等遭遇不测。久而久之便形成了天葬台。因此处高寒，便以印度佛教八大尸陀林之清凉寒林附会命名。小天葬可往前可分为两路，一是往东抵达最高点卓玛拉山口下山。另一则是往南经空行秘径，翻康卓桑姆山口下山，但后者尤为险峻。\nThe small heavenly burial platform located on the uphill in the northern section is also the most difficult and accident-frequent area. Pilgrims are prone to encounters here due to altitude sickness and accidental injuries. Over time, a heavenly burial platform was formed. Therefore, it is high and cold, so it is named after the cool cold forest of the eight great corpse forests of Indian Buddhism. The small heavenly burial can be divided into two ways. One is to go east to reach the highest point, Zhuomala Pass, and go down the mountain. The other is to go south through the secret path through the air and go down the Kangzhuo Samm Pass, but the latter is particularly dangerous.",
+    "note": "此处天葬台比附为印度佛教时期八大尸陀林（也即天葬地）中北方清凉寒林，也叫斯瓦采寒林",
+    "density": "密集区"
+  },
+  {
+    "id": "zhuomala",
+    "name": "卓玛拉山口",
+    "type": "全程最高点 5650m",
+    "section": "北转山道全程最高点",
+    "lat": 31.095443,
+    "lng": 81.371999,
+    "bubble": "海拔5650米的卓玛拉山口是神山转山道上海拔和心理双层面的制高点。作为朝圣艰辛的证明，无论前路是重返世间，还是迎向灵魂的新生，都足以体现其重量和价值。就算一路的祈求甚至诅咒，行走过那天边绸带似的山路，顶礼过卓玛拉风雪的人，都会感激这座神山所赐予他的力量和福泽。所以，它也必将成为一个时间的信标，根植在我们内心柔软的深处。\nThe Zhuomala Pass, which is 5,650 meters above sea level, is the high point of altitude and psychology on the Shenshan Road. As a proof of the hardships of pilgrimage, whether the road ahead is to return to the world or to face the new life of the soul, it is enough to reflect its weight and value. Even if you pray or even curse all the way, those who walk through the silk-like mountain road that day and bow to the wind and snow of Zhuomala will be grateful for the power and blessings given to him by this divine mountain. Therefore, it will also become a beacomer of time, rooted in the soft depths of our hearts.",
+    "note": "全程制高点，海拔5660米。传说为度母化身的青狼将开创转山小径时迷路的郭仓巴引领到此处寻找到了正确的道路",
+    "density": "密集区"
+  },
+  {
+    "id": "kongxingmu",
+    "name": "空行母浴池",
+    "type": "圣泉",
+    "section": "北转山道",
+    "lat": 31.093078,
+    "lng": 81.372788,
+    "bubble": "宗教的共性之一是净化。这处5000米之上最著名的冰湖，以其纯粹的冷洌和洁净，将为每一个朝圣人洗去征尘与倦意，并为他带来无尽的爱与慈悲的欢愉。\nOne of the commonalties of religion is purification. This most famous ice lake above 5,000 meters, with its pure coldness and cleanliness, will wash away the dust and fatigue of every pilgrim, and bring him endless joy of love and compassion.",
+    "note": "传说是胜乐金刚的空行母护法洗浴之地，也是印度教传说中乌玛天女沐浴处，藏地民间故事中称它为慈悲湖",
+    "density": "稀疏区"
+  },
+  {
+    "id": "dongbei",
+    "name": "东北不动地钉",
+    "type": "宗教遗迹处",
+    "section": "东转山道",
+    "lat": 31.079928,
+    "lng": 81.388142,
+    "bubble": "从东北不动地钉北望，卓玛拉山口以下是天梯般的陡峭，而在这般险难结束处，那缕帐篷中飘出奶茶香味，是朝圣人最大的犒赏。\nLooking north from the northeast, the Zhuomala Pass below is as steep as a ladder, and at the end of such danger, the fragrance of milk tea floats from the tent, which is the greatest reward for pilgrims.",
+    "note": "艰辛的北转山道结束后的休息补给处，有东北角佛祖不动地钉石",
+    "density": "稀疏区"
+  },
+  {
+    "id": "zunzhu",
+    "name": "尊珠寺",
+    "type": "寺院",
+    "section": "东转山道",
+    "lat": 31.000731,
+    "lng": 81.363896,
+    "bubble": "整个东转山道宽阔，一路下坡省力，到达尊珠寺，都属愉悦的路程。尊珠寺内供米拉日巴银质塑像，是全阿里最神圣的存在。\nThe whole east-turn mountain road is wide, and it saves effort all the way downhill. It is a pleasant journey to Zunzhu Temple. The silver statue of Mirajeba is enshrined in Zunzhu Temple, which is the most sacred existence in the whole Ali.",
+    "note": "阿里地区最为殊胜的著名的米拉日巴银像供奉于此",
+    "density": "密集区"
+  },
+  {
+    "id": "zongdui",
+    "name": "宗堆茶馆",
+    "type": "补给点 / 出山处",
+    "section": "南转山道",
+    "lat": 30.958633,
+    "lng": 81.319121,
+    "bubble": "经过一段深切险谷后，宗堆茶馆又迎来了巴嘎平原的开阔通透。大尺度的神山圣湖地景在阔别两日后会有一些亲切和熟悉。塔尔钦的建筑群也遥遥可见。\nAfter a deep and dangerous valley, Zongdui Teahouse ushered in the openness of the Baga Plain. The large-scale scenery of Shenshan Holy Lake will be somewhat intimate and familiar after two days of separation. The building complex of Tarchin can also be seen in the distance.",
+    "note": "东转山道出山处",
+    "density": "稀疏区"
+  },
+  {
+    "id": "poi_1778641925355",
+    "name": "郭仓巴足印",
+    "type": "开创者的足印",
+    "section": "北段",
+    "lat": 31.10364,
+    "lng": 81.313259,
+    "bubble": "郭仓巴是竹巴噶举派著名的修行大师，竹巴噶举派创始人藏巴甲热的高足，有鹰巢修士美誉。蒙元铁骑逡巡高原之际，他远赴阿里神山圣湖进行开拓，以求留下佛教火种。在圣湖玛旁雍西岸的果初寺有他的塑像。神山正北的哲日浦寺也起源于他。前往卓玛拉山口的过程中，一路都有空行母护法变幻出牦牛、青狼等　引领它开拓路线的遗迹。\nGuo Cangba was a renowned master of the Drukpa Kagyu school, a prominent disciple of Tsangpa Gyaltsen, the founder of the Drukpa Kagyu school, and was known as the \"Eagle's Nest Monk.\" When the Mongol cavalry roamed the plateau, he traveled to the sacred mountains and lakes of Ali to explore and preserve the seeds of Buddhism. A statue of him stands at Guochu Monastery on the western shore of Lake Manasarovar. Zheripu Monastery, located directly north of the sacred mountain, also originated from him. Along the way to the Dolma La Pass, there are remnants of dakinis (female deities) manifesting as yaks and wolves to guide the exploration of the route.",
+    "note": "",
+    "density": 1
+  },
+  {
+    "id": "poi_1778643234953",
+    "name": "双腿佛塔",
+    "type": "地标",
+    "section": "西段",
+    "lat": 31.014395,
+    "lng": 81.26015,
+    "bubble": "这是进入正式转山道的一个象征性的起点。印度教认为这里是地狱主阎摩之门，是由死向生循环的入口。\nThis is a symbolic starting point for entering the formal pilgrimage route. Hinduism considers this the gate of Yama, the lord of hell, and the entrance to the cycle of death and rebirth.",
+    "note": "",
+    "density": 1
+  },
+  {
+    "id": "poi_1778643368238",
+    "name": "13金塔",
+    "type": "地标",
+    "section": "内圈核心",
+    "lat": 31.060092,
+    "lng": 81.313508,
+    "bubble": "在止页噶举掌控神山圣湖修行权时期，一共有13位神山之主——受止贡派委任的神山修士集团首领，江扎寺寺主——的灵塔所在地。供塔于此，意味着神山信仰的基业是由止页噶举派筑就。\n在印度教话语系统中，这里是湿婆的七大祭司祭拜处，七大祭司传说根源于北斗七星仙人崇拜，因此这里也叫大熊圣洞。在此触拜岗底斯峰神圣的基岩、洞内凝结的冰柱林伽，以及为帕尔瓦蒂女神唱颂《美的流涌》（由印度教中兴大师商揭罗补撰完成，他曾亲临此处感受神迹），并绕行南迪（湿婆座骑山）圣道，是印度教徒最大的幸事。\nDuring the period when the Drikung Kagyu school controlled the practice of the sacred mountains and lakes, this was the location of the stupas of 13 masters of the sacred mountains—leaders of the sacred mountain ascetic groups appointed by the Drikung school, and the abbots of Jiangzha Monastery. The placement of these stupas here signifies that the foundation of the sacred mountain faith was built by the Drikung Kagyu school. In the Hindu discourse, this is the site of worship for Shiva's seven high priests, whose legend originates from the worship of the Big Dipper constellation, hence the place is also called the Great Bear Cave. Touching the sacred bedrock of Mount Kailash, the icicles within the cave, and chanting the \"Flow of Beauty\" (a verse completed by the Hindu reviver Shangara, who personally experienced the miracles here) for the goddess Parvati, and circumambulating the sacred path of Nandi (Shiva's mount), is considered the greatest blessing for Hindus.",
+    "note": "",
+    "density": 1
+  },
+  {
+    "id": "poi_1778644164756",
+    "name": "江扎寺",
+    "type": "圣寺",
+    "section": "内圈",
+    "lat": 31.005543,
+    "lng": 81.298714,
+    "bubble": "米拉日巴苦修成道的事迹，掀起了藏地宗教狂潮。止贡噶举派也随之成为喜马拉雅区域内宗教修行圣地开拓的最大力量。止贡派教主仁钦贝高足古雅岗巴率数万修士前来岗仁波齐坐山修行,大道不成，誓死不归。并建江扎寺总理神山圣湖宗教事务。由此也形成了江扎寺主历为神山之主的传统。\nMilarepa's ascetic practice and attainment of enlightenment sparked a religious frenzy in Tibet. The Drikung Kagyu school subsequently became the largest force in developing sacred religious sites within the Himalayas. Guya Gangpa, a prominent disciple of Rinchen Pelzang, led tens of thousands of ascetics to Mount Kailash for solitary practice, vowing not to return until they achieved enlightenment. He established Jiangzha Monastery to oversee religious affairs related to the sacred mountain and lake. This also established the tradition of the abbot of Jiangzha Monastery being considered the lord of the sacred mountain.",
+    "note": "",
+    "density": 1
+  },
+  {
+    "id": "poi_1778645102076",
+    "name": "新标记",
+    "type": "",
+    "section": "",
+    "lat": 31.0139,
+    "lng": 81.27001,
+    "bubble": "",
+    "note": "",
+    "density": 1
+  }
+]

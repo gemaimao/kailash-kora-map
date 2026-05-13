@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>冈仁波齐转山</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 左侧：地图区 -->
+  <div class="map-panel">
+    <div id="map"></div>
+
+    <header class="top-bar">
+      <div class="top-left-group">
+        <div class="logo-block">
+          <div class="logo-row1">
+            <span class="logo-year">2026</span>
+            <img class="logo-horse" src="assets/logo-lungta-trans.png" alt="" />
+            <span class="logo-year">火马年</span>
+          </div>
+          <div class="logo-row2">冈仁波齐转山认知地图</div>
+        </div>
+        <div class="poi-label" id="currentPoiName">塔尔钦镇</div>
+      </div>
+    </header>
+
+    <div class="controls">
+      <button class="ctrl-btn" id="playBtn">▶</button>
+      <button class="ctrl-btn speed-btn" id="slowerBtn">−</button>
+      <span class="speed-label" id="speedLabel">1×</span>
+      <button class="ctrl-btn speed-btn" id="fasterBtn">＋</button>
+      <input type="range" id="progress" min="0" max="1000" value="0" />
+      <button class="ctrl-btn bgm-btn" id="bgmBtn">♪</button>
+    </div>
+
+    <!-- 尾声祝福覆盖层 -->
+    <div class="epilogue-overlay" id="epilogueOverlay">
+      <div class="blessing-text">
+        <div class="blessing-year">2026</div>
+        <div class="blessing-wish">愿转山者吉祥</div>
+        <div class="blessing-credit">感谢长久以来<br>为神山圣湖在地文化贡献信仰之力与纪录的所有人！</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右侧：叙事面板 -->
+  <div class="side-panel" id="sidePanel">
+    <div class="poi-card" id="poiCard">
+      <div class="poi-card-header">
+        <div class="poi-title-row">
+          <div class="poi-name-group">
+            <span class="poi-name" id="cardName"></span>
+            <span class="poi-dwell" id="poiDwell"></span>
+          </div>
+          <div class="poi-nav">
+            <button class="poi-nav-btn" id="prevPoiBtn">❮</button>
+            <button class="tip-link" id="tipOpenBtn">🙏 赞赏</button>
+            <button class="poi-nav-btn" id="nextPoiBtn">❯</button>
+          </div>
+        </div>
+        <div class="poi-meta">
+          <span class="poi-cluster" id="poiCluster"></span>
+          <span class="dot" id="metaDot1">·</span>
+          <span id="cardType"></span>
+          <span class="dot" id="metaDot2">·</span>
+          <span id="cardSection"></span>
+        </div>
+      </div>
+      <div class="poi-card-body">
+        <div class="poi-bubble" id="cardBubble">点击地图上的标记，或播放转山动画，查看沿途叙事。</div>
+        <div class="poi-note" id="cardNote"></div>
+        <span class="tts-lang" id="ttsLang"></span>
+      </div>
+    </div>
+
+
+    <!-- 赞助商横幅 -->
+    <div class="sponsor-banner">
+      <div class="sponsor-track" id="sponsorTrack">
+        <img src="assets/sponsors/songtsam.png" alt="松赞" />
+        <img src="assets/sponsors/workair.png" alt="充氧宝" />
+        <img src="assets/sponsors/tibet5100.png" alt="5100冰泉" />
+        <img src="assets/sponsors/tibet-tourism.png" alt="西藏旅游" />
+        <img src="assets/sponsors/lhasa-beer.png" alt="拉萨啤酒" />
+        <img src="assets/sponsors/tibet-airlines.png" alt="西藏航空" />
+        <!-- 重复一组实现无缝滚动 -->
+        <img src="assets/sponsors/songtsam.png" alt="松赞" />
+        <img src="assets/sponsors/workair.png" alt="充氧宝" />
+        <img src="assets/sponsors/tibet5100.png" alt="5100冰泉" />
+        <img src="assets/sponsors/tibet-tourism.png" alt="西藏旅游" />
+        <img src="assets/sponsors/lhasa-beer.png" alt="拉萨啤酒" />
+        <img src="assets/sponsors/tibet-airlines.png" alt="西藏航空" />
+      </div>
+    </div>
+  </div>
+
+  <!-- 赞赏弹窗 -->
+  <div class="tip-modal" id="tipModal">
+    <div class="tip-qr-wrapper">
+      <img class="tip-qr-only" src="assets/tip-qr.png" alt="赞赏码" />
+    </div>
+  </div>
+
+  <audio id="bgm" src="assets/bgm.mp3" loop preload="auto"></audio>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

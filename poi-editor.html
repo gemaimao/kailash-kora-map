@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>POI 编辑器 · 冈仁波齐转山</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; width: 100%; font-family: -apple-system, "PingFang SC", sans-serif; background: #111; color: #eee; overflow: hidden; }
+
+    .map-area { position: absolute; top: 0; left: 0; bottom: 0; right: 320px; }
+    #map { position: absolute; inset: 0; background: #0d0d0f; z-index: 1; }
+
+    .editor-panel {
+      position: absolute; top: 0; right: 0; bottom: 0; width: 320px;
+      display: flex; flex-direction: column;
+      background: rgba(14,14,18,0.98); border-left: 1px solid rgba(255,255,255,0.1);
+      overflow: hidden;
+    }
+
+    .panel-toolbar {
+      padding: 10px 14px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .panel-toolbar button {
+      background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.15);
+      padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; white-space: nowrap;
+    }
+    .panel-toolbar button:hover { background: rgba(255,255,255,0.2); }
+    .panel-toolbar button.primary { background: rgba(80,180,80,0.25); border-color: rgba(80,180,80,0.4); }
+    .panel-toolbar button.danger { border-color: rgba(255,80,80,0.4); }
+    .panel-toolbar button.danger:hover { background: rgba(255,80,80,0.2); }
+    .panel-toolbar .info { font-size: 12px; color: rgba(255,255,255,0.5); }
+
+    .poi-list {
+      flex: 1; overflow-y: auto; padding: 8px 0;
+    }
+    .poi-item {
+      padding: 8px 14px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.04);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .poi-item:hover { background: rgba(255,255,255,0.05); }
+    .poi-item.selected { background: rgba(255,205,85,0.12); border-left: 3px solid #ffcd55; }
+    .poi-item .poi-item-name { font-size: 14px; }
+    .poi-item .poi-item-type { font-size: 11px; color: rgba(255,255,255,0.4); }
+
+    .edit-form {
+      border-top: 1px solid rgba(255,255,255,0.08); padding: 14px;
+      max-height: 50%; overflow-y: auto;
+    }
+    .edit-form.hidden { display: none; }
+    .form-row { margin-bottom: 10px; }
+    .form-row label { display: block; font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 3px; letter-spacing: 1px; }
+    .form-row input, .form-row textarea, .form-row select {
+      width: 100%; background: rgba(255,255,255,0.06); color: #eee;
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 6px;
+      padding: 7px 10px; font-size: 13px; font-family: inherit;
+    }
+    .form-row textarea { min-height: 80px; resize: vertical; line-height: 1.6; }
+    .form-row input:focus, .form-row textarea:focus { border-color: rgba(255,205,85,0.5); outline: none; }
+    .form-actions { display: flex; gap: 8px; margin-top: 4px; }
+    .form-actions button { flex: 1; }
+
+    .crosshair { cursor: crosshair !important; }
+    .status { position: absolute; bottom: 10px; left: 10px; z-index: 1000;
+      background: rgba(0,0,0,0.7); padding: 6px 12px; border-radius: 6px; font-size: 12px; color: rgba(255,255,255,0.7); }
+
+    .edit-handle { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,220,140,0.9); border: 2px solid #fff; cursor: grab; }
+  </style>
+</head>
+<body>
+  <div class="map-area">
+    <div id="map" class="crosshair"></div>
+    <div class="status" id="status">点击地图添加 POI，或在右侧列表中编辑</div>
+  </div>
+
+  <div class="editor-panel">
+    <div class="panel-toolbar">
+      <button id="addModeBtn">＋ 添加模式</button>
+      <button id="exportBtn" class="primary">↓ 导出 JSON</button>
+      <button id="importBtn">↑ 导入</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" />
+      <span class="info" id="poiCount">0 个 POI</span>
+    </div>
+
+    <div class="poi-list" id="poiList"></div>
+
+    <div class="edit-form hidden" id="editForm">
+      <div class="form-row">
+        <label>ID（唯一标识，英文）</label>
+        <input type="text" id="fId" placeholder="如 tarchen" />
+      </div>
+      <div class="form-row">
+        <label>名称</label>
+        <input type="text" id="fName" placeholder="如 塔尔钦镇" />
+      </div>
+      <div class="form-row">
+        <label>类型</label>
+        <input type="text" id="fType" placeholder="如 聚落/寺庙/山口/天葬台" />
+      </div>
+      <div class="form-row">
+        <label>区段</label>
+        <input type="text" id="fSection" placeholder="如 西段·起始" />
+      </div>
+      <div class="form-row">
+        <label>纬度</label>
+        <input type="number" id="fLat" step="0.000001" />
+      </div>
+      <div class="form-row">
+        <label>经度</label>
+        <input type="number" id="fLng" step="0.000001" />
+      </div>
+      <div class="form-row">
+        <label>气泡窗内容</label>
+        <textarea id="fBubble" placeholder="叙事内容..."></textarea>
+      </div>
+      <div class="form-row">
+        <label>简注</label>
+        <input type="text" id="fNote" />
+      </div>
+      <div class="form-actions">
+        <button id="savePoiBtn" class="primary">保存</button>
+        <button id="deletePoiBtn" class="danger">删除</button>
+        <button id="cancelEditBtn">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    let pois = [];
+    let map;
+    let markers = {};
+    let selectedId = null;
+    let addMode = true;
+
+    async function init() {
+      const bmRes = await fetch("data/basemap.json");
+      const bm = await bmRes.json();
+      const imgBounds = L.latLngBounds(bm.bounds[0], bm.bounds[1]);
+
+      map = L.map("map", {
+        zoomControl: true, attributionControl: false,
+        minZoom: 11, maxZoom: 16,
+        maxBounds: imgBounds.pad(0.08), maxBoundsViscosity: 0.9,
+        zoomSnap: 0.25, zoomDelta: 0.5
+      }).fitBounds(imgBounds);
+
+      L.tileLayer("assets/tiles/{z}/{x}/{y}.png", {
+        minZoom: 11, maxZoom: 16, tileSize: 256, noWrap: true, bounds: imgBounds
+      }).addTo(map);
+
+      setTimeout(() => map.invalidateSize(), 200);
+
+      // load existing routes for reference
+      try {
+        const rRes = await fetch("data/routes.json");
+        const rd = await rRes.json();
+        if (rd.main && rd.main.length) {
+          L.polyline(rd.main, { color: "#ffcd55", weight: 2, opacity: 0.3 }).addTo(map);
+        }
+        (rd.secondary || []).forEach(sr => {
+          if (sr.coords && sr.coords.length) {
+            L.polyline(sr.coords, { color: "#8a7a5a", weight: 1, opacity: 0.3, dashArray: "3,5" }).addTo(map);
+          }
+        });
+      } catch(e) {}
+
+      // load existing POIs
+      try {
+        const pRes = await fetch("data/pois.json");
+        pois = await pRes.json();
+        pois.forEach(p => addMarker(p));
+        renderList();
+      } catch(e) {}
+
+      // click to add
+      map.on("click", (e) => {
+        if (!addMode) return;
+        const id = "poi_" + Date.now();
+        const poi = {
+          id, name: "新标记", type: "", section: "",
+          lat: parseFloat(e.latlng.lat.toFixed(6)),
+          lng: parseFloat(e.latlng.lng.toFixed(6)),
+          bubble: "", note: "", density: 1
+        };
+        pois.push(poi);
+        addMarker(poi);
+        renderList();
+        selectPoi(id);
+      });
+
+      map.on("mousemove", (e) => {
+        document.getElementById("status").textContent =
+          (addMode ? "[添加模式] " : "[浏览模式] ") +
+          e.latlng.lat.toFixed(6) + ", " + e.latlng.lng.toFixed(6);
+      });
+    }
+
+    function addMarker(poi) {
+      const icon = L.divIcon({
+        className: "", html: '<div class="edit-handle"></div>',
+        iconSize: [12, 12], iconAnchor: [6, 6]
+      });
+      const m = L.marker([poi.lat, poi.lng], { icon, draggable: true, zIndexOffset: 500 }).addTo(map);
+      m.bindTooltip(poi.name, { direction: "top", offset: [0, -10] });
+      m.on("click", () => selectPoi(poi.id));
+      m.on("dragend", () => {
+        const pos = m.getLatLng();
+        const p = pois.find(x => x.id === poi.id);
+        if (p) {
+          p.lat = parseFloat(pos.lat.toFixed(6));
+          p.lng = parseFloat(pos.lng.toFixed(6));
+          if (selectedId === poi.id) {
+            document.getElementById("fLat").value = p.lat;
+            document.getElementById("fLng").value = p.lng;
+          }
+        }
+      });
+      markers[poi.id] = m;
+    }
+
+    function renderList() {
+      const list = document.getElementById("poiList");
+      list.innerHTML = "";
+      pois.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "poi-item" + (p.id === selectedId ? " selected" : "");
+        div.innerHTML = `<span class="poi-item-name">${p.name}</span><span class="poi-item-type">${p.type || ""}</span>`;
+        div.addEventListener("click", () => selectPoi(p.id));
+        list.appendChild(div);
+      });
+      document.getElementById("poiCount").textContent = pois.length + " 个 POI";
+    }
+
+    function selectPoi(id) {
+      selectedId = id;
+      const poi = pois.find(p => p.id === id);
+      if (!poi) return;
+      document.getElementById("editForm").classList.remove("hidden");
+      document.getElementById("fId").value = poi.id;
+      document.getElementById("fName").value = poi.name;
+      document.getElementById("fType").value = poi.type || "";
+      document.getElementById("fSection").value = poi.section || "";
+      document.getElementById("fLat").value = poi.lat;
+      document.getElementById("fLng").value = poi.lng;
+      document.getElementById("fBubble").value = poi.bubble || "";
+      document.getElementById("fNote").value = poi.note || "";
+      renderList();
+      // pan to marker
+      map.panTo([poi.lat, poi.lng], { animate: true });
+    }
+
+    function savePoi() {
+      const poi = pois.find(p => p.id === selectedId);
+      if (!poi) return;
+      const newId = document.getElementById("fId").value.trim();
+      if (newId && newId !== poi.id) {
+        // update id
+        const m = markers[poi.id];
+        delete markers[poi.id];
+        poi.id = newId;
+        markers[newId] = m;
+        selectedId = newId;
+      }
+      poi.name = document.getElementById("fName").value.trim();
+      poi.type = document.getElementById("fType").value.trim();
+      poi.section = document.getElementById("fSection").value.trim();
+      poi.lat = parseFloat(document.getElementById("fLat").value);
+      poi.lng = parseFloat(document.getElementById("fLng").value);
+      poi.bubble = document.getElementById("fBubble").value;
+      poi.note = document.getElementById("fNote").value.trim();
+      // update marker
+      const m = markers[poi.id];
+      if (m) {
+        m.setLatLng([poi.lat, poi.lng]);
+        m.setTooltipContent(poi.name);
+      }
+      renderList();
+      document.getElementById("status").textContent = "已保存: " + poi.name;
+      saveToServer();
+    }
+
+    function deletePoi() {
+      if (!selectedId) return;
+      if (!confirm("确认删除 " + (pois.find(p => p.id === selectedId)?.name || selectedId) + "？")) return;
+      const m = markers[selectedId];
+      if (m) { map.removeLayer(m); delete markers[selectedId]; }
+      pois = pois.filter(p => p.id !== selectedId);
+      selectedId = null;
+      document.getElementById("editForm").classList.add("hidden");
+      renderList();
+      saveToServer();
+    }
+
+    async function saveToServer() {
+      try {
+        const res = await fetch("/api/save-pois", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(pois, null, 2)
+        });
+        const result = await res.json();
+        if (result.ok) {
+          document.getElementById("status").textContent = "✅ 已保存到 data/pois.json (" + pois.length + " 个 POI)";
+        } else {
+          throw new Error(result.error);
+        }
+      } catch (err) {
+        document.getElementById("status").textContent = "⚠ 服务端保存失败，请用导出功能";
+        // 降级为下载
+        exportAsFile();
+      }
+    }
+
+    function exportAsFile() {
+      const blob = new Blob([JSON.stringify(pois, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "pois.json"; a.click();
+      URL.revokeObjectURL(url);
+      document.getElementById("status").textContent = "已导出 " + pois.length + " 个 POI（下载文件）";
+    }
+
+    function exportJSON() {
+      saveToServer();
+    }
+
+    function importJSON(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (!Array.isArray(data)) throw new Error("格式错误");
+          // clear existing
+          Object.values(markers).forEach(m => map.removeLayer(m));
+          markers = {};
+          pois = data;
+          pois.forEach(p => addMarker(p));
+          selectedId = null;
+          document.getElementById("editForm").classList.add("hidden");
+          renderList();
+          document.getElementById("status").textContent = "已导入 " + pois.length + " 个 POI";
+        } catch(err) { alert("导入失败: " + err.message); }
+      };
+      reader.readAsText(file);
+    }
+
+    // bind events
+    document.getElementById("addModeBtn").addEventListener("click", () => {
+      addMode = !addMode;
+      document.getElementById("addModeBtn").style.background = addMode ? "rgba(255,205,85,0.3)" : "";
+      document.getElementById("map").classList.toggle("crosshair", addMode);
+    });
+    document.getElementById("exportBtn").addEventListener("click", exportJSON);
+    document.getElementById("importBtn").addEventListener("click", () => document.getElementById("importFile").click());
+    document.getElementById("importFile").addEventListener("change", (e) => { if (e.target.files[0]) importJSON(e.target.files[0]); });
+    document.getElementById("savePoiBtn").addEventListener("click", savePoi);
+    document.getElementById("deletePoiBtn").addEventListener("click", deletePoi);
+    document.getElementById("cancelEditBtn").addEventListener("click", () => {
+      selectedId = null;
+      document.getElementById("editForm").classList.add("hidden");
+      renderList();
+    });
+
+    init();
+  </script>
+</body>
+</html>
