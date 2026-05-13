@@ -99,6 +99,24 @@ const server = http.createServer((req, res) => {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   if (req.method === "OPTIONS") { res.writeHead(204); res.end(); return; }
 
+  if (req.method === "POST" && req.url === "/api/visit") {
+    const statsPath = path.join(ROOT, "data", "stats.json");
+    let stats = { totalVisits: 0 };
+    if (fs.existsSync(statsPath)) {
+      try {
+        stats = JSON.parse(fs.readFileSync(statsPath, "utf-8"));
+      } catch (e) {
+        console.error("读取 stats.json 失败:", e.message);
+      }
+    }
+    stats.totalVisits = (stats.totalVisits || 0) + 1;
+    fs.writeFileSync(statsPath, JSON.stringify(stats, null, 2), "utf-8");
+    
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ visitCount: stats.totalVisits }));
+    return;
+  }
+
   if (req.method === "POST" && req.url.startsWith("/api/")) {
     handleAPI(req, res);
   } else {

@@ -668,10 +668,24 @@ if (bgm && bgmBtn) {
   });
 }
 
+async function updateVisitCount() {
+  try {
+    const res = await fetch("/api/visit", { method: "POST" });
+    const data = await res.json();
+    if (data.visitCount) {
+      document.getElementById("visitCount").textContent = data.visitCount;
+    }
+  } catch (err) {
+    console.error("无法获取访客统计:", err);
+    document.getElementById("visitorCounter").style.display = "none";
+  }
+}
+
 /* ---------- 启动 ---------- */
 
 (async function main() {
   try {
+    updateVisitCount(); // 异步更新访客数
     await loadData();
     initMap();
     updateProgress(0);
