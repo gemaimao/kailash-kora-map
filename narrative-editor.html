@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>叙事编辑器 · 冈仁波齐 2026</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    :root {
+      --bg-dark: #0d0d0f;
+      --bg-panel: rgba(22, 22, 28, 0.95);
+      --accent: #ffcd55;
+      --border: rgba(255, 255, 255, 0.1);
+      --text-dim: rgba(255, 255, 255, 0.5);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; width: 100%; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg-dark); color: #eee; overflow: hidden; }
+
+    /* Layout */
+    .app-container { display: flex; height: 100vh; width: 100vw; }
+    
+    .sidebar-left { width: 300px; background: var(--bg-panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
+    .main-canvas { flex: 1; position: relative; }
+    .sidebar-right { width: 340px; background: var(--bg-panel); border-left: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
+
+    /* Header */
+    .panel-header { padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .panel-header h2 { font-size: 14px; font-weight: 500; letter-spacing: 1px; color: var(--accent); }
+    
+    /* Event List */
+    .event-list { flex: 1; overflow-y: auto; padding: 8px 0; }
+    .event-item { 
+      padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer;
+      display: flex; gap: 12px; align-items: center; transition: background 0.2s;
+    }
+    .event-item:hover { background: rgba(255,255,255,0.05); }
+    .event-item.active { background: rgba(255, 205, 85, 0.1); border-left: 3px solid var(--accent); }
+    .event-icon { width: 32px; height: 32px; border-radius: 6px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .event-info { flex: 1; }
+    .event-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+    .event-meta { font-size: 11px; color: var(--text-dim); }
+
+    /* Map */
+    #map { height: 100%; width: 100%; background: #08080a; }
+    .map-overlay-tools { position: absolute; top: 20px; left: 20px; z-index: 1000; display: flex; gap: 8px; }
+    .tool-btn { 
+      background: rgba(0,0,0,0.8); border: 1px solid var(--border); color: #fff; 
+      padding: 8px 16px; border-radius: 20px; font-size: 12px; cursor: pointer; backdrop-filter: blur(8px);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .tool-btn:hover { background: rgba(40,40,45,0.9); border-color: var(--accent); }
+    .tool-btn.active { background: var(--accent); color: #000; font-weight: 600; }
+
+    /* Timeline */
+    .bottom-bar { 
+      position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 80%; max-width: 800px;
+      background: rgba(18, 18, 22, 0.9); border: 1px solid var(--border); border-radius: 40px; 
+      padding: 12px 24px; z-index: 1000; backdrop-filter: blur(12px);
+      display: flex; align-items: center; gap: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+    .play-btn { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; }
+    .timeline-slider { flex: 1; -webkit-appearance: none; background: rgba(255,255,255,0.1); height: 4px; border-radius: 2px; outline: none; }
+    .timeline-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 10px var(--accent); }
+
+    /* Form */
+    .edit-form { padding: 20px; flex: 1; overflow-y: auto; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 11px; color: var(--text-dim); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+    .form-input, .form-textarea {
+      width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 14px; color: #fff; font-size: 13px; outline: none; transition: border-color 0.2s;
+    }
+    .form-input:focus, .form-textarea:focus { border-color: var(--accent); }
+    .form-textarea { min-height: 120px; line-height: 1.6; }
+
+    .camera-card { 
+      background: rgba(255, 205, 85, 0.05); border: 1px dashed rgba(255, 205, 85, 0.3); border-radius: 8px; padding: 16px; margin-top: 10px;
+    }
+    .capture-btn { 
+      width: 100%; padding: 10px; background: rgba(255, 205, 85, 0.2); border: 1px solid rgba(255, 205, 85, 0.4); 
+      color: var(--accent); border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; margin-bottom: 12px;
+    }
+    .capture-btn:hover { background: rgba(255, 205, 85, 0.3); }
+
+    .action-bar { padding: 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; }
+    .primary-btn { flex: 1; background: var(--accent); color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .secondary-btn { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid var(--border); padding: 12px; border-radius: 8px; cursor: pointer; }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+    .status-msg { position: fixed; top: 20px; right: 360px; z-index: 2000; background: #000; padding: 10px 20px; border-radius: 30px; border: 1px solid var(--accent); color: var(--accent); font-size: 12px; display: none; }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Left: Sequence -->
+    <div class="sidebar-left">
+      <div class="panel-header">
+        <h2>叙事序列 (Narrative)</h2>
+        <span style="font-size: 11px; color: var(--text-dim);" id="eventCount">0 Events</span>
+      </div>
+      <div class="event-list" id="eventList">
+        <!-- Event items will be injected here -->
+      </div>
+      <div class="action-bar">
+        <button class="secondary-btn" style="flex:1" id="exportBtn">导出 JSON</button>
+      </div>
+    </div>
+
+    <!-- Main Map Canvas -->
+    <div class="main-canvas">
+      <div id="map"></div>
+      
+      <div class="map-overlay-tools">
+        <button class="tool-btn" id="toolAddPoi"><span>📍</span> 添加标记</button>
+        <button class="tool-btn" id="toolEditRoute"><span>🛤</span> 编辑路线</button>
+        <button class="tool-btn" id="toolSync"><span>🔄</span> 同步数据</button>
+      </div>
+
+      <div class="bottom-bar">
+        <button class="play-btn" id="playBtn">▶</button>
+        <input type="range" class="timeline-slider" id="timelineSlider" min="0" max="1000" value="0">
+        <div style="font-size: 12px; width: 60px; text-align: right; font-family: monospace;" id="timeDisplay">0.0%</div>
+      </div>
+    </div>
+
+    <!-- Sidebar Right: Properties -->
+    <div class="sidebar-right">
+      <div class="panel-header">
+        <h2>属性编辑 (Properties)</h2>
+        <button class="secondary-btn" style="padding: 4px 10px; font-size: 11px;" id="btnDelete">删除</button>
+      </div>
+      <div class="edit-form" id="editForm">
+        <div class="form-group">
+          <label>节点 ID / 名称</label>
+          <input type="text" class="form-input" id="fName" placeholder="例如：大经幡广场">
+        </div>
+        <div class="form-group">
+          <label>节点类型</label>
+          <select class="form-input" id="fType">
+            <option value="POI">地理标记 (POI)</option>
+            <option value="VIEW">镜头视角 (View)</option>
+            <option value="ACTION">特殊动作 (Action)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>叙事内容 (Bubble)</label>
+          <textarea class="form-textarea" id="fBubble" placeholder="在这里输入要展示的故事或说明文字..."></textarea>
+        </div>
+        
+        <div class="camera-card">
+          <label style="color: var(--accent); margin-bottom: 12px; display: block;">镜头状态 (Camera State)</label>
+          <button class="capture-btn" id="btnCapture">捕获当前地图视角</button>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>缩放 (Zoom)</label>
+              <input type="number" class="form-input" id="fZoom" step="0.1">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>视点 Lat</label>
+              <input type="number" class="form-input" id="fLat" step="0.000001">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>视点 Lng</label>
+              <input type="number" class="form-input" id="fLng" step="0.000001">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 20px;">
+          <label>驻留时长 (Dwell Seconds)</label>
+          <input type="number" class="form-input" id="fDwell" value="8">
+        </div>
+      </div>
+      <div class="action-bar">
+        <button class="primary-btn" id="btnSave">保存节点</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-msg" id="statusMsg">已保存</div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // --- State ---
+    let data = {
+      pois: [],
+      routes: { main: [], secondary: [] }
+    };
+    let activeId = null;
+    let map;
+    let markers = {};
+    let mainPolyline;
+    let addMode = false;
+
+    let playing = false;
+    let progress = 0;
+    let rafId = null;
+
+    // --- Init ---
+    async function init() {
+      try {
+        const [pRes, rRes, bRes] = await Promise.all([
+          fetch('data/pois.json'),
+          fetch('data/routes.json'),
+          fetch('data/basemap.json')
+        ]);
+        data.pois = await pRes.json();
+        data.routes = await rRes.json();
+        const basemap = await bRes.json();
+
+        const imgBounds = L.latLngBounds(basemap.bounds[0], basemap.bounds[1]);
+        map = L.map('map', {
+          zoomControl: false, attributionControl: false,
+          minZoom: 11, maxZoom: 17,
+          maxBounds: imgBounds.pad(0.1)
+        }).fitBounds(imgBounds);
+
+        L.tileLayer('assets/tiles/{z}/{x}/{y}.png', {
+          minZoom: 11, maxZoom: 16, tileSize: 256, noWrap: true, bounds: imgBounds
+        }).addTo(map);
+
+        // Draw Main Route
+        mainPolyline = L.polyline(data.routes.main, { color: '#ffcd55', weight: 3, opacity: 0.6 }).addTo(map);
+        
+        // Secondary routes
+        data.routes.secondary.forEach(sr => {
+          L.polyline(sr.coords, { color: '#8a7a5a', weight: 1.5, opacity: 0.3, dashArray: '4,6' }).addTo(map);
+        });
+
+        // Pilgrim Marker
+        pilgrimMarker = L.marker(data.routes.main[0], {
+          icon: L.divIcon({ className: '', html: '<div style="width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #ffcd55;"></div>', iconSize: [16, 16], iconAnchor: [8, 8] }),
+          zIndexOffset: 1000
+        }).addTo(map);
+
+        refreshMarkers();
+        refreshEventList();
+        
+        // Events
+        document.getElementById('toolAddPoi').addEventListener('click', toggleAddMode);
+        document.getElementById('btnSave').addEventListener('click', saveActive);
+        document.getElementById('btnCapture').addEventListener('click', captureCamera);
+        document.getElementById('exportBtn').addEventListener('click', exportData);
+        document.getElementById('playBtn').addEventListener('click', togglePlay);
+        document.getElementById('timelineSlider').addEventListener('input', (e) => {
+          updateProgress(e.target.value / 1000);
+        });
+        
+        map.on('click', onMapClick);
+      } catch (err) {
+        console.error("Init failed", err);
+      }
+    }
+
+    function updateProgress(p) {
+      progress = p;
+      const pts = data.routes.main;
+      if (pts.length < 2) return;
+      
+      const idx = Math.floor(p * (pts.length - 1));
+      const nextIdx = Math.min(idx + 1, pts.length - 1);
+      const t = (p * (pts.length - 1)) - idx;
+      
+      const a = pts[idx];
+      const b = pts[nextIdx];
+      const latlng = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+      
+      pilgrimMarker.setLatLng(latlng);
+      document.getElementById('timeDisplay').textContent = (p * 100).toFixed(1) + '%';
+      document.getElementById('timelineSlider').value = p * 1000;
+      
+      if (playing) map.panTo(latlng);
+    }
+
+    function togglePlay() {
+      playing = !playing;
+      document.getElementById('playBtn').textContent = playing ? '⏸' : '▶';
+      if (playing) {
+        const tick = () => {
+          if (!playing) return;
+          progress += 0.001;
+          if (progress >= 1) { progress = 1; playing = false; document.getElementById('playBtn').textContent = '▶'; }
+          updateProgress(progress);
+          rafId = requestAnimationFrame(tick);
+        };
+        rafId = requestAnimationFrame(tick);
+      } else {
+        cancelAnimationFrame(rafId);
+      }
+    }
+
+    function toggleAddMode() {
+      addMode = !addMode;
+      document.getElementById('toolAddPoi').classList.toggle('active', addMode);
+      showStatus(addMode ? "点击地图添加新节点" : "已退出添加模式");
+    }
+
+    function onMapClick(e) {
+      if (!addMode) return;
+      const id = 'evt_' + Date.now();
+      const newPoi = {
+        id,
+        name: "新节点",
+        type: "POI",
+        lat: parseFloat(e.latlng.lat.toFixed(6)),
+        lng: parseFloat(e.latlng.lng.toFixed(6)),
+        viewLat: parseFloat(e.latlng.lat.toFixed(6)),
+        viewLng: parseFloat(e.latlng.lng.toFixed(6)),
+        zoom: map.getZoom(),
+        bubble: "",
+        dwell: 8
+      };
+      data.pois.push(newPoi);
+      refreshMarkers();
+      refreshEventList();
+      selectEvent(id);
+      toggleAddMode();
+    }
+
+    function refreshMarkers() {
+      Object.values(markers).forEach(m => map.removeLayer(m));
+      markers = {};
+      
+      data.pois.forEach(poi => {
+        const icon = L.divIcon({
+          className: '',
+          html: `<div style="width:12px;height:12px;border-radius:50%;background:${poi.id === activeId ? '#ffcd55' : 'rgba(255,255,255,0.8)'};border:2px solid #fff;box-shadow:0 0 10px rgba(0,0,0,0.5);"></div>`,
+          iconSize: [12, 12], iconAnchor: [6, 6]
+        });
+        const m = L.marker([poi.lat, poi.lng], { icon, draggable: true }).addTo(map);
+        m.on('click', () => selectEvent(poi.id));
+        m.on('dragend', () => {
+          poi.lat = parseFloat(m.getLatLng().lat.toFixed(6));
+          poi.lng = parseFloat(m.getLatLng().lng.toFixed(6));
+          if (activeId === poi.id) {
+            document.getElementById('fLat').value = poi.lat;
+            document.getElementById('fLng').value = poi.lng;
+          }
+        });
+        markers[poi.id] = m;
+      });
+    }
+
+    function refreshEventList() {
+      const list = document.getElementById('eventList');
+      list.innerHTML = '';
+      
+      data.pois.forEach(poi => {
+        const item = document.createElement('div');
+        item.className = `event-item ${poi.id === activeId ? 'active' : ''}`;
+        item.innerHTML = `
+          <div class="event-icon">${poi.type === 'POI' ? '📍' : '🎥'}</div>
+          <div class="event-info">
+            <div class="event-name">${poi.name}</div>
+            <div class="event-meta">${poi.type} · ${poi.bubble ? poi.bubble.substring(0,15)+'...' : '无内容'}</div>
+          </div>
+        `;
+        item.onclick = () => selectEvent(poi.id);
+        list.appendChild(item);
+      });
+      document.getElementById('eventCount').textContent = data.pois.length + " Events";
+    }
+
+    function selectEvent(id) {
+      activeId = id;
+      const poi = data.pois.find(p => p.id === id);
+      if (!poi) return;
+
+      document.getElementById('fName').value = poi.name;
+      document.getElementById('fType').value = poi.type || 'POI';
+      document.getElementById('fBubble').value = poi.bubble || '';
+      document.getElementById('fLat').value = poi.viewLat || poi.lat;
+      document.getElementById('fLng').value = poi.viewLng || poi.lng;
+      document.getElementById('fZoom').value = poi.zoom || 14;
+      document.getElementById('fDwell').value = poi.dwell || 8;
+
+      refreshMarkers();
+      refreshEventList();
+      
+      map.panTo([poi.lat, poi.lng], { animate: true });
+    }
+
+    function captureCamera() {
+      if (!activeId) return;
+      const center = map.getCenter();
+      document.getElementById('fLat').value = center.lat.toFixed(6);
+      document.getElementById('fLng').value = center.lng.toFixed(6);
+      document.getElementById('fZoom').value = map.getZoom().toFixed(1);
+      showStatus("视角已捕获");
+    }
+
+    function saveActive() {
+      const poi = data.pois.find(p => p.id === activeId);
+      if (!poi) return;
+
+      poi.name = document.getElementById('fName').value;
+      poi.type = document.getElementById('fType').value;
+      poi.bubble = document.getElementById('fBubble').value;
+      poi.viewLat = parseFloat(document.getElementById('fLat').value);
+      poi.viewLng = parseFloat(document.getElementById('fLng').value);
+      poi.zoom = parseFloat(document.getElementById('fZoom').value);
+      poi.dwell = parseInt(document.getElementById('fDwell').value);
+
+      showStatus("已保存到内存");
+      refreshEventList();
+      saveToServer();
+    }
+
+    async function saveToServer() {
+      try {
+        await fetch('/api/save-pois', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data.pois, null, 2)
+        });
+      } catch (e) { console.error("Save failed", e); }
+    }
+
+    function exportData() {
+      const blob = new Blob([JSON.stringify(data.pois, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'pois.json'; a.click();
+    }
+
+    function showStatus(msg) {
+      const el = document.getElementById('statusMsg');
+      el.textContent = msg;
+      el.style.display = 'block';
+      setTimeout(() => el.style.display = 'none', 2000);
+    }
+
+    init();
+  </script>
+</body>
+</html>

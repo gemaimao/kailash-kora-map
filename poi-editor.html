@@ -111,6 +111,17 @@
         <label>经度</label>
         <input type="number" id="fLng" step="0.000001" />
       </div>
+      <div class="form-row" style="background: rgba(255,205,85,0.05); padding: 8px; border-radius: 6px; border: 1px dashed rgba(255,205,85,0.2);">
+        <label style="color: #ffcd55;">镜头控制 (Camera)</label>
+        <div style="display: flex; gap: 4px; margin-bottom: 4px;">
+          <input type="number" id="fZoom" step="0.25" placeholder="缩放级" style="flex: 1;" />
+          <button id="captureViewBtn" style="font-size: 11px; padding: 4px 8px; background: rgba(255,205,85,0.2); border-color: rgba(255,205,85,0.4);">捕获当前</button>
+        </div>
+        <div style="display: flex; gap: 4px;">
+          <input type="number" id="fViewLat" step="0.000001" placeholder="视点纬度" style="flex: 1;" />
+          <input type="number" id="fViewLng" step="0.000001" placeholder="视点经度" style="flex: 1;" />
+        </div>
+      </div>
       <div class="form-row">
         <label>气泡窗内容</label>
         <textarea id="fBubble" placeholder="叙事内容..."></textarea>
@@ -183,6 +194,9 @@
           id, name: "新标记", type: "", section: "",
           lat: parseFloat(e.latlng.lat.toFixed(6)),
           lng: parseFloat(e.latlng.lng.toFixed(6)),
+          zoom: map.getZoom(),
+          viewLat: parseFloat(e.latlng.lat.toFixed(6)),
+          viewLng: parseFloat(e.latlng.lng.toFixed(6)),
           bubble: "", note: "", density: 1
         };
         pois.push(poi);
@@ -245,6 +259,9 @@
       document.getElementById("fSection").value = poi.section || "";
       document.getElementById("fLat").value = poi.lat;
       document.getElementById("fLng").value = poi.lng;
+      document.getElementById("fZoom").value = poi.zoom || map.getZoom();
+      document.getElementById("fViewLat").value = poi.viewLat || poi.lat;
+      document.getElementById("fViewLng").value = poi.viewLng || poi.lng;
       document.getElementById("fBubble").value = poi.bubble || "";
       document.getElementById("fNote").value = poi.note || "";
       renderList();
@@ -269,6 +286,9 @@
       poi.section = document.getElementById("fSection").value.trim();
       poi.lat = parseFloat(document.getElementById("fLat").value);
       poi.lng = parseFloat(document.getElementById("fLng").value);
+      poi.zoom = parseFloat(document.getElementById("fZoom").value);
+      poi.viewLat = parseFloat(document.getElementById("fViewLat").value);
+      poi.viewLng = parseFloat(document.getElementById("fViewLng").value);
       poi.bubble = document.getElementById("fBubble").value;
       poi.note = document.getElementById("fNote").value.trim();
       // update marker
@@ -362,6 +382,14 @@
       selectedId = null;
       document.getElementById("editForm").classList.add("hidden");
       renderList();
+    });
+
+    document.getElementById("captureViewBtn").addEventListener("click", () => {
+      const center = map.getCenter();
+      document.getElementById("fZoom").value = map.getZoom();
+      document.getElementById("fViewLat").value = center.lat.toFixed(6);
+      document.getElementById("fViewLng").value = center.lng.toFixed(6);
+      document.getElementById("status").textContent = "已捕获当前地图视角";
     });
 
     init();

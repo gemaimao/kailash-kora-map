@@ -334,6 +334,15 @@ function showPoi(id) {
 
   currentPoiName.textContent = poi.name;
 
+  // 镜头控制：如果 POI 定义了视角，则自动移动地图
+  if (poi.zoom && poi.viewLat && poi.viewLng) {
+    map.flyTo([poi.viewLat, poi.viewLng], poi.zoom, {
+      animate: true,
+      duration: 1.5,
+      easeLinearity: 0.25
+    });
+  }
+
   // 更新辅助信息与密集区提示
   const clusterEl = document.getElementById("poiCluster");
   const dot1 = document.getElementById("metaDot1");
@@ -714,8 +723,9 @@ async function updateVisitCount() {
       throw new Error("Invalid local response");
     }
   } catch (localErr) {
-    console.error("所有计数方案均失败");
-    document.getElementById("visitorCounter").style.display = "none";
+    console.error("所有计数方案均失败:", localErr);
+    // 不再隐藏容器，保留 "..." 或显示 0，避免布局跳动
+    document.getElementById("visitCount").textContent = "---";
   }
 }
 

@@ -6,9 +6,12 @@
     "section": "线路起点和终点",
     "lat": 30.975861,
     "lng": 81.289003,
-    "bubble": "神山南麓世俗汇聚之地。南面是旷阔的巴嘎湖区平原与湿地，远方是纳木那尼绵延雪山，中间日月双湖波光湛蓝。拉昂错北部荒野中，柱状龙卷风常在午后狼奔虎逐，天地热力交换的重压下，连乌鸦也只能小回旋贴地短飞。北方的岗仁波齐峰只是稍露一头，显得冷寂，并且遥远。一面是天道往复不息的日升月起，世界般地宏阔无章，浩瀚的无趣感；一面又是久压的朝圣欲望，在每一个内心中最后的纠结，却又想一早跋涉圣途。\nThe secular gathering place at the southern slope of the sacred mountain. To the south lies the vast Bagha Lake plain and wetland, in the distance are the endless snow-capped mountains of Namtso Nani, and in the middle are the twin lakes, their ripples a deep azure blue. In the northern wilderness of Lake Lhakang, towering tornadoes often race about in the afternoon, under the intense pressure of the exchange of terrestrial heat, even crows can only make small circles and short flights close to the ground. The Gangrenboqi peak in the north is barely visible, appearing desolate and distant. On one hand, there is the endless rise and fall of the sun and moon, vast and unordered, a sense of boredom as boundless as the world; on the other hand, there is the long-suppressed desire for pilgrimage, the final entanglement in every heart, yet yearning to embark on the sacred journey early in the morning.",
+    "bubble": "神山南麓世俗汇聚之地。南面是旷阔的巴嘎湖区平原与湿地，远方是纳木那尼绵延雪山，中间日月双湖波光湛蓝。拉昂错北部荒野中，柱状龙卷风常在午后狼奔虎逐，天地热力交换的重压下，连乌鸦也只能小回旋贴地短飞。北方的冈仁波齐峰只是稍露一头，显得冷寂，并且遥远。一面是天道往复不息的日升月起，世界般地宏阔无章，浩瀚的无趣感；一面又是久压的朝圣欲望，在每一个内心中最后的纠结，却又想一早跋涉圣途。\nThe secular gathering place at the southern slope of the sacred mountain. To the south lies the vast Bagha Lake plain and wetland, in the distance are the endless snow-capped mountains of Namtso Nani, and in the middle are the twin lakes, their ripples a deep azure blue. In the northern wilderness of Lake Lhakang, towering tornadoes often race about in the afternoon, under the intense pressure of the exchange of terrestrial heat, even crows can only make small circles and short flights close to the ground. The Gangrenboqi peak in the north is barely visible, appearing desolate and distant. On one hand, there is the endless rise and fall of the sun and moon, vast and unordered, a sense of boredom as boundless as the world; on the other hand, there is the long-suppressed desire for pilgrimage, the final entanglement in every heart, yet yearning to embark on the sacred journey early in the morning.",
     "note": "塔尔钦意为大经幡，现为普兰县巴嘎镇所在地，神山朝圣大本营",
-    "density": "稀疏区"
+    "density": "稀疏区",
+    "zoom": 12,
+    "viewLat": 30.975861,
+    "viewLng": 81.289003
   },
   {
     "id": "serxiong",
@@ -160,9 +163,12 @@
     "section": "北段",
     "lat": 31.10364,
     "lng": 81.313259,
-    "bubble": "郭仓巴是竹巴噶举派著名的修行大师，竹巴噶举派创始人藏巴甲热的高足，有鹰巢修士美誉。蒙元铁骑逡巡高原之际，他远赴阿里神山圣湖进行开拓，以求留下佛教火种。在圣湖玛旁雍西岸的果初寺有他的塑像。神山正北的哲日浦寺也起源于他。前往卓玛拉山口的过程中，一路都有空行母护法变幻出牦牛、青狼等　引领它开拓路线的遗迹。\nGuo Cangba was a renowned master of the Drukpa Kagyu school, a prominent disciple of Tsangpa Gyaltsen, the founder of the Drukpa Kagyu school, and was known as the \"Eagle's Nest Monk.\" When the Mongol cavalry roamed the plateau, he traveled to the sacred mountains and lakes of Ali to explore and preserve the seeds of Buddhism. A statue of him stands at Guochu Monastery on the western shore of Lake Manasarovar. Zheripu Monastery, located directly north of the sacred mountain, also originated from him. Along the way to the Dolma La Pass, there are remnants of dakinis (female deities) manifesting as yaks and wolves to guide the exploration of the route.",
+    "bubble": "郭仓巴是竹巴噶举派著名的修行大师，竹巴噶举派创始人藏巴甲热高足，有鹰巢修士美誉。蒙元铁骑逡巡高原之际，他远赴阿里神山圣湖进行开拓，以求留下佛教火种。在圣湖玛旁雍西岸的果初寺有他的塑像。神山正北的哲日浦寺也起源于他。前往卓玛拉山口的过程中，一路都有空行母护法变幻出牦牛、青狼等　引领他开拓路线的遗迹。\nGuo Cangba was a renowned master of the Drukpa Kagyu school, a prominent disciple of Tsangpa Gyaltsen, the founder of the Drukpa Kagyu school, and was known as the \"Eagle's Nest Monk.\" When the Mongol cavalry roamed the plateau, he traveled to the sacred mountains and lakes of Ali to explore and preserve the seeds of Buddhism. A statue of him stands at Guochu Monastery on the western shore of Lake Manasarovar. Zheripu Monastery, located directly north of the sacred mountain, also originated from him. Along the way to the Dolma La Pass, there are remnants of dakinis (female deities) manifesting as yaks and wolves to guide the exploration of the route.",
     "note": "",
-    "density": 1
+    "density": 1,
+    "zoom": 12,
+    "viewLat": 31.10364,
+    "viewLng": 81.313259
   },
   {
     "id": "poi_1778643234953",
