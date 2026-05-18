@@ -163,7 +163,7 @@
     "section": "北段",
     "lat": 31.10364,
     "lng": 81.313259,
-    "bubble": "郭仓巴是竹巴噶举派著名的修行大师，竹巴噶举派创始人藏巴甲热高足，有鹰巢修士美誉。蒙元铁骑逡巡高原之际，他远赴阿里神山圣湖进行开拓，以求留下佛教火种。在圣湖玛旁雍西岸的果初寺有他的塑像。神山正北的哲日浦寺也起源于他。前往卓玛拉山口的过程中，一路都有空行母护法变幻出牦牛、青狼等　引领他开拓路线的遗迹。\nGuo Cangba was a renowned master of the Drukpa Kagyu school, a prominent disciple of Tsangpa Gyaltsen, the founder of the Drukpa Kagyu school, and was known as the \"Eagle's Nest Monk.\" When the Mongol cavalry roamed the plateau, he traveled to the sacred mountains and lakes of Ali to explore and preserve the seeds of Buddhism. A statue of him stands at Guochu Monastery on the western shore of Lake Manasarovar. Zheripu Monastery, located directly north of the sacred mountain, also originated from him. Along the way to the Dolma La Pass, there are remnants of dakinis (female deities) manifesting as yaks and wolves to guide the exploration of the route.",
+    "bubble": "郭仓巴是竹巴噶举派著名的修行大师，竹巴噶举派创始人藏巴甲热高足，有鹰巢修士美誉。蒙元铁骑逡巡高原之际，他远赴阿里神山圣湖进行开拓，以求留下佛教火种。在圣湖玛旁雍西岸的果初寺有他的塑像。神山正北的哲日浦寺也起源于他。前往卓玛拉山口的过程中，一路都有空行母护法变幻出牦牛、青狼等引领他开拓路线的遗迹。\nGuo Cangba was a renowned master of the Drukpa Kagyu school, a prominent disciple of Tsangpa Gyaltsen, the founder of the Drukpa Kagyu school, and was known as the \"Eagle's Nest Monk.\" When the Mongol cavalry roamed the plateau, he traveled to the sacred mountains and lakes of Ali to explore and preserve the seeds of Buddhism. A statue of him stands at Guochu Monastery on the western shore of Lake Manasarovar. Zheripu Monastery, located directly north of the sacred mountain, also originated from him. Along the way to the Dolma La Pass, there are remnants of dakinis (female deities) manifesting as yaks and wolves to guide the exploration of the route.",
     "note": "",
     "density": 1,
     "zoom": 12,
@@ -211,6 +211,34 @@
     "lat": 31.0139,
     "lng": 81.27001,
     "bubble": "",
+    "note": "",
+    "density": 1
+  },
+  {
+    "id": "poi_1779074391159",
+    "name": "大宝法王宝冠石",
+    "type": "宗教遗迹",
+    "section": "东段",
+    "lat": 31.014516,
+    "lng": 81.379046,
+    "zoom": 15.25,
+    "viewLat": 31.014269,
+    "viewLng": 81.379515,
+    "bubble": "据巴沃.祖拉陈瓦[贤者喜宴.噶玛岗仓史]记载，1548年，八世噶玛巴应岗底斯十三大宗扎噶庄园知事香拉普瓦的迎请，于岗仁波齐神山朝山并留下神迹。",
+    "note": "",
+    "density": 1
+  },
+  {
+    "id": "poi_1779074690109",
+    "name": "俄尔钦贡嘎桑波足印",
+    "type": "宗教足迹",
+    "section": "东段",
+    "lat": 30.995617,
+    "lng": 81.358729,
+    "zoom": 15.25,
+    "viewLat": 30.995617,
+    "viewLng": 81.358729,
+    "bubble": "1435年古格王室迎请当时声势正旺的萨迦派密教大师，俄尔支派的创始人俄尔钦贡嘎桑波（1382－1456）前来传法并主持古格国王出家仪式工。在此期间他朝圣神山所留神迹。",
     "note": "",
     "density": 1
   }

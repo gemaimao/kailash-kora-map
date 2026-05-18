@@ -324,6 +324,10 @@
         const result = await res.json();
         if (result.ok) {
           document.getElementById("status").textContent = "✅ 已保存到 data/pois.json (" + pois.length + " 个 POI)";
+          // 广播通知前台同步
+          if (typeof BroadcastChannel !== 'undefined') {
+            new BroadcastChannel('kailash-kora-data').postMessage({ type: 'data-updated', source: 'poi-editor' });
+          }
         } else {
           throw new Error(result.error);
         }

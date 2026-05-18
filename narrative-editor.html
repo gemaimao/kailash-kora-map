@@ -419,6 +419,10 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data.pois, null, 2)
         });
+        // 广播通知前台同步
+        if (typeof BroadcastChannel !== 'undefined') {
+          new BroadcastChannel('kailash-kora-data').postMessage({ type: 'data-updated', source: 'narrative-editor' });
+        }
       } catch (e) { console.error("Save failed", e); }
     }
 

@@ -744,6 +744,128 @@ async function updateVisitCount() {
   }
 })();
 
+/* ---------- 跨标签页数据热同步 ---------- */
+
+/**
+ * 后台编辑器保存后，通过 BroadcastChannel 通知前台重新加载 POI 数据。
+ * 只重载 pois，不重新初始化地图，保持当前进度和视角。
+ */
+async function reloadPois() {
+  try {
+    const res = await fetch("data/pois.json?_t=" + Date.now()); // 加时间戳绕过缓存
+    const pois = await res.json();
+    STATE.pois = pois;
+    STATE.poiById = Object.fromEntries(pois.map((p) => [p.id, p]));
+
+    // 移除旧标记
+    Object.values(STATE.poiMarkers).forEach((m) => map.removeLayer(m));
+    STATE.poiMarkers = {};
+
+    // 重建路线顺序
+    const routeRes = await fetch("data/route.json?_t=" + Date.now());
+    const route = await routeRes.json();
+    STATE.routePois = route.order.map((id) => STATE.poiById[id]).filter(Boolean);
+    STATE.epiloguePois = (route.epilogue || []).map((id) => STATE.poiById[id]).filter(Boolean);
+
+    // 重建 uniqueRoutePois 和 progressMap
+    const seen = new Set();
+    STATE.uniqueRoutePois = [];
+    STATE.routePois.forEach((poi) => {
+      if (!seen.has(poi.id)) { seen.add(poi.id); STATE.uniqueRoutePois.push(poi); }
+    });
+    STATE.poiProgressMap = {};
+    STATE.uniqueRoutePois.forEach((poi) => {
+      let bestDist = Infinity, bestProgress = 0, acc = 0;
+      for (let i = 0; i < STATE.segLengths.length; i++) {
+        const a = STATE.mainRoute[i], b = STATE.mainRoute[i + 1];
+        const segLen = STATE.segLengths[i];
+        if (segLen > 0) {
+          const dx = b[0] - a[0], dy = b[1] - a[1];
+          let t = ((poi.lat - a[0]) * dx + (poi.lng - a[1]) * dy) / (dx * dx + dy * dy);
+          t = Math.max(0, Math.min(1, t));
+          const proj = [a[0] + dx * t, a[1] + dy * t];
+          const dP = haversine([poi.lat, poi.lng], proj);
+          if (dP < bestDist) { bestDist = dP; bestProgress = (acc + segLen * t) / STATE.totalLength; }
+        }
+        acc += segLen;
+      }
+      STATE.poiProgressMap[poi.id] = bestProgress;
+    });
+    STATE.uniqueRoutePois.sort((a, b) => STATE.poiProgressMap[a.id] - STATE.poiProgressMap[b.id]);
+
+    // 重建密集簇
+    STATE.poiClusters = [];
+    const CLUSTER_GAP = 0.03;
+    let ci = 0;
+    while (ci < STATE.uniqueRoutePois.length) {
+      const cluster = { startIdx: ci, endIdx: ci, ids: [STATE.uniqueRoutePois[ci].id] };
+      while (ci + 1 < STATE.uniqueRoutePois.length) {
+        const gap = STATE.poiProgressMap[STATE.uniqueRoutePois[ci + 1].id]
+                  - STATE.poiProgressMap[STATE.uniqueRoutePois[ci].id];
+        if (gap < CLUSTER_GAP) { ci++; cluster.endIdx = ci; cluster.ids.push(STATE.uniqueRoutePois[ci].id); } else break;
+      }
+      STATE.poiClusters.push(cluster);
+      ci++;
+    }
+
+    // 重新添加标记
+    STATE.uniqueRoutePois.forEach((poi) => {
+      const icon = L.divIcon({
+        className: "",
+        html: `<div class="poi-marker" data-id="${poi.id}"></div>`,
+        iconSize: [14, 14], iconAnchor: [7, 7]
+      });
+      const marker = L.marker([poi.lat, poi.lng], { icon }).addTo(map);
+      marker.on("click", () => showPoi(poi.id));
+      STATE.poiMarkers[poi.id] = marker;
+    });
+    STATE.pois.forEach((poi) => {
+      if (STATE.poiMarkers[poi.id]) return;
+      if (!poi.bubble) return;
+      const icon = L.divIcon({
+        className: "",
+        html: `<div class="poi-marker offroute" data-id="${poi.id}"></div>`,
+        iconSize: [10, 10], iconAnchor: [5, 5]
+      });
+      const marker = L.marker([poi.lat, poi.lng], { icon }).addTo(map);
+      marker.on("click", () => showPoi(poi.id));
+      STATE.poiMarkers[poi.id] = marker;
+    });
+
+    // 如果当前显示的 POI 有更新，刷新气泡内容
+    if (STATE.activePoiId && STATE.poiById[STATE.activePoiId]) {
+      showPoi(STATE.activePoiId);
+    }
+
+    // 重置触发索引以匹配当前进度
+    STATE.lastTriggeredPoiIdx = -1;
+    STATE.uniqueRoutePois.forEach((poi, i) => {
+      if (STATE.poiProgressMap[poi.id] <= STATE.progress) STATE.lastTriggeredPoiIdx = i;
+    });
+
+    console.log("✅ 前台数据已热更新，POI 数:", pois.length);
+    // 短暂显示提示
+    const tip = document.createElement("div");
+    tip.style.cssText = "position:fixed;top:60px;right:20px;z-index:9999;background:rgba(0,0,0,0.85);color:#ffcd55;padding:8px 18px;border-radius:20px;border:1px solid rgba(255,205,85,0.4);font-size:13px;pointer-events:none;";
+    tip.textContent = "✅ 数据已同步更新";
+    document.body.appendChild(tip);
+    setTimeout(() => tip.remove(), 2500);
+  } catch (err) {
+    console.error("热更新失败:", err);
+  }
+}
+
+// 监听后台广播
+if (typeof BroadcastChannel !== "undefined") {
+  const syncChannel = new BroadcastChannel("kailash-kora-data");
+  syncChannel.onmessage = (e) => {
+    if (e.data && e.data.type === "data-updated") {
+      console.log("📡 收到后台更新通知:", e.data.source);
+      reloadPois();
+    }
+  };
+}
+
 /* ---------- 尾声动画 ---------- */
 
 async function startEpilogue() {
