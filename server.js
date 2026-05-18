@@ -62,22 +62,35 @@ function scheduleGitPush(changedFile) {
   gitPushTimer = setTimeout(() => {
     const relFile = path.relative(ROOT, changedFile);
     const now = new Date().toISOString().replace('T', ' ').slice(0, 16);
-    const cmd = `git -C "${ROOT}" add data/pois.json data/routes.json && git -C "${ROOT}" commit -m "[admin] auto-save: ${relFile} @ ${now}" && git -C "${ROOT}" push origin main`;
     gitState = { status: "pushing", message: "正在推送到 GitHub...", updatedAt: Date.now() };
     console.log("📡 正在推送到 GitHub...");
-    exec(cmd, (err, stdout, stderr) => {
-      if (err) {
-        if (stderr.includes("nothing to commit") || stdout.includes("nothing to commit")) {
+
+    // 先 add，再检查是否有 staged 变更，有才 commit+push
+    exec(`git -C "${ROOT}" add data/pois.json data/routes.json`, (addErr) => {
+      if (addErr) {
+        gitState = { status: "error", message: "git add 失败: " + addErr.message.slice(0, 80), updatedAt: Date.now() };
+        console.error("❌ git add 失败:", addErr.message);
+        return;
+      }
+      exec(`git -C "${ROOT}" diff --cached --quiet`, (diffErr) => {
+        if (!diffErr) {
+          // exit code 0 = 无变更
           gitState = { status: "success", message: "无变更，已是最新", updatedAt: Date.now() };
           console.log("ℹ️  无变更，跳过推送");
-        } else {
-          gitState = { status: "error", message: "推送失败: " + (stderr || err.message).slice(0, 80), updatedAt: Date.now() };
-          console.error("❌ Git push 失败:", stderr || err.message);
+          return;
         }
-      } else {
-        gitState = { status: "success", message: "✅ 已推送到 GitHub", updatedAt: Date.now() };
-        console.log("✅ 已推送到 GitHub:\n", stdout.trim());
-      }
+        // 有变更，执行 commit + push
+        const commitMsg = `[admin] auto-save: ${relFile} @ ${now}`;
+        exec(`git -C "${ROOT}" commit -m "${commitMsg}" && git -C "${ROOT}" push origin main`, (err, stdout, stderr) => {
+          if (err) {
+            gitState = { status: "error", message: "推送失败: " + (stderr || err.message).slice(0, 80), updatedAt: Date.now() };
+            console.error("❌ Git push 失败:", stderr || err.message);
+          } else {
+            gitState = { status: "success", message: "✅ 已推送到 GitHub", updatedAt: Date.now() };
+            console.log("✅ 已推送到 GitHub:\n", stdout.trim());
+          }
+        });
+      });
     });
   }, 3000); // 3 秒防抖
 }
