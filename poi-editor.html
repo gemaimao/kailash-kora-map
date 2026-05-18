@@ -323,19 +323,46 @@
         });
         const result = await res.json();
         if (result.ok) {
-          document.getElementById("status").textContent = "✅ 已保存到 data/pois.json (" + pois.length + " 个 POI)";
+          document.getElementById("status").textContent = "✅ 已保存 (" + pois.length + " 个 POI) · 准备推送...";
           // 广播通知前台同步
           if (typeof BroadcastChannel !== 'undefined') {
             new BroadcastChannel('kailash-kora-data').postMessage({ type: 'data-updated', source: 'poi-editor' });
           }
+          // 轮询 git 状态
+          pollGitStatus();
         } else {
           throw new Error(result.error);
         }
       } catch (err) {
         document.getElementById("status").textContent = "⚠ 服务端保存失败，请用导出功能";
-        // 降级为下载
         exportAsFile();
       }
+    }
+
+    let gitPollTimer = null;
+    function pollGitStatus() {
+      if (gitPollTimer) clearInterval(gitPollTimer);
+      let attempts = 0;
+      const statusEl = document.getElementById("status");
+      gitPollTimer = setInterval(async () => {
+        attempts++;
+        try {
+          const r = await fetch("/api/git-status");
+          const s = await r.json();
+          if (s.status === "pending") {
+            statusEl.textContent = "✅ 已保存 · ⏳ 3 秒后推送...";
+          } else if (s.status === "pushing") {
+            statusEl.textContent = "📡 正在推送到 GitHub...";
+          } else if (s.status === "success") {
+            statusEl.textContent = "✅ 已保存 · ✅ 已推送到 GitHub，线上即将更新";
+            clearInterval(gitPollTimer);
+          } else if (s.status === "error") {
+            statusEl.textContent = "⚠️ Git 推送失败: " + s.message;
+            clearInterval(gitPollTimer);
+          }
+        } catch(e) {}
+        if (attempts > 30) clearInterval(gitPollTimer); // 最多轮询 30 次（30 秒）
+      }, 1000);
     }
 
     function exportAsFile() {

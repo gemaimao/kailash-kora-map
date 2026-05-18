@@ -52,25 +52,30 @@ function servStatic(req, res) {
   });
 }
 
-/* ---------- 自动 Git 推送（防抖 3 秒） ---------- */
+/* ---------- 自动 Git 推送（防抖 3 秒）+ 状态追踪 ---------- */
 let gitPushTimer = null;
+let gitState = { status: "idle", message: "", updatedAt: 0 };
 
 function scheduleGitPush(changedFile) {
   if (gitPushTimer) clearTimeout(gitPushTimer);
+  gitState = { status: "pending", message: "3 秒后推送...", updatedAt: Date.now() };
   gitPushTimer = setTimeout(() => {
     const relFile = path.relative(ROOT, changedFile);
     const now = new Date().toISOString().replace('T', ' ').slice(0, 16);
     const cmd = `git -C "${ROOT}" add data/pois.json data/routes.json && git -C "${ROOT}" commit -m "[admin] auto-save: ${relFile} @ ${now}" && git -C "${ROOT}" push origin main`;
+    gitState = { status: "pushing", message: "正在推送到 GitHub...", updatedAt: Date.now() };
     console.log("📡 正在推送到 GitHub...");
     exec(cmd, (err, stdout, stderr) => {
       if (err) {
-        // 如果没有变更（nothing to commit），不算错误
         if (stderr.includes("nothing to commit") || stdout.includes("nothing to commit")) {
+          gitState = { status: "success", message: "无变更，已是最新", updatedAt: Date.now() };
           console.log("ℹ️  无变更，跳过推送");
         } else {
+          gitState = { status: "error", message: "推送失败: " + (stderr || err.message).slice(0, 80), updatedAt: Date.now() };
           console.error("❌ Git push 失败:", stderr || err.message);
         }
       } else {
+        gitState = { status: "success", message: "✅ 已推送到 GitHub", updatedAt: Date.now() };
         console.log("✅ 已推送到 GitHub:\n", stdout.trim());
       }
     });
@@ -143,6 +148,13 @@ const server = http.createServer((req, res) => {
     
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ visitCount: stats.totalVisits }));
+    return;
+  }
+
+  // GET /api/git-status → 返回当前 git push 状态
+  if (req.method === "GET" && req.url === "/api/git-status") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(gitState));
     return;
   }
 
