@@ -204,17 +204,6 @@
     "density": 1
   },
   {
-    "id": "poi_1778645102076",
-    "name": "新标记",
-    "type": "",
-    "section": "",
-    "lat": 31.0139,
-    "lng": 81.27001,
-    "bubble": "",
-    "note": "",
-    "density": 1
-  },
-  {
     "id": "poi_1779074391159",
     "name": "大宝法王宝冠石",
     "type": "宗教遗迹",
@@ -224,7 +213,7 @@
     "zoom": 15.25,
     "viewLat": 31.014269,
     "viewLng": 81.379515,
-    "bubble": "据巴沃.祖拉陈瓦[贤者喜宴.噶玛岗仓史]记载，1548年，八世噶玛巴应岗底斯十三大宗扎噶庄园知事香拉普瓦的迎请，于岗仁波齐神山朝山并留下神迹。",
+    "bubble": "据巴沃.祖拉陈瓦[贤者喜宴.噶玛岗仓史]记载，1548年，八世噶玛巴应岗底斯十三大宗扎噶庄园知事香拉普瓦的迎请，于岗仁波齐神山朝山并留下神迹。\nAccording to Bawo. Zula Chenwa [Sage's wedding banquet. It is recorded that in 1548, the eighth Kamapa was invited by the governor of Zaga Manor, the thirteen major sects of Gangdis, and left a miracle.",
     "note": "",
     "density": 1
   },
@@ -238,7 +227,7 @@
     "zoom": 15.25,
     "viewLat": 30.995617,
     "viewLng": 81.358729,
-    "bubble": "1435年古格王室迎请当时声势正旺的萨迦派密教大师，俄尔支派的创始人俄尔钦贡嘎桑波（1382－1456）前来传法并主持古格国王出家仪式工。在此期间他朝圣神山所留神迹。",
+    "bubble": "1435年古格王室迎请当时声势正旺的萨迦派密教大师，俄尔支派的创始人俄尔钦贡嘎桑波（1382－1456）前来传法并主持古格国王出家仪式工。在此期间他朝圣神山所留神迹。\nIn 1435, the Guge royal family welcomed the esoteric master of the Saga School, the founder of the Or tribe, Orchingonga Sanbo (1382-1456), to preach the Dharma and preside over the monking ceremony of King Guge. During this period, he pilgrimaged to the sacred mountain to leave a miracle.",
     "note": "",
     "density": 1
   }
