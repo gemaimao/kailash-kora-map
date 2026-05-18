@@ -1,6 +1,6 @@
 /**
  * 本地开发服务器
- * 功能：静态文件 + API 保存 POI / 路线数据
+ * 功能：静态文件 + API 保存 POI / 路线数据 + 自动 Git 推送
  * 启动：node server.js
  * 端口：8090
  */
@@ -8,6 +8,7 @@
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
+const { exec } = require("child_process");
 
 const PORT = 8090;
 const ROOT = __dirname;
@@ -51,6 +52,31 @@ function servStatic(req, res) {
   });
 }
 
+/* ---------- 自动 Git 推送（防抖 3 秒） ---------- */
+let gitPushTimer = null;
+
+function scheduleGitPush(changedFile) {
+  if (gitPushTimer) clearTimeout(gitPushTimer);
+  gitPushTimer = setTimeout(() => {
+    const relFile = path.relative(ROOT, changedFile);
+    const now = new Date().toISOString().replace('T', ' ').slice(0, 16);
+    const cmd = `git -C "${ROOT}" add data/pois.json data/routes.json && git -C "${ROOT}" commit -m "[admin] auto-save: ${relFile} @ ${now}" && git -C "${ROOT}" push origin main`;
+    console.log("📡 正在推送到 GitHub...");
+    exec(cmd, (err, stdout, stderr) => {
+      if (err) {
+        // 如果没有变更（nothing to commit），不算错误
+        if (stderr.includes("nothing to commit") || stdout.includes("nothing to commit")) {
+          console.log("ℹ️  无变更，跳过推送");
+        } else {
+          console.error("❌ Git push 失败:", stderr || err.message);
+        }
+      } else {
+        console.log("✅ 已推送到 GitHub:\n", stdout.trim());
+      }
+    });
+  }, 3000); // 3 秒防抖
+}
+
 function handleAPI(req, res) {
   // POST /api/save-pois  → 写入 data/pois.json
   // POST /api/save-routes → 写入 data/routes.json
@@ -84,6 +110,9 @@ function handleAPI(req, res) {
       console.log(`✅ 已保存 ${path.basename(target)} (${pretty.length} bytes)`);
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ ok: true, size: pretty.length }));
+
+      // 异步推送，不阻塞响应
+      scheduleGitPush(target);
     } catch (err) {
       console.error("保存失败:", err.message);
       res.writeHead(400, { "Content-Type": "application/json" });
