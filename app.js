@@ -5,6 +5,10 @@
  */
 
 const STATE = {
+  // existing properties ...
+  // ... (unchanged lines will be kept as is)
+  // New property to track last triggered index for all POIs
+  lastTriggeredAllIdx: -1,
   pois: [],
   poiById: {},
   routePois: [],          // POI 对象列表（按转山顺序）
@@ -94,6 +98,24 @@ function trailCoords(p) {
   return result;
 }
 
+/** 同步 lastTriggeredPoiIdx 与 lastTriggeredAllIdx 以匹配 progress */
+function syncLastTriggeredIndices(p) {
+  STATE.lastTriggeredPoiIdx = -1;
+  STATE.lastTriggeredAllIdx = -1;
+
+  STATE.uniqueRoutePois.forEach((poi, idx) => {
+    if (STATE.poiProgressMap[poi.id] <= p) {
+      STATE.lastTriggeredPoiIdx = idx;
+    }
+  });
+
+  STATE.allSortedPois.forEach((poi, idx) => {
+    if (STATE.poiProgressMap[poi.id] <= p) {
+      STATE.lastTriggeredAllIdx = idx;
+    }
+  });
+}
+
 /* ---------- 数据加载 ---------- */
 
 async function loadData() {
@@ -170,8 +192,45 @@ async function loadData() {
     STATE.poiProgressMap[poi.id] = bestProgress;
   });
 
-  // 按进度排序 uniqueRoutePois
-  STATE.uniqueRoutePois.sort((a, b) => STATE.poiProgressMap[a.id] - STATE.poiProgressMap[b.id]);
+    // 按进度排序 uniqueRoutePois
+    STATE.uniqueRoutePois.sort((a, b) => STATE.poiProgressMap[a.id] - STATE.poiProgressMap[b.id]);
+    // 合并主路线与非主路线 POI，统一排序供进度触发使用
+    STATE.allSortedPois = [...STATE.uniqueRoutePois];
+    // 添加所有 POI（包括非路线），确保每个 POI 都有进度映射
+    STATE.pois.forEach(p => {
+      if (!STATE.poiById[p.id]) return;
+      // 如果已经有进度映射（在主路线中），跳过
+      if (STATE.poiProgressMap[p.id] !== undefined) return;
+      // 计算该 POI 在主路线上的最近投影进度
+      let bestDist = Infinity;
+      let bestProgress = 0;
+      let acc = 0;
+      for (let i = 0; i < STATE.segLengths.length; i++) {
+        const a = STATE.mainRoute[i];
+        const b = STATE.mainRoute[i + 1];
+        const segLen = STATE.segLengths[i];
+        const dx = b[0] - a[0], dy = b[1] - a[1];
+        let t = ((p.lat - a[0]) * dx + (p.lng - a[1]) * dy) / (dx * dx + dy * dy);
+        t = Math.max(0, Math.min(1, t));
+        const proj = [a[0] + dx * t, a[1] + dy * t];
+        const dP = haversine([p.lat, p.lng], proj);
+        if (dP < bestDist) {
+          bestDist = dP;
+          bestProgress = (acc + segLen * t) / STATE.totalLength;
+        }
+        // 端点比较
+        const dA = haversine([p.lat, p.lng], a);
+        const dB = haversine([p.lat, p.lng], b);
+        if (dA < bestDist) { bestDist = dA; bestProgress = acc / STATE.totalLength; }
+        if (dB < bestDist) { bestDist = dB; bestProgress = (acc + segLen) / STATE.totalLength; }
+        acc += segLen;
+      }
+      STATE.poiProgressMap[p.id] = bestProgress;
+    });
+    // 去重并排序所有 POI
+    STATE.allSortedPois = Array.from(new Set(STATE.allSortedPois.concat(STATE.pois)))
+      .filter(p => STATE.poiProgressMap[p.id] !== undefined)
+      .sort((a, b) => STATE.poiProgressMap[a.id] - STATE.poiProgressMap[b.id]);
 
   // 计算密集簇（进度差 < 3% 的连续 POI 归为一簇）
   STATE.poiClusters = [];
@@ -380,6 +439,7 @@ const progressEl = document.getElementById("progress");
 const playBtn = document.getElementById("playBtn");
 
 function updateProgress(p, opts = {}) {
+  const oldProgress = STATE.progress;
   STATE.progress = Math.max(0, Math.min(1, p));
   const { latlng } = progressToLatLng(STATE.progress);
   STATE.pilgrimMarker.setLatLng(latlng);
@@ -406,15 +466,24 @@ function updateProgress(p, opts = {}) {
 
   // 基于进度触发 POI 气泡 + 驻留策略
   if (!STATE.dwelling) {
-    const pois = STATE.uniqueRoutePois;
+    const pois = STATE.allSortedPois;
+    // Check for backwards movement or jumps
+    const isJump = opts.fromSlider || opts.forceSync || (p < oldProgress) || (Math.abs(p - oldProgress) > 0.02);
+    if (isJump) {
+      syncLastTriggeredIndices(STATE.progress);
+    }
     for (let i = 0; i < pois.length; i++) {
       const poiP = STATE.poiProgressMap[pois[i].id];
-      if (STATE.progress >= poiP && i > STATE.lastTriggeredPoiIdx) {
-        STATE.lastTriggeredPoiIdx = i;
+      if (STATE.progress >= poiP && i > STATE.lastTriggeredAllIdx) {
+        // Update both indices appropriately
+        // If this POI is part of the main route, also update main route index
+        const mainIdx = STATE.uniqueRoutePois.findIndex(item => item.id === pois[i].id);
+        if (mainIdx !== -1) STATE.lastTriggeredPoiIdx = mainIdx;
+        STATE.lastTriggeredAllIdx = i;
         showPoi(pois[i].id);
         // 触发驻留
         if (STATE.playing) {
-          const cluster = STATE.poiClusters.find(c => i >= c.startIdx && i <= c.endIdx);
+          const cluster = STATE.poiClusters.find(c => c.ids.includes(pois[i].id));
           if (cluster && cluster.ids.length > 1) {
             // 密集簇：暂停，等用户手动翻阅后继续
             startDwell(-1); // -1 表示无限等待，显示"←→ 翻阅 ‣ 继续"
@@ -482,7 +551,6 @@ playBtn.addEventListener("click", () => {
   }
   if (STATE.dwelling) endDwell();
   if (STATE.progress >= 1) {
-    STATE.lastTriggeredPoiIdx = -1;
     updateProgress(0);
   }
   if (STATE.playing) pause();
@@ -492,12 +560,6 @@ playBtn.addEventListener("click", () => {
 progressEl.addEventListener("input", (e) => {
   if (STATE.playing) pause();
   const p = Number(e.target.value) / 1000;
-  // 回滚时重置已触发 POI 索引
-  const pois = STATE.uniqueRoutePois;
-  STATE.lastTriggeredPoiIdx = -1;
-  for (let i = 0; i < pois.length; i++) {
-    if (STATE.poiProgressMap[pois[i].id] <= p) STATE.lastTriggeredPoiIdx = i;
-  }
   updateProgress(p, { fromSlider: true });
 });
 
@@ -838,10 +900,7 @@ async function reloadPois() {
     }
 
     // 重置触发索引以匹配当前进度
-    STATE.lastTriggeredPoiIdx = -1;
-    STATE.uniqueRoutePois.forEach((poi, i) => {
-      if (STATE.poiProgressMap[poi.id] <= STATE.progress) STATE.lastTriggeredPoiIdx = i;
-    });
+    syncLastTriggeredIndices(STATE.progress);
 
     console.log("✅ 前台数据已热更新，POI 数:", pois.length);
     // 短暂显示提示
