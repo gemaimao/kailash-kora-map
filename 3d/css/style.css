@@ -512,38 +512,46 @@ html, body, #cesiumContainer {
    移动端响应式适配 (修复控制面板挡住地图和 InfoBox 被遮挡)
 ========================================================= */
 @media (max-width: 768px) {
-    /* 控制面板移到底部并以最小化方式呈现 */
+    /* 控制面板移到底部居中，取消通栏，做成极简悬浮卡片 */
     .glass-panel {
         top: auto;
-        bottom: 10px;
-        left: 8px;
-        right: 8px;
-        width: auto;
-        padding: 8px;
-        max-height: 35vh; /* 避免占满屏幕 */
+        bottom: 20px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        width: max-content;
+        min-width: 320px;
+        max-width: 95vw;
+        padding: 12px;
+        max-height: 40vh; /* 避免占满屏幕 */
         display: flex;
         flex-direction: column;
         z-index: 10;
-        border-radius: 10px;
+        border-radius: 12px;
     }
 
     .panel-header-compact {
-        margin-bottom: 6px;
-        gap: 8px;
+        margin-bottom: 8px;
+        gap: 10px;
+        justify-content: center;
     }
 
     .lungta-logo {
-        height: 28px;
+        height: 32px;
     }
 
     .panel-title {
-        font-size: 14px;
+        font-size: 16px;
         margin-top: 2px;
+        text-align: left;
+        text-align-last: left; /* 修复拉宽变形的问题 */
+        letter-spacing: 1px;
     }
     
     .panel-subtitle {
-        font-size: 8px;
-        letter-spacing: 1.5px;
+        font-size: 9px;
+        letter-spacing: 1px;
+        text-align: left;
     }
 
     /* 优化控制按钮间距 */
