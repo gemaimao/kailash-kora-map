@@ -507,3 +507,140 @@ html, body, #cesiumContainer {
     line-height: 1.8;
     letter-spacing: 1px;
 }
+
+/* =========================================================
+   移动端响应式适配 (修复控制面板挡住地图和 InfoBox 被遮挡)
+========================================================= */
+@media (max-width: 768px) {
+    /* 控制面板移到底部并以最小化方式呈现 */
+    .glass-panel {
+        top: auto;
+        bottom: 10px;
+        left: 8px;
+        right: 8px;
+        width: auto;
+        padding: 8px;
+        max-height: 35vh; /* 避免占满屏幕 */
+        display: flex;
+        flex-direction: column;
+        z-index: 10;
+        border-radius: 10px;
+    }
+
+    .panel-header-compact {
+        margin-bottom: 6px;
+        gap: 8px;
+    }
+
+    .lungta-logo {
+        height: 28px;
+    }
+
+    .panel-title {
+        font-size: 14px;
+        margin-top: 2px;
+    }
+    
+    .panel-subtitle {
+        font-size: 8px;
+        letter-spacing: 1.5px;
+    }
+
+    /* 优化控制按钮间距 */
+    .controls-compact {
+        gap: 4px;
+        margin-bottom: 6px;
+    }
+
+    .btn {
+        padding: 5px 6px;
+        font-size: 10px;
+        border-radius: 4px;
+    }
+    
+    .visitor-count {
+        font-size: 10px;
+        padding: 2px 4px;
+    }
+
+    .commercial-zone {
+        margin-top: 4px;
+        gap: 4px;
+    }
+    
+    .ad-banner {
+        padding: 4px;
+    }
+    
+    .ad-slide {
+        font-size: 9px;
+        height: 14px;
+        line-height: 14px;
+    }
+    
+    .ad-text-viewport {
+        height: 14px;
+    }
+    
+    .btn-donate {
+        font-size: 10px;
+        padding: 4px 6px;
+        min-width: 50px;
+    }
+
+    /* 限制 POI 信息区域高度 */
+    .poi-info-content {
+        margin-top: 6px;
+        padding-top: 6px;
+    }
+    
+    .poi-header {
+        margin-bottom: 6px;
+    }
+    
+    .poi-tag {
+        font-size: 10px;
+        padding: 2px 6px;
+    }
+
+    .poi-title {
+        font-size: 13px;
+    }
+
+    .poi-body {
+        max-height: 60px; /* 最小化方式存在，且可以滚动 */
+        padding: 6px;
+        border-radius: 8px;
+    }
+
+    .poi-desc {
+        font-size: 11px;
+        line-height: 1.35;
+    }
+    
+    .carousel-controls {
+        padding: 4px;
+        margin-bottom: 6px;
+        gap: 10px;
+    }
+    
+    .carousel-btn {
+        width: 22px;
+        height: 22px;
+        font-size: 9px;
+    }
+    
+    .carousel-indicator {
+        font-size: 10px;
+    }
+
+    /* 修复原生的 Cesium InfoBox (摄像头弹出窗) 被遮挡和布局问题 */
+    .cesium-infoBox {
+        top: 15px !important;
+        right: 15px !important;
+        left: auto !important;
+        width: 200px !important;
+        z-index: 9999 !important; /* 确保层级最高，绝不被遮挡 */
+    }
+}
+

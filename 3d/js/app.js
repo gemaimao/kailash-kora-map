@@ -257,8 +257,20 @@ function flyNext() {
         currentSegmentStartIdx = findClosestIndex(fullRoute, lastPt.lat, lastPt.lng);
         currentSegmentEndIdx = findClosestIndex(fullRoute, pt.lat, pt.lng);
         
+        // 计算两点之间的物理距离
+        const distMeters = Cesium.Cartesian3.distance(
+            Cesium.Cartesian3.fromDegrees(lastPt.lng, lastPt.lat),
+            Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat)
+        );
+        
+        // 平滑速度控制：设定舒适观看速度为 40米/秒，点位密集时最少给 2.5 秒缓冲
+        let dynamicDuration = Math.max(2.5, distMeters / 40.0);
+        
+        // 在原有设定值和动态值之间取较大者，确保绝不“狂奔”
+        pt._actualDuration = Math.max(pt.duration * 1.5, dynamicDuration);
+
         currentSegmentStartTime = Date.now();
-        currentSegmentDuration = pt.duration * 1000; // 与 flyTo 动画时间完美同步
+        currentSegmentDuration = pt._actualDuration * 1000; // 与 flyTo 动画时间完美同步
     }
     
     // 核心修复：相机高度 = 真实的地球表面海拔 + 530米的相对净空高度
@@ -271,7 +283,7 @@ function flyNext() {
             pitch: Cesium.Math.toRadians(pt.pitch), // -32度
             roll: 0.0
         },
-        duration: pt.duration,
+        duration: pt._actualDuration || (pt.duration * 1.5),
         easingFunction: Cesium.EasingFunction.LINEAR_NONE, // 匀速平滑过渡，不卡顿
         complete: () => {
             currentWaypoint++;
