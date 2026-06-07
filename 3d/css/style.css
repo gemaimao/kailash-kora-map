@@ -273,7 +273,7 @@ html, body, #cesiumContainer {
     align-items: center;
     justify-content: center;
     gap: 15px;
-    margin-bottom: 15px;
+    margin: 0 0 0 auto; /* 靠右对齐，去除底部边距 */
     background: rgba(0, 0, 0, 0.3);
     padding: 6px;
     border-radius: 20px;
@@ -628,7 +628,7 @@ html, body, #cesiumContainer {
     
     .carousel-controls {
         padding: 4px;
-        margin-bottom: 6px;
+        margin: 0 0 0 auto;
         gap: 10px;
     }
     
