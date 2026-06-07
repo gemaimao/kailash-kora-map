@@ -652,3 +652,16 @@ html, body, #cesiumContainer {
     }
 }
 
+/* =========================================================
+   控制面板最小化状态
+========================================================= */
+.glass-panel.minimized .controls-compact,
+.glass-panel.minimized .commercial-zone,
+.glass-panel.minimized .poi-info-content {
+    display: none !important;
+}
+
+.glass-panel.minimized {
+    padding-bottom: 8px; /* 最小化时紧凑排布 */
+}
+

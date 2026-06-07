@@ -418,3 +418,17 @@ document.getElementById('btn-poi-next').addEventListener('click', () => {
     currentNearbyIndex = (currentNearbyIndex + 1) % nearbyPois.length;
     updateHudContent();
 });
+
+// 控制面板最小化逻辑
+const btnMinimize = document.getElementById('btn-minimize-panel');
+const uiPanel = document.getElementById('ui-panel');
+if (btnMinimize && uiPanel) {
+    btnMinimize.addEventListener('click', () => {
+        uiPanel.classList.toggle('minimized');
+        if (uiPanel.classList.contains('minimized')) {
+            btnMinimize.innerText = '▲'; // 向上箭头表示点击可以展开
+        } else {
+            btnMinimize.innerText = '▼'; // 向下箭头表示点击可以折叠
+        }
+    });
+}
