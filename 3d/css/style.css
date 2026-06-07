@@ -1,0 +1,509 @@
+html, body, #cesiumContainer {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #000;
+    font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', sans-serif;
+}
+
+/* 隐藏左下角的 Cesium 官方版权文字 */
+.cesium-widget-credits { display: none !important; }
+
+/* 玻璃质感浮动面板 */
+.glass-panel {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 360px;
+    box-sizing: border-box;
+    background: rgba(25, 25, 30, 0.45);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    color: #fef08a; /* Pale mud gold for general text */
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+
+.panel-header-compact {
+    display: flex; 
+    align-items: center; 
+    gap: 14px; 
+    margin-bottom: 20px;
+}
+
+.lungta-logo {
+    height: 60px; /* 放大了图标 */
+    flex-shrink: 0;
+    display: block;
+    transform: scaleX(-1); /* 水平翻转，修正马头方向 */
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+}
+
+.panel-title {
+    margin: 4px 0 0 0;
+    font-size: 24px; /* 微调以匹配副标题宽度 */
+    font-weight: 700;
+    letter-spacing: 0px;
+    background: linear-gradient(90deg, #fde047, #d97706); /* Mud gold gradient */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    white-space: nowrap;
+    text-align: justify;
+    text-align-last: justify;
+}
+
+.panel-subtitle {
+    font-size: 11px;
+    color: #ca8a04; /* Darker mud gold */
+    letter-spacing: 2.7px; /* 平均分布字母间距以对齐中文 */
+    font-weight: 700;
+    text-transform: uppercase;
+    white-space: nowrap;
+    text-align: left;
+}
+
+/* 并排精简按钮组 */
+.controls-compact {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.btn {
+    flex: 1;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+
+.btn.primary {
+    background: rgba(79, 70, 229, 0.8);
+    color: white;
+    border: 1px solid rgba(79, 70, 229, 0.5);
+}
+
+.btn.primary:hover {
+    background: rgba(79, 70, 229, 1);
+    transform: translateY(-1px);
+}
+
+.btn.secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e5e7eb;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.status-box {
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.status-label {
+    color: #9ca3af;
+}
+
+.status-value {
+    color: #10b981;
+    font-weight: 500;
+}
+
+.visitor-count {
+    color: #fde047; /* Mud gold */
+    font-size: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+/* =========================================================
+   商业互动区 (广告、打赏)
+========================================================= */
+.commercial-zone {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.ad-banner {
+    flex: 1;
+    min-width: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ad-banner:hover {
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+    border-color: rgba(255,255,255,0.2);
+}
+
+.ad-tag {
+    font-size: 10px;
+    background: rgba(217, 119, 6, 0.3); /* Mud gold tint */
+    color: #fde047;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.ad-text-viewport {
+    flex: 1;
+    min-width: 0;
+    height: 18px; /* 限制高度为单行 */
+    overflow: hidden;
+    position: relative;
+}
+
+.ad-text-slider {
+    display: flex;
+    flex-direction: column;
+    animation: slideAds 20s infinite;
+}
+
+.ad-slide {
+    height: 18px;
+    line-height: 18px;
+    font-size: 11px;
+    color: #e5e7eb;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ad-slide strong {
+    color: #fcd34d; /* 强调人名 */
+}
+
+@keyframes slideAds {
+    0%, 16% { transform: translateY(0); }
+    20%, 36% { transform: translateY(-18px); }
+    40%, 56% { transform: translateY(-36px); }
+    60%, 76% { transform: translateY(-54px); }
+    80%, 96% { transform: translateY(-72px); }
+    100% { transform: translateY(0); }
+}
+
+.btn-donate {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    min-width: 65px;
+}
+
+.btn-donate:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.6);
+}
+
+/* =========================================================
+   POI 解说浮动窗口样式 (HUD)
+========================================================= */
+.poi-info-content {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    max-height: 400px;
+    opacity: 1;
+    transform: translateY(0);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.poi-info-content.hidden {
+    opacity: 0;
+    transform: translateY(20px);
+    max-height: 0;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+    pointer-events: none;
+}
+
+.poi-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+/* 轮播翻页控件 */
+.carousel-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 6px;
+    border-radius: 20px;
+}
+
+.carousel-controls.hidden {
+    display: none;
+}
+
+.carousel-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-size: 12px;
+}
+
+.carousel-btn:hover {
+    background: rgba(79, 70, 229, 0.8);
+    transform: scale(1.1);
+}
+
+.carousel-indicator {
+    font-size: 12px;
+    font-weight: 600;
+    color: #cbd5e1;
+    letter-spacing: 1px;
+}
+
+.poi-tag {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+}
+
+.poi-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    margin: 0;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.poi-body {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    overflow-y: auto;
+    max-height: 250px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* 优雅的自定义滚动条 */
+.poi-body::-webkit-scrollbar {
+    width: 6px;
+}
+.poi-body::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+.poi-body::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+.poi-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.poi-desc {
+    color: #fef08a; /* Pale mud gold */
+    font-size: 15px;
+    line-height: 1.8;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    text-align: justify;
+}
+
+/* =========================================================
+   Cesium 原生 InfoBox (点击POI出现的摄像头信息框) 美化
+========================================================= */
+.cesium-infoBox {
+    background: rgba(25, 25, 30, 0.45) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
+    border-radius: 12px !important;
+    width: 240px !important;
+    min-height: 40px !important;
+    top: 20px !important;
+    right: 20px !important;
+}
+
+.cesium-infoBox-title {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #fde047 !important; /* Mud gold */
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    height: 36px !important;
+    line-height: 36px !important;
+    padding: 0 12px !important;
+}
+
+/* 隐藏自带的 iframe (因为我们没有描述内容) 以缩短高度 */
+.cesium-infoBox-iframe {
+    display: none !important;
+}
+
+.cesium-infoBox-camera {
+    top: 6px !important;
+    right: 32px !important;
+}
+
+.cesium-infoBox-close {
+    top: 6px !important;
+    right: 6px !important;
+}
+
+/* =========================================================
+   打赏模态框
+========================================================= */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto;
+    padding: 30px;
+    border-radius: 12px;
+    width: 80%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    position: relative;
+    animation: slideDown 0.3s ease-out;
+}
+
+.close-btn {
+    color: #888;
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: #000;
+    text-decoration: none;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* =========================================================
+   全屏定格遮罩 (开场 / 谢幕)
+========================================================= */
+.fullscreen-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(10, 10, 12, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 10000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.8s ease;
+}
+
+.fullscreen-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.overlay-content {
+    text-align: center;
+    color: #fff;
+    max-width: 600px;
+    padding: 0 20px;
+}
+
+.overlay-logo {
+    height: 100px;
+    margin-bottom: 24px;
+    filter: drop-shadow(0 4px 12px rgba(253, 224, 71, 0.3));
+}
+
+#overlay-title {
+    font-size: 42px;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    letter-spacing: 4px;
+    background: linear-gradient(90deg, #fde047, #d97706);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+#overlay-desc {
+    font-size: 18px;
+    color: #cbd5e1;
+    line-height: 1.8;
+    letter-spacing: 1px;
+}

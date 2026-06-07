@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>神山转山 3D 漫游 - Kailash Kora</title>
+    <!-- CesiumJS -->
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 全屏定格遮罩 (开场/谢幕) -->
+    <div id="fullscreen-overlay" class="fullscreen-overlay">
+        <div class="overlay-content">
+            <img src="../assets/logo-lungta-trans.png" class="overlay-logo" alt="风马旗">
+            <h1 id="overlay-title">2026马年大转山</h1>
+            <p id="overlay-desc">一山之缘，众生之幸。愿以此行，祈福平安。</p>
+            <button id="btn-overlay-start" class="btn primary" style="font-size: 16px; padding: 12px 30px; margin-top: 20px;">▶️ 开始启程</button>
+            <button id="btn-overlay-replay" class="btn secondary" style="font-size: 16px; padding: 12px 30px; margin-top: 20px; display: none;">🔄 再次巡航</button>
+        </div>
+    </div>
+
+    <div id="cesiumContainer"></div>
+    
+    <!-- 浮动 UI 面板 -->
+    <div id="ui-panel" class="glass-panel">
+        <div class="panel-header-compact">
+            <img src="../assets/logo-lungta-trans.png" class="lungta-logo" alt="风马旗摩尼宝">
+            <div class="titles-wrapper" style="display: flex; flex-direction: column; flex: 1; min-width: 0;">
+                <div class="panel-subtitle">THE GREAT KAILASH KORA 3D</div>
+                <h1 class="panel-title">2026马年大转山地图</h1>
+            </div>
+        </div>
+        
+        <div class="controls-compact">
+            <button id="btn-start-tour" class="btn primary">▶️ 巡航</button>
+            <button id="btn-stop-tour" class="btn secondary">⏸ 720探索</button>
+            <button id="btn-bgm" class="btn" style="flex: 0 0 36px; padding: 6px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);">🎵</button>
+            <div class="visitor-count" style="display:flex; align-items:center; margin-left: 8px;">👁 12,504</div>
+        </div>
+        
+        <!-- 商业互动区 -->
+        <div class="commercial-zone">
+            <div class="ad-banner">
+                <span class="ad-tag">推荐</span>
+                <div class="ad-text-viewport">
+                    <div class="ad-text-slider">
+                        <div class="ad-slide"><strong>向导丁丁</strong>: 高原资深户外大神 (微信 tintin_seu)</div>
+                        <div class="ad-slide"><strong>多啦</strong>: 好菜安客豪爽姐 (微信 lolo67)</div>
+                        <div class="ad-slide"><strong>墨小妖</strong>: 古道热肠的跑者 (微信 moxiaoyao1111)</div>
+                        <div class="ad-slide"><strong>充氧宝颜伟</strong>: 环保供氧专家 (微信 sparkyanwei)</div>
+                        <div class="ad-slide"><strong>龙虎林</strong>: 独立研究开发者 (微信 gemaimao)</div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn-donate" title="打赏作者">☕ 打赏</button>
+        </div>
+        
+        <!-- 新增：与时间轴同步的浮动解说窗口 (默认隐藏) -->
+        <div id="poi-info-panel" class="poi-info-content hidden">
+            <div class="poi-header">
+                <span id="poi-tag" class="poi-tag">地标</span>
+                <h2 id="poi-title" class="poi-title">加载中</h2>
+            </div>
+            <!-- 轮播控制器 -->
+            <div id="poi-carousel-controls" class="carousel-controls hidden">
+                <button id="btn-poi-prev" class="carousel-btn">◀</button>
+                <span id="poi-page-indicator" class="carousel-indicator">1 / 1</span>
+                <button id="btn-poi-next" class="carousel-btn">▶</button>
+            </div>
+            <div class="poi-body">
+                <p id="poi-desc" class="poi-desc">暂无描述</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 打赏模态框 (从上版地图移植) -->
+    <div id="tipModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-btn" id="closeTipModal">&times;</span>
+            <h3 style="color:#111; margin-top:0;">打赏作者</h3>
+            <p style="color:#444; font-size:13px;">如果您喜欢这个 3D 沉浸式神山地图，<br>欢迎打赏！☕️</p>
+            <div class="qr-code-box" style="text-align:center; margin-top:15px;">
+                <img src="../assets/tip-qr.png" alt="微信打赏码" style="width:200px; max-width:100%; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1);" />
+            </div>
+        </div>
+    </div>
+
+    <!-- 赞助商联系方式模态框 -->
+    <div id="sponsorsModal" class="modal hidden">
+        <div class="modal-content" style="width: 320px; text-align: left;">
+            <span class="close-btn" id="closeSponsorsModal">&times;</span>
+            <h3 style="color:#111; margin-top:0; text-align: center;">联系与交流</h3>
+            <div style="color:#444; font-size:13px; line-height: 1.6; margin-top: 15px;">
+                <p><strong>向导丁丁</strong><br>高原资深户外大神 (微信: tintin_seu)</p>
+                <p><strong>多啦</strong><br>好菜安客豪爽姐 (微信: lolo67)</p>
+                <p><strong>墨小妖</strong><br>古道热肠的跑者 (微信: moxiaoyao1111)</p>
+                <p><strong>充氧宝颜伟</strong><br>环保供氧专家 (微信: sparkyanwei)</p>
+                <p><strong>龙虎林</strong><br>独立研究开发者 (微信: gemaimao)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 背景音乐 -->
+    <audio id="bgmAudio" src="../assets/bgm.mp3" loop></audio>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
