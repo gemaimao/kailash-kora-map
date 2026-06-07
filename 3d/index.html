@@ -25,38 +25,6 @@
     
     <!-- 浮动 UI 面板 -->
     <div id="ui-panel" class="glass-panel">
-        <div class="panel-header-compact">
-            <img src="../assets/logo-lungta-trans.png" class="lungta-logo" alt="风马旗摩尼宝">
-            <div class="titles-wrapper" style="display: flex; flex-direction: column; flex: 1; min-width: 0;">
-                <div class="panel-subtitle">THE GREAT KAILASH KORA 3D</div>
-                <h1 class="panel-title">2026马年大转山地图</h1>
-            </div>
-            <button id="btn-minimize-panel" style="background: transparent; border: none; color: #cbd5e1; font-size: 16px; cursor: pointer; padding: 4px;">▼</button>
-        </div>
-        
-        <div class="controls-compact">
-            <button id="btn-start-tour" class="btn primary">▶️ 巡航</button>
-            <button id="btn-stop-tour" class="btn secondary">⏸ 720探索</button>
-            <button id="btn-bgm" class="btn" style="flex: 0 0 36px; padding: 6px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);">🎵</button>
-            <div class="visitor-count" style="display:flex; align-items:center; margin-left: 8px;">👁 12,504</div>
-        </div>
-        
-        <!-- 商业互动区 -->
-        <div class="commercial-zone">
-            <div class="ad-banner">
-                <span class="ad-tag">推荐</span>
-                <div class="ad-text-viewport">
-                    <div class="ad-text-slider">
-                        <div class="ad-slide"><strong>向导丁丁</strong>: 高原资深户外大神 (微信 tintin_seu)</div>
-                        <div class="ad-slide"><strong>多啦</strong>: 好菜安客豪爽姐 (微信 lolo67)</div>
-                        <div class="ad-slide"><strong>墨小妖</strong>: 古道热肠的跑者 (微信 moxiaoyao1111)</div>
-                        <div class="ad-slide"><strong>充氧宝颜伟</strong>: 环保供氧专家 (微信 sparkyanwei)</div>
-                        <div class="ad-slide"><strong>龙虎林</strong>: 独立研究开发者 (微信 gemaimao)</div>
-                    </div>
-                </div>
-            </div>
-            <button class="btn-donate" title="打赏作者">☕ 打赏</button>
-        </div>
         
         <!-- 新增：与时间轴同步的浮动解说窗口 (默认隐藏) -->
         <div id="poi-info-panel" class="poi-info-content hidden">
@@ -73,6 +41,48 @@
             <div class="poi-body">
                 <p id="poi-desc" class="poi-desc">暂无描述</p>
             </div>
+        </div>
+
+        <!-- 商业互动区 (跑马灯) -->
+        <div class="commercial-zone">
+            <div class="ad-banner">
+                <span class="ad-tag">推荐</span>
+                <div class="ad-text-viewport">
+                    <div class="ad-text-slider">
+                        <div class="ad-slide"><strong>向导丁丁</strong>: 高原资深户外大神 (微信 tintin_seu)</div>
+                        <div class="ad-slide"><strong>多啦</strong>: 好菜安客豪爽姐 (微信 lolo67)</div>
+                        <div class="ad-slide"><strong>墨小妖</strong>: 古道热肠的跑者 (微信 moxiaoyao1111)</div>
+                        <div class="ad-slide"><strong>充氧宝颜伟</strong>: 环保供氧专家 (微信 sparkyanwei)</div>
+                        <div class="ad-slide"><strong>龙虎林</strong>: 独立研究开发者 (微信 gemaimao)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 左右分栏结构 (现移至底部) -->
+        <div class="panel-top-layout">
+            <!-- 左侧：Logo和标题 -->
+            <div class="panel-left-col">
+                <img src="../assets/logo-lungta-trans.png" class="lungta-logo" alt="风马旗摩尼宝">
+                <div class="titles-wrapper">
+                    <div class="panel-subtitle">THE GREAT KAILASH KORA</div>
+                    <h1 class="panel-title">2026马年大转山</h1>
+                </div>
+            </div>
+            
+            <!-- 右侧：控制按钮与打赏 -->
+            <div class="panel-right-col">
+                <div class="controls-compact">
+                    <button id="btn-start-tour" class="btn primary">▶️ 巡航</button>
+                    <button id="btn-stop-tour" class="btn secondary">⏸ 探索</button>
+                    <button id="btn-bgm" class="btn btn-icon">🎵</button>
+                    <button class="btn-donate">☕</button>
+                </div>
+                <div class="visitor-count">👁 12,504</div>
+            </div>
+            
+            <!-- 最小化按钮 -->
+            <button id="btn-minimize-panel" class="btn-minimize">▼</button>
         </div>
     </div>
 
