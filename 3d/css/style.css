@@ -445,10 +445,9 @@ html, body, #cesiumContainer {
 }
 
 /* =========================================================
-   打赏模态框
+   打赏与赞助商模态框
 ========================================================= */
 .modal {
-    display: none;
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -458,6 +457,13 @@ html, body, #cesiumContainer {
     overflow: auto;
     background-color: rgba(0,0,0,0.6);
     backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.hidden {
+    display: none !important;
 }
 
 .modal-content {
