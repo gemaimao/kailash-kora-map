@@ -14,26 +14,59 @@ html, body, #cesiumContainer {
 /* 全局隐藏类 */
 .hidden { display: none !important; }
 
-/* 顶部独立发布条 */
-.publish-bar-panel {
+/* 顶部左侧区域容器 */
+.top-left-panel {
     position: absolute;
     top: 20px;
     left: 20px;
     width: 480px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    transition: all 0.3s ease;
+}
+
+.map-title-header {
+    background: rgba(18, 18, 22, 0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    padding: 5px 14px;
+    width: fit-content;
+    margin-bottom: -1px; /* 贴合下边框 */
+    z-index: 11;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.map-title-header span {
+    font-size: 15px; /* 字号变大 2~3 号 */
+    font-weight: 900;
+    letter-spacing: 2px;
+    background: linear-gradient(90deg, #fde047, #d97706);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+/* 顶部独立发布条 */
+.publish-bar-panel {
     box-sizing: border-box;
     background: rgba(18, 18, 22, 0.65);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-    border-radius: 12px;
+    border-radius: 0 12px 12px 12px; /* 左上角取消圆角，与框楣拼接 */
     padding: 8px 10px;
     display: flex;
     align-items: center;
     gap: 8px;
     justify-content: space-between;
-    z-index: 10;
-    transition: all 0.3s ease;
+    width: 100%;
 }
 
 .bar-btn-publish, .bar-btn-donate {
@@ -747,15 +780,33 @@ html, body, #cesiumContainer {
 ========================================================= */
 @media (max-width: 768px) {
     /* 控制面板移到底部居中，取消通栏，做成极简悬浮卡片 */
-    .publish-bar-panel {
+    .top-left-panel {
         top: 10px;
         bottom: auto;
         left: 50%;
         right: auto;
         transform: translateX(-50%);
         width: 96vw;
+        gap: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* 居中对齐框楣 */
+    }
+
+    .map-title-header {
+        padding: 4px 12px;
+        border-radius: 6px 6px 0 0;
+        margin-bottom: -1px;
+    }
+
+    .map-title-header span {
+        font-size: 13px;
+        letter-spacing: 1.5px;
+    }
+
+    .publish-bar-panel {
         padding: 6px 8px;
-        border-radius: 8px;
+        border-radius: 8px; /* 移动端保持全圆角以匹配居中样式 */
     }
 
     .bar-btn-publish, .bar-btn-donate {

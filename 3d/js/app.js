@@ -137,7 +137,7 @@ function loadPoisAndStart(terrainProvider) {
                     });
                 }
 
-                const iconUrl = `https://raw.githubusercontent.com/gemaimao/assets/main/kailashpic/${poiId}.png`;
+                const iconUrl = `https://cdn.jsdelivr.net/gh/gemaimao/assets@main/kailashpic/${poiId}.png`;
                 viewer.entities.add({
                     id: 'poi_' + poi.id,
                     position: Cesium.Cartesian3.fromDegrees(fixedLng, fixedLat, poi.flat ? groundHeight : altitude),
@@ -215,12 +215,13 @@ function updateHudContent() {
     }
 }
 
-// 辅助函数：找到路线上最近的点索引
+// 辅助函数：找到路线上最近的点索引 (修复经纬度交叉比对 Bug)
 function findClosestIndex(route, lat, lng) {
     let minD = Infinity;
     let idx = 0;
     for (let i = 0; i < route.length; i++) {
-        const d = Math.pow(route[i][0] - lat, 2) + Math.pow(route[i][1] - lng, 2);
+        // route[i][0] 为经度，route[i][1] 为纬度
+        const d = Math.pow(route[i][0] - lng, 2) + Math.pow(route[i][1] - lat, 2);
         if (d < minD) { minD = d; idx = i; }
     }
     return idx;
@@ -497,9 +498,18 @@ if (btnSubmitMsg) {
         const contact = document.getElementById('pub-contact').value.trim();
         const type = document.getElementById('pub-type').value;
         const content = document.getElementById('pub-content').value.trim();
+        const captcha = document.getElementById('pub-captcha').value.trim();
 
         if (!nickname || !content) {
             pubStatus.innerText = '昵称和内容为必填项！';
+            pubStatus.style.color = 'red';
+            pubStatus.style.display = 'block';
+            return;
+        }
+
+        // 防刷人机简单阻挡验证
+        if (captcha !== '冈仁波齐' && captcha !== '岗仁波齐' && captcha !== '冈仁波齐峰') {
+            pubStatus.innerText = '验证码错误，请输入正确的四字神山名称！(提示：冈仁波齐)';
             pubStatus.style.color = 'red';
             pubStatus.style.display = 'block';
             return;
@@ -512,7 +522,7 @@ if (btnSubmitMsg) {
             const response = await fetch('/api/messages', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nickname, contact, type, content })
+                body: JSON.stringify({ nickname, contact, type, content, captcha })
             });
 
             if (response.ok) {
@@ -547,6 +557,7 @@ if (btnSubmitMsg) {
                     document.getElementById('pub-nickname').value = '';
                     document.getElementById('pub-contact').value = '';
                     document.getElementById('pub-content').value = '';
+                    document.getElementById('pub-captcha').value = '';
                 }, 2000);
             } else {
                 const err = await response.json();

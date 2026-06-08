@@ -25,20 +25,25 @@
     
     <!-- 顶部右上角绝对定位：访问人数统计及Logo标题 (已废弃，功能移到底部) -->
 
-    <!-- 顶部独立发布条 (左上方绝对定位) -->
-    <div id="publish-bar" class="publish-bar-panel">
-        <button id="btn-publish-msg" class="bar-btn-publish">发布</button>
-        <div class="ad-banner">
-            <marquee class="ad-text-slider" scrollamount="4" scrolldelay="100">
-                <span class="ad-slide">环保供氧专家: 提供高原医用级制氧机租赁 (微信号: sparkyanwei)</span>
-                <span class="ad-slide">割麦猫: 6月12日约车回拉萨，请联系 (15208047098)</span>
-                <span class="ad-slide">星空下的朝圣者: 寻找同行伙伴，预计明早出发</span>
-                <span class="ad-slide">冈仁波齐守护者: 请大家爱护环境，带走垃圾</span>
-                <span class="ad-slide">龙虎林: 独立研究开发者 (微信 gemaimao)</span>
-                <!-- 动态加载留言 -->
-            </marquee>
+    <!-- 顶部左侧区域 (标题 + 独立发布条) -->
+    <div id="top-left-container" class="top-left-panel">
+        <div class="map-title-header">
+            <span>2026马年大转山</span>
         </div>
-        <button class="bar-btn-donate">打赏</button>
+        <div id="publish-bar" class="publish-bar-panel">
+            <button id="btn-publish-msg" class="bar-btn-publish">发布</button>
+            <div class="ad-banner">
+                <marquee class="ad-text-slider" scrollamount="4" scrolldelay="100">
+                    <span class="ad-slide">环保供氧专家: 提供高原医用级制氧机租赁 (微信号: sparkyanwei)</span>
+                    <span class="ad-slide">割麦猫: 6月12日约车回拉萨，请联系 (15208047098)</span>
+                    <span class="ad-slide">星空下的朝圣者: 寻找同行伙伴，预计明早出发</span>
+                    <span class="ad-slide">冈仁波齐守护者: 请大家爱护环境，带走垃圾</span>
+                    <span class="ad-slide">龙虎林: 独立研究开发者 (微信 gemaimao)</span>
+                    <!-- 动态加载留言 -->
+                </marquee>
+            </div>
+            <button class="bar-btn-donate">打赏</button>
+        </div>
     </div>
 
     <!-- 底部控制与信息面板 (左下方绝对定位) -->
@@ -57,8 +62,8 @@
                 <span>全景探索</span>
             </button>
             <button id="btn-bgm" class="btn-music" title="播放/暂停音乐">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="display: block;">
-                    <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h6V3h-8z"/>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="display: block; color: #ffd700; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));">
+                    <path d="M19 3H9c-1.1 0-2 .9-2 2v11.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h10v7.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V5c0-1.1.9-2 2-2z"/>
                 </svg>
             </button>
         </div>
@@ -132,6 +137,7 @@
                     <option value="租装备">租装备</option>
                 </select>
                 <textarea id="pub-content" placeholder="填写内容详情，方便大家了解 (限50字)" maxlength="50" rows="3" class="pub-input" style="resize:none;"></textarea>
+                <input type="text" id="pub-captcha" placeholder="防刷验证：转山核心神山名称是？(四个字)" class="pub-input" required>
                 <button id="btn-submit-msg" class="btn primary" style="width:100%; margin-top:10px; padding: 10px;">提 交 发 布</button>
             </div>
             <p id="pub-status" style="color: green; font-size: 12px; text-align: center; margin-top: 10px; display: none;"></p>

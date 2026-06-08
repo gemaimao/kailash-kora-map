@@ -58,10 +58,38 @@ export async function onRequestPost(context) {
     }
 
     const data = await request.json();
-    const { nickname, contact, type, content } = data;
+    const { nickname, contact, type, content, captcha } = data;
 
     if (!nickname || !type || !content) {
       return new Response(JSON.stringify({ error: "缺少必填字段：昵称、类型或内容" }), { status: 400 });
+    }
+
+    // 验证码防刷检查
+    const cleanCaptcha = (captcha || "").trim();
+    if (cleanCaptcha !== "冈仁波齐" && cleanCaptcha !== "岗仁波齐" && cleanCaptcha !== "冈仁波齐峰") {
+      return new Response(JSON.stringify({ error: "防刷验证失败，请填写正确的四字神山名称！" }), {
+        status: 400,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        }
+      });
+    }
+
+    // IP 速率限制 (2分钟发一次)
+    const ip = request.headers.get("CF-Connecting-IP");
+    if (ip) {
+      const limitKey = `ratelimit_${ip}`;
+      const isLimited = await env.KORA_MESSAGES.get(limitKey);
+      if (isLimited) {
+        return new Response(JSON.stringify({ error: "您的 IP 发布过于频繁，请等待 2 分钟后再试" }), {
+          status: 429,
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          }
+        });
+      }
     }
 
     // 敏感词过滤审核（检查昵称、联系方式和内容）
@@ -91,6 +119,12 @@ export async function onRequestPost(context) {
 
     // 存入 KV，保留数据
     await env.KORA_MESSAGES.put(key, JSON.stringify(messagePayload));
+
+    // 设置 IP 速率限制
+    if (ip) {
+      const limitKey = `ratelimit_${ip}`;
+      await env.KORA_MESSAGES.put(limitKey, "true", { expirationTtl: 120 });
+    }
 
     return new Response(JSON.stringify({ success: true, message: messagePayload }), {
       headers: {
