@@ -49,6 +49,7 @@
         <!-- 商业互动区 (跑马灯) -->
         <div class="commercial-zone">
             <div class="visitor-count">👁 12,504</div>
+            <button id="btn-publish-msg" class="btn-publish">发 布</button>
             <div class="ad-banner">
                 <span class="ad-tag">推荐</span>
                 <div class="ad-text-viewport">
@@ -110,6 +111,29 @@
                 <p><strong>充氧宝颜伟</strong><br>环保供氧专家 (微信: sparkyanwei)</p>
                 <p><strong>龙虎林</strong><br>独立研究开发者 (微信: gemaimao)</p>
             </div>
+        </div>
+    </div>
+
+    <!-- 发布留言模态框 -->
+    <div id="publishModal" class="modal hidden">
+        <div class="modal-content" style="width: 320px; text-align: left;">
+            <span class="close-btn" id="closePublishModal">&times;</span>
+            <h3 style="color:#111; margin-top:0; text-align: center;">发布互动信息</h3>
+            <div class="publish-form">
+                <input type="text" id="pub-nickname" placeholder="您的称呼/昵称 (必填)" maxlength="20" class="pub-input">
+                <input type="text" id="pub-contact" placeholder="联系方式 (选填，如微信号)" maxlength="50" class="pub-input">
+                <select id="pub-type" class="pub-input">
+                    <option value="留言">一句话留言</option>
+                    <option value="约伴">约伴</option>
+                    <option value="约饭">约饭</option>
+                    <option value="约车">约车</option>
+                    <option value="找背夫">找背夫</option>
+                    <option value="租装备">租装备</option>
+                </select>
+                <textarea id="pub-content" placeholder="填写内容详情，方便大家了解 (限50字)" maxlength="50" rows="3" class="pub-input" style="resize:none;"></textarea>
+                <button id="btn-submit-msg" class="btn primary" style="width:100%; margin-top:10px; padding: 10px;">提 交 发 布</button>
+            </div>
+            <p id="pub-status" style="color: green; font-size: 12px; text-align: center; margin-top: 10px; display: none;"></p>
         </div>
     </div>
 

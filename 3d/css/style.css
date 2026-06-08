@@ -211,6 +211,24 @@ html, body, #cesiumContainer {
     padding-bottom: 10px;
 }
 
+.btn-publish {
+    background: linear-gradient(135deg, #10b981, #059669); /* Green glowing */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.btn-publish:active {
+    transform: scale(0.95);
+}
+
 .ad-banner {
     flex: 1;
     min-width: 0;
@@ -465,6 +483,23 @@ html, body, #cesiumContainer {
 
 .modal.hidden {
     display: none !important;
+}
+
+.pub-input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.pub-input:focus {
+    outline: none;
+    border-color: #f59e0b;
+    box-shadow: 0 0 5px rgba(245, 158, 11, 0.3);
 }
 
 .modal-content {

@@ -386,6 +386,121 @@ if (adBanner && sponsorsModal && closeSponsorsModal) {
     });
 }
 
+// 互动留言发布逻辑
+const publishModal = document.getElementById('publishModal');
+const btnPublishMsg = document.getElementById('btn-publish-msg');
+const closePublishModal = document.getElementById('closePublishModal');
+const btnSubmitMsg = document.getElementById('btn-submit-msg');
+const pubStatus = document.getElementById('pub-status');
+
+if (btnPublishMsg && publishModal && closePublishModal) {
+    btnPublishMsg.addEventListener('click', () => {
+        publishModal.classList.remove('hidden');
+        pubStatus.style.display = 'none';
+    });
+    closePublishModal.addEventListener('click', () => {
+        publishModal.classList.add('hidden');
+    });
+    window.addEventListener('click', (e) => {
+        if (e.target === publishModal) {
+            publishModal.classList.add('hidden');
+        }
+    });
+}
+
+// 获取动态留言并渲染
+async function fetchAndRenderMessages() {
+    try {
+        const response = await fetch('/api/messages');
+        if (response.ok) {
+            const data = await response.json();
+            if (data.messages && data.messages.length > 0) {
+                const slider = document.querySelector('.ad-text-slider');
+                if (slider) {
+                    data.messages.forEach(msg => {
+                        const div = document.createElement('div');
+                        div.className = 'ad-slide';
+                        const contactStr = msg.contact ? ` (${msg.contact})` : '';
+                        div.innerHTML = `<strong>[${msg.type}] ${msg.nickname}</strong>: ${msg.content}${contactStr}`;
+                        slider.appendChild(div);
+                    });
+                }
+            }
+        }
+    } catch (e) {
+        console.log('留言拉取失败', e);
+    }
+}
+
+// 页面加载完成后拉取留言
+document.addEventListener('DOMContentLoaded', () => {
+    fetchAndRenderMessages();
+});
+
+// 提交留言
+if (btnSubmitMsg) {
+    btnSubmitMsg.addEventListener('click', async () => {
+        const nickname = document.getElementById('pub-nickname').value.trim();
+        const contact = document.getElementById('pub-contact').value.trim();
+        const type = document.getElementById('pub-type').value;
+        const content = document.getElementById('pub-content').value.trim();
+
+        if (!nickname || !content) {
+            pubStatus.innerText = '昵称和内容为必填项！';
+            pubStatus.style.color = 'red';
+            pubStatus.style.display = 'block';
+            return;
+        }
+
+        btnSubmitMsg.innerText = '提交中...';
+        btnSubmitMsg.disabled = true;
+
+        try {
+            const response = await fetch('/api/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nickname, contact, type, content })
+            });
+
+            if (response.ok) {
+                pubStatus.innerText = '发布成功！已加入滚动队列。';
+                pubStatus.style.color = 'green';
+                pubStatus.style.display = 'block';
+                
+                // 动态追加到 DOM，立即显示
+                const slider = document.querySelector('.ad-text-slider');
+                if (slider) {
+                    const div = document.createElement('div');
+                    div.className = 'ad-slide';
+                    const contactStr = contact ? ` (${contact})` : '';
+                    div.innerHTML = `<strong>[${type}] ${nickname}</strong>: ${content}${contactStr}`;
+                    // 放到推荐广告后面，即倒数第二个位置（因为最后一个可能是无缝滚动复制的节点，或者直接 append 都可以）
+                    slider.appendChild(div);
+                }
+
+                // 2秒后关闭弹窗
+                setTimeout(() => {
+                    publishModal.classList.add('hidden');
+                    btnSubmitMsg.innerText = '提 交 发 布';
+                    btnSubmitMsg.disabled = false;
+                    document.getElementById('pub-nickname').value = '';
+                    document.getElementById('pub-contact').value = '';
+                    document.getElementById('pub-content').value = '';
+                }, 2000);
+            } else {
+                const err = await response.json();
+                throw new Error(err.error || '提交失败');
+            }
+        } catch (e) {
+            pubStatus.innerText = '发布失败：' + e.message;
+            pubStatus.style.color = 'red';
+            pubStatus.style.display = 'block';
+            btnSubmitMsg.innerText = '提 交 发 布';
+            btnSubmitMsg.disabled = false;
+        }
+    });
+}
+
 // 背景音乐逻辑
 const bgmBtn = document.getElementById('btn-bgm');
 const bgmAudio = document.getElementById('bgmAudio');
