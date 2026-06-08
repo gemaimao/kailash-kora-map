@@ -339,10 +339,14 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
 // 暂停/恢复 巡航
 document.getElementById('btn-stop-tour').addEventListener('click', () => {
     isPlaying = !isPlaying;
-    const btnSpan = document.getElementById('btn-stop-tour').querySelector('span');
-    btnSpan.innerText = isPlaying ? '探索' : '恢复';
-    const btnImg = document.getElementById('btn-stop-tour').querySelector('img');
-    btnImg.src = isPlaying ? '../assets/icon-pause.svg' : '../assets/icon-play.svg';
+    const btnSpans = document.getElementById('btn-stop-tour').querySelectorAll('span');
+    if (btnSpans.length > 1) {
+        btnSpans[1].innerText = isPlaying ? '探索' : '恢复';
+    }
+    const btnEmoji = document.getElementById('btn-stop-tour').querySelector('.btn-icon-emoji');
+    if (btnEmoji) {
+        btnEmoji.innerText = isPlaying ? '⏸️' : '▶️';
+    }
     
     if (isPlaying) {
         flyNext();
@@ -423,11 +427,22 @@ async function fetchAndRenderMessages() {
                 const slider = document.querySelector('.ad-text-slider');
                 if (slider) {
                     data.messages.forEach(msg => {
+                        const contactStr = msg.contact ? ` (${msg.contact})` : '';
+                        const htmlStr = `<strong>[${msg.type}] ${msg.nickname}</strong>: ${msg.content}${contactStr}`;
+                        
+                        // 添加到跑马灯
                         const div = document.createElement('div');
                         div.className = 'ad-slide';
-                        const contactStr = msg.contact ? ` (${msg.contact})` : '';
-                        div.innerHTML = `<strong>[${msg.type}] ${msg.nickname}</strong>: ${msg.content}${contactStr}`;
+                        div.innerHTML = htmlStr;
                         slider.appendChild(div);
+                        
+                        // 添加到模态框
+                        const modalList = document.getElementById('modal-message-list');
+                        if (modalList) {
+                            const li = document.createElement('li');
+                            li.innerHTML = htmlStr;
+                            modalList.appendChild(li);
+                        }
                     });
                 }
             }
@@ -475,12 +490,20 @@ if (btnSubmitMsg) {
                 // 动态追加到 DOM，立即显示
                 const slider = document.querySelector('.ad-text-slider');
                 if (slider) {
+                    const contactStr = contact ? ` (${contact})` : '';
+                    const htmlStr = `<strong>[${type}] ${nickname}</strong>: ${content}${contactStr}`;
+                    
                     const div = document.createElement('div');
                     div.className = 'ad-slide';
-                    const contactStr = contact ? ` (${contact})` : '';
-                    div.innerHTML = `<strong>[${type}] ${nickname}</strong>: ${content}${contactStr}`;
-                    // 放到推荐广告后面，即倒数第二个位置（因为最后一个可能是无缝滚动复制的节点，或者直接 append 都可以）
+                    div.innerHTML = htmlStr;
                     slider.appendChild(div);
+                    
+                    const modalList = document.getElementById('modal-message-list');
+                    if (modalList) {
+                        const li = document.createElement('li');
+                        li.innerHTML = htmlStr;
+                        modalList.prepend(li);
+                    }
                 }
 
                 // 2秒后关闭弹窗

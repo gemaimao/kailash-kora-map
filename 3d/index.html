@@ -51,15 +51,13 @@
             <button id="btn-publish-msg" class="btn-publish">发 布</button>
             <div class="ad-banner">
                 <span class="ad-tag">推荐</span>
-                <div class="ad-text-viewport">
-                    <div class="ad-text-slider">
-                        <div class="ad-slide"><strong>向导丁丁</strong>: 高原资深户外大神 (微信 tintin_seu)</div>
-                        <div class="ad-slide"><strong>多啦</strong>: 好菜安客豪爽姐 (微信 lolo67)</div>
-                        <div class="ad-slide"><strong>墨小妖</strong>: 古道热肠的跑者 (微信 moxiaoyao1111)</div>
-                        <div class="ad-slide"><strong>充氧宝颜伟</strong>: 环保供氧专家 (微信 sparkyanwei)</div>
-                        <div class="ad-slide"><strong>龙虎林</strong>: 独立研究开发者 (微信 gemaimao)</div>
-                    </div>
-                </div>
+                <marquee class="ad-text-slider" scrollamount="4" scrolldelay="100">
+                    <span class="ad-slide"><strong>[推荐服务] 环保供氧专家</strong>: 提供高原医用级制氧机租赁 (微信号: sparkyanwei)</span>
+                    <span class="ad-slide"><strong>[留言] 割麦猫</strong>: 6月12日约车回拉萨，请联系 (15208047098)</span>
+                    <span class="ad-slide"><strong>[留言] 星空下的朝圣者</strong>: 寻找同行伙伴，预计明早出发</span>
+                    <span class="ad-slide"><strong>[留言] 冈仁波齐守护者</strong>: 请大家爱护环境，带走垃圾</span>
+                    <span class="ad-slide"><strong>龙虎林</strong>: 独立研究开发者 (微信 gemaimao)</span>
+                </marquee>
             </div>
         </div>
 
@@ -71,7 +69,6 @@
                 <div class="titles-wrapper">
                     <div class="panel-subtitle">THE GREAT KAILASH KORA</div>
                     <h1 class="panel-title">2026马年大转山</h1>
-                    <div class="visitor-count" style="margin-top: 4px; opacity: 0.8;">👁 12,504 次访问</div>
                 </div>
             </div>
             
@@ -79,11 +76,11 @@
             <div class="panel-right-col">
                 <div class="controls-compact">
                     <button id="btn-start-tour" class="btn-tour">
-                        <img src="../assets/icon-play.svg" class="icon-sm" alt="Play" style="width:14px; height:14px; margin-right:4px;">
+                        <span class="btn-icon-emoji">▶️</span>
                         <span>巡航</span>
                     </button>
                     <button id="btn-stop-tour" class="btn-explore hidden">
-                        <img src="../assets/icon-pause.svg" class="icon-sm" alt="Pause" style="width:14px; height:14px; margin-right:4px;">
+                        <span class="btn-icon-emoji">⏸️</span>
                         <span>探索</span>
                     </button>
                     <button id="btn-bgm" class="btn btn-icon">🎵</button>
@@ -111,10 +108,16 @@
             <span class="close-btn" id="closeSponsorsModal">&times;</span>
             <h3 style="color:#111; margin-top:0;">联系与交流</h3>
             <div style="color:#444; font-size:13px; line-height: 1.6; margin-top: 15px;">
-                <p><strong>向导丁丁</strong><br>高原资深户外大神 (微信: tintin_seu)</p>
-                <p><strong>多啦</strong><br>好菜安客豪爽姐 (微信: lolo67)</p>
-                <p><strong>墨小妖</strong><br>古道热肠的跑者 (微信: moxiaoyao1111)</p>
-                <p><strong>充氧宝颜伟</strong><br>环保供氧专家 (微信: sparkyanwei)</p>
+                <ul class="sponsor-list">
+                    <li><strong>推荐服务</strong>: 环保供氧专家 (微信号: sparkyanwei)</li>
+                    <li><strong>留 言</strong>: 割麦猫: 6月12日约车回拉萨，请联系 (15208047098)</li>
+                    <li><strong>留 言</strong>: 星空下的朝圣者: 寻找同行伙伴，预计明早出发</li>
+                    <li><strong>留 言</strong>: 冈仁波齐守护者: 请大家爱护环境，带走垃圾</li>
+                </ul>
+                <h4 style="margin-top: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">最新实时发布</h4>
+                <ul class="sponsor-list" id="modal-message-list">
+                    <!-- 动态加载的新留言 -->
+                </ul>
                 <p><strong>龙虎林</strong><br>独立研究开发者 (微信: gemaimao)</p>
             </div>
         </div>
