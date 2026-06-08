@@ -7,3 +7,4 @@ server_logs/
 backups/
 .bb-browser/
 assets/basemap.png
+temp_venv/
