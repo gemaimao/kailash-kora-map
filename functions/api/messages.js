@@ -229,9 +229,10 @@ async function triggerWeChatPush(env, message, requestUrl) {
     const title = `新留言待审核 - 2026马年大转山`;
     const desp = `**分类**: ${type}\n\n**昵称**: ${nickname}\n\n**联系方式**: ${contact || "无"}\n\n**内容**: ${content}\n\n[点击进入后台审核](${adminUrl})`;
 
+    const sendKey = env.SERVERCHAN_SENDKEY || "SCT361188TWGJcCi6lYTmaRijWjloOGSCn";
     // 1. Server酱支持
-    if (env.SERVERCHAN_SENDKEY) {
-      const serverChanUrl = `https://sctapi.ftqq.com/${env.SERVERCHAN_SENDKEY}.send`;
+    if (sendKey) {
+      const serverChanUrl = `https://sctapi.ftqq.com/${sendKey}.send`;
       await fetch(serverChanUrl, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
