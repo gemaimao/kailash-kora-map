@@ -46,7 +46,7 @@ html, body, #cesiumContainer {
     display: flex;
     align-items: center;
     gap: 12px;
-    flex: 1;
+    flex: 0 0 auto; /* 改为按内容宽度，不强制伸展 */
 }
 
 .panel-right-col {
@@ -567,15 +567,19 @@ html, body, #cesiumContainer {
         gap: 6px;
         margin-top: 6px;
         align-items: center;
+        width: 100%;
+        justify-content: space-between;
     }
 
     .panel-left-col {
         gap: 6px;
+        flex: 0 0 auto;
     }
 
     .panel-right-col {
         gap: 4px;
-        padding-right: 15px; /* 为最小化按钮留空间 */
+        padding-right: 18px; /* 为最小化按钮留空间 */
+        flex: 0 0 auto;
     }
 
     .lungta-logo {
@@ -603,18 +607,25 @@ html, body, #cesiumContainer {
         padding: 4px 6px;
         font-size: 10px;
         border-radius: 4px;
+        flex: 0 0 auto;
+        white-space: nowrap !important;
+        min-width: max-content;
     }
     
     .btn-donate {
         padding: 4px 6px;
         font-size: 10px;
         border-radius: 4px;
+        flex: 0 0 auto;
+        white-space: nowrap !important;
+        min-width: max-content;
     }
     
     .btn-icon {
         flex: 0 0 24px;
         padding: 4px 0;
         font-size: 10px;
+        min-width: 24px;
     }
     
     .visitor-count {
