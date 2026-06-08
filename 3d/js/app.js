@@ -33,6 +33,7 @@ const SMOOTH_FACTOR = 5;
 let allPoisData = []; // 全局存储 POI 数据，用于雷达测距
 let nearbyPois = [];  // 当前进入雷达探测范围的所有 POI
 let currentNearbyIndex = 0; // 当前正在展示的 POI 索引
+const poiPopups = []; // 存储气泡弹窗以防 ReferenceError
 
 // 手动校准偏差（新版KML已贴地，无需偏移）
 const OFFSET_LNG = 0.0;
@@ -168,30 +169,40 @@ function loadPoisAndStart(terrainProvider) {
                     });
                 }
 
-                // 扁平/传统 POI 支持：如果是空白图标，生成白色金芯圆点；否则加载对应的 PNG 图标
-                let billboardImage;
-                if (isFlat) {
-                    if (poiId === 'wht-blank') {
-                        billboardImage = createDefaultMarkerCanvas();
-                    } else {
-                        billboardImage = `../assets/kailashpic/${poiId}.png`;
-                    }
-                } else {
-                    billboardImage = `../assets/kailashpic/${poiId}.png`;
-                }
-
-                viewer.entities.add({
+                // 扁平/传统 POI 支持：如果是空白图标，无图标直接用黄色/金色文本标签显示以防冰雪看不清；否则加载对应的 PNG 图标
+                const entityConfig = {
                     id: 'poi_' + poi.id,
-                    position: Cesium.Cartesian3.fromDegrees(fixedLng, fixedLat, isFlat ? groundHeight : altitude),
-                    billboard: {
+                    name: poi.name,
+                    description: poi.bubble || poi.note || '',
+                    position: Cesium.Cartesian3.fromDegrees(fixedLng, fixedLat, isFlat ? groundHeight : altitude)
+                };
+
+                if (isFlat && poiId === 'wht-blank') {
+                    entityConfig.label = {
+                        text: poi.name,
+                        font: 'bold 13px "PingFang SC", "Microsoft YaHei", Arial, sans-serif',
+                        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                        fillColor: Cesium.Color.fromCssColorString('#ffcd55'), // 亮黄/金黄色
+                        outlineColor: Cesium.Color.BLACK,
+                        outlineWidth: 3.5,
+                        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                        disableDepthTestDistance: 10000000.0,
+                        scaleByDistance: new Cesium.NearFarScalar(100, 1.0, 15000, 0.4)
+                    };
+                } else {
+                    let billboardImage = `../assets/kailashpic/${poiId}.png`;
+                    entityConfig.billboard = {
                         image: billboardImage,
                         scale: isFlat ? 0.6 : 0.65,
                         scaleByDistance: new Cesium.NearFarScalar(100, 1.0, 10000, 0.2),
                         verticalOrigin: isFlat ? Cesium.VerticalOrigin.CENTER : Cesium.VerticalOrigin.BOTTOM,
                         heightReference: isFlat ? Cesium.HeightReference.CLAMP_TO_GROUND : Cesium.HeightReference.NONE,
                         disableDepthTestDistance: 10000000.0
-                    }
-                });
+                    };
+                }
+
+                viewer.entities.add(entityConfig);
 
                 if (!poi.flat) {
                     const popup = document.createElement('div');

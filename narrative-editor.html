@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>叙事编辑器 · 冈仁波齐 2026</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <title>叙事编辑器 (3D) · 冈仁波齐 2026</title>
+  <!-- CesiumJS -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
   <style>
     :root {
       --bg-dark: #0d0d0f;
@@ -43,11 +45,13 @@
 
     /* Map */
     #map { height: 100%; width: 100%; background: #08080a; }
+    .cesium-viewer-bottom { display: none !important; }
+    
     .map-overlay-tools { position: absolute; top: 20px; left: 20px; z-index: 1000; display: flex; gap: 8px; }
     .tool-btn { 
       background: rgba(0,0,0,0.8); border: 1px solid var(--border); color: #fff; 
       padding: 8px 16px; border-radius: 20px; font-size: 12px; cursor: pointer; backdrop-filter: blur(8px);
-      display: flex; align-items: center; gap: 6px;
+      display: flex; align-items: center; gap: 6px; transition: border-color 0.2s, background-color 0.2s;
     }
     .tool-btn:hover { background: rgba(40,40,45,0.9); border-color: var(--accent); }
     .tool-btn.active { background: var(--accent); color: #000; font-weight: 600; }
@@ -72,10 +76,13 @@
       padding: 10px 14px; color: #fff; font-size: 13px; outline: none; transition: border-color 0.2s;
     }
     .form-input:focus, .form-textarea:focus { border-color: var(--accent); }
-    .form-textarea { min-height: 120px; line-height: 1.6; }
+    .form-textarea { min-height: 100px; line-height: 1.6; }
+
+    .form-group .checkbox-label { display: flex; align-items: center; gap: 8px; color: #eee; font-size: 12px; cursor: pointer; user-select: none; }
+    .form-group .checkbox-label input { width: auto; margin: 0; }
 
     .camera-card { 
-      background: rgba(255, 205, 85, 0.05); border: 1px dashed rgba(255, 205, 85, 0.3); border-radius: 8px; padding: 16px; margin-top: 10px;
+      background: rgba(255, 205, 85, 0.04); border: 1px dashed rgba(255, 205, 85, 0.3); border-radius: 8px; padding: 16px; margin-top: 10px;
     }
     .capture-btn { 
       width: 100%; padding: 10px; background: rgba(255, 205, 85, 0.2); border: 1px solid rgba(255, 205, 85, 0.4); 
@@ -93,7 +100,11 @@
     ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
-    .status-msg { position: fixed; top: 20px; right: 360px; z-index: 2000; background: #000; padding: 10px 20px; border-radius: 30px; border: 1px solid var(--accent); color: var(--accent); font-size: 12px; display: none; }
+    .status-msg {
+      position: fixed; top: 20px; right: 360px; z-index: 2000;
+      background: #000; padding: 10px 20px; border-radius: 30px; border: 1px solid var(--accent);
+      color: var(--accent); font-size: 12px; display: none; pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -102,7 +113,7 @@
     <div class="sidebar-left">
       <div class="panel-header">
         <h2>叙事序列 (Narrative)</h2>
-        <span style="font-size: 11px; color: var(--text-dim);" id="eventCount">0 Events</span>
+        <span style="font-size: 11px; color: var(--text-dim);" id="eventCount">0 节点</span>
       </div>
       <div class="event-list" id="eventList">
         <!-- Event items will be injected here -->
@@ -117,8 +128,7 @@
       <div id="map"></div>
       
       <div class="map-overlay-tools">
-        <button class="tool-btn" id="toolAddPoi"><span>📍</span> 添加标记</button>
-        <button class="tool-btn" id="toolEditRoute"><span>🛤</span> 编辑路线</button>
+        <button class="tool-btn" id="toolAddPoi"><span>📍</span> 添加节点</button>
         <button class="tool-btn" id="toolSync"><span>🔄</span> 同步数据</button>
       </div>
 
@@ -135,9 +145,13 @@
         <h2>属性编辑 (Properties)</h2>
         <button class="secondary-btn" style="padding: 4px 10px; font-size: 11px;" id="btnDelete">删除</button>
       </div>
-      <div class="edit-form" id="editForm">
+      <div class="edit-form" id="editForm" style="display:none;">
         <div class="form-group">
-          <label>节点 ID / 名称</label>
+          <label>节点 ID (英文标识，必须对应图标名)</label>
+          <input type="text" class="form-input" id="fId" placeholder="例如：001 或 wht-blank">
+        </div>
+        <div class="form-group">
+          <label>节点名称</label>
           <input type="text" class="form-input" id="fName" placeholder="例如：大经幡广场">
         </div>
         <div class="form-group">
@@ -149,24 +163,30 @@
           </select>
         </div>
         <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="fFlat">
+            <span style="color: var(--accent); font-weight: bold;">贴地扁平 (无图标传统地标，仅显示文字)</span>
+          </label>
+        </div>
+        <div class="form-group">
           <label>叙事内容 (Bubble)</label>
           <textarea class="form-textarea" id="fBubble" placeholder="在这里输入要展示的故事或说明文字..."></textarea>
         </div>
         
         <div class="camera-card">
           <label style="color: var(--accent); margin-bottom: 12px; display: block;">镜头状态 (Camera State)</label>
-          <button class="capture-btn" id="btnCapture">捕获当前地图视角</button>
+          <button class="capture-btn" id="btnCapture">捕获当前 3D 相机视角</button>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
             <div class="form-group" style="margin-bottom: 0;">
-              <label>缩放 (Zoom)</label>
-              <input type="number" class="form-input" id="fZoom" step="0.1">
+              <label>视线范围 (Range)</label>
+              <input type="number" class="form-input" id="fZoom" step="1">
             </div>
             <div class="form-group" style="margin-bottom: 0;">
-              <label>视点 Lat</label>
+              <label>对焦纬度 (Lat)</label>
               <input type="number" class="form-input" id="fLat" step="0.000001">
             </div>
             <div class="form-group" style="margin-bottom: 0;">
-              <label>视点 Lng</label>
+              <label>对焦经度 (Lng)</label>
               <input type="number" class="form-input" id="fLng" step="0.000001">
             </div>
           </div>
@@ -177,7 +197,7 @@
           <input type="number" class="form-input" id="fDwell" value="8">
         </div>
       </div>
-      <div class="action-bar">
+      <div class="action-bar" id="saveBar" style="display:none;">
         <button class="primary-btn" id="btnSave">保存节点</button>
       </div>
     </div>
@@ -185,74 +205,215 @@
 
   <div class="status-msg" id="statusMsg">已保存</div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
+    // Cesium Access Token
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJhZDY0YWY3Yy1mZmQ1LTQ2MjgtYTRjZi01OTM0NzQ3YjljOGMiLCJpZCI6NDM2NzA2LCJpc3MiOiJodHRwczovL2FwaS5jZXNpdW0uY29tIiwiYXVkIjoidW5kZWZpbmVkX2RlZmF1bHQiLCJpYXQiOjE3Nzk4MDU4MjZ9.80efk41binldWGgit3mGqqZ3keritykzZUoNw0qoQc0';
+
     // --- State ---
     let data = {
       pois: [],
       routes: { main: [], secondary: [] }
     };
     let activeId = null;
-    let map;
+    let viewer;
     let markers = {};
-    let mainPolyline;
+    let pilgrimMarker;
     let addMode = false;
-
     let playing = false;
     let progress = 0;
-    let rafId = null;
+    let animationFrameId = null;
+
+    // Dragging state
+    let isDragging = false;
+    let dragEntity = null;
 
     // --- Init ---
     async function init() {
       try {
-        const [pRes, rRes, bRes] = await Promise.all([
+        const [pRes, rRes] = await Promise.all([
           fetch('data/pois.json'),
-          fetch('data/routes.json'),
-          fetch('data/basemap.json')
+          fetch('data/routes.json')
         ]);
         data.pois = await pRes.json();
         data.routes = await rRes.json();
-        const basemap = await bRes.json();
 
-        const imgBounds = L.latLngBounds(basemap.bounds[0], basemap.bounds[1]);
-        map = L.map('map', {
-          zoomControl: false, attributionControl: false,
-          minZoom: 11, maxZoom: 17,
-          maxBounds: imgBounds.pad(0.1)
-        }).fitBounds(imgBounds);
-
-        L.tileLayer('assets/tiles/{z}/{x}/{y}.png', {
-          minZoom: 11, maxZoom: 16, tileSize: 256, noWrap: true, bounds: imgBounds
-        }).addTo(map);
-
-        // Draw Main Route
-        mainPolyline = L.polyline(data.routes.main, { color: '#ffcd55', weight: 3, opacity: 0.6 }).addTo(map);
-        
-        // Secondary routes
-        data.routes.secondary.forEach(sr => {
-          L.polyline(sr.coords, { color: '#8a7a5a', weight: 1.5, opacity: 0.3, dashArray: '4,6' }).addTo(map);
+        // Init Cesium Viewer
+        viewer = new Cesium.Viewer('map', {
+          animation: false,
+          timeline: false,
+          baseLayerPicker: false,
+          fullscreenButton: false,
+          geocoder: false,
+          homeButton: false,
+          infoBox: false,
+          selectionIndicator: true,
+          sceneModePicker: false,
+          navigationHelpButton: false
         });
 
-        // Pilgrim Marker
-        pilgrimMarker = L.marker(data.routes.main[0], {
-          icon: L.divIcon({ className: '', html: '<div style="width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #ffcd55;"></div>', iconSize: [16, 16], iconAnchor: [8, 8] }),
-          zIndexOffset: 1000
-        }).addTo(map);
+        viewer.scene.postProcessStages.fxaa.enabled = true;
+        viewer.scene.globe.depthTestAgainstTerrain = true;
 
+        // Terrain Provider
+        try {
+          const tp = await Cesium.createWorldTerrainAsync();
+          viewer.terrainProvider = tp;
+        } catch (err) {
+          console.error("Terrain provider failed to load in Narrative:", err);
+        }
+
+        // Mt. Kailash Focus View
+        viewer.camera.setView({
+          destination: Cesium.Cartesian3.fromDegrees(81.2865, 30.9300, 7500),
+          orientation: {
+            heading: Cesium.Math.toRadians(0.0),
+            pitch: Cesium.Math.toRadians(-25.0),
+            roll: 0.0
+          }
+        });
+
+        // Draw Main Route Line in 3D
+        if (data.routes.main && data.routes.main.length) {
+          const positions = data.routes.main.map(pt => Cesium.Cartesian3.fromDegrees(pt[0], pt[1]));
+          viewer.entities.add({
+            name: 'Kora Route',
+            polyline: {
+              positions,
+              width: 3.5,
+              material: Cesium.Color.fromCssColorString('#ffcd55').withAlpha(0.5),
+              clampToGround: true
+            }
+          });
+        }
+
+        // Draw Pilgrim Position Indicator
+        if (data.routes.main && data.routes.main.length) {
+          const startPt = data.routes.main[0];
+          pilgrimMarker = viewer.entities.add({
+            name: 'Pilgrim Position',
+            position: Cesium.Cartesian3.fromDegrees(startPt[0], startPt[1], 0.0),
+            point: {
+              pixelSize: 12,
+              color: Cesium.Color.WHITE,
+              outlineColor: Cesium.Color.fromCssColorString('#ffcd55'),
+              outlineWidth: 3.0,
+              heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+              disableDepthTestDistance: 10000000.0
+            }
+          });
+        }
+
+        // Refresh Markers on Map
         refreshMarkers();
         refreshEventList();
         
-        // Events
+        // Bind UI Elements
         document.getElementById('toolAddPoi').addEventListener('click', toggleAddMode);
         document.getElementById('btnSave').addEventListener('click', saveActive);
         document.getElementById('btnCapture').addEventListener('click', captureCamera);
         document.getElementById('exportBtn').addEventListener('click', exportData);
         document.getElementById('playBtn').addEventListener('click', togglePlay);
+        document.getElementById('btnDelete').addEventListener('click', deleteActive);
+        document.getElementById('toolSync').addEventListener('click', () => {
+          showStatus("📡 数据同步保存中...");
+          saveToServer();
+        });
+
         document.getElementById('timelineSlider').addEventListener('input', (e) => {
           updateProgress(e.target.value / 1000);
         });
-        
-        map.on('click', onMapClick);
+
+        // Set ScreenSpace Handler for picks and clicks
+        const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+
+        // Click detection
+        handler.setInputAction((click) => {
+          const picked = viewer.scene.pick(click.position);
+          if (Cesium.defined(picked) && Cesium.defined(picked.id)) {
+            const entity = picked.id;
+            if (entity.id && entity.id.startsWith('poi_')) {
+              const id = entity.id.replace('poi_', '');
+              selectEvent(id);
+              return;
+            }
+          }
+
+          if (addMode) {
+            const ray = viewer.camera.getRay(click.position);
+            const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
+            if (Cesium.defined(cartesian)) {
+              const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+              const lat = parseFloat(Cesium.Math.toDegrees(cartographic.latitude).toFixed(6));
+              const lng = parseFloat(Cesium.Math.toDegrees(cartographic.longitude).toFixed(6));
+              
+              const id = 'evt_' + Date.now();
+              const newPoi = {
+                id,
+                name: "新节点",
+                type: "POI",
+                lat,
+                lng,
+                viewLat: lat,
+                viewLng: lng,
+                zoom: 1500,
+                bubble: "",
+                dwell: 8
+              };
+              data.pois.push(newPoi);
+              refreshMarkers();
+              refreshEventList();
+              selectEvent(id);
+              toggleAddMode();
+            }
+          }
+        }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+        // Drag-to-move handlers
+        handler.setInputAction((click) => {
+          const picked = viewer.scene.pick(click.position);
+          if (Cesium.defined(picked) && Cesium.defined(picked.id)) {
+            const entity = picked.id;
+            if (entity.id && entity.id.startsWith('poi_')) {
+              const id = entity.id.replace('poi_', '');
+              if (id === activeId) {
+                isDragging = true;
+                dragEntity = entity;
+                viewer.scene.screenSpaceCameraController.enableInputs = false; // lock map zoom/rotate
+              }
+            }
+          }
+        }, Cesium.ScreenSpaceEventType.LEFT_DOWN);
+
+        handler.setInputAction((movement) => {
+          if (isDragging && dragEntity) {
+            const ray = viewer.camera.getRay(movement.endPosition);
+            const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
+            if (Cesium.defined(cartesian)) {
+              dragEntity.position = cartesian;
+              const carto = Cesium.Cartographic.fromCartesian(cartesian);
+              const lat = parseFloat(Cesium.Math.toDegrees(carto.latitude).toFixed(6));
+              const lng = parseFloat(Cesium.Math.toDegrees(carto.longitude).toFixed(6));
+
+              const id = dragEntity.id.replace('poi_', '');
+              const p = data.pois.find(x => x.id === id);
+              if (p) {
+                p.lat = lat;
+                p.lng = lng;
+              }
+            }
+          }
+        }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
+        handler.setInputAction(() => {
+          if (isDragging) {
+            isDragging = false;
+            dragEntity = null;
+            viewer.scene.screenSpaceCameraController.enableInputs = true; // restore map control
+            saveToServer();
+            refreshMarkers();
+          }
+        }, Cesium.ScreenSpaceEventType.LEFT_UP);
+
       } catch (err) {
         console.error("Init failed", err);
       }
@@ -261,7 +422,7 @@
     function updateProgress(p) {
       progress = p;
       const pts = data.routes.main;
-      if (pts.length < 2) return;
+      if (!pts || pts.length < 2) return;
       
       const idx = Math.floor(p * (pts.length - 1));
       const nextIdx = Math.min(idx + 1, pts.length - 1);
@@ -269,13 +430,26 @@
       
       const a = pts[idx];
       const b = pts[nextIdx];
-      const latlng = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+      const lng = a[0] + (b[0] - a[0]) * t;
+      const lat = a[1] + (b[1] - a[1]) * t;
       
-      pilgrimMarker.setLatLng(latlng);
+      if (pilgrimMarker) {
+        pilgrimMarker.position = Cesium.Cartesian3.fromDegrees(lng, lat, 0.0);
+      }
       document.getElementById('timeDisplay').textContent = (p * 100).toFixed(1) + '%';
       document.getElementById('timelineSlider').value = p * 1000;
       
-      if (playing) map.panTo(latlng);
+      if (playing) {
+        // Smoothly look-at current pilgrim position in 3D
+        viewer.camera.setView({
+          destination: Cesium.Cartesian3.fromDegrees(lng, lat - 0.015, 3000),
+          orientation: {
+            heading: Cesium.Math.toRadians(0.0),
+            pitch: Cesium.Math.toRadians(-30.0),
+            roll: 0.0
+          }
+        });
+      }
     }
 
     function togglePlay() {
@@ -287,63 +461,79 @@
           progress += 0.001;
           if (progress >= 1) { progress = 1; playing = false; document.getElementById('playBtn').textContent = '▶'; }
           updateProgress(progress);
-          rafId = requestAnimationFrame(tick);
+          animationFrameId = requestAnimationFrame(tick);
         };
-        rafId = requestAnimationFrame(tick);
+        animationFrameId = requestAnimationFrame(tick);
       } else {
-        cancelAnimationFrame(rafId);
+        cancelAnimationFrame(animationFrameId);
       }
     }
 
     function toggleAddMode() {
       addMode = !addMode;
       document.getElementById('toolAddPoi').classList.toggle('active', addMode);
-      showStatus(addMode ? "点击地图添加新节点" : "已退出添加模式");
-    }
-
-    function onMapClick(e) {
-      if (!addMode) return;
-      const id = 'evt_' + Date.now();
-      const newPoi = {
-        id,
-        name: "新节点",
-        type: "POI",
-        lat: parseFloat(e.latlng.lat.toFixed(6)),
-        lng: parseFloat(e.latlng.lng.toFixed(6)),
-        viewLat: parseFloat(e.latlng.lat.toFixed(6)),
-        viewLng: parseFloat(e.latlng.lng.toFixed(6)),
-        zoom: map.getZoom(),
-        bubble: "",
-        dwell: 8
-      };
-      data.pois.push(newPoi);
-      refreshMarkers();
-      refreshEventList();
-      selectEvent(id);
-      toggleAddMode();
+      showStatus(addMode ? "添加模式：点击 3D 山体任意位置添加叙事地标点" : "已退出添加模式");
     }
 
     function refreshMarkers() {
-      Object.values(markers).forEach(m => map.removeLayer(m));
+      Object.keys(markers).forEach(id => {
+        viewer.entities.remove(markers[id]);
+      });
       markers = {};
       
       data.pois.forEach(poi => {
-        const icon = L.divIcon({
-          className: '',
-          html: `<div style="width:12px;height:12px;border-radius:50%;background:${poi.id === activeId ? '#ffcd55' : 'rgba(255,255,255,0.8)'};border:2px solid #fff;box-shadow:0 0 10px rgba(0,0,0,0.5);"></div>`,
-          iconSize: [12, 12], iconAnchor: [6, 6]
-        });
-        const m = L.marker([poi.lat, poi.lng], { icon, draggable: true }).addTo(map);
-        m.on('click', () => selectEvent(poi.id));
-        m.on('dragend', () => {
-          poi.lat = parseFloat(m.getLatLng().lat.toFixed(6));
-          poi.lng = parseFloat(m.getLatLng().lng.toFixed(6));
-          if (activeId === poi.id) {
-            document.getElementById('fLat').value = poi.lat;
-            document.getElementById('fLng').value = poi.lng;
-          }
-        });
-        markers[poi.id] = m;
+        const isFlat = !!poi.flat;
+        const poiId = poi.id.replace('msn_', '');
+
+        const entityConfig = {
+          id: 'poi_' + poi.id,
+          name: poi.name,
+          position: Cesium.Cartesian3.fromDegrees(poi.lng, poi.lat, 0.0)
+        };
+
+        const isActive = poi.id === activeId;
+
+        if (isFlat && poiId === 'wht-blank') {
+          // Flat/Traditional POI text-label with black outline
+          entityConfig.label = {
+            text: poi.name + (isActive ? " (已选择)" : ""),
+            font: 'bold 13px "PingFang SC", "Microsoft YaHei", Arial, sans-serif',
+            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+            fillColor: isActive ? Cesium.Color.fromCssColorString('#f59e0b') : Cesium.Color.fromCssColorString('#ffcd55'),
+            outlineColor: Cesium.Color.BLACK,
+            outlineWidth: 3.5,
+            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+            disableDepthTestDistance: 10000000.0,
+            scaleByDistance: new Cesium.NearFarScalar(100, 1.0, 15000, 0.5)
+          };
+        } else {
+          // Standard POI: golden point & offset label
+          entityConfig.point = {
+            pixelSize: isActive ? 12 : 8,
+            color: isActive ? Cesium.Color.fromCssColorString('#f59e0b') : Cesium.Color.fromCssColorString('#ffcd55'),
+            outlineColor: Cesium.Color.BLACK,
+            outlineWidth: 2,
+            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+            disableDepthTestDistance: 10000000.0
+          };
+          entityConfig.label = {
+            text: poi.name,
+            font: 'bold 12px "PingFang SC", "Microsoft YaHei", sans-serif',
+            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+            fillColor: isActive ? Cesium.Color.fromCssColorString('#f59e0b') : Cesium.Color.fromCssColorString('#e5e7eb'), // Light gray/gold instead of white
+            outlineColor: Cesium.Color.BLACK,
+            outlineWidth: 3.0,
+            pixelOffset: new Cesium.Cartesian2(0, -14),
+            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+            disableDepthTestDistance: 10000000.0,
+            scaleByDistance: new Cesium.NearFarScalar(100, 1.0, 15000, 0.5)
+          };
+        }
+
+        const entity = viewer.entities.add(entityConfig);
+        markers[poi.id] = entity;
       });
     }
 
@@ -355,16 +545,16 @@
         const item = document.createElement('div');
         item.className = `event-item ${poi.id === activeId ? 'active' : ''}`;
         item.innerHTML = `
-          <div class="event-icon">${poi.type === 'POI' ? '📍' : '🎥'}</div>
+          <div class="event-icon">${poi.type === 'VIEW' ? '🎥' : (poi.flat ? '📄' : '📍')}</div>
           <div class="event-info">
             <div class="event-name">${poi.name}</div>
-            <div class="event-meta">${poi.type} · ${poi.bubble ? poi.bubble.substring(0,15)+'...' : '无内容'}</div>
+            <div class="event-meta">${poi.type || 'POI'} · ${poi.bubble ? poi.bubble.replace(/<[^>]*>/g, '').substring(0,12)+'...' : '无内容'}</div>
           </div>
         `;
         item.onclick = () => selectEvent(poi.id);
         list.appendChild(item);
       });
-      document.getElementById('eventCount').textContent = data.pois.length + " Events";
+      document.getElementById('eventCount').textContent = data.pois.length + " 个节点";
     }
 
     function selectEvent(id) {
@@ -372,42 +562,101 @@
       const poi = data.pois.find(p => p.id === id);
       if (!poi) return;
 
+      document.getElementById('editForm').style.display = 'block';
+      document.getElementById('saveBar').style.display = 'flex';
+      
+      document.getElementById('fId').value = poi.id;
       document.getElementById('fName').value = poi.name;
       document.getElementById('fType').value = poi.type || 'POI';
+      document.getElementById('fFlat').checked = !!poi.flat;
       document.getElementById('fBubble').value = poi.bubble || '';
       document.getElementById('fLat').value = poi.viewLat || poi.lat;
       document.getElementById('fLng').value = poi.viewLng || poi.lng;
-      document.getElementById('fZoom').value = poi.zoom || 14;
+      document.getElementById('fZoom').value = poi.zoom || 1500;
       document.getElementById('fDwell').value = poi.dwell || 8;
 
       refreshMarkers();
       refreshEventList();
       
-      map.panTo([poi.lat, poi.lng], { animate: true });
+      // Focus Camera onto selected POI
+      viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(poi.lng, poi.lat - 0.015, 2500),
+        orientation: {
+          heading: Cesium.Math.toRadians(0.0),
+          pitch: Cesium.Math.toRadians(-35.0),
+          roll: 0.0
+        },
+        duration: 1.5
+      });
     }
 
+    // Capture current 3D Camera Focus point on terrain
     function captureCamera() {
       if (!activeId) return;
-      const center = map.getCenter();
-      document.getElementById('fLat').value = center.lat.toFixed(6);
-      document.getElementById('fLng').value = center.lng.toFixed(6);
-      document.getElementById('fZoom').value = map.getZoom().toFixed(1);
-      showStatus("视角已捕获");
+      
+      const canvasCenter = new Cesium.Cartesian2(viewer.container.clientWidth / 2, viewer.container.clientHeight / 2);
+      const ray = viewer.camera.getRay(canvasCenter);
+      const targetCartesian = viewer.scene.globe.pick(ray, viewer.scene);
+      
+      let viewLat, viewLng, range;
+      if (Cesium.defined(targetCartesian)) {
+        const targetCarto = Cesium.Cartographic.fromCartesian(targetCartesian);
+        viewLat = Cesium.Math.toDegrees(targetCarto.latitude);
+        viewLng = Cesium.Math.toDegrees(targetCarto.longitude);
+        range = Cesium.Cartesian3.distance(viewer.camera.position, targetCartesian);
+      } else {
+        const cameraCarto = Cesium.Cartographic.fromCartesian(viewer.camera.position);
+        viewLat = Cesium.Math.toDegrees(cameraCarto.latitude);
+        viewLng = Cesium.Math.toDegrees(cameraCarto.longitude);
+        range = cameraCarto.height;
+      }
+
+      document.getElementById('fLat').value = viewLat.toFixed(6);
+      document.getElementById('fLng').value = viewLng.toFixed(6);
+      document.getElementById('fZoom').value = Math.round(range);
+      showStatus("📸 3D相机视角参数已成功捕获 (对焦高度: " + Math.round(range) + " 米)");
     }
 
     function saveActive() {
       const poi = data.pois.find(p => p.id === activeId);
       if (!poi) return;
 
-      poi.name = document.getElementById('fName').value;
+      const newId = document.getElementById('fId').value.trim();
+      if (newId && newId !== poi.id) {
+        poi.id = newId;
+        activeId = newId;
+      }
+
+      poi.name = document.getElementById('fName').value.trim();
       poi.type = document.getElementById('fType').value;
+      
+      if (document.getElementById('fFlat').checked) {
+        poi.flat = true;
+      } else {
+        delete poi.flat;
+      }
+
       poi.bubble = document.getElementById('fBubble').value;
       poi.viewLat = parseFloat(document.getElementById('fLat').value);
       poi.viewLng = parseFloat(document.getElementById('fLng').value);
       poi.zoom = parseFloat(document.getElementById('fZoom').value);
-      poi.dwell = parseInt(document.getElementById('fDwell').value);
+      poi.dwell = parseInt(document.getElementById('fDwell').value) || 8;
 
-      showStatus("已保存到内存");
+      showStatus("✅ 属性已保存到内存，同步中...");
+      refreshMarkers();
+      refreshEventList();
+      saveToServer();
+    }
+
+    function deleteActive() {
+      if (!activeId) return;
+      if (!confirm("确认删除此叙事节点吗？")) return;
+      
+      data.pois = data.pois.filter(p => p.id !== activeId);
+      activeId = null;
+      document.getElementById('editForm').style.display = 'none';
+      document.getElementById('saveBar').style.display = 'none';
+      refreshMarkers();
       refreshEventList();
       saveToServer();
     }
@@ -419,11 +668,38 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data.pois, null, 2)
         });
-        // 广播通知前台同步
+        
         if (typeof BroadcastChannel !== 'undefined') {
           new BroadcastChannel('kailash-kora-data').postMessage({ type: 'data-updated', source: 'narrative-editor' });
         }
-      } catch (e) { console.error("Save failed", e); }
+        showStatus("✅ 已保存到服务器 & 推送 GitHub");
+        pollGitStatus();
+      } catch (e) {
+        console.error("Save failed", e);
+        showStatus("⚠️ 服务端保存失败，请点击 [导出 JSON] 手动备份");
+      }
+    }
+
+    // Poll Git Status
+    let gitPollTimer = null;
+    function pollGitStatus() {
+      if (gitPollTimer) clearInterval(gitPollTimer);
+      let attempts = 0;
+      gitPollTimer = setInterval(async () => {
+        attempts++;
+        try {
+          const r = await fetch("/api/git-status");
+          const s = await r.json();
+          if (s.status === "success") {
+            showStatus("🚀 已自动部署推送至 GitHub 仓库！");
+            clearInterval(gitPollTimer);
+          } else if (s.status === "error") {
+            showStatus("⚠️ Git 推送失败: " + s.message);
+            clearInterval(gitPollTimer);
+          }
+        } catch(e) {}
+        if (attempts > 30) clearInterval(gitPollTimer);
+      }, 1000);
     }
 
     function exportData() {
@@ -437,7 +713,7 @@
       const el = document.getElementById('statusMsg');
       el.textContent = msg;
       el.style.display = 'block';
-      setTimeout(() => el.style.display = 'none', 2000);
+      setTimeout(() => el.style.display = 'none', 2500);
     }
 
     init();

@@ -3,20 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>POI 编辑器 · 冈仁波齐转山</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <title>POI 编辑器 (3D) · 冈仁波齐转山</title>
+  <!-- CesiumJS -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; width: 100%; font-family: -apple-system, "PingFang SC", sans-serif; background: #111; color: #eee; overflow: hidden; }
+    html, body { height: 100%; width: 100%; font-family: -apple-system, "PingFang SC", sans-serif; background: #0d0d0f; color: #eee; overflow: hidden; }
 
     .map-area { position: absolute; top: 0; left: 0; bottom: 0; right: 320px; }
     #map { position: absolute; inset: 0; background: #0d0d0f; z-index: 1; }
+
+    /* Override Cesium default styles for a clean dark look */
+    .cesium-viewer-bottom { display: none !important; }
 
     .editor-panel {
       position: absolute; top: 0; right: 0; bottom: 0; width: 320px;
       display: flex; flex-direction: column;
       background: rgba(14,14,18,0.98); border-left: 1px solid rgba(255,255,255,0.1);
-      overflow: hidden;
+      overflow: hidden; z-index: 10;
     }
 
     .panel-toolbar {
@@ -25,29 +30,33 @@
     }
     .panel-toolbar button {
       background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.15);
-      padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; white-space: nowrap;
+      padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; white-space: nowrap;
+      transition: background-color 0.2s;
     }
     .panel-toolbar button:hover { background: rgba(255,255,255,0.2); }
-    .panel-toolbar button.primary { background: rgba(80,180,80,0.25); border-color: rgba(80,180,80,0.4); }
-    .panel-toolbar button.danger { border-color: rgba(255,80,80,0.4); }
-    .panel-toolbar button.danger:hover { background: rgba(255,80,80,0.2); }
-    .panel-toolbar .info { font-size: 12px; color: rgba(255,255,255,0.5); }
+    .panel-toolbar button.primary { background: rgba(255,205,85,0.2); border-color: rgba(255,205,85,0.4); color: #ffcd55; }
+    .panel-toolbar button.primary.active { background: #ffcd55; color: #000; }
+    .panel-toolbar button.save-btn { background: rgba(80,180,80,0.25); border-color: rgba(80,180,80,0.4); color: #8af; }
+    .panel-toolbar .info { font-size: 11px; color: rgba(255,255,255,0.5); margin-left: auto; }
 
     .poi-list {
       flex: 1; overflow-y: auto; padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
     }
     .poi-item {
       padding: 8px 14px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.04);
       display: flex; justify-content: space-between; align-items: center;
+      transition: background 0.15s;
     }
     .poi-item:hover { background: rgba(255,255,255,0.05); }
     .poi-item.selected { background: rgba(255,205,85,0.12); border-left: 3px solid #ffcd55; }
-    .poi-item .poi-item-name { font-size: 14px; }
+    .poi-item .poi-item-name { font-size: 13px; font-weight: 500; }
     .poi-item .poi-item-type { font-size: 11px; color: rgba(255,255,255,0.4); }
 
     .edit-form {
       border-top: 1px solid rgba(255,255,255,0.08); padding: 14px;
-      max-height: 50%; overflow-y: auto;
+      max-height: 60%; overflow-y: auto;
+      background: rgba(20,20,25,0.9);
     }
     .edit-form.hidden { display: none; }
     .form-row { margin-bottom: 10px; }
@@ -55,31 +64,48 @@
     .form-row input, .form-row textarea, .form-row select {
       width: 100%; background: rgba(255,255,255,0.06); color: #eee;
       border: 1px solid rgba(255,255,255,0.12); border-radius: 6px;
-      padding: 7px 10px; font-size: 13px; font-family: inherit;
+      padding: 7px 10px; font-size: 12px; font-family: inherit;
     }
-    .form-row textarea { min-height: 80px; resize: vertical; line-height: 1.6; }
-    .form-row input:focus, .form-row textarea:focus { border-color: rgba(255,205,85,0.5); outline: none; }
-    .form-actions { display: flex; gap: 8px; margin-top: 4px; }
-    .form-actions button { flex: 1; }
+    .form-row textarea { min-height: 60px; resize: vertical; line-height: 1.5; }
+    .form-row input:focus, .form-row textarea:focus, .form-row select:focus { border-color: rgba(255,205,85,0.5); outline: none; }
+    
+    .form-row .checkbox-label { display: flex; align-items: center; gap: 8px; color: #eee; font-size: 12px; cursor: pointer; user-select: none; }
+    .form-row .checkbox-label input { width: auto; margin: 0; }
+
+    .form-row.camera-box { background: rgba(255,205,85,0.04); padding: 8px; border-radius: 6px; border: 1px dashed rgba(255,205,85,0.2); }
+
+    .form-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .form-actions button {
+      flex: 1; padding: 8px; border-radius: 6px; font-size: 12px; cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.1); color: #fff;
+      transition: background-color 0.2s;
+    }
+    .form-actions button:hover { background: rgba(255,255,255,0.2); }
+    .form-actions button.primary { background: rgba(255,205,85,0.25); border-color: rgba(255,205,85,0.4); color: #ffcd55; }
+    .form-actions button.primary:hover { background: rgba(255,205,85,0.35); }
+    .form-actions button.danger { border-color: rgba(255,80,80,0.4); background: rgba(255,80,80,0.1); color: #ff8080; }
+    .form-actions button.danger:hover { background: rgba(255,80,80,0.2); }
 
     .crosshair { cursor: crosshair !important; }
-    .status { position: absolute; bottom: 10px; left: 10px; z-index: 1000;
-      background: rgba(0,0,0,0.7); padding: 6px 12px; border-radius: 6px; font-size: 12px; color: rgba(255,255,255,0.7); }
-
-    .edit-handle { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,220,140,0.9); border: 2px solid #fff; cursor: grab; }
+    .status {
+      position: absolute; bottom: 10px; left: 10px; z-index: 1000;
+      background: rgba(0,0,0,0.75); border: 1px solid rgba(255,255,255,0.1);
+      padding: 6px 12px; border-radius: 6px; font-size: 12px; color: rgba(255,255,255,0.8);
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
   <div class="map-area">
     <div id="map" class="crosshair"></div>
-    <div class="status" id="status">点击地图添加 POI，或在右侧列表中编辑</div>
+    <div class="status" id="status">正在初始化 3D 地球...</div>
   </div>
 
   <div class="editor-panel">
     <div class="panel-toolbar">
-      <button id="addModeBtn">＋ 添加模式</button>
-      <button id="exportBtn" class="primary">↓ 导出 JSON</button>
-      <button id="importBtn">↑ 导入</button>
+      <button id="addModeBtn" class="primary active">＋ 添加模式</button>
+      <button id="exportBtn">导出 JSON</button>
+      <button id="importBtn">导入</button>
       <input type="file" id="importFile" accept=".json" style="display:none" />
       <span class="info" id="poiCount">0 个 POI</span>
     </div>
@@ -88,234 +114,426 @@
 
     <div class="edit-form hidden" id="editForm">
       <div class="form-row">
-        <label>ID（唯一标识，英文）</label>
-        <input type="text" id="fId" placeholder="如 tarchen" />
+        <label>ID（唯一英文标识，必须对应图标文件名）</label>
+        <input type="text" id="fId" placeholder="例如: wht-blank" />
       </div>
       <div class="form-row">
         <label>名称</label>
-        <input type="text" id="fName" placeholder="如 塔尔钦镇" />
+        <input type="text" id="fName" placeholder="例如: 第四天葬台" />
       </div>
       <div class="form-row">
         <label>类型</label>
-        <input type="text" id="fType" placeholder="如 聚落/寺庙/山口/天葬台" />
+        <input type="text" id="fType" placeholder="例如: 天葬台 / 寺庙" />
       </div>
       <div class="form-row">
         <label>区段</label>
-        <input type="text" id="fSection" placeholder="如 西段·起始" />
+        <input type="text" id="fSection" placeholder="例如: 西段" />
       </div>
+      
       <div class="form-row">
-        <label>纬度</label>
-        <input type="number" id="fLat" step="0.000001" />
+        <label class="checkbox-label">
+          <input type="checkbox" id="fFlat" />
+          <span style="color: #ffcd55; font-weight: bold;">贴地扁平 (无图标传统地标，仅显示文字)</span>
+        </label>
       </div>
-      <div class="form-row">
-        <label>经度</label>
-        <input type="number" id="fLng" step="0.000001" />
-      </div>
-      <div class="form-row" style="background: rgba(255,205,85,0.05); padding: 8px; border-radius: 6px; border: 1px dashed rgba(255,205,85,0.2);">
-        <label style="color: #ffcd55;">镜头控制 (Camera)</label>
-        <div style="display: flex; gap: 4px; margin-bottom: 4px;">
-          <input type="number" id="fZoom" step="0.25" placeholder="缩放级" style="flex: 1;" />
-          <button id="captureViewBtn" style="font-size: 11px; padding: 4px 8px; background: rgba(255,205,85,0.2); border-color: rgba(255,205,85,0.4);">捕获当前</button>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <div class="form-row">
+          <label>纬度 (Latitude)</label>
+          <input type="number" id="fLat" step="0.000001" readonly style="background: rgba(255,255,255,0.03); color: #aaa;" />
         </div>
-        <div style="display: flex; gap: 4px;">
-          <input type="number" id="fViewLat" step="0.000001" placeholder="视点纬度" style="flex: 1;" />
-          <input type="number" id="fViewLng" step="0.000001" placeholder="视点经度" style="flex: 1;" />
+        <div class="form-row">
+          <label>经度 (Longitude)</label>
+          <input type="number" id="fLng" step="0.000001" readonly style="background: rgba(255,255,255,0.03); color: #aaa;" />
         </div>
       </div>
+
+      <div class="form-row camera-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <label style="color: #ffcd55; margin: 0;">3D 镜头视角 (Camera State)</label>
+          <button id="captureViewBtn" style="font-size: 10px; padding: 2px 6px; background: rgba(255,205,85,0.2); border: 1px solid rgba(255,205,85,0.4); color: #ffcd55; border-radius: 4px; cursor: pointer;">捕获当前视角</button>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 4px;">
+          <input type="number" id="fViewLat" step="0.000001" placeholder="视点纬度" />
+          <input type="number" id="fViewLng" step="0.000001" placeholder="视点经度" />
+        </div>
+        <input type="number" id="fZoom" step="1" placeholder="视线距离/范围 (米)" />
+      </div>
+
       <div class="form-row">
-        <label>气泡窗内容</label>
-        <textarea id="fBubble" placeholder="叙事内容..."></textarea>
+        <label>气泡窗 HTML 内容</label>
+        <textarea id="fBubble" placeholder="气泡窗叙事详情...支持 HTML"></textarea>
       </div>
       <div class="form-row">
-        <label>简注</label>
-        <input type="text" id="fNote" />
+        <label>简注 (BGM/图片详情...)</label>
+        <input type="text" id="fNote" placeholder="图片或视频的 html 标签..." />
       </div>
       <div class="form-actions">
-        <button id="savePoiBtn" class="primary">保存</button>
+        <button id="savePoiBtn" class="primary">保存修改</button>
         <button id="deletePoiBtn" class="danger">删除</button>
         <button id="cancelEditBtn">取消</button>
       </div>
     </div>
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
+    // Cesium Access Token
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJhZDY0YWY3Yy1mZmQ1LTQ2MjgtYTRjZi01OTM0NzQ3YjljOGMiLCJpZCI6NDM2NzA2LCJpc3MiOiJodHRwczovL2FwaS5jZXNpdW0uY29tIiwiYXVkIjoidW5kZWZpbmVkX2RlZmF1bHQiLCJpYXQiOjE3Nzk4MDU4MjZ9.80efk41binldWGgit3mGqqZ3keritykzZUoNw0qoQc0';
+
     let pois = [];
-    let map;
+    let viewer;
     let markers = {};
     let selectedId = null;
     let addMode = true;
 
+    // Drag-to-move State
+    let isDragging = false;
+    let dragEntity = null;
+
     async function init() {
-      const bmRes = await fetch("data/basemap.json");
-      const bm = await bmRes.json();
-      const imgBounds = L.latLngBounds(bm.bounds[0], bm.bounds[1]);
+      const statusEl = document.getElementById("status");
+      
+      // Initialize Cesium 3D Viewer inside 'map' div
+      viewer = new Cesium.Viewer("map", {
+        animation: false,
+        timeline: false,
+        baseLayerPicker: false,
+        fullscreenButton: false,
+        geocoder: false,
+        homeButton: false,
+        infoBox: false, // Turn off Cesium standard infobox
+        selectionIndicator: true,
+        sceneModePicker: false,
+        navigationHelpButton: false
+      });
 
-      map = L.map("map", {
-        zoomControl: true, attributionControl: false,
-        minZoom: 11, maxZoom: 16,
-        maxBounds: imgBounds.pad(0.08), maxBoundsViscosity: 0.9,
-        zoomSnap: 0.25, zoomDelta: 0.5
-      }).fitBounds(imgBounds);
+      // Enable anti-aliasing
+      viewer.scene.postProcessStages.fxaa.enabled = true;
+      // Enable depth testing to prevent seeing markers through mountains
+      viewer.scene.globe.depthTestAgainstTerrain = true;
 
-      // load Esri Satellite basemap to show real geographic data
-      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-        maxZoom: 18,
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-      }).addTo(map);
+      // Load Terrain
+      try {
+        const tp = await Cesium.createWorldTerrainAsync();
+        viewer.terrainProvider = tp;
+        statusEl.textContent = "3D 地形加载完成 · 正在读取数据...";
+      } catch (err) {
+        console.error("Terrain provider failed to load:", err);
+        statusEl.textContent = "地形引擎初始化失败 · 使用默认椭球底图";
+      }
 
-      setTimeout(() => map.invalidateSize(), 200);
+      // Fly to Mt. Kailash initial view
+      viewer.camera.setView({
+        destination: Cesium.Cartesian3.fromDegrees(81.2865, 30.9300, 7500),
+        orientation: {
+          heading: Cesium.Math.toRadians(0.0),
+          pitch: Cesium.Math.toRadians(-25.0),
+          roll: 0.0
+        }
+      });
 
-      // load existing routes for reference
+      // Load main route line from routes.json
       try {
         const rRes = await fetch("data/routes.json");
         const rd = await rRes.json();
         if (rd.main && rd.main.length) {
-          L.polyline(rd.main, { color: "#ffcd55", weight: 2, opacity: 0.3 }).addTo(map);
+          const rawPositions = rd.main.map(pt => Cesium.Cartesian3.fromDegrees(pt[0], pt[1]));
+          viewer.entities.add({
+            name: 'Kailash Kora Route',
+            polyline: {
+              positions: rawPositions,
+              width: 3.5,
+              material: Cesium.Color.fromCssColorString('#ffcd55').withAlpha(0.5),
+              clampToGround: true
+            }
+          });
         }
-        (rd.secondary || []).forEach(sr => {
-          if (sr.coords && sr.coords.length) {
-            L.polyline(sr.coords, { color: "#8a7a5a", weight: 1, opacity: 0.3, dashArray: "3,5" }).addTo(map);
-          }
-        });
-      } catch(e) {}
+      } catch (e) {
+        console.error("加载路线数据失败:", e);
+      }
 
-      // load existing POIs
+      // Load existing POIs
       try {
         const pRes = await fetch("data/pois.json");
         pois = await pRes.json();
-        pois.forEach(p => addMarker(p));
+        refreshMarkers();
         renderList();
-      } catch(e) {}
+      } catch (e) {
+        console.error("加载 POI 数据失败:", e);
+      }
 
-      // click to add
-      map.on("click", (e) => {
-        if (!addMode) return;
-        const id = "poi_" + Date.now();
-        const poi = {
-          id, name: "新标记", type: "", section: "",
-          lat: parseFloat(e.latlng.lat.toFixed(6)),
-          lng: parseFloat(e.latlng.lng.toFixed(6)),
-          zoom: map.getZoom(),
-          viewLat: parseFloat(e.latlng.lat.toFixed(6)),
-          viewLng: parseFloat(e.latlng.lng.toFixed(6)),
-          bubble: "", note: "", density: 1
-        };
-        pois.push(poi);
-        addMarker(poi);
-        renderList();
-        selectPoi(id);
-      });
+      // ScreenSpaceEventHandler for Click interactions
+      const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
 
-      map.on("mousemove", (e) => {
-        document.getElementById("status").textContent =
-          (addMode ? "[添加模式] " : "[浏览模式] ") +
-          e.latlng.lat.toFixed(6) + ", " + e.latlng.lng.toFixed(6);
-      });
-    }
-
-    function addMarker(poi) {
-      const icon = L.divIcon({
-        className: "", html: '<div class="edit-handle"></div>',
-        iconSize: [12, 12], iconAnchor: [6, 6]
-      });
-      const m = L.marker([poi.lat, poi.lng], { icon, draggable: true, zIndexOffset: 500 }).addTo(map);
-      m.bindTooltip(poi.name, { direction: "top", offset: [0, -10] });
-      m.on("click", () => selectPoi(poi.id));
-      m.on("dragend", () => {
-        const pos = m.getLatLng();
-        const p = pois.find(x => x.id === poi.id);
-        if (p) {
-          p.lat = parseFloat(pos.lat.toFixed(6));
-          p.lng = parseFloat(pos.lng.toFixed(6));
-          if (selectedId === poi.id) {
-            document.getElementById("fLat").value = p.lat;
-            document.getElementById("fLng").value = p.lng;
+      // Mouse left click: Add POI or Select POI
+      handler.setInputAction((click) => {
+        // Pick entity
+        const picked = viewer.scene.pick(click.position);
+        if (Cesium.defined(picked) && Cesium.defined(picked.id)) {
+          const entity = picked.id;
+          if (entity.id && entity.id.startsWith('poi_')) {
+            const id = entity.id.replace('poi_', '');
+            selectPoi(id);
+            return;
           }
         }
-      });
-      markers[poi.id] = m;
+
+        // If in addMode and clicked on terrain
+        if (addMode) {
+          const ray = viewer.camera.getRay(click.position);
+          const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
+          if (Cesium.defined(cartesian)) {
+            const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+            const lat = parseFloat(Cesium.Math.toDegrees(cartographic.latitude).toFixed(6));
+            const lng = parseFloat(Cesium.Math.toDegrees(cartographic.longitude).toFixed(6));
+
+            const id = "poi_" + Date.now();
+            const newPoi = {
+              id,
+              name: "新标记",
+              type: "",
+              section: "",
+              lat,
+              lng,
+              zoom: 1500,
+              viewLat: lat,
+              viewLng: lng,
+              bubble: "",
+              note: "",
+              density: 1
+            };
+            pois.push(newPoi);
+            refreshMarkers();
+            renderList();
+            selectPoi(id);
+          }
+        }
+      }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+      // Mouse move: Update coordinates display / Drag Entity
+      handler.setInputAction((movement) => {
+        const ray = viewer.camera.getRay(movement.endPosition);
+        const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
+        
+        if (Cesium.defined(cartesian)) {
+          const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+          const lat = Cesium.Math.toDegrees(cartographic.latitude);
+          const lng = Cesium.Math.toDegrees(cartographic.longitude);
+          
+          statusEl.textContent =
+            (addMode ? "[添加模式] " : "[浏览模式] ") +
+            lat.toFixed(6) + ", " + lng.toFixed(6) + " (拖拽选中的地标可移动位置)";
+        }
+
+        // Handle dragging
+        if (isDragging && dragEntity) {
+          if (Cesium.defined(cartesian)) {
+            dragEntity.position = cartesian;
+            const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+            const lat = parseFloat(Cesium.Math.toDegrees(cartographic.latitude).toFixed(6));
+            const lng = parseFloat(Cesium.Math.toDegrees(cartographic.longitude).toFixed(6));
+
+            const id = dragEntity.id.replace('poi_', '');
+            const p = pois.find(x => x.id === id);
+            if (p) {
+              p.lat = lat;
+              p.lng = lng;
+              document.getElementById("fLat").value = lat;
+              document.getElementById("fLng").value = lng;
+            }
+          }
+        }
+      }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
+      // Mouse left down: start dragging
+      handler.setInputAction((click) => {
+        const picked = viewer.scene.pick(click.position);
+        if (Cesium.defined(picked) && Cesium.defined(picked.id)) {
+          const entity = picked.id;
+          if (entity.id && entity.id.startsWith('poi_')) {
+            const id = entity.id.replace('poi_', '');
+            if (id === selectedId) {
+              isDragging = true;
+              dragEntity = entity;
+              viewer.scene.screenSpaceCameraController.enableInputs = false; // lock camera
+            }
+          }
+        }
+      }, Cesium.ScreenSpaceEventType.LEFT_DOWN);
+
+      // Mouse left up: end dragging
+      handler.setInputAction(() => {
+        if (isDragging) {
+          isDragging = false;
+          dragEntity = null;
+          viewer.scene.screenSpaceCameraController.enableInputs = true; // unlock camera
+          saveToServer();
+          refreshMarkers();
+        }
+      }, Cesium.ScreenSpaceEventType.LEFT_UP);
     }
 
+    // Refresh Cesium Entities based on POIs
+    function refreshMarkers() {
+      // Clear old markers
+      Object.keys(markers).forEach(id => {
+        viewer.entities.remove(markers[id]);
+      });
+      markers = {};
+
+      pois.forEach(poi => {
+        const isFlat = !!poi.flat;
+        const poiId = poi.id.replace('msn_', '');
+
+        const entityConfig = {
+          id: 'poi_' + poi.id,
+          name: poi.name,
+          position: Cesium.Cartesian3.fromDegrees(poi.lng, poi.lat, 0.0) // clamped to ground automatically
+        };
+
+        const isSelected = poi.id === selectedId;
+        const colorHex = isSelected ? '#ffcd55' : '#ffcd55';
+
+        if (isFlat && poiId === 'wht-blank') {
+          // Yellow label, no billboard icon, clamped to ground. Black outline to stand out against white snow terrain
+          entityConfig.label = {
+            text: poi.name + (isSelected ? " (已选中)" : ""),
+            font: 'bold 13px "PingFang SC", "Microsoft YaHei", Arial, sans-serif',
+            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+            fillColor: isSelected ? Cesium.Color.fromCssColorString('#f59e0b') : Cesium.Color.fromCssColorString('#ffcd55'),
+            outlineColor: Cesium.Color.BLACK,
+            outlineWidth: 3.5,
+            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+            disableDepthTestDistance: 10000000.0,
+            scaleByDistance: new Cesium.NearFarScalar(100, 1.0, 15000, 0.5)
+          };
+        } else {
+          // Normal POI shows as a golden dot point with label offset
+          entityConfig.point = {
+            pixelSize: isSelected ? 12 : 8,
+            color: isSelected ? Cesium.Color.fromCssColorString('#f59e0b') : Cesium.Color.fromCssColorString('#ffcd55'),
+            outlineColor: Cesium.Color.BLACK,
+            outlineWidth: 2,
+            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+            disableDepthTestDistance: 10000000.0
+          };
+          entityConfig.label = {
+            text: poi.name,
+            font: 'bold 12px "PingFang SC", "Microsoft YaHei", sans-serif',
+            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+            fillColor: isSelected ? Cesium.Color.fromCssColorString('#f59e0b') : Cesium.Color.fromCssColorString('#e5e7eb'), // Light gray/gold text, no white text
+            outlineColor: Cesium.Color.BLACK,
+            outlineWidth: 3.0,
+            pixelOffset: new Cesium.Cartesian2(0, -14),
+            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+            disableDepthTestDistance: 10000000.0,
+            scaleByDistance: new Cesium.NearFarScalar(100, 1.0, 15000, 0.5)
+          };
+        }
+
+        const entity = viewer.entities.add(entityConfig);
+        markers[poi.id] = entity;
+      });
+    }
+
+    // Render left panel list
     function renderList() {
       const list = document.getElementById("poiList");
       list.innerHTML = "";
       pois.forEach(p => {
         const div = document.createElement("div");
         div.className = "poi-item" + (p.id === selectedId ? " selected" : "");
-        div.innerHTML = `<span class="poi-item-name">${p.name}</span><span class="poi-item-type">${p.type || ""}</span>`;
+        div.innerHTML = `<span class="poi-item-name">${p.name}</span><span class="poi-item-type">${p.type || (p.flat ? "扁平" : "")}</span>`;
         div.addEventListener("click", () => selectPoi(p.id));
         list.appendChild(div);
       });
       document.getElementById("poiCount").textContent = pois.length + " 个 POI";
     }
 
+    // Select POI from list or map click
     function selectPoi(id) {
       selectedId = id;
       const poi = pois.find(p => p.id === id);
       if (!poi) return;
+
       document.getElementById("editForm").classList.remove("hidden");
       document.getElementById("fId").value = poi.id;
       document.getElementById("fName").value = poi.name;
       document.getElementById("fType").value = poi.type || "";
       document.getElementById("fSection").value = poi.section || "";
+      document.getElementById("fFlat").checked = !!poi.flat;
       document.getElementById("fLat").value = poi.lat;
       document.getElementById("fLng").value = poi.lng;
-      document.getElementById("fZoom").value = poi.zoom || map.getZoom();
+      document.getElementById("fZoom").value = poi.zoom || 1500;
       document.getElementById("fViewLat").value = poi.viewLat || poi.lat;
       document.getElementById("fViewLng").value = poi.viewLng || poi.lng;
       document.getElementById("fBubble").value = poi.bubble || "";
       document.getElementById("fNote").value = poi.note || "";
+
       renderList();
-      // pan to marker
-      map.panTo([poi.lat, poi.lng], { animate: true });
+      refreshMarkers();
+
+      // Pan camera to look at selected POI
+      viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(poi.lng, poi.lat - 0.015, 2500),
+        orientation: {
+          heading: Cesium.Math.toRadians(0.0),
+          pitch: Cesium.Math.toRadians(-35.0),
+          roll: 0.0
+        },
+        duration: 1.5
+      });
     }
 
+    // Save changes of active POI
     function savePoi() {
       const poi = pois.find(p => p.id === selectedId);
       if (!poi) return;
+
       const newId = document.getElementById("fId").value.trim();
       if (newId && newId !== poi.id) {
-        // update id
-        const m = markers[poi.id];
-        delete markers[poi.id];
         poi.id = newId;
-        markers[newId] = m;
         selectedId = newId;
       }
+
       poi.name = document.getElementById("fName").value.trim();
       poi.type = document.getElementById("fType").value.trim();
       poi.section = document.getElementById("fSection").value.trim();
-      poi.lat = parseFloat(document.getElementById("fLat").value);
-      poi.lng = parseFloat(document.getElementById("fLng").value);
-      poi.zoom = parseFloat(document.getElementById("fZoom").value);
-      poi.viewLat = parseFloat(document.getElementById("fViewLat").value);
-      poi.viewLng = parseFloat(document.getElementById("fViewLng").value);
+      
+      if (document.getElementById("fFlat").checked) {
+        poi.flat = true;
+      } else {
+        delete poi.flat;
+      }
+
+      poi.zoom = parseFloat(document.getElementById("fZoom").value) || 1500;
+      poi.viewLat = parseFloat(document.getElementById("fViewLat").value) || poi.lat;
+      poi.viewLng = parseFloat(document.getElementById("fViewLng").value) || poi.lng;
       poi.bubble = document.getElementById("fBubble").value;
       poi.note = document.getElementById("fNote").value.trim();
-      // update marker
-      const m = markers[poi.id];
-      if (m) {
-        m.setLatLng([poi.lat, poi.lng]);
-        m.setTooltipContent(poi.name);
-      }
+
       renderList();
+      refreshMarkers();
       document.getElementById("status").textContent = "已保存: " + poi.name;
       saveToServer();
     }
 
+    // Delete active POI
     function deletePoi() {
       if (!selectedId) return;
       if (!confirm("确认删除 " + (pois.find(p => p.id === selectedId)?.name || selectedId) + "？")) return;
-      const m = markers[selectedId];
-      if (m) { map.removeLayer(m); delete markers[selectedId]; }
+      
       pois = pois.filter(p => p.id !== selectedId);
       selectedId = null;
       document.getElementById("editForm").classList.add("hidden");
+      refreshMarkers();
       renderList();
       saveToServer();
     }
 
+    // Save pois array to server.js
     async function saveToServer() {
       try {
         const res = await fetch("/api/save-pois", {
@@ -325,22 +543,20 @@
         });
         const result = await res.json();
         if (result.ok) {
-          document.getElementById("status").textContent = "✅ 已保存 (" + pois.length + " 个 POI) · 准备推送...";
-          // 广播通知前台同步
+          document.getElementById("status").textContent = "✅ 已保存并同步 (" + pois.length + " 个 POI) · 自动推送中...";
           if (typeof BroadcastChannel !== 'undefined') {
             new BroadcastChannel('kailash-kora-data').postMessage({ type: 'data-updated', source: 'poi-editor' });
           }
-          // 轮询 git 状态
           pollGitStatus();
         } else {
           throw new Error(result.error);
         }
       } catch (err) {
-        document.getElementById("status").textContent = "⚠ 服务端保存失败，请用导出功能";
-        exportAsFile();
+        document.getElementById("status").textContent = "⚠ 保存失败，请点击 [导出 JSON] 手动备份";
       }
     }
 
+    // Poll Git Status
     let gitPollTimer = null;
     function pollGitStatus() {
       if (gitPollTimer) clearInterval(gitPollTimer);
@@ -352,45 +568,40 @@
           const r = await fetch("/api/git-status");
           const s = await r.json();
           if (s.status === "pending") {
-            statusEl.textContent = "✅ 已保存 · ⏳ 3 秒后推送...";
+            statusEl.textContent = "✅ 数据保存成功 · ⏳ 推送中...";
           } else if (s.status === "pushing") {
             statusEl.textContent = "📡 正在推送到 GitHub...";
           } else if (s.status === "success") {
-            statusEl.textContent = "✅ 已保存 · ✅ 已推送到 GitHub，线上即将更新";
+            statusEl.textContent = "✅ 已保存 · 🚀 已自动部署推送到 GitHub！线上即将更新";
             clearInterval(gitPollTimer);
           } else if (s.status === "error") {
             statusEl.textContent = "⚠️ Git 推送失败: " + s.message;
             clearInterval(gitPollTimer);
           }
         } catch(e) {}
-        if (attempts > 30) clearInterval(gitPollTimer); // 最多轮询 30 次（30 秒）
+        if (attempts > 30) clearInterval(gitPollTimer);
       }, 1000);
     }
 
+    // Export to file
     function exportAsFile() {
       const blob = new Blob([JSON.stringify(pois, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url; a.download = "pois.json"; a.click();
       URL.revokeObjectURL(url);
-      document.getElementById("status").textContent = "已导出 " + pois.length + " 个 POI（下载文件）";
+      document.getElementById("status").textContent = "已导出 " + pois.length + " 个 POI 文件";
     }
 
-    function exportJSON() {
-      saveToServer();
-    }
-
+    // Import from file
     function importJSON(file) {
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
           const data = JSON.parse(e.target.result);
-          if (!Array.isArray(data)) throw new Error("格式错误");
-          // clear existing
-          Object.values(markers).forEach(m => map.removeLayer(m));
-          markers = {};
+          if (!Array.isArray(data)) throw new Error("JSON 根元素必须是数组");
           pois = data;
-          pois.forEach(p => addMarker(p));
+          refreshMarkers();
           selectedId = null;
           document.getElementById("editForm").classList.add("hidden");
           renderList();
@@ -400,29 +611,52 @@
       reader.readAsText(file);
     }
 
-    // bind events
+    // Event Listeners
     document.getElementById("addModeBtn").addEventListener("click", () => {
       addMode = !addMode;
-      document.getElementById("addModeBtn").style.background = addMode ? "rgba(255,205,85,0.3)" : "";
+      document.getElementById("addModeBtn").classList.toggle("active", addMode);
       document.getElementById("map").classList.toggle("crosshair", addMode);
+      document.getElementById("status").textContent = addMode ? "添加模式：点击 3D 山体可增加新标记点" : "浏览模式：可通过鼠标右键漫游 3D 山川";
     });
-    document.getElementById("exportBtn").addEventListener("click", exportJSON);
+    
+    document.getElementById("exportBtn").addEventListener("click", exportAsFile);
     document.getElementById("importBtn").addEventListener("click", () => document.getElementById("importFile").click());
     document.getElementById("importFile").addEventListener("change", (e) => { if (e.target.files[0]) importJSON(e.target.files[0]); });
+    
     document.getElementById("savePoiBtn").addEventListener("click", savePoi);
     document.getElementById("deletePoiBtn").addEventListener("click", deletePoi);
+    
     document.getElementById("cancelEditBtn").addEventListener("click", () => {
       selectedId = null;
       document.getElementById("editForm").classList.add("hidden");
       renderList();
+      refreshMarkers();
     });
 
+    // Capture current 3D camera look-at coordinate & distance
     document.getElementById("captureViewBtn").addEventListener("click", () => {
-      const center = map.getCenter();
-      document.getElementById("fZoom").value = map.getZoom();
-      document.getElementById("fViewLat").value = center.lat.toFixed(6);
-      document.getElementById("fViewLng").value = center.lng.toFixed(6);
-      document.getElementById("status").textContent = "已捕获当前地图视角";
+      const canvasCenter = new Cesium.Cartesian2(viewer.container.clientWidth / 2, viewer.container.clientHeight / 2);
+      const ray = viewer.camera.getRay(canvasCenter);
+      const targetCartesian = viewer.scene.globe.pick(ray, viewer.scene);
+      
+      let viewLat, viewLng, range;
+      if (Cesium.defined(targetCartesian)) {
+        const targetCarto = Cesium.Cartographic.fromCartesian(targetCartesian);
+        viewLat = Cesium.Math.toDegrees(targetCarto.latitude);
+        viewLng = Cesium.Math.toDegrees(targetCarto.longitude);
+        range = Cesium.Cartesian3.distance(viewer.camera.position, targetCartesian);
+      } else {
+        // Fallback: camera looking at space, project to ground
+        const cameraCarto = Cesium.Cartographic.fromCartesian(viewer.camera.position);
+        viewLat = Cesium.Math.toDegrees(cameraCarto.latitude);
+        viewLng = Cesium.Math.toDegrees(cameraCarto.longitude);
+        range = cameraCarto.height;
+      }
+
+      document.getElementById("fZoom").value = Math.round(range);
+      document.getElementById("fViewLat").value = viewLat.toFixed(6);
+      document.getElementById("fViewLng").value = viewLng.toFixed(6);
+      document.getElementById("status").textContent = "📡 已成功捕获当前 3D 相机视角 (倾斜对焦高度: " + Math.round(range) + " 米)";
     });
 
     init();

@@ -3,12 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>路线编辑器 · 冈仁波齐转山</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <title>路线编辑器 (3D) · 冈仁波齐转山</title>
+  <!-- CesiumJS -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; width: 100%; font-family: -apple-system, "PingFang SC", sans-serif; background: #111; color: #eee; overflow: hidden; }
+    html, body { height: 100%; width: 100%; font-family: -apple-system, "PingFang SC", sans-serif; background: #0d0d0f; color: #eee; overflow: hidden; }
     #map { position: absolute; inset: 0; z-index: 0; background: #0d0d0f; }
+
+    .cesium-viewer-bottom { display: none !important; }
 
     .toolbar {
       position: absolute; z-index: 1000; top: 12px; left: 12px; right: 12px;
@@ -20,15 +24,15 @@
     .toolbar button {
       background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.15);
       padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;
-      white-space: nowrap;
+      white-space: nowrap; transition: background-color 0.2s;
     }
     .toolbar button:hover { background: rgba(255,255,255,0.2); }
     .toolbar button.active { background: rgba(255,205,85,0.3); border-color: #ffcd55; color: #ffcd55; }
-    .toolbar button.danger { border-color: rgba(255,80,80,0.4); }
+    .toolbar button.danger { border-color: rgba(255,80,80,0.4); background: rgba(255,80,80,0.1); color: #ff8080; }
     .toolbar button.danger:hover { background: rgba(255,80,80,0.2); }
     .toolbar select {
       background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.15);
-      padding: 6px 10px; border-radius: 6px; font-size: 13px;
+      padding: 6px 10px; border-radius: 6px; font-size: 13px; outline: none;
     }
     .toolbar .sep { width: 1px; height: 24px; background: rgba(255,255,255,0.15); }
     .toolbar .info { font-size: 12px; color: rgba(255,255,255,0.6); }
@@ -39,18 +43,10 @@
       border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
       padding: 10px 14px; font-size: 12px; color: rgba(255,255,255,0.6);
       display: flex; justify-content: space-between; align-items: center;
+      pointer-events: none;
     }
 
     .crosshair { cursor: crosshair !important; }
-
-    /* 拖拽手柄 */
-    .edit-handle {
-      width: 10px; height: 10px; border-radius: 50%;
-      background: #fff; border: 2px solid #ffcd55;
-      cursor: grab; box-shadow: 0 0 6px rgba(255,205,85,0.6);
-    }
-    .edit-handle:hover { transform: scale(1.3); }
-    .edit-handle.secondary { border-color: #8a7a5a; background: #ccc; }
   </style>
 </head>
 <body>
@@ -68,21 +64,24 @@
     <button id="undoBtn">↩ 撤销</button>
     <button id="clearBtn" class="danger">✕ 清空当前线</button>
     <div class="sep"></div>
-    <button id="refToggle">👁 参考线</button>
+    <button id="refToggle" class="active">👁 旧路线参考</button>
     <div class="sep"></div>
-    <button id="exportBtn" style="background:rgba(80,180,80,0.2);border-color:rgba(80,180,80,0.4);">↓ 导出 JSON</button>
+    <button id="saveBtn" style="background:rgba(80,180,80,0.2); border-color:rgba(80,180,80,0.4); color: #8af;">💾 保存到服务器</button>
+    <button id="exportBtn">↓ 导出 JSON</button>
     <span class="info" id="pointCount">0 个点</span>
   </div>
 
   <div class="status-bar">
-    <span id="statusText">点击底图描绘路线，右键撤销最后一点</span>
+    <span id="statusText">正在初始化 3D 地形...</span>
     <span id="coordDisplay">—</span>
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // ---- 状态 ----
-    const routes = {
+    // Cesium Access Token
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJhZDY0YWY3Yy1mZmQ1LTQ2MjgtYTRjZi01OTM0NzQ3YjljOGMiLCJpZCI6NDM2NzA2LCJpc3MiOiJodHRwczovL2FwaS5jZXNpdW0uY29tIiwiYXVkIjoidW5kZWZpbmVkX2RlZmF1bHQiLCJpYXQiOjE3Nzk4MDU4MjZ9.80efk41binldWGgit3mGqqZ3keritykzZUoNw0qoQc0';
+
+    // ---- State ----
+    let routes = {
       main: [],
       secondary: [
         { name: "大天葬台路线", coords: [] },
@@ -93,19 +92,21 @@
     };
 
     let currentKey = "main";           // "main" | "s0" | "s1" | "s2" | "s3"
-    let editLine = null;               // 当前正在编辑的 polyline
-    let editMarkers = [];              // 当前路线的可拖拽标记
-    let refLines = [];                 // 参考线（旧 KMZ 路线）
+    let viewer;
+    let editLineEntity = null;         // Polyline entity for the editing route
+    let refLineEntities = [];          // Reference polyline entities (faint red)
+    let dragMarkers = [];              // Array of drag handle entities
     let refVisible = true;
-    let oldRoutes = null;              // 旧路线数据（参考用）
-    let map;
+    let isDragging = false;
+    let dragEntity = null;
 
-    // ---- 辅助 ----
+    // ---- Helpers ----
     function getCurrentCoords() {
       if (currentKey === "main") return routes.main;
       const idx = parseInt(currentKey.slice(1));
       return routes.secondary[idx].coords;
     }
+
     function setCurrentCoords(arr) {
       if (currentKey === "main") routes.main = arr;
       else {
@@ -118,158 +119,373 @@
       document.getElementById("pointCount").textContent = getCurrentCoords().length + " 个点";
     }
 
-    // ---- 地图初始化 ----
+    // ---- Init ----
     async function init() {
-      const bmRes = await fetch("data/basemap.json");
-      const bm = await bmRes.json();
-      const imgBounds = L.latLngBounds(bm.bounds[0], bm.bounds[1]);
+      const statusEl = document.getElementById("statusText");
 
-      map = L.map("map", {
-        zoomControl: true,
-        attributionControl: false,
-        minZoom: 11,
-        maxZoom: 16,
-        maxBounds: imgBounds.pad(0.08),
-        maxBoundsViscosity: 0.9,
-        zoomSnap: 0.25,
-        zoomDelta: 0.5
-      }).fitBounds(imgBounds);
-
-      // load Esri Satellite basemap to show real geographic data
-      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-        maxZoom: 18,
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-      }).addTo(map);
-
-      setTimeout(() => map.invalidateSize(), 200);
-
-      // 加载 POI 标记作为参照
-      const poisRes = await fetch("data/pois.json");
-      const pois = await poisRes.json();
-      pois.forEach(poi => {
-        const icon = L.divIcon({
-          className: "",
-          html: `<div style="width:10px;height:10px;border-radius:50%;background:rgba(255,220,140,0.8);border:1.5px solid #fff;box-shadow:0 0 6px rgba(255,220,140,0.5);"></div>`,
-          iconSize: [10, 10], iconAnchor: [5, 5]
-        });
-        L.marker([poi.lat, poi.lng], { icon, interactive: false }).addTo(map)
-          .bindTooltip(poi.name, { permanent: false, direction: "top", offset: [0, -8], className: "poi-tip" });
+      viewer = new Cesium.Viewer("map", {
+        animation: false,
+        timeline: false,
+        baseLayerPicker: false,
+        fullscreenButton: false,
+        geocoder: false,
+        homeButton: false,
+        infoBox: false,
+        selectionIndicator: true,
+        sceneModePicker: false,
+        navigationHelpButton: false
       });
 
-      // 加载旧路线作为参考
+      viewer.scene.postProcessStages.fxaa.enabled = true;
+      viewer.scene.globe.depthTestAgainstTerrain = true;
+
+      // Load Terrain
+      try {
+        const tp = await Cesium.createWorldTerrainAsync();
+        viewer.terrainProvider = tp;
+        statusEl.textContent = "3D 地形加载完成 · 正在初始化路线...";
+      } catch (err) {
+        console.error("Terrain init failed:", err);
+      }
+
+      // Initial camera view of Mt. Kailash
+      viewer.camera.setView({
+        destination: Cesium.Cartesian3.fromDegrees(81.2865, 30.9300, 7500),
+        orientation: {
+          heading: Cesium.Math.toRadians(0.0),
+          pitch: Cesium.Math.toRadians(-25.0),
+          roll: 0.0
+        }
+      });
+
+      // Load reference POIs
+      try {
+        const poisRes = await fetch("data/pois.json");
+        const pois = await poisRes.json();
+        pois.forEach(poi => {
+          viewer.entities.add({
+            name: poi.name,
+            position: Cesium.Cartesian3.fromDegrees(poi.lng, poi.lat, 0.0),
+            point: {
+              pixelSize: 8,
+              color: Cesium.Color.fromCssColorString('#ffcd55').withAlpha(0.7),
+              outlineColor: Cesium.Color.BLACK,
+              outlineWidth: 2,
+              heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+              disableDepthTestDistance: 10000000.0
+            },
+            label: {
+              text: poi.name,
+              font: 'bold 11px "PingFang SC", "Microsoft YaHei", sans-serif',
+              style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+              fillColor: Cesium.Color.fromCssColorString('#ffcd55'), // Golden text label
+              outlineColor: Cesium.Color.BLACK,
+              outlineWidth: 3.0,
+              pixelOffset: new Cesium.Cartesian2(0, -12),
+              verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+              heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+              disableDepthTestDistance: 10000000.0
+            }
+          });
+        });
+      } catch(e) {
+        console.error("加载参考 POI 失败:", e);
+      }
+
+      // Load routes.json
       try {
         const routesRes = await fetch("data/routes.json");
-        oldRoutes = await routesRes.json();
-        drawRefLines();
-      } catch(e) { /* no old routes */ }
+        const loadedData = await routesRes.json();
+        if (loadedData.main) routes.main = loadedData.main;
+        if (loadedData.secondary) {
+          loadedData.secondary.forEach((s, idx) => {
+            if (routes.secondary[idx]) {
+              routes.secondary[idx].coords = s.coords || [];
+            }
+          });
+        }
+        drawRefLines(loadedData);
+      } catch(e) {
+        console.error("加载路线数据失败:", e);
+      }
 
-      // 初始化编辑线
-      editLine = L.polyline([], { color: "#00ff88", weight: 3, opacity: 0.9 }).addTo(map);
-
-      // 鼠标坐标显示
-      map.on("mousemove", (e) => {
-        document.getElementById("coordDisplay").textContent =
-          e.latlng.lat.toFixed(6) + ", " + e.latlng.lng.toFixed(6);
+      // Create main edit line entity (clamped to terrain)
+      editLineEntity = viewer.entities.add({
+        name: 'Editing Route Path',
+        polyline: {
+          positions: new Cesium.CallbackProperty(() => {
+            const coords = getCurrentCoords();
+            if (coords.length < 2) return undefined;
+            return coords.map(c => Cesium.Cartesian3.fromDegrees(c[0], c[1]));
+          }, false),
+          width: 4.0,
+          material: Cesium.Color.fromCssColorString('#00ff88'), // Bright green for editing line
+          clampToGround: true
+        }
       });
 
-      // 左键添加点
-      map.on("click", (e) => {
-        const coords = getCurrentCoords();
-        coords.push([parseFloat(e.latlng.lat.toFixed(6)), parseFloat(e.latlng.lng.toFixed(6))]);
-        addDragMarker(coords.length - 1, e.latlng);
-        refreshLine();
-        updateCount();
-      });
+      // Build edit handle dots
+      rebuildMarkers();
 
-      // 右键撤销
-      map.on("contextmenu", (e) => {
-        e.originalEvent.preventDefault();
-        undo();
-      });
+      // Interactions
+      const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+
+      // LEFT_CLICK: Add new route point (if not clicking on a drag handle)
+      handler.setInputAction((click) => {
+        const picked = viewer.scene.pick(click.position);
+        if (Cesium.defined(picked) && Cesium.defined(picked.id)) {
+          const entity = picked.id;
+          if (entity.id && entity.id.startsWith('drag_')) {
+            return; // Clicked on a point handle, do not add new coordinate
+          }
+        }
+
+        // Project clicked terrain point
+        const ray = viewer.camera.getRay(click.position);
+        const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
+        if (Cesium.defined(cartesian)) {
+          const carto = Cesium.Cartographic.fromCartesian(cartesian);
+          const lat = parseFloat(Cesium.Math.toDegrees(carto.latitude).toFixed(6));
+          const lng = parseFloat(Cesium.Math.toDegrees(carto.longitude).toFixed(6));
+          
+          const coords = getCurrentCoords();
+          coords.push([lng, lat]); // Save as [lng, lat] to routes.json compatibility
+          
+          rebuildMarkers();
+        }
+      }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+      // MOUSE_MOVE: display coordinates & handle drag-to-move route point
+      handler.setInputAction((movement) => {
+        const ray = viewer.camera.getRay(movement.endPosition);
+        const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
+        
+        if (Cesium.defined(cartesian)) {
+          const carto = Cesium.Cartographic.fromCartesian(cartesian);
+          const lat = Cesium.Math.toDegrees(carto.latitude);
+          const lng = Cesium.Math.toDegrees(carto.longitude);
+          document.getElementById("coordDisplay").textContent = lat.toFixed(6) + ", " + lng.toFixed(6);
+        }
+
+        if (isDragging && dragEntity) {
+          if (Cesium.defined(cartesian)) {
+            dragEntity.position = cartesian;
+            const carto = Cesium.Cartographic.fromCartesian(cartesian);
+            const lat = parseFloat(Cesium.Math.toDegrees(carto.latitude).toFixed(6));
+            const lng = parseFloat(Cesium.Math.toDegrees(carto.longitude).toFixed(6));
+
+            const idx = dragEntity._ptIdx;
+            const coords = getCurrentCoords();
+            if (coords[idx]) {
+              coords[idx] = [lng, lat];
+            }
+          }
+        }
+      }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
+      // LEFT_DOWN: start dragging point
+      handler.setInputAction((click) => {
+        const picked = viewer.scene.pick(click.position);
+        if (Cesium.defined(picked) && Cesium.defined(picked.id)) {
+          const entity = picked.id;
+          if (entity.id && entity.id.startsWith('drag_')) {
+            isDragging = true;
+            dragEntity = entity;
+            viewer.scene.screenSpaceCameraController.enableInputs = false; // Lock map rotations
+          }
+        }
+      }, Cesium.ScreenSpaceEventType.LEFT_DOWN);
+
+      // LEFT_UP: stop dragging point
+      handler.setInputAction(() => {
+        if (isDragging) {
+          isDragging = false;
+          dragEntity = null;
+          viewer.scene.screenSpaceCameraController.enableInputs = true; // Unlock map
+          saveToServer();
+          rebuildMarkers();
+        }
+      }, Cesium.ScreenSpaceEventType.LEFT_UP);
+
+      statusEl.textContent = "点击底图任意位置增加路线点，鼠标拖拽节点可调整路径";
     }
 
-    // ---- 参考线 ----
-    function drawRefLines() {
-      if (!oldRoutes) return;
-      // 清旧
-      refLines.forEach(l => map.removeLayer(l));
-      refLines = [];
-      // 主线
-      const ml = L.polyline(oldRoutes.main, { color: "#ff4444", weight: 2, opacity: 0.5, dashArray: "4,4" }).addTo(map);
-      refLines.push(ml);
-      // 支线
-      oldRoutes.secondary.forEach(sr => {
-        const sl = L.polyline(sr.coords, { color: "#ff8844", weight: 1.5, opacity: 0.4, dashArray: "3,4" }).addTo(map);
-        refLines.push(sl);
-      });
+    // ---- Reference Lines ----
+    function drawRefLines(loadedData) {
+      if (!loadedData) return;
+      
+      // Clear old reference entities
+      refLineEntities.forEach(ent => viewer.entities.remove(ent));
+      refLineEntities = [];
+
+      const mainColor = Cesium.Color.RED.withAlpha(refVisible ? 0.45 : 0.0);
+      const secondaryColor = Cesium.Color.ORANGE.withAlpha(refVisible ? 0.45 : 0.0);
+
+      // Main Reference Route
+      if (loadedData.main && loadedData.main.length) {
+        const pos = loadedData.main.map(pt => Cesium.Cartesian3.fromDegrees(pt[0], pt[1]));
+        const ent = viewer.entities.add({
+          name: 'Old Main Reference Route',
+          polyline: {
+            positions: pos,
+            width: 2.0,
+            material: new Cesium.PolylineDashMaterialProperty({
+              color: mainColor,
+              dashLength: 8.0
+            }),
+            clampToGround: true
+          }
+        });
+        refLineEntities.push(ent);
+      }
+
+      // Secondary Reference Routes
+      if (loadedData.secondary) {
+        loadedData.secondary.forEach(sr => {
+          if (sr.coords && sr.coords.length) {
+            const pos = sr.coords.map(pt => Cesium.Cartesian3.fromDegrees(pt[0], pt[1]));
+            const ent = viewer.entities.add({
+              name: 'Old Branch Reference Route: ' + sr.name,
+              polyline: {
+                positions: pos,
+                width: 1.5,
+                material: new Cesium.PolylineDashMaterialProperty({
+                  color: secondaryColor,
+                  dashLength: 6.0
+                }),
+                clampToGround: true
+              }
+            });
+            refLineEntities.push(ent);
+          }
+        });
+      }
     }
 
     function toggleRef() {
       refVisible = !refVisible;
-      refLines.forEach(l => { l.setStyle({ opacity: refVisible ? 0.5 : 0 }); });
       document.getElementById("refToggle").classList.toggle("active", refVisible);
-    }
-
-    // ---- 编辑操作 ----
-    function addDragMarker(idx, latlng) {
-      const isMain = currentKey === "main";
-      const icon = L.divIcon({
-        className: "",
-        html: `<div class="edit-handle ${isMain ? "" : "secondary"}"></div>`,
-        iconSize: [10, 10], iconAnchor: [5, 5]
+      refLineEntities.forEach(ent => {
+        if (ent.polyline) {
+          const color = ent.polyline.material.color.getValue();
+          ent.polyline.material.color = color.withAlpha(refVisible ? 0.45 : 0.0);
+        }
       });
-      const m = L.marker(latlng, { icon, draggable: true, zIndexOffset: 500 }).addTo(map);
-      m._ptIdx = idx;
-      m.on("drag", () => {
-        const coords = getCurrentCoords();
-        const pos = m.getLatLng();
-        coords[m._ptIdx] = [parseFloat(pos.lat.toFixed(6)), parseFloat(pos.lng.toFixed(6))];
-        refreshLine();
-      });
-      editMarkers.push(m);
     }
 
-    function refreshLine() {
-      editLine.setLatLngs(getCurrentCoords());
-    }
-
+    // ---- Rebuild Point Handles ----
     function rebuildMarkers() {
-      editMarkers.forEach(m => map.removeLayer(m));
-      editMarkers = [];
+      // Clear old handle entities
+      dragMarkers.forEach(ent => viewer.entities.remove(ent));
+      dragMarkers = [];
+
       const coords = getCurrentCoords();
-      coords.forEach((c, i) => {
-        addDragMarker(i, L.latLng(c[0], c[1]));
+      const isMain = currentKey === "main";
+      const dotColor = isMain ? Cesium.Color.fromCssColorString('#00ff88') : Cesium.Color.fromCssColorString('#66ccff');
+
+      coords.forEach((c, idx) => {
+        const ent = viewer.entities.add({
+          id: 'drag_' + idx + '_' + Date.now(),
+          position: Cesium.Cartesian3.fromDegrees(c[0], c[1], 0.0),
+          point: {
+            pixelSize: 10,
+            color: dotColor,
+            outlineColor: Cesium.Color.WHITE,
+            outlineWidth: 2,
+            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+            disableDepthTestDistance: 10000000.0
+          },
+          label: {
+            text: (idx + 1).toString(),
+            font: 'bold 9px monospace',
+            fillColor: Cesium.Color.BLACK,
+            outlineColor: Cesium.Color.WHITE,
+            outlineWidth: 1.0,
+            pixelOffset: new Cesium.Cartesian2(0, 0),
+            verticalOrigin: Cesium.VerticalOrigin.CENTER,
+            horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+            disableDepthTestDistance: 10000000.0
+          }
+        });
+        ent._ptIdx = idx;
+        dragMarkers.push(ent);
       });
-      refreshLine();
+
       updateCount();
     }
 
+    // ---- Edit Actions ----
     function undo() {
       const coords = getCurrentCoords();
       if (coords.length === 0) return;
       coords.pop();
-      const last = editMarkers.pop();
-      if (last) map.removeLayer(last);
-      refreshLine();
-      updateCount();
+      rebuildMarkers();
+      saveToServer();
     }
 
     function clearCurrent() {
-      if (!confirm("确认清空当前路线的所有点？")) return;
+      if (!confirm("确认清空当前所选路线的所有点吗？")) return;
       setCurrentCoords([]);
       rebuildMarkers();
+      saveToServer();
     }
 
     function switchRoute(key) {
       currentKey = key;
       const isMain = currentKey === "main";
-      editLine.setStyle({ color: isMain ? "#00ff88" : "#66ccff", weight: isMain ? 3 : 2 });
-      rebuildMarkers();
       document.getElementById("statusText").textContent =
-        "编辑中：" + document.getElementById("routeSelect").selectedOptions[0].text;
+        "正在编辑路线：" + document.getElementById("routeSelect").selectedOptions[0].text;
+      rebuildMarkers();
     }
 
-    // ---- 导出 ----
+    // ---- Save & Export ----
+    async function saveToServer() {
+      const out = {
+        main: routes.main,
+        secondary: routes.secondary.map(s => ({ name: s.name, coords: s.coords }))
+      };
+      
+      try {
+        const res = await fetch("/api/save-routes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(out, null, 2)
+        });
+        const result = await res.json();
+        if (result.ok) {
+          document.getElementById("statusText").textContent = "✅ 路线已成功自动保存到本地 & 正在推送 GitHub...";
+          pollGitStatus();
+        } else {
+          throw new Error(result.error);
+        }
+      } catch (err) {
+        document.getElementById("statusText").textContent = "⚠️ 保存失败，请点击 [导出 JSON] 手动下载备份";
+      }
+    }
+
+    let gitPollTimer = null;
+    function pollGitStatus() {
+      if (gitPollTimer) clearInterval(gitPollTimer);
+      let attempts = 0;
+      const statusEl = document.getElementById("statusText");
+      gitPollTimer = setInterval(async () => {
+        attempts++;
+        try {
+          const r = await fetch("/api/git-status");
+          const s = await r.json();
+          if (s.status === "success") {
+            statusEl.textContent = "✅ 路线保存成功 · 🚀 已自动编译推送 GitHub，线上即将同步！";
+            clearInterval(gitPollTimer);
+          } else if (s.status === "error") {
+            statusEl.textContent = "⚠️ Git 推送失败: " + s.message;
+            clearInterval(gitPollTimer);
+          }
+        } catch(e) {}
+        if (attempts > 30) clearInterval(gitPollTimer);
+      }, 1000);
+    }
+
     function exportJSON() {
       const out = {
         main: routes.main,
@@ -282,28 +498,18 @@
       a.download = "routes.json";
       a.click();
       URL.revokeObjectURL(url);
-
-      // 同时输出到控制台
-      console.log("=== 导出的路线数据 ===");
-      console.log("主线:", routes.main.length, "点");
-      routes.secondary.forEach(s => console.log("支线:", s.name, s.coords.length, "点"));
-      console.log(JSON.stringify(out));
-
-      document.getElementById("statusText").textContent =
-        "已导出！主线 " + routes.main.length + " 点，支线 " +
-        routes.secondary.map(s => s.coords.length).join("/") + " 点";
     }
 
-    // ---- 绑定事件 ----
+    // ---- Bindings ----
     document.getElementById("undoBtn").addEventListener("click", undo);
     document.getElementById("clearBtn").addEventListener("click", clearCurrent);
     document.getElementById("refToggle").addEventListener("click", toggleRef);
+    document.getElementById("saveBtn").addEventListener("click", saveToServer);
     document.getElementById("exportBtn").addEventListener("click", exportJSON);
     document.getElementById("routeSelect").addEventListener("change", (e) => {
       switchRoute(e.target.value);
     });
 
-    // 快捷键
     document.addEventListener("keydown", (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "z") { e.preventDefault(); undo(); }
     });
