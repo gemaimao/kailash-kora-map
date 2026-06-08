@@ -232,7 +232,7 @@ function flyNext() {
         }
         
         isPlaying = false;
-        document.getElementById('btn-stop-tour').innerText = '⏸ 720探索';
+        // 不再改变按钮文本
         return;
     }
     
@@ -340,14 +340,11 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
     
     isPlaying = true;
     
-    // 隐藏巡航按钮，显示暂停和720探索
-    document.getElementById('btn-start-tour').classList.add('hidden');
-    const stopBtn = document.getElementById('btn-stop-tour');
-    stopBtn.classList.remove('hidden');
-    stopBtn.querySelectorAll('span')[1].innerText = '暂停';
-    const stopBtnEmoji = stopBtn.querySelector('.btn-icon-emoji');
-    if (stopBtnEmoji) stopBtnEmoji.innerText = '⏸️';
-    document.getElementById('btn-free-explore').classList.remove('hidden');
+    // 不再隐藏任何按钮
+    // document.getElementById('btn-start-tour').classList.add('hidden');
+    // const stopBtn = document.getElementById('btn-stop-tour');
+    // stopBtn.classList.remove('hidden');
+    // document.getElementById('btn-free-explore').classList.remove('hidden');
     
     if (currentWaypoint === 0 && !flightPath[0].elevation) {
         try {
@@ -364,34 +361,11 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
     flyNext();
 });
 
-// 暂停/恢复 巡航
-document.getElementById('btn-stop-tour').addEventListener('click', () => {
-    isPlaying = !isPlaying;
-    const btnSpans = document.getElementById('btn-stop-tour').querySelectorAll('span');
-    if (btnSpans.length > 1) {
-        btnSpans[1].innerText = isPlaying ? '暂停' : '恢复';
-    }
-    const btnEmoji = document.getElementById('btn-stop-tour').querySelector('.btn-icon-emoji');
-    if (btnEmoji) {
-        btnEmoji.innerText = isPlaying ? '⏸️' : '▶️';
-    }
-    
-    if (isPlaying) {
-        flyNext();
-    } else {
-        viewer.camera.cancelFlight();
-    }
-});
-
-// 720 自由探索
+// 720 自由探索（即停止巡航）
 document.getElementById('btn-free-explore').addEventListener('click', () => {
     isPlaying = false;
     viewer.camera.cancelFlight();
-    
-    // 显示巡航按钮，隐藏暂停和探索
-    document.getElementById('btn-start-tour').classList.remove('hidden');
-    document.getElementById('btn-stop-tour').classList.add('hidden');
-    document.getElementById('btn-free-explore').classList.add('hidden');
+    // 不再切换按钮状态
 });
 
 // 打赏模态框逻辑
