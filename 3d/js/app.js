@@ -147,7 +147,7 @@ function loadPoisAndStart(terrainProvider) {
                         scaleByDistance: new Cesium.NearFarScalar(100, 1.0, 10000, 0.2),
                         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
                         heightReference: poi.flat ? Cesium.HeightReference.CLAMP_TO_GROUND : Cesium.HeightReference.NONE,
-                        disableDepthTestDistance: Number.POSITIVE_INFINITY
+                        disableDepthTestDistance: 10000000.0
                     }
                 });
 
@@ -201,7 +201,23 @@ function updateHudContent() {
     
     if (tagEl) tagEl.innerHTML = activePoi.type || '途经点';
     if (titleEl) titleEl.innerHTML = activePoi.name || '未知点位';
-    if (descEl) descEl.innerHTML = activePoi.bubble || activePoi.note || '暂无详细描述。';
+    
+    let contentHtml = '';
+    if (activePoi.bubble) {
+        let cleanBubble = activePoi.bubble;
+        // 移除多余的转义双引号首尾
+        if (cleanBubble.startsWith('"') && cleanBubble.endsWith('"')) {
+            cleanBubble = cleanBubble.substring(1, cleanBubble.length - 1);
+        }
+        contentHtml += `<div class="hud-bubble" style="line-height: 1.6; font-size: 14px;">${cleanBubble}</div>`;
+    }
+    if (activePoi.note) {
+        contentHtml += `<div class="hud-note" style="margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; font-size: 13px; color: #ddd; line-height: 1.5;">${activePoi.note}</div>`;
+    }
+    
+    if (descEl) {
+        descEl.innerHTML = contentHtml || '暂无详细描述。';
+    }
     
     // 如果超过 1 个点，显示轮播控制器
     const controls = document.getElementById('poi-carousel-controls');
@@ -519,15 +535,20 @@ if (btnSubmitMsg) {
         btnSubmitMsg.disabled = true;
 
         try {
+            const latitude = window.emergencyCoordinates ? window.emergencyCoordinates.latitude : null;
+            const longitude = window.emergencyCoordinates ? window.emergencyCoordinates.longitude : null;
+            
             const response = await fetch('/api/messages', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nickname, contact, type, content, captcha })
+                body: JSON.stringify({ nickname, contact, type, content, captcha, latitude, longitude })
             });
 
             if (response.ok) {
-                pubStatus.innerText = '提交成功！留言已进入待审核队列，管理员审核通过后将在公网展示。';
-                pubStatus.style.color = 'green';
+                pubStatus.innerText = type === '紧急求助' ? 
+                    '紧急求助已提交！我们将立即通过微信推送给管理员，并在3D地图中进行定位！' : 
+                    '提交成功！留言已进入待审核队列，管理员审核通过后将在公网展示。';
+                pubStatus.style.color = type === '紧急求助' ? 'red' : 'green';
                 pubStatus.style.display = 'block';
                 
                 // 动态追加到 DOM，立即显示
@@ -558,7 +579,9 @@ if (btnSubmitMsg) {
                     document.getElementById('pub-contact').value = '';
                     document.getElementById('pub-content').value = '';
                     document.getElementById('pub-captcha').value = '';
-                }, 2000);
+                    document.getElementById('gps-info-container').style.display = 'none';
+                    window.emergencyCoordinates = null;
+                }, 3000);
             } else {
                 const err = await response.json();
                 throw new Error(err.error || '提交失败');
@@ -632,3 +655,193 @@ if (dragHandle && uiPanel) {
         }
     });
 }
+
+// =========================================================
+// 新增：定位、导航、紧急救援功能
+// =========================================================
+
+// 全局变量缓存定位信息
+window.emergencyCoordinates = null;
+let myLocationEntity = null;
+let rescueBeaconEntity = null;
+
+// 1. 发布模态框类型切换监听
+const pubTypeSelect = document.getElementById('pub-type');
+const gpsInfoContainer = document.getElementById('gps-info-container');
+const gpsStatusText = document.getElementById('gps-status-text');
+
+if (pubTypeSelect && gpsInfoContainer && gpsStatusText) {
+    pubTypeSelect.addEventListener('change', () => {
+        if (pubTypeSelect.value === '紧急求助') {
+            gpsInfoContainer.style.display = 'block';
+            gpsStatusText.innerText = '⏳ 正在尝试获取您当前的精确GPS位置...';
+            window.emergencyCoordinates = null;
+            
+            if (!navigator.geolocation) {
+                gpsStatusText.innerText = '❌ 您的浏览器或设备不支持 GPS 定位！';
+                return;
+            }
+            
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    window.emergencyCoordinates = { latitude: lat, longitude: lng };
+                    gpsStatusText.innerHTML = `✅ 定位成功：经度 ${lng.toFixed(6)}, 纬度 ${lat.toFixed(6)}<br><span style="font-size:10px; color:#22c55e;">位置坐标已绑定，提交后将直接通知管理员！</span>`;
+                },
+                (err) => {
+                    console.error("求救定位失败:", err);
+                    gpsStatusText.innerText = `⚠️ 定位获取失败 (${err.message})，您可以继续提交，我们将以“无位置模式”发送求救。`;
+                },
+                { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+            );
+        } else {
+            gpsInfoContainer.style.display = 'none';
+            window.emergencyCoordinates = null;
+        }
+    });
+}
+
+// 2. 地图控制面板上的“我的定位”按钮逻辑
+const btnMyLocation = document.getElementById('btn-my-location');
+if (btnMyLocation) {
+    btnMyLocation.addEventListener('click', () => {
+        btnMyLocation.disabled = true;
+        const oldHtml = btnMyLocation.innerHTML;
+        btnMyLocation.innerHTML = '<span class="btn-icon-emoji">⏳</span><span>定位中...</span>';
+        
+        if (!navigator.geolocation) {
+            alert("您的浏览器或设备不支持 GPS 定位！");
+            btnMyLocation.disabled = false;
+            btnMyLocation.innerHTML = oldHtml;
+            return;
+        }
+        
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                
+                // 清除旧的定位点
+                if (myLocationEntity) {
+                    viewer.entities.remove(myLocationEntity);
+                }
+                
+                // 绘制带发光蓝色点位的定位实体
+                myLocationEntity = viewer.entities.add({
+                    name: '我的位置',
+                    position: Cesium.Cartesian3.fromDegrees(lng, lat, 0.0),
+                    point: {
+                        pixelSize: 14,
+                        color: Cesium.Color.BLUE,
+                        outlineColor: Cesium.Color.WHITE,
+                        outlineWidth: 3,
+                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                        disableDepthTestDistance: 10000000.0
+                    },
+                    ellipse: {
+                        semiMajorAxis: 100.0,
+                        semiMinorAxis: 100.0,
+                        material: Cesium.Color.BLUE.withAlpha(0.2),
+                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
+                    }
+                });
+                
+                // 计算与神山中心点的距离（大本营塔尔钦：81.2865, 30.9736）
+                const kailashCartesian = Cesium.Cartesian3.fromDegrees(81.2865, 30.9736);
+                const myCartesian = Cesium.Cartesian3.fromDegrees(lng, lat);
+                const distKm = Cesium.Cartesian3.distance(kailashCartesian, myCartesian) / 1000;
+                
+                if (distKm < 150) { // 150公里内认为身处转山区域，进行视角飞越
+                    viewer.camera.flyTo({
+                        destination: Cesium.Cartesian3.fromDegrees(lng, lat, 6000),
+                        orientation: {
+                            heading: Cesium.Math.toRadians(0.0),
+                            pitch: Cesium.Math.toRadians(-30.0),
+                            roll: 0.0
+                        },
+                        duration: 3.0
+                    });
+                    alert(`🧭 定位成功！您当前已进入转山区域，GPS坐标已标记在地图上。`);
+                } else {
+                    alert(`🧭 定位成功！您当前位置（距离神山 ${Math.round(distKm)} 公里）超出转山核心图区。已在地球上标记蓝点（您可以缩小地球查看）。`);
+                }
+                
+                btnMyLocation.disabled = false;
+                btnMyLocation.innerHTML = oldHtml;
+            },
+            (err) => {
+                console.error("GPS定位失败:", err);
+                alert(`定位失败：请确保设备已开启 GPS，并已授权浏览器获取位置权限。(${err.message})`);
+                btnMyLocation.disabled = false;
+                btnMyLocation.innerHTML = oldHtml;
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    });
+}
+
+// 3. 页面加载时：解析 URL 的 focusLng / focusLat 救援定位参数并飞越
+function checkUrlParametersAndFocus() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const focusLng = parseFloat(urlParams.get('focusLng'));
+    const focusLat = parseFloat(urlParams.get('focusLat'));
+    
+    if (!isNaN(focusLng) && !isNaN(focusLat)) {
+        // 延迟等视角初始化完成后再飞过去
+        setTimeout(() => {
+            if (rescueBeaconEntity) {
+                viewer.entities.remove(rescueBeaconEntity);
+            }
+            
+            // 绘制闪烁的红色救援警报点
+            rescueBeaconEntity = viewer.entities.add({
+                name: '🚨 紧急救援求助位置',
+                position: Cesium.Cartesian3.fromDegrees(focusLng, focusLat, 0.0),
+                point: {
+                    pixelSize: 18,
+                    color: Cesium.Color.RED,
+                    outlineColor: Cesium.Color.WHITE,
+                    outlineWidth: 3,
+                    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                    disableDepthTestDistance: 10000000.0
+                },
+                ellipse: {
+                    semiMajorAxis: 200.0,
+                    semiMinorAxis: 200.0,
+                    material: Cesium.Color.RED.withAlpha(0.35),
+                    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
+                }
+            });
+            
+            viewer.camera.flyTo({
+                destination: Cesium.Cartesian3.fromDegrees(focusLng, focusLat, 4500),
+                orientation: {
+                    heading: Cesium.Math.toRadians(0.0),
+                    pitch: Cesium.Math.toRadians(-45.0),
+                    roll: 0.0
+                },
+                duration: 4.0
+            });
+            
+            // 在 HUD 面板提示管理员/用户
+            const hudPanel = document.getElementById('poi-info-panel');
+            if (hudPanel) {
+                document.getElementById('poi-tag').innerText = '🚨 紧急救援点';
+                document.getElementById('poi-title').innerText = '求救定位位置';
+                document.getElementById('poi-desc').innerHTML = `
+                    <div style="color: #ff5555; font-weight: bold; font-size: 14px; line-height: 1.6;">
+                        已在3D地图上自动定位到此紧急救援求救点。<br>
+                        位置坐标：经度 ${focusLng.toFixed(6)}, 纬度 ${focusLat.toFixed(6)}。<br>
+                        请立即联系转山大本营或安排救援力量前往此位置实施搜救！
+                    </div>
+                `;
+                hudPanel.classList.remove('hidden');
+            }
+        }, 5000);
+    }
+}
+
+// 启动执行
+checkUrlParametersAndFocus();
+

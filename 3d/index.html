@@ -61,6 +61,10 @@
                 <span class="btn-icon-emoji">🌍</span>
                 <span>全景探索</span>
             </button>
+            <button id="btn-my-location" class="btn-explore" title="在地图上标记我当前的位置">
+                <span class="btn-icon-emoji">📍</span>
+                <span>我的定位</span>
+            </button>
             <button id="btn-bgm" class="btn-music" title="播放/暂停音乐">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="display: block; color: #ffd700; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));">
                     <path d="M19 3H9c-1.1 0-2 .9-2 2v11.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h10v7.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V5c0-1.1.9-2 2-2z"/>
@@ -135,7 +139,11 @@
                     <option value="约车">约车</option>
                     <option value="找背夫">找背夫</option>
                     <option value="租装备">租装备</option>
+                    <option value="紧急求助" style="color: #ef4444; font-weight: bold;">🚨 紧急求助 (自动附带GPS定位)</option>
                 </select>
+                <div id="gps-info-container" style="display:none; font-size: 11px; color: #ef4444; margin: 4px 0 8px 0; background: rgba(239,68,68,0.08); padding: 8px; border-radius: 6px; border: 1px solid rgba(239,68,68,0.15); line-height: 1.4;">
+                    <span id="gps-status-text">⏳ 正在尝试获取您当前的精确GPS位置...</span>
+                </div>
                 <textarea id="pub-content" placeholder="填写内容详情，方便大家了解 (限50字)" maxlength="50" rows="3" class="pub-input" style="resize:none;"></textarea>
                 <input type="text" id="pub-captcha" placeholder="防刷验证：转山核心神山名称是？(四个字)" class="pub-input" required>
                 <button id="btn-submit-msg" class="btn primary" style="width:100%; margin-top:10px; padding: 10px;">提 交 发 布</button>

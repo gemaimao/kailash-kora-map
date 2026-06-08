@@ -70,7 +70,7 @@ export async function onRequestPost(context) {
     }
 
     const data = await request.json();
-    const { nickname, contact, type, content, captcha } = data;
+    const { nickname, contact, type, content, captcha, latitude, longitude } = data;
 
     if (!nickname || !type || !content) {
       return new Response(JSON.stringify({ error: "缺少必填字段：昵称、类型或内容" }), { status: 400 });
@@ -127,7 +127,9 @@ export async function onRequestPost(context) {
       type: type,
       content: content.substring(0, 100), // 限制内容长度
       timestamp: timestamp,
-      status: "pending" // 默认待审核状态
+      status: "pending", // 默认待审核状态
+      latitude: latitude || null,
+      longitude: longitude || null
     };
 
     // 存入 KV，保留数据
