@@ -147,7 +147,7 @@ function loadPoisAndStart(terrainProvider) {
                         scaleByDistance: new Cesium.NearFarScalar(100, 1.0, 10000, 0.2),
                         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
                         heightReference: poi.flat ? Cesium.HeightReference.CLAMP_TO_GROUND : Cesium.HeightReference.NONE,
-                        disableDepthTestDistance: undefined
+                        disableDepthTestDistance: Number.POSITIVE_INFINITY
                     }
                 });
 
