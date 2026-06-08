@@ -115,26 +115,26 @@ fetch('../data/routes.json').then(r => r.json()).then(data => {
 // =========================================================
 // 安全初始化地形，然后绘制神山所有的 POI 地标
 // =========================================================
-Cesium.createWorldTerrainAsync().then(terrainProvider => {
-    viewer.terrainProvider = terrainProvider; // 注入全球地形
+function loadPoisAndStart(terrainProvider) {
+    if (terrainProvider) {
+        viewer.terrainProvider = terrainProvider;
+    }
     
     fetch('../data/pois.json').then(r => r.json()).then(pois => {
         allPoisData = pois.filter(p => p.lng && p.lat && p.id);
         const poiPositions = allPoisData.map(poi => Cesium.Cartographic.fromDegrees(poi.lng + OFFSET_LNG, poi.lat + OFFSET_LAT));
         
-        // 地形引擎彻底就绪，安全采样所有 POI 的真实地表高程！
-        Cesium.sampleTerrainMostDetailed(terrainProvider, poiPositions).then(updatedPositions => {
+        const renderPois = (positions) => {
             for (let i = 0; i < allPoisData.length; i++) {
                 const poi = allPoisData[i];
                 const poiId = poi.id.replace('msn_', '');
                 const fixedLng = poi.lng + OFFSET_LNG;
                 const fixedLat = poi.lat + OFFSET_LAT;
                 
-                const groundHeight = updatedPositions[i].height || 5000;
+                const groundHeight = (positions && positions[i]) ? (positions[i].height || 5000) : 5000;
                 const altitude = groundHeight + 130;
                 
                 if (!poi.flat) {
-                    // 绘制纯 2D 效果的垂直虚线，完美匹配 2D 纸片图标
                     viewer.entities.add({
                         polyline: {
                             positions: Cesium.Cartesian3.fromDegreesArrayHeights([
@@ -150,7 +150,6 @@ Cesium.createWorldTerrainAsync().then(terrainProvider => {
                     });
                 }
 
-                const isSmall = (poiId === '18' || poiId === '14');
                 viewer.entities.add({
                     id: 'poi_' + poi.id,
                     position: Cesium.Cartesian3.fromDegrees(fixedLng, fixedLat, poi.flat ? groundHeight : altitude),
@@ -165,7 +164,6 @@ Cesium.createWorldTerrainAsync().then(terrainProvider => {
                 });
 
                 if (!poi.flat) {
-                    // 创建 HTML 弹窗面板
                     const popup = document.createElement('div');
                     popup.className = 'poi-popup hidden';
                     popup.innerHTML = `<div class="poi-popup-content">${poi.bubble || ''}</div>`;
@@ -175,19 +173,34 @@ Cesium.createWorldTerrainAsync().then(terrainProvider => {
             }
             document.getElementById('tour-status').innerText = '漫游已就绪';
             
-            // 立刻飞往“起飞前景大图”视角
             viewer.camera.flyTo({
                 destination: Cesium.Cartesian3.fromDegrees(81.2865 + OFFSET_LNG, 30.9300 + OFFSET_LAT, 5800),
                 orientation: {
-                    heading: Cesium.Math.toRadians(0.0), // 正北
-                    pitch: Cesium.Math.toRadians(-12.0), // 微微低头
+                    heading: Cesium.Math.toRadians(0.0),
+                    pitch: Cesium.Math.toRadians(-12.0),
                     roll: 0.0
                 },
                 duration: 4.0
             });
-        }).catch(e => console.error("POI 高程采样失败:", e));
+        };
+
+        if (terrainProvider) {
+            Cesium.sampleTerrainMostDetailed(terrainProvider, poiPositions).then(renderPois).catch(e => {
+                console.error("POI 高程采样失败:", e);
+                renderPois(null);
+            });
+        } else {
+            renderPois(null);
+        }
     }).catch(e => console.error("加载 POI 数据失败:", e));
-}).catch(e => console.error("地形引擎初始化失败:", e));
+}
+
+Cesium.createWorldTerrainAsync().then(terrainProvider => {
+    loadPoisAndStart(terrainProvider);
+}).catch(e => {
+    console.error("地形引擎初始化失败，正在以默认模式启动：", e);
+    loadPoisAndStart(null);
+});
 
 // 更新 HUD 面板内容
 function updateHudContent() {
@@ -306,7 +319,8 @@ function flyNext() {
     }
     
     // 核心修复：相机高度 = 真实的地球表面海拔 + 530米的相对净空高度
-    const absoluteAltitude = pt.elevation + pt.range; 
+    const elevationVal = typeof pt.elevation === 'number' ? pt.elevation : 5000;
+    const absoluteAltitude = elevationVal + pt.range; 
     
     viewer.camera.flyTo({
         destination: Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, absoluteAltitude),
@@ -355,13 +369,24 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
     
     if (currentWaypoint === 0 && !flightPath[0].elevation) {
         try {
-            const positions = flightPath.map(pt => Cesium.Cartographic.fromDegrees(pt.lng, pt.lat));
-            const updatedPositions = await Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, positions);
-            for(let i = 0; i < updatedPositions.length; i++) {
-                flightPath[i].elevation = updatedPositions[i].height || 5000;
+            if (viewer.terrainProvider && !(viewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider)) {
+                const positions = flightPath.map(pt => Cesium.Cartographic.fromDegrees(pt.lng, pt.lat));
+                const updatedPositions = await Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, positions);
+                for(let i = 0; i < updatedPositions.length; i++) {
+                    flightPath[i].elevation = updatedPositions[i].height || 5000;
+                }
+            } else {
+                for(let i = 0; i < flightPath.length; i++) {
+                    flightPath[i].elevation = 5000;
+                }
             }
         } catch (error) {
-            console.error("高程计算失败", error);
+            console.error("高程计算失败，正在使用默认高程：", error);
+            for(let i = 0; i < flightPath.length; i++) {
+                if (flightPath[i].elevation === undefined) {
+                    flightPath[i].elevation = 5000;
+                }
+            }
         }
     }
     

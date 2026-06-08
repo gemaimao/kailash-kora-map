@@ -19,17 +19,15 @@ html, body, #cesiumContainer {
     position: absolute;
     top: 20px;
     left: 20px;
-    width: fit-content;
-    min-width: 320px;
-    max-width: 400px;
+    width: 480px;
     box-sizing: border-box;
-    background: rgba(25, 25, 30, 0.45);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: rgba(18, 18, 22, 0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 36px 0 rgba(0, 0, 0, 0.5);
     border-radius: 12px;
-    padding: 20px;
+    padding: 12px 16px;
     color: #fef08a; /* Pale mud gold for general text */
     z-index: 10;
     transition: all 0.3s ease;
@@ -65,65 +63,96 @@ html, body, #cesiumContainer {
 }
 
 /* 按钮及交互区 */
+.bottom-actions-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.brand-card {
+    background: #000000;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 130px;
+    min-width: 130px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    height: 32px;
+}
+
+.brand-title {
+    font-size: 13px;
+    color: #fde047; /* yellow-300 */
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+}
+
+.panel-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 8px 0;
+}
+
 .controls-compact {
     display: flex;
     gap: 8px;
     align-items: center;
+    flex: 1;
+    justify-content: flex-end;
 }
 
 .btn-tour, .btn-explore {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 14px;
-    background: linear-gradient(135deg, #4f46e5, #3730a3);
-    color: white;
+    padding: 0 10px;
+    height: 32px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.85);
     border: none;
     border-radius: 6px;
     font-size: 13px;
     font-weight: bold;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.4);
-    transition: all 0.3s ease;
+    box-shadow: none;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
 }
 
 .btn-tour:hover, .btn-explore:hover {
-    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
 }
 
-.btn-explore {
-    background: linear-gradient(135deg, #374151, #1f2937);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-}
-
-.btn-icon {
-    flex: 0 0 36px;
-    padding: 6px 0;
-    text-align: center;
-    background: linear-gradient(135deg, #f59e0b, #d97706);
+.btn-music, .btn-donate {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f97316, #ea580c);
     color: white;
     border: none;
     border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+    font-size: 15px;
     cursor: pointer;
-}
-
-.btn-donate {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
     transition: all 0.3s ease;
+    flex-shrink: 0;
+    box-sizing: border-box;
 }
 
-.btn-donate:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.6);
+.btn-music:hover, .btn-donate:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.6);
 }
 
 /* 全局访问人数统计 (右上角) */
@@ -269,12 +298,11 @@ html, body, #cesiumContainer {
 ========================================================= */
 /* 商业赞助滚动区 */
 .commercial-zone {
-    margin: 10px 0;
+    margin: 0;
     display: flex;
     align-items: center;
     gap: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 10px;
+    padding-bottom: 0;
 }
 
 .btn-publish {
@@ -282,31 +310,40 @@ html, body, #cesiumContainer {
     color: white;
     border: none;
     border-radius: 6px;
-    padding: 6px 10px;
-    font-size: 11px;
+    padding: 0 12px;
+    height: 32px;
+    font-size: 12px;
     font-weight: bold;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
     transition: all 0.3s ease;
     white-space: nowrap;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
 }
 
-.btn-publish:active {
-    transform: scale(0.95);
+.btn-publish:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 14px rgba(16, 185, 129, 0.6);
 }
 
 .ad-banner {
     flex: 1;
     min-width: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
-    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(10, 10, 12, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 6px;
-    padding: 6px;
+    padding: 0 12px;
+    height: 32px;
     display: flex;
     align-items: center;
     gap: 6px;
     cursor: pointer;
     transition: all 0.2s;
+    box-sizing: border-box;
 }
 
 .ad-banner:hover {
@@ -673,47 +710,37 @@ html, body, #cesiumContainer {
         right: auto;
         transform: translateX(-50%);
         width: 96vw;
-        padding: 10px;
-        max-height: 40vh; /* 避免占满屏幕 */
+        padding: 8px 10px;
+        max-height: 45vh; /* 避免占满屏幕 */
         display: flex;
         flex-direction: column;
         z-index: 10;
         border-radius: 12px;
     }
 
-    .panel-top-layout {
+    .bottom-actions-row {
         gap: 6px;
-        margin-top: 6px;
-        align-items: center;
         width: 100%;
         justify-content: space-between;
+        align-items: center;
     }
 
-    .panel-left-col {
-        gap: 6px;
-        flex: 0 0 auto;
-    }
-
-    .panel-right-col {
-        gap: 4px;
-        padding-right: 18px; /* 为最小化按钮留空间 */
-        flex: 0 0 auto;
-    }
-
-    .lungta-logo {
+    .brand-card {
+        min-width: 100px;
+        padding: 0 6px;
         height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
-    .panel-title {
-        font-size: 12px;
-        margin-top: 2px;
-        white-space: normal;
-        letter-spacing: 0;
+    .brand-title {
+        font-size: 10px;
+        line-height: 1;
     }
-    
-    .panel-subtitle {
-        font-size: 8px;
-        letter-spacing: 0.5px;
+
+    .panel-divider {
+        margin: 6px 0;
     }
 
     /* 优化控制按钮间距 */
@@ -721,34 +748,18 @@ html, body, #cesiumContainer {
         gap: 4px;
     }
 
-    .btn {
-        padding: 4px 6px;
-        font-size: 10px;
-        border-radius: 4px;
-        flex: 0 0 auto;
-        white-space: nowrap !important;
-        min-width: max-content;
+    .btn-tour, .btn-explore {
+        padding: 0 8px;
+        font-size: 11px;
+        height: 28px;
+        border-radius: 6px;
     }
-    
-    .btn-donate {
-        padding: 4px 6px;
-        font-size: 10px;
-        border-radius: 4px;
-        flex: 0 0 auto;
-        white-space: nowrap !important;
-        min-width: max-content;
-    }
-    
-    .btn-icon {
-        flex: 0 0 24px;
-        padding: 4px 0;
-        font-size: 10px;
-        min-width: 24px;
-    }
-    
-    .visitor-count {
-        font-size: 9px;
-        padding: 2px 4px;
+
+    .btn-music, .btn-donate {
+        width: 28px;
+        height: 28px;
+        font-size: 13px;
+        border-radius: 6px;
     }
     
     .drag-handle {
@@ -758,10 +769,22 @@ html, body, #cesiumContainer {
     }
 
     .commercial-zone {
-        margin: 6px 0;
-        padding-bottom: 6px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        border-top: none;
+        margin: 0;
+        padding-bottom: 0;
+        gap: 6px;
+    }
+
+    .btn-publish {
+        height: 30px;
+        padding: 0 10px;
+        font-size: 11px;
+        border-radius: 6px;
+    }
+
+    .ad-banner {
+        height: 30px;
+        padding: 0 8px;
+        border-radius: 6px;
     }
 
     /* 限制 POI 信息区域高度 */
