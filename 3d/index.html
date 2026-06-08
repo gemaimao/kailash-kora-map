@@ -48,7 +48,6 @@
 
         <!-- 商业互动区 (跑马灯) -->
         <div class="commercial-zone">
-            <div class="visitor-count">👁 12,504</div>
             <button id="btn-publish-msg" class="btn-publish">发 布</button>
             <div class="ad-banner">
                 <span class="ad-tag">推荐</span>
@@ -72,14 +71,21 @@
                 <div class="titles-wrapper">
                     <div class="panel-subtitle">THE GREAT KAILASH KORA</div>
                     <h1 class="panel-title">2026马年大转山</h1>
+                    <div class="visitor-count" style="margin-top: 4px; opacity: 0.8;">👁 12,504 次访问</div>
                 </div>
             </div>
             
             <!-- 右侧：控制按钮与打赏 -->
             <div class="panel-right-col">
                 <div class="controls-compact">
-                    <button id="btn-start-tour" class="btn primary">▶️ 巡航</button>
-                    <button id="btn-stop-tour" class="btn secondary">⏸ 探索</button>
+                    <button id="btn-start-tour" class="btn-tour">
+                        <img src="../assets/icon-play.svg" class="icon-sm" alt="Play" style="width:14px; height:14px; margin-right:4px;">
+                        <span>巡航</span>
+                    </button>
+                    <button id="btn-stop-tour" class="btn-explore hidden">
+                        <img src="../assets/icon-pause.svg" class="icon-sm" alt="Pause" style="width:14px; height:14px; margin-right:4px;">
+                        <span>探索</span>
+                    </button>
                     <button id="btn-bgm" class="btn btn-icon">🎵</button>
                     <button class="btn-donate">☕</button>
                 </div>
@@ -138,7 +144,7 @@
     </div>
 
     <!-- 背景音乐 -->
-    <audio id="bgmAudio" src="../assets/bgm.mp3" loop></audio>
+    <audio id="bgmAudio" src="../assets/blue-sky-pilgrim.mp3?v=2" loop></audio>
 
     <script src="js/app.js"></script>
 </body>

@@ -315,8 +315,11 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
     
     isPlaying = true;
     
-    // 更新按钮状态
-    document.getElementById('btn-stop-tour').innerText = '⏸ 720探索';
+    // 隐藏巡航按钮，显示探索按钮
+    document.getElementById('btn-start-tour').classList.add('hidden');
+    const stopBtn = document.getElementById('btn-stop-tour');
+    stopBtn.classList.remove('hidden');
+    stopBtn.querySelector('span').innerText = '探索';
     
     if (currentWaypoint === 0 && !flightPath[0].elevation) {
         try {
@@ -336,8 +339,10 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
 // 暂停/恢复 巡航
 document.getElementById('btn-stop-tour').addEventListener('click', () => {
     isPlaying = !isPlaying;
-    const btn = document.getElementById('btn-stop-tour');
-    btn.innerText = isPlaying ? '⏸ 720探索' : '▶️ 恢复';
+    const btnSpan = document.getElementById('btn-stop-tour').querySelector('span');
+    btnSpan.innerText = isPlaying ? '探索' : '恢复';
+    const btnImg = document.getElementById('btn-stop-tour').querySelector('img');
+    btnImg.src = isPlaying ? '../assets/icon-pause.svg' : '../assets/icon-play.svg';
     
     if (isPlaying) {
         flyNext();
