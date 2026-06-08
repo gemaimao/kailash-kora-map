@@ -1,9 +1,14 @@
 export async function onRequestGet(context) {
   try {
-    const { env } = context;
+    const { env, request } = context;
     if (!env.KORA_MESSAGES) {
       return new Response(JSON.stringify({ error: "KV namespace KORA_MESSAGES is not bound" }), { status: 500 });
     }
+
+    const url = new URL(request.url);
+    const password = url.searchParams.get("password");
+    const adminPassword = env.ADMIN_PASSWORD || "kailash2026";
+    const isAdmin = (password === adminPassword);
 
     // 获取所有 key，按前缀 msg_ 过滤
     const list = await env.KORA_MESSAGES.list({ prefix: 'msg_' });
@@ -12,15 +17,22 @@ export async function onRequestGet(context) {
     for (const key of list.keys) {
       const value = await env.KORA_MESSAGES.get(key.name);
       if (value) {
-        messages.push(JSON.parse(value));
+        const msg = JSON.parse(value);
+        msg.key = key.name; // 保存键名方便后台操作
+        messages.push(msg);
       }
+    }
+
+    // 非管理员过滤待审核留言
+    if (!isAdmin) {
+      messages = messages.filter(msg => msg.status !== "pending");
     }
 
     // 按时间倒序排序（最新的在前）
     messages.sort((a, b) => b.timestamp - a.timestamp);
 
-    // 最多返回 50 条，防止超载
-    messages = messages.slice(0, 50);
+    // 最多返回 100 条
+    messages = messages.slice(0, 100);
 
     return new Response(JSON.stringify({ messages }), {
       headers: {
@@ -114,7 +126,8 @@ export async function onRequestPost(context) {
       contact: (contact || "").substring(0, 50),
       type: type,
       content: content.substring(0, 100), // 限制内容长度
-      timestamp: timestamp
+      timestamp: timestamp,
+      status: "pending" // 默认待审核状态
     };
 
     // 存入 KV，保留数据
@@ -127,6 +140,70 @@ export async function onRequestPost(context) {
     }
 
     return new Response(JSON.stringify({ success: true, message: messagePayload }), {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      }
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+  }
+}
+
+export async function onRequestPut(context) {
+  try {
+    const { request, env } = context;
+    if (!env.KORA_MESSAGES) {
+      return new Response(JSON.stringify({ error: "KV namespace KORA_MESSAGES is not bound" }), { status: 500 });
+    }
+
+    const data = await request.json();
+    const { key, password } = data;
+    const adminPassword = env.ADMIN_PASSWORD || "kailash2026";
+
+    if (password !== adminPassword) {
+      return new Response(JSON.stringify({ error: "无管理员权限" }), { status: 401 });
+    }
+
+    const value = await env.KORA_MESSAGES.get(key);
+    if (!value) {
+      return new Response(JSON.stringify({ error: "留言不存在" }), { status: 404 });
+    }
+
+    const msg = JSON.parse(value);
+    msg.status = "approved";
+
+    await env.KORA_MESSAGES.put(key, JSON.stringify(msg));
+
+    return new Response(JSON.stringify({ success: true, message: msg }), {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      }
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+  }
+}
+
+export async function onRequestDelete(context) {
+  try {
+    const { request, env } = context;
+    if (!env.KORA_MESSAGES) {
+      return new Response(JSON.stringify({ error: "KV namespace KORA_MESSAGES is not bound" }), { status: 500 });
+    }
+
+    const data = await request.json();
+    const { key, password } = data;
+    const adminPassword = env.ADMIN_PASSWORD || "kailash2026";
+
+    if (password !== adminPassword) {
+      return new Response(JSON.stringify({ error: "无管理员权限" }), { status: 401 });
+    }
+
+    await env.KORA_MESSAGES.delete(key);
+
+    return new Response(JSON.stringify({ success: true }), {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",

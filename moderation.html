@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>留言管理审核</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #0d0d0f; color: #eee; padding: 20px; }
+    h2 { color: #ffcd55; margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 10px; }
+    .auth-box { max-width: 320px; margin: 100px auto; background: #18181c; padding: 20px; border-radius: 8px; border: 1px solid #333; text-align: center; }
+    .input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 4px; border: 1px solid #444; background: #000; color: #fff; box-sizing: border-box; }
+    .btn { padding: 8px 16px; border: none; border-radius: 4px; background: #ffcd55; color: #111; font-weight: bold; cursor: pointer; font-size: 13px; }
+    .btn:hover { background: #ffe285; }
+    .btn-danger { background: #ef4444; color: white; }
+    .btn-danger:hover { background: #f87171; }
+    .btn-success { background: #10b981; color: white; }
+    .btn-success:hover { background: #34d399; }
+    .msg-list { list-style: none; padding: 0; }
+    .msg-item { background: #18181c; border: 1px solid #282830; padding: 15px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .msg-content { flex: 1; margin-right: 20px; }
+    .msg-meta { font-size: 12px; color: #888; margin-top: 5px; }
+    .msg-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-left: 10px; }
+    .badge-pending { background: #f59e0b; color: #000; }
+    .badge-approved { background: #10b981; color: #fff; }
+    .actions { display: flex; gap: 8px; }
+  </style>
+</head>
+<body>
+
+  <div id="auth-section" class="auth-box">
+    <h3>请输入后台管理密码</h3>
+    <input type="password" id="admin-pass" placeholder="管理密码" class="input">
+    <button onclick="login()" class="btn">登录</button>
+    <p id="auth-err" style="color: red; font-size: 12px; margin-top: 10px; display: none;"></p>
+  </div>
+
+  <div id="admin-section" style="display: none;">
+    <h2>留言审核管理后台</h2>
+    <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+      <button onclick="loadMessages()" class="btn">🔄 刷新列表</button>
+      <span style="font-size: 12px; color: #888;">默认管理密码为 kailash2026 (可在 Cloudflare 环境变量 ADMIN_PASSWORD 中配置)</span>
+    </div>
+    <ul id="list-container" class="msg-list">
+      <!-- 动态加载留言 -->
+    </ul>
+  </div>
+
+  <script>
+    let currentPassword = localStorage.getItem('admin_pass') || '';
+
+    if (currentPassword) {
+      document.getElementById('auth-section').style.display = 'none';
+      document.getElementById('admin-section').style.display = 'block';
+      loadMessages();
+    }
+
+    function login() {
+      const pass = document.getElementById('admin-pass').value;
+      if (!pass) return;
+      currentPassword = pass;
+      localStorage.setItem('admin_pass', pass);
+      document.getElementById('auth-section').style.display = 'none';
+      document.getElementById('admin-section').style.display = 'block';
+      loadMessages();
+    }
+
+    async function loadMessages() {
+      const container = document.getElementById('list-container');
+      container.innerHTML = '<li>加载中...</li>';
+      try {
+        const res = await fetch('/api/messages?password=' + encodeURIComponent(currentPassword));
+        if (!res.ok) {
+          if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem('admin_pass');
+            document.getElementById('auth-section').style.display = 'block';
+            document.getElementById('admin-section').style.display = 'none';
+            document.getElementById('auth-err').innerText = '密码错误！';
+            document.getElementById('auth-err').style.display = 'block';
+            return;
+          }
+          throw new Error('加载失败');
+        }
+        const data = await res.json();
+        const messages = data.messages || [];
+        if (messages.length === 0) {
+          container.innerHTML = '<li>暂无任何留言</li>';
+          return;
+        }
+
+        container.innerHTML = '';
+        messages.forEach(msg => {
+          const li = document.createElement('li');
+          li.className = 'msg-item';
+          
+          const timeStr = new Date(msg.timestamp).toLocaleString();
+          const badgeClass = msg.status === 'approved' ? 'badge-approved' : 'badge-pending';
+          const badgeText = msg.status === 'approved' ? '已通过' : '待审核';
+          
+          let actionButtons = '';
+          if (msg.status === 'pending') {
+            actionButtons += `<button onclick="approveMessage('${msg.key}')" class="btn btn-success">✅ 通过</button>`;
+          }
+          actionButtons += `<button onclick="deleteMessage('${msg.key}')" class="btn btn-danger">❌ 删除</button>`;
+
+          li.innerHTML = `
+            <div class="msg-content">
+              <strong>[${msg.type}] ${msg.nickname}</strong> ${msg.contact ? `(${msg.contact})` : ''}
+              <span class="msg-badge ${badgeClass}">${badgeText}</span>
+              <p style="margin-top: 8px; color: #fff; font-size: 15px;">${msg.content}</p>
+              <div class="msg-meta">提交时间: ${timeStr}</div>
+            </div>
+            <div class="actions">
+              ${actionButtons}
+            </div>
+          `;
+          container.appendChild(li);
+        });
+      } catch (err) {
+        container.innerHTML = '<li style="color: red;">加载留言出错：' + err.message + '</li>';
+      }
+    }
+
+    async function approveMessage(key) {
+      if (!confirm('确定要审核通过该条留言，展示在公网上吗？')) return;
+      try {
+        const res = await fetch('/api/messages', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key, password: currentPassword })
+        });
+        if (res.ok) {
+          loadMessages();
+        } else {
+          const err = await res.json();
+          alert('审批失败: ' + err.error);
+        }
+      } catch (e) {
+        alert('错误: ' + e.message);
+      }
+    }
+
+    async function deleteMessage(key) {
+      if (!confirm('确定要永久删除该条留言吗？')) return;
+      try {
+        const res = await fetch('/api/messages', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key, password: currentPassword })
+        });
+        if (res.ok) {
+          loadMessages();
+        } else {
+          const err = await res.json();
+          alert('删除失败: ' + err.error);
+        }
+      } catch (e) {
+        alert('错误: ' + e.message);
+      }
+    }
+  </script>
+</body>
+</html>
