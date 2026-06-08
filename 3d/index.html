@@ -63,40 +63,18 @@
             </div>
         </div>
 
-        <!-- 分割线 -->
-        <div class="panel-divider" style="height: 1px; background: rgba(255,255,255,0.1); margin: 8px 0;"></div>
-
-        <!-- 底部左右分栏 -->
-        <div class="panel-top-layout">
-            <!-- 左侧：Logo、标题和访问人数 -->
-            <div class="panel-left-col">
-                <div class="header-branding" style="margin-top:0;">
-                    <img src="../assets/logo-lungta-trans.png" alt="Wind Horse" class="header-logo" style="height: 32px; width: auto; object-fit: contain;">
-                    <div class="header-titles">
-                        <div class="header-subtitle" style="font-size: 10px; opacity: 0.8;">THE GREAT KAILASH KORA</div>
-                        <h1 class="header-title" style="font-size: 16px; margin: 2px 0;">2026 马年大转山</h1>
-                        <div class="global-visitor-count" style="margin-top: 2px; font-size: 10px; color: #9ca3af; text-align: left;">
-                            <span class="icon">👁</span> <span id="visitor-count">12,504</span> 次访问
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 右侧：控制按钮与打赏 -->
-            <div class="panel-right-col">
-                <div class="controls-compact">
-                    <button id="btn-start-tour" class="btn-tour">
-                        <span class="btn-icon-emoji">▶️</span>
-                        <span>巡航</span>
-                    </button>
-                    <button id="btn-free-explore" class="btn-explore">
-                        <span class="btn-icon-emoji">🌍</span>
-                        <span>720探索</span>
-                    </button>
-                    <button id="btn-bgm" class="btn btn-icon">🎵</button>
-                    <button class="btn-donate">☕</button>
-                </div>
-            </div>
+        <!-- 底部控制栏：只保留按钮 -->
+        <div class="controls-compact" style="margin-top: 8px; justify-content: flex-end;">
+            <button id="btn-start-tour" class="btn-tour">
+                <span class="btn-icon-emoji">▶️</span>
+                <span>巡航</span>
+            </button>
+            <button id="btn-free-explore" class="btn-explore">
+                <span class="btn-icon-emoji">🌍</span>
+                <span>720探索</span>
+            </button>
+            <button id="btn-bgm" class="btn btn-icon">🎵</button>
+            <button class="btn-donate">☕</button>
         </div>
     </div>
 

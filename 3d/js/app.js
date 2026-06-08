@@ -193,17 +193,24 @@ Cesium.createWorldTerrainAsync().then(terrainProvider => {
 function updateHudContent() {
     if (nearbyPois.length === 0) return;
     const activePoi = nearbyPois[currentNearbyIndex];
-    document.getElementById('poi-type-badge').innerHTML = activePoi.type || '途经点';
-    document.getElementById('poi-title').innerHTML = activePoi.name || '未知点位';
-    document.getElementById('poi-desc').innerHTML = activePoi.bubble || activePoi.note || '暂无详细描述。';
+    
+    const tagEl = document.getElementById('poi-tag');
+    const titleEl = document.getElementById('poi-title');
+    const descEl = document.getElementById('poi-desc');
+    
+    if (tagEl) tagEl.innerHTML = activePoi.type || '途经点';
+    if (titleEl) titleEl.innerHTML = activePoi.name || '未知点位';
+    if (descEl) descEl.innerHTML = activePoi.bubble || activePoi.note || '暂无详细描述。';
     
     // 如果超过 1 个点，显示轮播控制器
     const controls = document.getElementById('poi-carousel-controls');
-    if (nearbyPois.length > 1) {
-        controls.classList.remove('hidden');
-        document.getElementById('poi-page-indicator').innerText = `${currentNearbyIndex + 1} / ${nearbyPois.length}`;
-    } else {
-        controls.classList.add('hidden');
+    if (controls) {
+        if (nearbyPois.length > 1) {
+            controls.classList.remove('hidden');
+            document.getElementById('poi-page-indicator').innerText = `${currentNearbyIndex + 1} / ${nearbyPois.length}`;
+        } else {
+            controls.classList.add('hidden');
+        }
     }
 }
 

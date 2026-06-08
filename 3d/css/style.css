@@ -20,8 +20,8 @@ html, body, #cesiumContainer {
     top: 20px;
     left: 20px;
     width: fit-content;
-    min-width: 360px;
-    max-width: 95vw;
+    min-width: 320px;
+    max-width: 400px;
     box-sizing: border-box;
     background: rgba(25, 25, 30, 0.45);
     backdrop-filter: blur(16px);
