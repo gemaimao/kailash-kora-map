@@ -102,16 +102,19 @@ html, body, #cesiumContainer {
     border-radius: 12px;
 }
 
-.btn-minimize {
-    background: transparent;
-    border: none;
-    color: #cbd5e1;
-    font-size: 18px;
+.drag-handle {
+    width: 40px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    margin: 0 auto 8px auto;
     cursor: pointer;
-    padding: 4px;
-    position: absolute;
-    top: -5px;
-    right: -5px;
+    flex-shrink: 0;
+    transition: background 0.2s;
+}
+
+.drag-handle:active {
+    background: rgba(255, 255, 255, 0.6);
 }
 
 .lungta-logo {
@@ -633,10 +636,10 @@ html, body, #cesiumContainer {
         padding: 2px 4px;
     }
     
-    .btn-minimize {
-        font-size: 12px;
-        top: -8px;
-        right: -8px;
+    .drag-handle {
+        width: 36px;
+        height: 4px;
+        margin-bottom: 6px;
     }
 
     .commercial-zone {

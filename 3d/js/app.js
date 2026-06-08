@@ -419,16 +419,29 @@ document.getElementById('btn-poi-next').addEventListener('click', () => {
     updateHudContent();
 });
 
-// 控制面板最小化逻辑
-const btnMinimize = document.getElementById('btn-minimize-panel');
+// 控制面板滑动/点击最小化逻辑
+const dragHandle = document.getElementById('drag-handle');
 const uiPanel = document.getElementById('ui-panel');
-if (btnMinimize && uiPanel) {
-    btnMinimize.addEventListener('click', () => {
+if (dragHandle && uiPanel) {
+    // 支持点击切换
+    dragHandle.addEventListener('click', () => {
         uiPanel.classList.toggle('minimized');
-        if (uiPanel.classList.contains('minimized')) {
-            btnMinimize.innerText = '▲'; // 向上箭头表示点击可以展开
-        } else {
-            btnMinimize.innerText = '▼'; // 向下箭头表示点击可以折叠
+    });
+
+    // 支持滑动折叠/展开
+    let startY = 0;
+    dragHandle.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].clientY;
+    });
+    dragHandle.addEventListener('touchend', (e) => {
+        let endY = e.changedTouches[0].clientY;
+        let deltaY = endY - startY;
+        if (deltaY > 30) {
+            // 向下滑动，折叠
+            uiPanel.classList.add('minimized');
+        } else if (deltaY < -30) {
+            // 向上滑动，展开
+            uiPanel.classList.remove('minimized');
         }
     });
 }
