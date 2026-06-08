@@ -439,7 +439,7 @@ html, body, #cesiumContainer {
 .poi-info-content {
     background: rgba(0, 0, 0, 0.3);
     border-radius: 8px;
-    padding: 12px;
+    padding: 10px;
     margin-top: 10px; /* spacing below the control buttons */
     transition: all 0.3s ease;
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -452,8 +452,8 @@ html, body, #cesiumContainer {
 .poi-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 10px;
+    gap: 8px;
+    margin-bottom: 8px;
 }
 
 /* 轮播翻页控件 */
@@ -461,11 +461,12 @@ html, body, #cesiumContainer {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 15px;
+    gap: 8px;
     margin: 0 0 0 auto; /* 靠右对齐，去除底部边距 */
     background: rgba(0, 0, 0, 0.3);
-    padding: 6px;
-    border-radius: 20px;
+    padding: 4px 8px;
+    border-radius: 14px;
+    flex-shrink: 0;
 }
 
 .carousel-controls.hidden {
@@ -476,15 +477,15 @@ html, body, #cesiumContainer {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
-    width: 28px;
-    height: 28px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
-    font-size: 12px;
+    font-size: 10px;
 }
 
 .carousel-btn:hover {
@@ -493,39 +494,45 @@ html, body, #cesiumContainer {
 }
 
 .carousel-indicator {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     color: #cbd5e1;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
 }
 
 .poi-tag {
     background: linear-gradient(135deg, #f59e0b, #d97706);
     color: white;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 20px;
+    padding: 2px 6px;
+    border-radius: 4px;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 6px rgba(245, 158, 11, 0.2);
+    flex-shrink: 0;
 }
 
 .poi-title {
-    font-size: 22px;
-    font-weight: 800;
+    font-size: 15px;
+    font-weight: 700;
     color: #fff;
     margin: 0;
-    letter-spacing: 1px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
 }
 
 .poi-body {
     background: rgba(0, 0, 0, 0.2);
-    border-radius: 12px;
-    padding: 16px;
+    border-radius: 8px;
+    padding: 10px 12px;
     overflow-y: auto;
-    max-height: 250px;
+    max-height: 200px;
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -547,8 +554,8 @@ html, body, #cesiumContainer {
 
 .poi-desc {
     color: #fef08a; /* Pale mud gold */
-    font-size: 15px;
-    line-height: 1.8;
+    font-size: 13px;
+    line-height: 1.6;
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     text-align: justify;
