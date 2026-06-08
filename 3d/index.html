@@ -38,7 +38,7 @@
                 <!-- 动态加载留言 -->
             </marquee>
         </div>
-        <button class="btn-donate bar-btn-donate">打赏</button>
+        <button class="bar-btn-donate">打赏</button>
     </div>
 
     <!-- 底部控制与信息面板 (左下方绝对定位) -->
@@ -56,7 +56,11 @@
                 <span class="btn-icon-emoji">🌍</span>
                 <span>全景探索</span>
             </button>
-            <button id="btn-bgm" class="btn-music">🎵</button>
+            <button id="btn-bgm" class="btn-music" title="播放/暂停音乐">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="display: block;">
+                    <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h6V3h-8z"/>
+                </svg>
+            </button>
         </div>
 
         <!-- 功能面板下方：浮动解说窗口 (当进入雷达范围时显示) -->

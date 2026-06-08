@@ -33,6 +33,23 @@ export async function onRequestGet(context) {
   }
 }
 
+// 敏感词/违法违规关键词库（防灌水、防政治敏感、防博彩色情色诱、防垃圾广告及翻墙工具）
+const SENSITIVE_KEYWORDS = [
+  "法轮功", "falg", "退党", "三退", "民主运动", "独裁", "暴政", "江泽民", "习近平", "六四", "8964", "天安门事件",
+  "赌博", "博彩", "百家乐", "六合彩", "外围", "买球", "球盘", "彩票走势", "彩票分析",
+  "嫖娼", "招嫖", "同城约炮", "成人网", "免费看片", "色情", "女大学生包养", "外围女", "寻包养",
+  "代开", "发票", "代开发票", "开票",
+  "翻墙", "科学上网", "vpn", "机场", "shadowsocks", "v2ray", "trojan", "clash",
+  "买卖枪支", "迷药", "毒品", "枪支", "弹药", "海洛因", "大麻",
+  "贷款", "网贷", "套现", "刷单", "刷信誉", "刷钻", "兼职刷单"
+];
+
+function hasSensitiveWord(text) {
+  if (!text) return false;
+  const lowerText = text.toLowerCase();
+  return SENSITIVE_KEYWORDS.some(word => lowerText.includes(word.toLowerCase()));
+}
+
 export async function onRequestPost(context) {
   try {
     const { request, env } = context;
@@ -45,6 +62,18 @@ export async function onRequestPost(context) {
 
     if (!nickname || !type || !content) {
       return new Response(JSON.stringify({ error: "缺少必填字段：昵称、类型或内容" }), { status: 400 });
+    }
+
+    // 敏感词过滤审核（检查昵称、联系方式和内容）
+    const combinedText = `${nickname} ${contact || ""} ${content}`;
+    if (hasSensitiveWord(combinedText)) {
+      return new Response(JSON.stringify({ error: "发布失败：内容包含敏感词汇或被系统判定为广告垃圾，请文明留言！" }), {
+        status: 400,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        }
+      });
     }
 
     const timestamp = Date.now();

@@ -391,7 +391,7 @@ document.getElementById('btn-free-explore').addEventListener('click', () => {
 // 打赏模态框逻辑
 const tipModal = document.getElementById('tipModal');
 const closeTipModal = document.getElementById('closeTipModal');
-const btnDonate = document.querySelector('.btn-donate');
+const btnDonate = document.querySelector('.bar-btn-donate');
 
 if (btnDonate && tipModal && closeTipModal) {
     btnDonate.addEventListener('click', () => {

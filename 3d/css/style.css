@@ -195,29 +195,7 @@ html, body, #cesiumContainer {
 .btn-music:hover {
     background: rgba(255, 255, 255, 0.08);
     color: #ffffff;
-}
-
-.btn-donate {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #f97316, #ea580c);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 15px;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
-    transition: all 0.3s ease;
-    flex-shrink: 0;
-    box-sizing: border-box;
-}
-
-.btn-music:hover, .btn-donate:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.6);
 }
 
 /* 全局访问人数统计 (右上角) */
