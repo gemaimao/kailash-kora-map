@@ -526,7 +526,7 @@ if (btnSubmitMsg) {
             });
 
             if (response.ok) {
-                pubStatus.innerText = '发布成功！已加入滚动队列。';
+                pubStatus.innerText = '提交成功！留言已进入待审核队列，管理员审核通过后将在公网展示。';
                 pubStatus.style.color = 'green';
                 pubStatus.style.display = 'block';
                 
