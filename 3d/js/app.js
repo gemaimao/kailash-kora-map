@@ -102,6 +102,35 @@ fetch('../data/routes.json').then(r => r.json()).then(data => {
 // =========================================================
 // 安全初始化地形，然后绘制神山所有的 POI 地标
 // =========================================================
+// 内存中生成一个漂亮的金色圆形地标点（用于传统扁平POI）
+function createDefaultMarkerCanvas() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 24;
+    canvas.height = 24;
+    const ctx = canvas.getContext('2d');
+    
+    // 阴影发光效果
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 2;
+    
+    // 白色外边圈
+    ctx.beginPath();
+    ctx.arc(12, 12, 8, 0, 2 * Math.PI);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fill();
+    
+    // 金黄色核心点
+    ctx.shadowColor = 'transparent';
+    ctx.beginPath();
+    ctx.arc(12, 12, 5, 0, 2 * Math.PI);
+    ctx.fillStyle = '#ffcd55';
+    ctx.fill();
+    
+    return canvas;
+}
+
 function loadPoisAndStart(terrainProvider) {
     if (terrainProvider) {
         viewer.terrainProvider = terrainProvider;
@@ -121,7 +150,9 @@ function loadPoisAndStart(terrainProvider) {
                 const groundHeight = (positions && positions[i]) ? (positions[i].height || 5000) : 5000;
                 const altitude = groundHeight + 130;
                 
-                if (!poi.flat) {
+                const isFlat = !!poi.flat;
+                
+                if (!isFlat) {
                     viewer.entities.add({
                         polyline: {
                             positions: Cesium.Cartesian3.fromDegreesArrayHeights([
@@ -137,16 +168,27 @@ function loadPoisAndStart(terrainProvider) {
                     });
                 }
 
-                const iconUrl = `../assets/kailashpic/${poiId}.png`;
+                // 扁平/传统 POI 支持：如果是空白图标，生成白色金芯圆点；否则加载对应的 PNG 图标
+                let billboardImage;
+                if (isFlat) {
+                    if (poiId === 'wht-blank') {
+                        billboardImage = createDefaultMarkerCanvas();
+                    } else {
+                        billboardImage = `../assets/kailashpic/${poiId}.png`;
+                    }
+                } else {
+                    billboardImage = `../assets/kailashpic/${poiId}.png`;
+                }
+
                 viewer.entities.add({
                     id: 'poi_' + poi.id,
-                    position: Cesium.Cartesian3.fromDegrees(fixedLng, fixedLat, poi.flat ? groundHeight : altitude),
+                    position: Cesium.Cartesian3.fromDegrees(fixedLng, fixedLat, isFlat ? groundHeight : altitude),
                     billboard: {
-                        image: poi.flat ? '../assets/qr_code_mountain_final.png' : iconUrl,
-                        scale: poi.flat ? 0.3 : 0.65,
+                        image: billboardImage,
+                        scale: isFlat ? 0.6 : 0.65,
                         scaleByDistance: new Cesium.NearFarScalar(100, 1.0, 10000, 0.2),
-                        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                        heightReference: poi.flat ? Cesium.HeightReference.CLAMP_TO_GROUND : Cesium.HeightReference.NONE,
+                        verticalOrigin: isFlat ? Cesium.VerticalOrigin.CENTER : Cesium.VerticalOrigin.BOTTOM,
+                        heightReference: isFlat ? Cesium.HeightReference.CLAMP_TO_GROUND : Cesium.HeightReference.NONE,
                         disableDepthTestDistance: 10000000.0
                     }
                 });
