@@ -119,6 +119,7 @@ html, body, #cesiumContainer {
 
 .lungta-logo {
     height: 48px;
+    transform: scaleX(-1);
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
 }
 
@@ -529,9 +530,11 @@ html, body, #cesiumContainer {
 }
 
 .overlay-logo {
-    height: 100px;
-    margin-bottom: 24px;
-    filter: drop-shadow(0 4px 12px rgba(253, 224, 71, 0.3));
+    width: 150px;
+    height: auto;
+    margin-bottom: 30px;
+    transform: scaleX(-1);
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
 }
 
 #overlay-title {

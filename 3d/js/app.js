@@ -199,8 +199,8 @@ function flyNext() {
         // 漫游结束，显示全屏谢幕
         const overlay = document.getElementById('fullscreen-overlay');
         if (overlay && currentWaypoint >= flightPath.length) {
-            document.getElementById('overlay-title').innerText = '扎西德勒！转山圆满';
-            document.getElementById('overlay-desc').innerText = '本次 3D 沉浸式神山巡航已结束。\n感谢向导丁丁、多啦、跑者墨小妖、充氧宝颜伟等同伴的支持！';
+            document.getElementById('overlay-title').innerText = '愿转山者吉祥';
+            document.getElementById('overlay-desc').innerHTML = '感谢长久以来<br>为神山圣湖在地文化贡献信仰之力与纪录的所有人！';
             document.getElementById('btn-overlay-start').style.display = 'none';
             document.getElementById('btn-overlay-replay').style.display = 'inline-block';
             overlay.classList.remove('hidden');
