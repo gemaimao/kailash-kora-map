@@ -137,6 +137,7 @@ function loadPoisAndStart(terrainProvider) {
                     });
                 }
 
+                const iconUrl = `https://raw.githubusercontent.com/gemaimao/assets/main/kailashpic/${poiId}.png`;
                 viewer.entities.add({
                     id: 'poi_' + poi.id,
                     position: Cesium.Cartesian3.fromDegrees(fixedLng, fixedLat, poi.flat ? groundHeight : altitude),
