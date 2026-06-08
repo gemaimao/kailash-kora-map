@@ -52,35 +52,21 @@ fetch('../data/routes.json').then(r => r.json()).then(data => {
     // 直接使用原始高精度坐标点，并避免因为坐标点重复导致 Cesium 底层报错
     fullRoutePositions = rawPositions;
     
-    // 1. 全局路线底色 (使用 clampToGround 完美贴合地形起伏)
-        // 动态绘制进度变量
-        let drawIndex = 0;
-        const dynamicPositions = new Cesium.CallbackProperty(() => {
-            if (isPlaying && drawIndex < rawPositions.length) {
-                drawIndex += 15; // 每次渲染增加的点数，控制生长速度
-                if (drawIndex > rawPositions.length) drawIndex = rawPositions.length;
-            } else if (!isPlaying && drawIndex === 0) {
-                // 如果还没开始且没播放，显示少量点或不显示
-                return rawPositions.slice(0, 2);
-            }
-            return rawPositions.slice(0, Math.max(2, drawIndex));
-        }, false);
+    // 1. 全局路线底色 (使用 clampToGround 完美贴合地形起伏，始终完全显示以展示整体路线)
+    viewer.entities.add({
+        name: 'Kailash Kora Route',
+        polyline: {
+            positions: rawPositions,
+            width: 4,
+            material: new Cesium.PolylineGlowMaterialProperty({
+                glowPower: 0.1,
+                color: Cesium.Color.fromCssColorString('#f59e0b').withAlpha(0.4) // 半透明底色光晕
+            }),
+            clampToGround: true
+        }
+    });
 
-        viewer.entities.add({
-            name: 'Kailash Kora Route',
-            polyline: {
-                positions: dynamicPositions,
-                width: 8,
-                material: new Cesium.PolylineGlowMaterialProperty({
-                    glowPower: 0.2,
-                    taperPower: 0.5,
-                    color: Cesium.Color.fromCssColorString('#f59e0b') // 明黄色光晕
-                }),
-                clampToGround: true
-            }
-        });
-
-    // 2. 动态飞行轨迹（完美丝滑版）
+    // 2. 动态飞行轨迹（完美丝滑版，随漫游实时生长）
     let progressPositions = [];
     viewer.entities.add({
         name: 'Kora Route Progress',
@@ -94,7 +80,8 @@ fetch('../data/routes.json').then(r => r.json()).then(data => {
                 let progress = (now - currentSegmentStartTime) / currentSegmentDuration;
                 if (progress > 1.0) progress = 1.0;
                 
-                const exactIdx = Math.floor((currentSegmentStartIdx + (currentSegmentEndIdx - currentSegmentStartIdx) * progress) * SMOOTH_FACTOR);
+                // 修复：移除遗留的 SMOOTH_FACTOR 乘数，与漫游实际索引精细对齐，防止绘制提前或超限
+                const exactIdx = Math.floor(currentSegmentStartIdx + (currentSegmentEndIdx - currentSegmentStartIdx) * progress);
                 
                 const newPositions = fullRoutePositions.slice(0, exactIdx + 1);
                 if (newPositions.length >= 2) {
@@ -102,10 +89,10 @@ fetch('../data/routes.json').then(r => r.json()).then(data => {
                 }
                 return progressPositions.length >= 2 ? progressPositions : undefined;
             }, false),
-            width: 12,
+            width: 8,
             material: new Cesium.PolylineGlowMaterialProperty({
                 glowPower: 0.3,
-                color: Cesium.Color.fromCssColorString('#f59e0b')
+                color: Cesium.Color.fromCssColorString('#f59e0b') // 实体明黄光晕进度线
             }),
             clampToGround: true
         }

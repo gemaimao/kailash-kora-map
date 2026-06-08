@@ -25,18 +25,46 @@
     
     <!-- 顶部右上角绝对定位：访问人数统计及Logo标题 (已废弃，功能移到底部) -->
 
-    <!-- UI 层 -->
+    <!-- 顶部独立发布条 (左上方绝对定位) -->
+    <div id="publish-bar" class="publish-bar-panel">
+        <button id="btn-publish-msg" class="bar-btn-publish">发布</button>
+        <div class="ad-banner">
+            <marquee class="ad-text-slider" scrollamount="4" scrolldelay="100">
+                <span class="ad-slide">环保供氧专家: 提供高原医用级制氧机租赁 (微信号: sparkyanwei)</span>
+                <span class="ad-slide">割麦猫: 6月12日约车回拉萨，请联系 (15208047098)</span>
+                <span class="ad-slide">星空下的朝圣者: 寻找同行伙伴，预计明早出发</span>
+                <span class="ad-slide">冈仁波齐守护者: 请大家爱护环境，带走垃圾</span>
+                <span class="ad-slide">龙虎林: 独立研究开发者 (微信 gemaimao)</span>
+                <!-- 动态加载留言 -->
+            </marquee>
+        </div>
+        <button class="btn-donate bar-btn-donate">打赏</button>
+    </div>
+
+    <!-- 底部控制与信息面板 (左下方绝对定位) -->
     <div id="ui-panel" class="glass-panel">
-        
         <!-- iOS 风格拖拽/点击缩放手柄 -->
         <div id="drag-handle" class="drag-handle"></div>
-        
-        <!-- 新增：与时间轴同步的浮动解说窗口 (默认隐藏) -->
+
+        <!-- 顶部的三个功能键 -->
+        <div class="controls-compact">
+            <button id="btn-start-tour" class="btn-tour">
+                <span class="btn-icon-emoji">▶️</span>
+                <span>巡航飞行</span>
+            </button>
+            <button id="btn-free-explore" class="btn-explore">
+                <span class="btn-icon-emoji">🌍</span>
+                <span>全景探索</span>
+            </button>
+            <button id="btn-bgm" class="btn-music">🎵</button>
+        </div>
+
+        <!-- 功能面板下方：浮动解说窗口 (当进入雷达范围时显示) -->
         <div id="poi-info-panel" class="poi-info-content hidden">
             <div class="poi-header">
                 <span id="poi-tag" class="poi-tag">地标</span>
                 <h2 id="poi-title" class="poi-title">加载中</h2>
-                <!-- 轮播控制器 (移入行内) -->
+                <!-- 轮播控制器 -->
                 <div id="poi-carousel-controls" class="carousel-controls hidden">
                     <button id="btn-poi-prev" class="carousel-btn">◀</button>
                     <span id="poi-page-indicator" class="carousel-indicator">1 / 1</span>
@@ -45,46 +73,6 @@
             </div>
             <div class="poi-body">
                 <p id="poi-desc" class="poi-desc">暂无描述</p>
-            </div>
-        </div>
-
-        <!-- 商业互动区 (跑马灯) -->
-        <div class="commercial-zone">
-            <button id="btn-publish-msg" class="btn-publish">发 布</button>
-            <div class="ad-banner">
-                <marquee class="ad-text-slider" scrollamount="4" scrolldelay="100">
-                    <span class="ad-slide">环保供氧专家: 提供高原医用级制氧机租赁 (微信号: sparkyanwei)</span>
-                    <span class="ad-slide">割麦猫: 6月12日约车回拉萨，请联系 (15208047098)</span>
-                    <span class="ad-slide">星空下的朝圣者: 寻找同行伙伴，预计明早出发</span>
-                    <span class="ad-slide">冈仁波齐守护者: 请大家爱护环境，带走垃圾</span>
-                    <span class="ad-slide">龙虎林: 独立研究开发者 (微信 gemaimao)</span>
-                    <!-- 动态加载留言 -->
-                </marquee>
-            </div>
-        </div>
-
-        <!-- 细分割线 -->
-        <div class="panel-divider"></div>
-
-        <!-- 底部标题与控制栏 (横向排列) -->
-        <div class="bottom-actions-row">
-            <!-- 标题框 -->
-            <div class="brand-card">
-                <div class="brand-title">2026 马年大转山</div>
-            </div>
-
-            <!-- 底部控制栏 -->
-            <div class="controls-compact">
-                <button id="btn-start-tour" class="btn-tour">
-                    <span class="btn-icon-emoji">▶️</span>
-                    <span>巡航</span>
-                </button>
-                <button id="btn-free-explore" class="btn-explore">
-                    <span class="btn-icon-emoji">🌍</span>
-                    <span>720探索</span>
-                </button>
-                <button id="btn-bgm" class="btn-music">🎵</button>
-                <button class="btn-donate">☕</button>
             </div>
         </div>
     </div>

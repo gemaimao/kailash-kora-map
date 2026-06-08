@@ -14,12 +14,53 @@ html, body, #cesiumContainer {
 /* 全局隐藏类 */
 .hidden { display: none !important; }
 
-/* 玻璃质感浮动面板 */
-.glass-panel {
+/* 顶部独立发布条 */
+.publish-bar-panel {
     position: absolute;
     top: 20px;
     left: 20px;
     width: 480px;
+    box-sizing: border-box;
+    background: rgba(18, 18, 22, 0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: space-between;
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+
+.bar-btn-publish, .bar-btn-donate {
+    background: transparent;
+    border: none;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 6px 12px;
+    white-space: nowrap;
+    transition: opacity 0.2s ease;
+}
+
+.bar-btn-publish, .bar-btn-donate {
+    color: #10b981; /* 翠绿 */
+}
+
+.bar-btn-publish:hover, .bar-btn-donate:hover {
+    opacity: 0.8;
+}
+
+/* 玻璃质感浮动面板 */
+.glass-panel {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: 360px;
     box-sizing: border-box;
     background: rgba(18, 18, 22, 0.65);
     backdrop-filter: blur(20px);
@@ -103,15 +144,15 @@ html, body, #cesiumContainer {
 
 .controls-compact {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     align-items: center;
-    flex: 1;
-    justify-content: flex-end;
+    width: 100%;
 }
 
 .btn-tour, .btn-explore {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     padding: 0 10px;
     height: 32px;
@@ -125,6 +166,7 @@ html, body, #cesiumContainer {
     box-shadow: none;
     transition: all 0.2s ease;
     box-sizing: border-box;
+    flex: 1;
 }
 
 .btn-tour:hover, .btn-explore:hover {
@@ -132,7 +174,30 @@ html, body, #cesiumContainer {
     color: #ffffff;
 }
 
-.btn-music, .btn-donate {
+.btn-music {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.85);
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    box-shadow: none;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+.btn-music:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+.btn-donate {
     width: 32px;
     height: 32px;
     display: flex;
@@ -394,22 +459,16 @@ html, body, #cesiumContainer {
 ========================================================= */
 /* POI 信息容器 */
 .poi-info-content {
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 5px; /* 改为底部边距 */
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 10px; /* spacing below the control buttons */
     transition: all 0.3s ease;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .poi-info-content.hidden {
-    opacity: 0;
-    transform: translateY(20px);
-    max-height: 0;
-    margin-top: 0;
-    padding-top: 0;
-    border-top: none;
-    pointer-events: none;
+    display: none !important;
 }
 
 .poi-header {
@@ -703,6 +762,22 @@ html, body, #cesiumContainer {
 ========================================================= */
 @media (max-width: 768px) {
     /* 控制面板移到底部居中，取消通栏，做成极简悬浮卡片 */
+    .publish-bar-panel {
+        top: 10px;
+        bottom: auto;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        width: 96vw;
+        padding: 6px 8px;
+        border-radius: 8px;
+    }
+
+    .bar-btn-publish, .bar-btn-donate {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+
     .glass-panel {
         top: auto;
         bottom: 20px;
@@ -718,34 +793,10 @@ html, body, #cesiumContainer {
         border-radius: 12px;
     }
 
-    .bottom-actions-row {
-        gap: 6px;
-        width: 100%;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .brand-card {
-        min-width: 100px;
-        padding: 0 6px;
-        height: 28px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .brand-title {
-        font-size: 10px;
-        line-height: 1;
-    }
-
-    .panel-divider {
-        margin: 6px 0;
-    }
-
     /* 优化控制按钮间距 */
     .controls-compact {
         gap: 4px;
+        width: 100%;
     }
 
     .btn-tour, .btn-explore {
@@ -755,7 +806,7 @@ html, body, #cesiumContainer {
         border-radius: 6px;
     }
 
-    .btn-music, .btn-donate {
+    .btn-music {
         width: 28px;
         height: 28px;
         font-size: 13px;
