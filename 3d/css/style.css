@@ -11,6 +11,9 @@ html, body, #cesiumContainer {
 /* 隐藏左下角的 Cesium 官方版权文字 */
 .cesium-widget-credits { display: none !important; }
 
+/* 全局隐藏类 */
+.hidden { display: none !important; }
+
 /* 玻璃质感浮动面板 */
 .glass-panel {
     position: absolute;
@@ -30,6 +33,10 @@ html, body, #cesiumContainer {
     color: #fef08a; /* Pale mud gold for general text */
     z-index: 10;
     transition: all 0.3s ease;
+}
+
+.btn-tour span, .btn-explore span {
+    white-space: nowrap;
 }
 
 /* =========================================================
