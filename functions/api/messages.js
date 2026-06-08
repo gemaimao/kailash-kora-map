@@ -133,6 +133,13 @@ export async function onRequestPost(context) {
     // 存入 KV，保留数据
     await env.KORA_MESSAGES.put(key, JSON.stringify(messagePayload));
 
+    // 异步触发微信通知推送
+    if (context.waitUntil) {
+      context.waitUntil(triggerWeChatPush(env, messagePayload, request.url));
+    } else {
+      triggerWeChatPush(env, messagePayload, request.url).catch(() => {});
+    }
+
     // 设置 IP 速率限制
     if (ip) {
       const limitKey = `ratelimit_${ip}`;
@@ -211,5 +218,49 @@ export async function onRequestDelete(context) {
     });
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+  }
+}
+
+// 微信通知推送函数
+async function triggerWeChatPush(env, message, requestUrl) {
+  try {
+    const { nickname, type, content, contact } = message;
+    const adminUrl = requestUrl ? new URL(requestUrl).origin + "/admin.html" : "https://kailash-kora-map.pages.dev/admin.html";
+    const title = `新留言待审核 - 2026马年大转山`;
+    const desp = `**分类**: ${type}\n\n**昵称**: ${nickname}\n\n**联系方式**: ${contact || "无"}\n\n**内容**: ${content}\n\n[点击进入后台审核](${adminUrl})`;
+
+    // 1. Server酱支持
+    if (env.SERVERCHAN_SENDKEY) {
+      const serverChanUrl = `https://sctapi.ftqq.com/${env.SERVERCHAN_SENDKEY}.send`;
+      await fetch(serverChanUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ title, desp })
+      });
+    }
+
+    // 2. PushPlus (推送加) 支持
+    if (env.PUSHPLUS_TOKEN) {
+      const pushPlusUrl = "http://www.pushplus.plus/send";
+      const htmlContent = `
+        <strong>留言类型</strong>: ${type}<br>
+        <strong>发布昵称</strong>: ${nickname}<br>
+        <strong>联系方式</strong>: ${contact || "无"}<br>
+        <strong>留言内容</strong>: ${content}<br><br>
+        <a href="${adminUrl}" style="color: #ffcd55; font-weight: bold; text-decoration: none;">👉 点击进入后台审核</a>
+      `;
+      await fetch(pushPlusUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token: env.PUSHPLUS_TOKEN,
+          title,
+          content: htmlContent,
+          template: "html"
+        })
+      });
+    }
+  } catch (err) {
+    console.error("发送微信推送失败:", err);
   }
 }
