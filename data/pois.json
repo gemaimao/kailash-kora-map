@@ -220,8 +220,8 @@
     "id": "msn_025",
     "name": "俄尔钦足印",
     "bubble": "\"1435年古格王室迎请当时声势正旺的萨迦派密教大师，俄尔支派的创始人俄尔钦贡嘎桑波（1382－1456）前来传法并主持古格国王出家仪式工。在此期间他朝圣神山所留神迹。\\nIn 1435, the Guge royal family welcomed the esoteric master of the Saga School, the founder of the Or tribe, Orchingonga Sanbo (1382-1456), to preach the Dharma and preside over the monking ceremony of King Guge. During this period, he pilgrimaged to the sacred mountain to leave a miracle.\",",
-    "lat": 31.00156803975118,
-    "lng": 81.35708064760303
+    "lat": 30.99727289051452,
+    "lng": 81.35738519400964
   },
   {
     "id": "msn_026",
@@ -284,8 +284,8 @@
     "id": "msn_030",
     "name": "13金塔",
     "bubble": "在止页噶举掌控神山圣湖修行权时期，一共有13位神山之主——受止贡派委任的神山修士集团首领，江扎寺寺主——的灵塔所在地。供塔于此，意味着神山信仰的基业是由止页噶举派筑就。\\n在印度教话语系统中，这里是湿婆的七大祭司祭拜处，七大祭司传说根源于北斗七星仙人崇拜，因此这里也叫大熊圣洞。在此触拜岗底斯峰神圣的基岩、洞内凝结的冰柱林伽，以及为帕尔瓦蒂女神唱颂《美的流涌》（由印度教中兴大师商揭罗补撰完成，他曾亲临此处感受神迹），并绕行南迪（湿婆座骑山）圣道，是印度教徒最大的幸事。\\nDuring the period when the Drikung Kagyu school controlled the practice of the sacred mountains and lakes, this was the location of the stupas of 13 masters of the sacred mountains—leaders of the sacred mountain ascetic groups appointed by the Drikung school, and the abbots of Jiangzha Monastery. The placement of these stupas here signifies that the foundation of the sacred mountain faith was built by the Drikung Kagyu school. In the Hindu discourse, this is the site of worship for Shiva's seven high priests, whose legend originates from the worship of the Big Dipper constellation, hence the place is also called the Great Bear Cave. Touching the sacred bedrock of Mount Kailash, the icicles within the cave, and chanting the \\\"Flow of Beauty\\\" (a verse completed by the Hindu reviver Shangara, who personally experienced the miracles here) for the goddess Parvati, and circumambulating the sacred path of Nandi (Shiva's mount), is considered the greatest blessing for Hindus.\",",
-    "lat": 31.06015870584061,
-    "lng": 81.31245882486999,
+    "lat": 31.0611169856459,
+    "lng": 81.3106906391689,
     "type": "地标",
     "section": "内圈核心",
     "note": "",
@@ -312,5 +312,21 @@
     "bubble": "冈仁波齐，雪山中的珍宝。佛教宇宙观中世界中心须弥山的化身，藏传佛教认为胜乐金刚的无上净土，印度教中主神湿婆（希瓦）的宫殿，耆那教中认为了战胜一切外道的山王，苯教最重要的祖源神山Mount Kailash, the jewel among the sacred snow mountains. In Buddhist cosmology, it is the earthly manifestation of Mount Meru, the center of the universe. Tibetan Buddhism regards it as the supreme pure land of Chakrasamvara, while Hinduism reveres it as the celestial palace of Lord Shiva. In Jainism, it is honored as the king of mountains where spiritual victory over all heterodox doctrines was achieved, and in Bön, it stands as the most crucial ancestral sacred mountain.",
     "lat": 31.06627429696712,
     "lng": 81.31223477826595
+  },
+  {
+    "id": "msn_wht-blank",
+    "name": "第四天葬台",
+    "lat": 31.00501706617709,
+    "lng": 81.2877286328109,
+    "bubble": "<h3>第四天葬台</h3>",
+    "flat": true
+  },
+  {
+    "id": "msn_wht-blank",
+    "name": "小天葬台茶馆",
+    "lat": 31.09803656930616,
+    "lng": 81.3398220440023,
+    "bubble": "<h3>小天葬台茶馆</h3>",
+    "flat": true
   }
 ]

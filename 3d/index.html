@@ -23,8 +23,17 @@
 
     <div id="cesiumContainer"></div>
     
-    <!-- 顶部右上角绝对定位：访问人数统计 -->
-    <div class="global-visitor-count">👁 12,504 次访问</div>
+    <!-- 顶部右上角绝对定位：访问人数统计及Logo标题 -->
+    <div class="top-right-header">
+        <div class="header-branding">
+            <div class="titles-wrapper">
+                <div class="panel-subtitle" style="text-align: right;">THE GREAT KAILASH KORA</div>
+                <h1 class="panel-title" style="text-align: right;">2026马年大转山</h1>
+            </div>
+            <img src="../assets/logo-lungta-trans.png" class="lungta-logo" alt="风马旗摩尼宝" style="height: 32px; margin-left: 8px;">
+        </div>
+        <div class="global-visitor-count">👁 12,504 次访问</div>
+    </div>
 
     <!-- UI 层 -->
     <div id="ui-panel" class="glass-panel">
@@ -53,28 +62,19 @@
         <div class="commercial-zone">
             <button id="btn-publish-msg" class="btn-publish">发 布</button>
             <div class="ad-banner">
-                <span class="ad-tag">推荐</span>
                 <marquee class="ad-text-slider" scrollamount="4" scrolldelay="100">
-                    <span class="ad-slide"><strong>[推荐服务] 环保供氧专家</strong>: 提供高原医用级制氧机租赁 (微信号: sparkyanwei)</span>
-                    <span class="ad-slide"><strong>[留言] 割麦猫</strong>: 6月12日约车回拉萨，请联系 (15208047098)</span>
-                    <span class="ad-slide"><strong>[留言] 星空下的朝圣者</strong>: 寻找同行伙伴，预计明早出发</span>
-                    <span class="ad-slide"><strong>[留言] 冈仁波齐守护者</strong>: 请大家爱护环境，带走垃圾</span>
-                    <span class="ad-slide"><strong>龙虎林</strong>: 独立研究开发者 (微信 gemaimao)</span>
+                    <span class="ad-slide">环保供氧专家: 提供高原医用级制氧机租赁 (微信号: sparkyanwei)</span>
+                    <span class="ad-slide">割麦猫: 6月12日约车回拉萨，请联系 (15208047098)</span>
+                    <span class="ad-slide">星空下的朝圣者: 寻找同行伙伴，预计明早出发</span>
+                    <span class="ad-slide">冈仁波齐守护者: 请大家爱护环境，带走垃圾</span>
+                    <span class="ad-slide">龙虎林: 独立研究开发者 (微信 gemaimao)</span>
+                    <!-- 动态加载留言 -->
                 </marquee>
             </div>
         </div>
 
-        <!-- 左右分栏结构 (现移至底部) -->
-        <div class="panel-top-layout">
-            <!-- 左侧：Logo和标题 -->
-            <div class="panel-left-col">
-                <img src="../assets/logo-lungta-trans.png" class="lungta-logo" alt="风马旗摩尼宝">
-                <div class="titles-wrapper">
-                    <div class="panel-subtitle">THE GREAT KAILASH KORA</div>
-                    <h1 class="panel-title">2026马年大转山</h1>
-                </div>
-            </div>
-            
+        <!-- 底部控制栏 -->
+        <div class="panel-top-layout" style="justify-content: flex-end;">
             <!-- 右侧：控制按钮与打赏 -->
             <div class="panel-right-col">
                 <div class="controls-compact">
@@ -84,7 +84,11 @@
                     </button>
                     <button id="btn-stop-tour" class="btn-explore hidden">
                         <span class="btn-icon-emoji">⏸️</span>
-                        <span>探索</span>
+                        <span>暂停</span>
+                    </button>
+                    <button id="btn-free-explore" class="btn-explore hidden">
+                        <span class="btn-icon-emoji">🌍</span>
+                        <span>720探索</span>
                     </button>
                     <button id="btn-bgm" class="btn btn-icon">🎵</button>
                     <button class="btn-donate">☕</button>
@@ -112,12 +116,13 @@
             <h3 style="color:#111; margin-top:0;">联系与交流</h3>
             <div style="color:#444; font-size:13px; line-height: 1.6; margin-top: 15px;">
                 <ul class="sponsor-list">
-                    <li><strong>推荐服务</strong>: 环保供氧专家 (微信号: sparkyanwei)</li>
-                    <li><strong>留 言</strong>: 割麦猫: 6月12日约车回拉萨，请联系 (15208047098)</li>
-                    <li><strong>留 言</strong>: 星空下的朝圣者: 寻找同行伙伴，预计明早出发</li>
-                    <li><strong>留 言</strong>: 冈仁波齐守护者: 请大家爱护环境，带走垃圾</li>
+                    <li>环保供氧专家: 提供高原医用级制氧机租赁 (微信号: sparkyanwei)</li>
+                    <li>割麦猫: 6月12日约车回拉萨，请联系 (15208047098)</li>
+                    <li>星空下的朝圣者: 寻找同行伙伴，预计明早出发</li>
+                    <li>冈仁波齐守护者: 请大家爱护环境，带走垃圾</li>
+                    <li>龙虎林: 独立研究开发者 (微信 gemaimao)</li>
                 </ul>
-                <h4 style="margin-top: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">最新实时发布</h4>
+                <h4 style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">最新实时发布</h4>
                 <ul class="sponsor-list" id="modal-message-list">
                     <!-- 动态加载的新留言 -->
                 </ul>

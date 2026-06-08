@@ -1,0 +1,39 @@
+{
+  "file name" : "贤者喜宴·噶玛岗仓史 (巴卧·祖拉陈瓦) (z-library.sk, 1lib.sk, z-lib.sk).pdf",
+  "number of pages" : 634,
+  "author" : "巴卧·祖拉陈瓦",
+  "title" : "贤者喜宴·噶玛岗仓史",
+  "creation date" : "D:20230826204313+08'00'",
+  "modification date" : "D:20230826210153+08'00'",
+  "kids" : [ {
+    "type" : "image",
+    "id" : 1,
+    "page number" : 1,
+    "bounding box" : [ 0.0, 0.0, 464.64, 668.16 ],
+    "source" : "贤者喜宴·噶玛岗仓史 (巴卧·祖拉陈瓦) (z-library.sk, 1lib.sk, z-lib.sk)_images/imageFile1.png"
+  }, {
+    "type" : "image",
+    "id" : 2,
+    "page number" : 2,
+    "bounding box" : [ 0.0, 0.0, 464.598, 716.69 ],
+    "source" : "贤者喜宴·噶玛岗仓史 (巴卧·祖拉陈瓦) (z-library.sk, 1lib.sk, z-lib.sk)_images/imageFile2.png"
+  }, {
+    "type" : "image",
+    "id" : 3,
+    "page number" : 3,
+    "bounding box" : [ 0.0, 0.0, 464.598, 716.69 ],
+    "source" : "贤者喜宴·噶玛岗仓史 (巴卧·祖拉陈瓦) (z-library.sk, 1lib.sk, z-lib.sk)_images/imageFile3.png"
+  }, {
+    "type" : "image",
+    "id" : 4,
+    "page number" : 4,
+    "bounding box" : [ 0.0, 0.0, 464.598, 716.69 ],
+    "source" : "贤者喜宴·噶玛岗仓史 (巴卧·祖拉陈瓦) (z-library.sk, 1lib.sk, z-lib.sk)_images/imageFile4.png"
+  }, {
+    "type" : "image",
+    "id" : 5,
+    "page number" : 5,
+    "bounding box" : [ 0.0, 0.0, 464.598, 716.69 ],
+    "source" : "贤者喜宴·噶玛岗仓史 (巴卧·祖拉陈瓦) (z-library.sk, 1lib.sk, z-lib.sk)_images/imageFile5.png"
+  } ]
+}

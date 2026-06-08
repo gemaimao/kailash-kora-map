@@ -53,18 +53,32 @@ fetch('../data/routes.json').then(r => r.json()).then(data => {
     fullRoutePositions = rawPositions;
     
     // 1. 全局路线底色 (使用 clampToGround 完美贴合地形起伏)
-    viewer.entities.add({
-        name: 'Kora Route Base',
-        polyline: {
-            positions: fullRoutePositions,
-            width: 4,
-            material: new Cesium.PolylineDashMaterialProperty({
-                color: Cesium.Color.fromCssColorString('#ffffff').withAlpha(0.6),
-                dashLength: 20
-            }),
-            clampToGround: true
-        }
-    });
+        // 动态绘制进度变量
+        let drawIndex = 0;
+        const dynamicPositions = new Cesium.CallbackProperty(() => {
+            if (isPlaying && drawIndex < rawPositions.length) {
+                drawIndex += 15; // 每次渲染增加的点数，控制生长速度
+                if (drawIndex > rawPositions.length) drawIndex = rawPositions.length;
+            } else if (!isPlaying && drawIndex === 0) {
+                // 如果还没开始且没播放，显示少量点或不显示
+                return rawPositions.slice(0, 2);
+            }
+            return rawPositions.slice(0, Math.max(2, drawIndex));
+        }, false);
+
+        viewer.entities.add({
+            name: 'Kailash Kora Route',
+            polyline: {
+                positions: dynamicPositions,
+                width: 8,
+                material: new Cesium.PolylineGlowMaterialProperty({
+                    glowPower: 0.2,
+                    taperPower: 0.5,
+                    color: Cesium.Color.fromCssColorString('#f59e0b') // 明黄色光晕
+                }),
+                clampToGround: true
+            }
+        });
 
     // 2. 动态飞行轨迹（完美丝滑版）
     let progressPositions = [];
@@ -119,34 +133,45 @@ Cesium.createWorldTerrainAsync().then(terrainProvider => {
                 const groundHeight = updatedPositions[i].height || 5000;
                 const altitude = groundHeight + 130;
                 
-                // 绘制纯 2D 效果的垂直虚线，完美匹配 2D 纸片图标
-                viewer.entities.add({
-                    polyline: {
-                        positions: Cesium.Cartesian3.fromDegreesArrayHeights([
-                            fixedLng, fixedLat, groundHeight,
-                            fixedLng, fixedLat, altitude
-                        ]),
-                        width: 1.5,
-                        material: new Cesium.PolylineDashMaterialProperty({
-                            color: Cesium.Color.WHITE.withAlpha(0.6),
-                            dashLength: 6.0
-                        })
-                    }
-                });
+                if (!poi.flat) {
+                    // 绘制纯 2D 效果的垂直虚线，完美匹配 2D 纸片图标
+                    viewer.entities.add({
+                        polyline: {
+                            positions: Cesium.Cartesian3.fromDegreesArrayHeights([
+                                fixedLng, fixedLat, groundHeight,
+                                fixedLng, fixedLat, altitude
+                            ]),
+                            width: 1.5,
+                            material: new Cesium.PolylineDashMaterialProperty({
+                                color: Cesium.Color.WHITE.withAlpha(0.6),
+                                dashLength: 6.0
+                            })
+                        }
+                    });
+                }
 
-                // 绘制悬浮大图标
-                const iconUrl = `https://raw.githubusercontent.com/gemaimao/assets/main/kailashpic/${poiId}.png`;
+                const isSmall = (poiId === '18' || poiId === '14');
                 viewer.entities.add({
-                    name: poi.name || "POI",
-                    position: Cesium.Cartesian3.fromDegrees(fixedLng, fixedLat, altitude),
+                    id: 'poi_' + poi.id,
+                    position: Cesium.Cartesian3.fromDegrees(fixedLng, fixedLat, poi.flat ? groundHeight : altitude),
                     billboard: {
-                        image: iconUrl,
-                        scale: 0.65,  // 图标增大
+                        image: poi.flat ? '../assets/qr_code_mountain_final.png' : iconUrl,
+                        scale: poi.flat ? 0.3 : 0.65,
                         scaleByDistance: new Cesium.NearFarScalar(100, 1.0, 10000, 0.2),
-                        verticalOrigin: Cesium.VerticalOrigin.BOTTOM, // 让图标站在光柱顶部
+                        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                        heightReference: poi.flat ? Cesium.HeightReference.CLAMP_TO_GROUND : Cesium.HeightReference.NONE,
                         disableDepthTestDistance: undefined
                     }
                 });
+
+                if (!poi.flat) {
+                    // 创建 HTML 弹窗面板
+                    const popup = document.createElement('div');
+                    popup.className = 'poi-popup hidden';
+                    popup.innerHTML = `<div class="poi-popup-content">${poi.bubble || ''}</div>`;
+                    document.getElementById('cesiumContainer').appendChild(popup);
+                    poiPopups.push({ id: poi.id, element: popup, lng: fixedLng, lat: fixedLat, height: altitude });
+                }
             }
             document.getElementById('tour-status').innerText = '漫游已就绪';
             
@@ -315,11 +340,14 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
     
     isPlaying = true;
     
-    // 隐藏巡航按钮，显示探索按钮
+    // 隐藏巡航按钮，显示暂停和720探索
     document.getElementById('btn-start-tour').classList.add('hidden');
     const stopBtn = document.getElementById('btn-stop-tour');
     stopBtn.classList.remove('hidden');
-    stopBtn.querySelector('span').innerText = '探索';
+    stopBtn.querySelectorAll('span')[1].innerText = '暂停';
+    const stopBtnEmoji = stopBtn.querySelector('.btn-icon-emoji');
+    if (stopBtnEmoji) stopBtnEmoji.innerText = '⏸️';
+    document.getElementById('btn-free-explore').classList.remove('hidden');
     
     if (currentWaypoint === 0 && !flightPath[0].elevation) {
         try {
@@ -341,7 +369,7 @@ document.getElementById('btn-stop-tour').addEventListener('click', () => {
     isPlaying = !isPlaying;
     const btnSpans = document.getElementById('btn-stop-tour').querySelectorAll('span');
     if (btnSpans.length > 1) {
-        btnSpans[1].innerText = isPlaying ? '探索' : '恢复';
+        btnSpans[1].innerText = isPlaying ? '暂停' : '恢复';
     }
     const btnEmoji = document.getElementById('btn-stop-tour').querySelector('.btn-icon-emoji');
     if (btnEmoji) {
@@ -353,6 +381,17 @@ document.getElementById('btn-stop-tour').addEventListener('click', () => {
     } else {
         viewer.camera.cancelFlight();
     }
+});
+
+// 720 自由探索
+document.getElementById('btn-free-explore').addEventListener('click', () => {
+    isPlaying = false;
+    viewer.camera.cancelFlight();
+    
+    // 显示巡航按钮，隐藏暂停和探索
+    document.getElementById('btn-start-tour').classList.remove('hidden');
+    document.getElementById('btn-stop-tour').classList.add('hidden');
+    document.getElementById('btn-free-explore').classList.add('hidden');
 });
 
 // 打赏模态框逻辑
@@ -425,26 +464,26 @@ async function fetchAndRenderMessages() {
             const data = await response.json();
             if (data.messages && data.messages.length > 0) {
                 const slider = document.querySelector('.ad-text-slider');
-                if (slider) {
-                    data.messages.forEach(msg => {
-                        const contactStr = msg.contact ? ` (${msg.contact})` : '';
-                        const htmlStr = `<strong>[${msg.type}] ${msg.nickname}</strong>: ${msg.content}${contactStr}`;
+                const modalList = document.getElementById('modal-message-list');
+                data.messages.forEach(msg => {
+                    const contactStr = msg.contact ? ` (${msg.contact})` : '';
+                    const htmlStr = `<strong>${msg.nickname}</strong>: ${msg.content}${contactStr}`;
                         
-                        // 添加到跑马灯
+                    // 添加到跑马灯
+                    if (slider) {
                         const div = document.createElement('div');
                         div.className = 'ad-slide';
                         div.innerHTML = htmlStr;
                         slider.appendChild(div);
-                        
-                        // 添加到模态框
-                        const modalList = document.getElementById('modal-message-list');
-                        if (modalList) {
-                            const li = document.createElement('li');
-                            li.innerHTML = htmlStr;
-                            modalList.appendChild(li);
-                        }
-                    });
-                }
+                    }
+                    
+                    // 添加到模态框
+                    if (modalList) {
+                        const li = document.createElement('li');
+                        li.innerHTML = htmlStr;
+                        modalList.appendChild(li);
+                    }
+                });
             }
         }
     } catch (e) {
