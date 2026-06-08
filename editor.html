@@ -135,8 +135,10 @@
         zoomDelta: 0.5
       }).fitBounds(imgBounds);
 
-      L.tileLayer("assets/tiles/{z}/{x}/{y}.png", {
-        minZoom: 11, maxZoom: 16, tileSize: 256, noWrap: true, bounds: imgBounds
+      // load Esri Satellite basemap to show real geographic data
+      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+        maxZoom: 18,
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
       }).addTo(map);
 
       setTimeout(() => map.invalidateSize(), 200);
