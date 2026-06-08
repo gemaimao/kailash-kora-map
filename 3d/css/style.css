@@ -73,6 +73,31 @@ html, body, #cesiumContainer {
     align-items: center;
 }
 
+.btn-tour, .btn-explore {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: linear-gradient(135deg, #4f46e5, #3730a3);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.4);
+    transition: all 0.3s ease;
+}
+
+.btn-tour:hover, .btn-explore:hover {
+    transform: translateY(-2px);
+}
+
+.btn-explore {
+    background: linear-gradient(135deg, #374151, #1f2937);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
 .btn-icon {
     flex: 0 0 36px;
     padding: 6px 0;
