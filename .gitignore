@@ -8,3 +8,4 @@ backups/
 .bb-browser/
 assets/basemap.png
 temp_venv/
+markitdown_venv/
