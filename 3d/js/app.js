@@ -168,9 +168,9 @@ Cesium.createWorldTerrainAsync().then(terrainProvider => {
 function updateHudContent() {
     if (nearbyPois.length === 0) return;
     const activePoi = nearbyPois[currentNearbyIndex];
-    document.getElementById('poi-tag').innerText = activePoi.type || '途经点';
-    document.getElementById('poi-title').innerText = activePoi.name || '未知点位';
-    document.getElementById('poi-desc').innerText = activePoi.bubble || activePoi.note || '暂无详细描述。';
+    document.getElementById('poi-type-badge').innerHTML = activePoi.type || '途经点';
+    document.getElementById('poi-title').innerHTML = activePoi.name || '未知点位';
+    document.getElementById('poi-desc').innerHTML = activePoi.bubble || activePoi.note || '暂无详细描述。';
     
     // 如果超过 1 个点，显示轮播控制器
     const controls = document.getElementById('poi-carousel-controls');

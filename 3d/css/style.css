@@ -16,7 +16,9 @@ html, body, #cesiumContainer {
     position: absolute;
     top: 20px;
     left: 20px;
-    width: 360px;
+    width: fit-content;
+    min-width: 360px;
+    max-width: 480px;
     box-sizing: border-box;
     background: rgba(25, 25, 30, 0.45);
     backdrop-filter: blur(16px);
@@ -259,38 +261,32 @@ html, body, #cesiumContainer {
 .ad-text-viewport {
     flex: 1;
     min-width: 0;
-    height: 18px; /* 限制高度为单行 */
     overflow: hidden;
+    white-space: nowrap;
     position: relative;
 }
 
 .ad-text-slider {
-    display: flex;
-    flex-direction: column;
-    animation: slideAds 20s infinite;
+    display: inline-block;
+    white-space: nowrap;
+    padding-left: 100%;
+    animation: marqueeHorizontal 25s linear infinite;
 }
 
 .ad-slide {
-    height: 18px;
-    line-height: 18px;
+    display: inline-block;
+    margin-right: 30px;
     font-size: 11px;
     color: #e5e7eb;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .ad-slide strong {
     color: #fcd34d; /* 强调人名 */
 }
 
-@keyframes slideAds {
-    0%, 16% { transform: translateY(0); }
-    20%, 36% { transform: translateY(-18px); }
-    40%, 56% { transform: translateY(-36px); }
-    60%, 76% { transform: translateY(-54px); }
-    80%, 96% { transform: translateY(-72px); }
-    100% { transform: translateY(0); }
+@keyframes marqueeHorizontal {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
 }
 
 /* =========================================================

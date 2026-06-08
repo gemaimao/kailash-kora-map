@@ -7,7 +7,7 @@
     "lng": 81.28655440734049,
     "type": "转山大本营 / 行政中心",
     "section": "线路起点和终点",
-    "note": "塔尔钦意为大经幡，现为普兰县巴嘎镇所在地，神山朝圣大本营",
+    "note": "塔尔钦意为大经幡，现为普兰县巴嘎镇所在地，神山朝圣大本营<br><img src=\"https://images.unsplash.com/photo-1544330691-628d0115049c?q=80&w=600&auto=format&fit=crop\" alt=\"雪山风光\">",
     "density": "稀疏区",
     "zoom": 12,
     "viewLat": 30.975861,
@@ -308,6 +308,7 @@
   {
     "id": "msn_033",
     "name": "冈仁波齐峰",
+    "note": "这是第一处遥拜冈仁波齐的地方。<br><video src=\"https://www.w3schools.com/html/mov_bbb.mp4\" controls muted playsinline style=\"width:100%;\"></video>",
     "bubble": "冈仁波齐，雪山中的珍宝。佛教宇宙观中世界中心须弥山的化身，藏传佛教认为胜乐金刚的无上净土，印度教中主神湿婆（希瓦）的宫殿，耆那教中认为了战胜一切外道的山王，苯教最重要的祖源神山Mount Kailash, the jewel among the sacred snow mountains. In Buddhist cosmology, it is the earthly manifestation of Mount Meru, the center of the universe. Tibetan Buddhism regards it as the supreme pure land of Chakrasamvara, while Hinduism reveres it as the celestial palace of Lord Shiva. In Jainism, it is honored as the king of mountains where spiritual victory over all heterodox doctrines was achieved, and in Bön, it stands as the most crucial ancestral sacred mountain.",
     "lat": 31.06627429696712,
     "lng": 81.31223477826595
