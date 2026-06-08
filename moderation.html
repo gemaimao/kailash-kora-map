@@ -96,7 +96,7 @@
           const badgeText = msg.status === 'approved' ? '已通过' : '待审核';
           
           let actionButtons = '';
-          if (msg.status === 'pending') {
+          if (msg.status !== 'approved') {
             actionButtons += `<button onclick="approveMessage('${msg.key}')" class="btn btn-success">✅ 通过</button>`;
           }
           actionButtons += `<button onclick="deleteMessage('${msg.key}')" class="btn btn-danger">❌ 删除</button>`;

@@ -23,9 +23,9 @@ export async function onRequestGet(context) {
       }
     }
 
-    // 非管理员过滤待审核留言
+    // 非管理员只拉取已通过的留言
     if (!isAdmin) {
-      messages = messages.filter(msg => msg.status !== "pending");
+      messages = messages.filter(msg => msg.status === "approved");
     }
 
     // 按时间倒序排序（最新的在前）
