@@ -388,7 +388,17 @@ function showPoi(id) {
     }
     return line;
   }).join('\n');
-  cardBubble.innerHTML = formattedBubble;
+  let mediaHtml = "";
+  if (poi.imageUrl) {
+    const urls = poi.imageUrl.split(/[,，]/).map(u => u.trim()).filter(Boolean);
+    urls.forEach(url => {
+      mediaHtml += `<img src="${url}" style="width: 100%; max-width: 100%; border-radius: 8px; margin-top: 10px; display: block;" />`;
+    });
+  }
+  if (poi.videoUrl) {
+    mediaHtml += `<video src="${poi.videoUrl}" controls style="width: 100%; max-width: 100%; border-radius: 8px; margin-top: 10px; display: block;"></video>`;
+  }
+  cardBubble.innerHTML = formattedBubble + mediaHtml;
   cardNote.innerHTML = poi.note ? "简注：" + poi.note : "";
 
   currentPoiName.textContent = poi.name;

@@ -372,6 +372,20 @@ function updateHudContent() {
         }
         contentHtml += `<div class="hud-bubble" style="line-height: 1.6; font-size: 14px;">${cleanBubble}</div>`;
     }
+    
+    // 支持渲染多张图片和视频
+    let mediaHtml = '';
+    if (activePoi.imageUrl) {
+        const urls = activePoi.imageUrl.split(/[,，]/).map(u => u.trim()).filter(Boolean);
+        urls.forEach(url => {
+            mediaHtml += `<img src="${url}" style="width: 100%; max-width: 100%; border-radius: 8px; margin-top: 10px; display: block;" />`;
+        });
+    }
+    if (activePoi.videoUrl) {
+        mediaHtml += `<video src="${activePoi.videoUrl}" controls style="width: 100%; max-width: 100%; border-radius: 8px; margin-top: 10px; display: block;"></video>`;
+    }
+    contentHtml += mediaHtml;
+
     if (activePoi.note) {
         contentHtml += `<div class="hud-note" style="margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; font-size: 13px; color: #ddd; line-height: 1.5;">${activePoi.note}</div>`;
     }
