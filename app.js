@@ -389,7 +389,7 @@ function showPoi(id) {
     return line;
   }).join('\n');
   cardBubble.innerHTML = formattedBubble;
-  cardNote.textContent = poi.note ? "简注：" + poi.note : "";
+  cardNote.innerHTML = poi.note ? "简注：" + poi.note : "";
 
   currentPoiName.textContent = poi.name;
 
