@@ -95,16 +95,22 @@
           const badgeClass = msg.status === 'approved' ? 'badge-approved' : 'badge-pending';
           const badgeText = msg.status === 'approved' ? '已通过' : '待审核';
           
+          const pinBadge = msg.isPinned ? `<span class="msg-badge badge-approved" style="background:#3b82f6;">📌 置顶</span>` : '';
+          const pinBtnText = msg.isPinned ? '📌 取消置顶' : '📌 置顶';
+          const pinBtnClass = msg.isPinned ? 'btn-danger' : 'btn-success';
+
           let actionButtons = '';
           if (msg.status !== 'approved') {
             actionButtons += `<button onclick="approveMessage('${msg.key}')" class="btn btn-success">✅ 通过</button>`;
           }
-          actionButtons += `<button onclick="deleteMessage('${msg.key}')" class="btn btn-danger">❌ 删除</button>`;
+          actionButtons += `<button onclick="togglePinMessage('${msg.key}')" class="btn ${pinBtnClass}">${pinBtnText}</button>`;
+          actionButtons += `<button onclick="deleteMessage('${msg.key}')" class="btn btn-danger" style="background:#ef4444; color:#fff;">❌ 删除</button>`;
 
           li.innerHTML = `
             <div class="msg-content">
               <strong>[${msg.type}] ${msg.nickname}</strong> ${msg.contact ? `(${msg.contact})` : ''}
               <span class="msg-badge ${badgeClass}">${badgeText}</span>
+              ${pinBadge}
               <p style="margin-top: 8px; color: #fff; font-size: 15px;">${msg.content}</p>
               <div class="msg-meta">提交时间: ${timeStr}</div>
             </div>
@@ -132,6 +138,24 @@
         } else {
           const err = await res.json();
           alert('审批失败: ' + err.error);
+        }
+      } catch (e) {
+        alert('错误: ' + e.message);
+      }
+    }
+
+    async function togglePinMessage(key) {
+      try {
+        const res = await fetch('/api/messages', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key, password: currentPassword, action: 'togglePin' })
+        });
+        if (res.ok) {
+          loadMessages();
+        } else {
+          const err = await res.json();
+          alert('置顶失败: ' + err.error);
         }
       } catch (e) {
         alert('错误: ' + e.message);

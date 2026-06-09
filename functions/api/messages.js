@@ -28,8 +28,13 @@ export async function onRequestGet(context) {
       messages = messages.filter(msg => msg.status === "approved");
     }
 
-    // 按时间倒序排序（最新的在前）
-    messages.sort((a, b) => b.timestamp - a.timestamp);
+    // 按置顶优先和时间倒序排序（置顶在前，其余按时间倒序）
+    messages.sort((a, b) => {
+      const pinA = a.isPinned ? 1 : 0;
+      const pinB = b.isPinned ? 1 : 0;
+      if (pinA !== pinB) return pinB - pinA;
+      return b.timestamp - a.timestamp;
+    });
 
     // 最多返回 100 条
     messages = messages.slice(0, 100);
@@ -167,7 +172,7 @@ export async function onRequestPut(context) {
     }
 
     const data = await request.json();
-    const { key, password } = data;
+    const { key, password, action } = data;
     const adminPassword = env.ADMIN_PASSWORD || "kailash2026";
 
     if (password !== adminPassword) {
@@ -180,7 +185,12 @@ export async function onRequestPut(context) {
     }
 
     const msg = JSON.parse(value);
-    msg.status = "approved";
+    
+    if (action === "togglePin") {
+      msg.isPinned = !msg.isPinned;
+    } else {
+      msg.status = "approved";
+    }
 
     await env.KORA_MESSAGES.put(key, JSON.stringify(msg));
 
