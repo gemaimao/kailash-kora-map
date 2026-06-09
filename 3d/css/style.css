@@ -565,7 +565,10 @@ html, body, #cesiumContainer {
     border-radius: 8px;
     padding: 10px 12px;
     overflow-y: auto;
-    max-height: 200px;
+    resize: vertical; /* 允许在PC Web端垂直拉伸 */
+    min-height: 120px; /* 限制最小高度 */
+    max-height: 75vh; /* 限制最大高度，避免超出视口 */
+    height: 220px; /* 初始默认高度 */
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -899,6 +902,8 @@ html, body, #cesiumContainer {
         max-height: 60px; /* 最小化方式存在，且可以滚动 */
         padding: 6px;
         border-radius: 8px;
+        resize: none; /* 移动端不需要垂直拉伸 */
+        height: auto; /* 恢复自适应高度 */
     }
 
     .poi-desc {
