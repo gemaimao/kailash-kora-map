@@ -923,15 +923,15 @@ html, body, #cesiumContainer {
     }
 
     .poi-body {
-        max-height: 60px; /* 最小化方式存在，且可以滚动 */
+        min-height: 60px;
+        max-height: 65vh; /* 移动端最大高度限制 */
         padding: 6px;
         border-radius: 8px;
         resize: none;
-        height: auto !important; /* 强制恢复自适应高度 */
     }
 
     .poi-resizer {
-        display: none !important; /* 移动端隐藏高度调节条 */
+        display: none !important; /* 移动端隐藏底部高度调节条，改用顶部手柄拖拽 */
     }
 
     .poi-desc {

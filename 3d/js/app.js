@@ -810,36 +810,106 @@ document.getElementById('btn-poi-next').addEventListener('click', () => {
     updateHudContent();
 });
 
-// 控制面板滑动/点击最小化逻辑
+// ==========================================
+// 控制面板拖拽/滑动高度调节 & 最小化逻辑
+// ==========================================
 const dragHandle = document.getElementById('drag-handle');
 const uiPanel = document.getElementById('ui-panel');
-if (dragHandle && uiPanel) {
-    // 支持点击切换
-    dragHandle.addEventListener('click', () => {
-        uiPanel.classList.toggle('minimized');
-    });
+const poiBody = document.querySelector('.poi-body');
+const poiResizer = document.getElementById('poi-resizer');
 
-    // 支持滑动折叠/展开
+// 1. 顶部手柄 (#drag-handle) 拖拽拉高与折叠逻辑 (支持 PC 鼠标与移动端触摸)
+if (dragHandle && uiPanel && poiBody) {
     let startY = 0;
-    dragHandle.addEventListener('touchstart', (e) => {
-        startY = e.touches[0].clientY;
-    });
-    dragHandle.addEventListener('touchend', (e) => {
-        let endY = e.changedTouches[0].clientY;
-        let deltaY = endY - startY;
-        if (deltaY > 30) {
-            // 向下滑动，折叠
-            uiPanel.classList.add('minimized');
-        } else if (deltaY < -30) {
-            // 向上滑动，展开
-            uiPanel.classList.remove('minimized');
+    let startHeight = 0;
+    let isDragging = false;
+    let hasMoved = false;
+
+    const initDrag = (e) => {
+        isDragging = true;
+        hasMoved = false;
+        startY = e.clientY || (e.touches && e.touches[0].clientY);
+        
+        // 如果当前是最小化状态，起始高度视为最小高度 (60px)
+        const isMinimized = uiPanel.classList.contains('minimized');
+        startHeight = isMinimized ? 60 : (poiBody.offsetHeight || 220);
+
+        document.documentElement.addEventListener('mousemove', doDrag, false);
+        document.documentElement.addEventListener('touchmove', doDrag, { passive: false });
+        document.documentElement.addEventListener('mouseup', stopDrag, false);
+        document.documentElement.addEventListener('touchend', stopDrag, false);
+
+        if (e.cancelable) {
+            e.preventDefault();
         }
-    });
+    };
+
+    const doDrag = (e) => {
+        if (!isDragging) return;
+        
+        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        const deltaY = startY - clientY; // 往上拉 deltaY 为正值，增加高度
+        
+        if (Math.abs(deltaY) > 5) {
+            hasMoved = true;
+        }
+
+        if (hasMoved) {
+            // 如果是在最小化状态往上拉，立即展开面板
+            if (uiPanel.classList.contains('minimized') && deltaY > 10) {
+                uiPanel.classList.remove('minimized');
+            }
+            
+            let newHeight = startHeight + deltaY;
+            
+            // 限制拉伸高度范围
+            const minHeight = 60;
+            const maxHeight = window.innerHeight * 0.7;
+            if (newHeight < minHeight) newHeight = minHeight;
+            if (newHeight > maxHeight) newHeight = maxHeight;
+            
+            poiBody.style.height = `${newHeight}px`;
+        }
+
+        if (e.cancelable) {
+            e.preventDefault();
+        }
+    };
+
+    const stopDrag = (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        
+        document.documentElement.removeEventListener('mousemove', doDrag, false);
+        document.documentElement.removeEventListener('touchmove', doDrag, false);
+        document.documentElement.removeEventListener('mouseup', stopDrag, false);
+        document.documentElement.removeEventListener('touchend', stopDrag, false);
+
+        const endY = e.clientY || (e.changedTouches && e.changedTouches[0].clientY) || startY;
+        const totalDeltaY = endY - startY; // 往下拉为正值
+
+        if (!hasMoved) {
+            // 纯点击手柄：直接切换最小化状态
+            uiPanel.classList.toggle('minimized');
+            if (uiPanel.classList.contains('minimized')) {
+                poiBody.style.height = ''; // 折叠时清空内联高度样式
+            }
+        } else {
+            // 拖动释放：如果向下拖动距离过大，则折叠最小化
+            if (totalDeltaY > 80) {
+                uiPanel.classList.add('minimized');
+                poiBody.style.height = '';
+            } else if (totalDeltaY < -30) {
+                uiPanel.classList.remove('minimized');
+            }
+        }
+    };
+
+    dragHandle.addEventListener('mousedown', initDrag, false);
+    dragHandle.addEventListener('touchstart', initDrag, { passive: false });
 }
 
-// 浮动窗口自定义高度调节滑动条逻辑 (拖拽 resizer 调节 poi-body 的高度)
-const poiResizer = document.getElementById('poi-resizer');
-const poiBody = document.querySelector('.poi-body');
+// 2. 底部拖拽条 (#poi-resizer) 调节高度逻辑 (仅 PC Web 端生效)
 if (poiResizer && poiBody) {
     let startY = 0;
     let startHeight = 0;
@@ -855,10 +925,8 @@ if (poiResizer && poiBody) {
         document.documentElement.addEventListener('mouseup', stopDrag, false);
         document.documentElement.addEventListener('touchend', stopDrag, false);
         
-        // 样式反馈：拖拽时添加高亮
         poiResizer.style.background = 'rgba(255, 255, 255, 0.4)';
         
-        // 防止文本选中干扰
         if (e.cancelable) {
             e.preventDefault();
         }
@@ -867,12 +935,12 @@ if (poiResizer && poiBody) {
     const doDrag = (e) => {
         if (!isDragging) return;
         const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-        const deltaY = clientY - startY;
+        const deltaY = clientY - startY; // 往下拉增加高度
         let newHeight = startHeight + deltaY;
         
-        // 限制调节范围：最小 120px，最大为 70% 视口高度
-        if (newHeight < 120) newHeight = 120;
+        const minHeight = 120;
         const maxHeight = window.innerHeight * 0.7;
+        if (newHeight < minHeight) newHeight = minHeight;
         if (newHeight > maxHeight) newHeight = maxHeight;
         
         poiBody.style.height = `${newHeight}px`;
@@ -886,7 +954,6 @@ if (poiResizer && poiBody) {
         document.documentElement.removeEventListener('mouseup', stopDrag, false);
         document.documentElement.removeEventListener('touchend', stopDrag, false);
         
-        // 恢复原有样式
         poiResizer.style.background = '';
     };
 
