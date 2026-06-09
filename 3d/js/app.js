@@ -14,6 +14,25 @@ const viewer = new Cesium.Viewer('cesiumContainer', {
     navigationHelpButton: false 
 });
 
+// 监听 POI 选中事件，如果 POI 包含自定义 3D 相机视角则自动飞往该视角
+viewer.selectedEntityChanged.addEventListener(function(selectedEntity) {
+    if (Cesium.defined(selectedEntity) && selectedEntity.id && selectedEntity.id.startsWith('poi_')) {
+        const id = selectedEntity.id.replace('poi_', '');
+        const poi = allPoisData.find(p => p.id === id);
+        if (poi && typeof poi.camLng === 'number' && typeof poi.camLat === 'number' && typeof poi.camHeight === 'number') {
+            viewer.camera.flyTo({
+                destination: Cesium.Cartesian3.fromDegrees(poi.camLng, poi.camLat, poi.camHeight),
+                orientation: {
+                    heading: Cesium.Math.toRadians(typeof poi.heading === 'number' ? poi.heading : 0.0),
+                    pitch: Cesium.Math.toRadians(typeof poi.pitch === 'number' ? poi.pitch : -35.0),
+                    roll: Cesium.Math.toRadians(typeof poi.roll === 'number' ? poi.roll : 0.0)
+                },
+                duration: 2.0
+            });
+        }
+    }
+});
+
 // 默认开启抗锯齿
 viewer.scene.postProcessStages.fxaa.enabled = true;
 // 开启深度测试，防止山体背后的图标透视穿模
@@ -132,6 +151,64 @@ function createDefaultMarkerCanvas() {
     return canvas;
 }
 
+/**
+ * 动态拼接 SVG 战术异形路牌并返回 Data URL
+ * @param {string} name 地标名称（如 "马鞍石"）
+ * @param {string} type 语义类型（如 "自然奇观"）
+ * @param {string} innerIconSvg 核心语义图形（SVG 路径字符串）
+ * @param {string} themeColor 主题发光颜色
+ */
+function generateRoadSignBillboard(name, type, innerIconSvg, themeColor = "#f59e0b") {
+    const width = 140;
+    const height = 64;
+    
+    // 异形盾牌路牌外观的 SVG Path
+    const pathD = "M 12 0 " +
+                  "L 128 0 " +
+                  "C 134 0, 140 6, 140 12 " +
+                  "L 140 44 " +
+                  "C 140 50, 134 56, 128 56 " +
+                  "L 78 56 " +
+                  "L 70 64 " +  // 下方指示尖角
+                  "L 62 56 " +
+                  "L 12 56 " +
+                  "C 6 56, 0 50, 0 44 " +
+                  "L 0 12 " +
+                  "C 0 6, 6 0, 12 0 Z";
+
+    // 纯代码拼接 SVG，包含阴影、渐变、文字排版与左侧图标嵌入
+    const svgString = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.5" flood-color="#000000"/>
+        </filter>
+        
+        <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#1e293b" stop-opacity="0.95" />
+            <stop offset="100%" stop-color="#0f172a" stop-opacity="0.95" />
+        </linearGradient>
+
+        <g filter="url(#shadow)">
+            <path d="${pathD}" fill="url(#bgGrad)" stroke="${themeColor}" stroke-width="1.5"/>
+        </g>
+        
+        <!-- 左侧核心语义图形容器 (展示马鞍、马头等图形) -->
+        <g transform="translate(12, 14)" stroke="${themeColor}" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            ${innerIconSvg}
+        </g>
+        
+        <!-- 右侧文本排版 -->
+        <text x="44" y="24" font-family="'PingFang SC', -apple-system, sans-serif" font-size="12" font-weight="bold" fill="#ffffff">${name}</text>
+        <text x="44" y="40" font-family="'PingFang SC', -apple-system, sans-serif" font-size="9" font-weight="bold" fill="${themeColor}" letter-spacing="1">${type.toUpperCase()}</text>
+    </svg>`;
+
+    // 将 SVG 字符串安全转换为 Base64 格式的 Data URL
+    const utf8Bytes = encodeURIComponent(svgString).replace(/%([0-9A-F]{2})/g, (match, p1) => {
+        return String.fromCharCode('0x' + p1);
+    });
+    return 'data:image/svg+xml;base64,' + btoa(utf8Bytes);
+}
+
 function loadPoisAndStart(terrainProvider) {
     if (terrainProvider) {
         viewer.terrainProvider = terrainProvider;
@@ -192,9 +269,40 @@ function loadPoisAndStart(terrainProvider) {
                     };
                 } else {
                     let billboardImage = `../assets/kailashpic/${poiId}.png`;
+                    let useSvgSign = false;
+                    let svgIconPath = "";
+                    let svgType = "";
+                    let svgColor = "#f59e0b";
+                    
+                    if (poi.id === "msn_009") { // 马鞍石
+                        useSvgSign = true;
+                        svgIconPath = `<path d="M 2 12 Q 12 4 22 12 Q 22 18 12 18 Q 2 18 2 12 Z M 12 18 L 12 22 M 6 15 L 6 22 M 18 15 L 18 22" />`;
+                        svgType = "自然奇观";
+                        svgColor = "#fbbf24";
+                    } else if (poi.id === "msn_010") { // 马头明王旅馆
+                        useSvgSign = true;
+                        svgIconPath = `<path d="M 12 2 L 6 9 L 6 22 L 18 22 L 18 9 Z M 9 12 A 3 3 0 0 1 15 12 M 12 6 L 12 9 M 9 16 H 15" />`;
+                        svgType = "补给休憩处";
+                        svgColor = "#ef4444";
+                    } else if (poi.id === "msn_018") { // 卓玛拉山口
+                        useSvgSign = true;
+                        svgIconPath = `<path d="M 2 20 L 8 10 L 14 18 L 22 6 L 26 20 Z M 8 10 L 22 6 M 2 20 H 26" />`;
+                        svgType = "全程最高点";
+                        svgColor = "#3b82f6";
+                    } else if (poi.id === "msn_029") { // 色龙寺
+                        useSvgSign = true;
+                        svgIconPath = `<path d="M 12 2 L 12 6 M 7 9 H 17 M 6 14 H 18 M 8 14 V 22 H 16 V 14 Z M 12 17 A 1.5 1.5 0 1 1 12 20" />`;
+                        svgType = "内圈修行寺院";
+                        svgColor = "#a855f7";
+                    }
+
+                    if (useSvgSign) {
+                        billboardImage = generateRoadSignBillboard(poi.name, svgType, svgIconPath, svgColor);
+                    }
+
                     entityConfig.billboard = {
                         image: billboardImage,
-                        scale: isFlat ? 0.6 : 0.65,
+                        scale: isFlat ? 0.6 : (useSvgSign ? 0.85 : 0.65),
                         scaleByDistance: new Cesium.NearFarScalar(100, 1.0, 10000, 0.2),
                         verticalOrigin: isFlat ? Cesium.VerticalOrigin.CENTER : Cesium.VerticalOrigin.BOTTOM,
                         heightReference: isFlat ? Cesium.HeightReference.CLAMP_TO_GROUND : Cesium.HeightReference.NONE,

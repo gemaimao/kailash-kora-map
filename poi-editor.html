@@ -7,6 +7,7 @@
   <!-- CesiumJS -->
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Cesium.js"></script>
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/cesium-navigation-es6-plugin@1.1.7/CesiumNavigation.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; width: 100%; font-family: -apple-system, "PingFang SC", sans-serif; background: #0d0d0f; color: #eee; overflow: hidden; }
@@ -86,7 +87,6 @@
     .form-actions button.danger { border-color: rgba(255,80,80,0.4); background: rgba(255,80,80,0.1); color: #ff8080; }
     .form-actions button.danger:hover { background: rgba(255,80,80,0.2); }
 
-    .crosshair { cursor: crosshair !important; }
     .status {
       position: absolute; bottom: 10px; left: 10px; z-index: 1000;
       background: rgba(0,0,0,0.75); border: 1px solid rgba(255,255,255,0.1);
@@ -157,7 +157,18 @@
           <input type="number" id="fViewLat" step="0.000001" placeholder="视点纬度" />
           <input type="number" id="fViewLng" step="0.000001" placeholder="视点经度" />
         </div>
-        <input type="number" id="fZoom" step="1" placeholder="视线距离/范围 (米)" />
+        <input type="number" id="fZoom" step="1" placeholder="视线距离/范围 (米)" style="margin-bottom: 4px;" />
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; margin-top: 6px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 6px;">
+          <input type="number" id="fCamLng" readonly style="background: rgba(255,255,255,0.02); color: #ccc; font-size: 11px;" placeholder="相机经度" />
+          <input type="number" id="fCamLat" readonly style="background: rgba(255,255,255,0.02); color: #ccc; font-size: 11px;" placeholder="相机纬度" />
+          <input type="number" id="fCamHeight" readonly style="background: rgba(255,255,255,0.02); color: #ccc; font-size: 11px;" placeholder="相机高度" />
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; margin-top: 4px;">
+          <input type="number" id="fHeading" step="0.1" style="font-size: 11px;" placeholder="偏航角 Heading" />
+          <input type="number" id="fPitch" step="0.1" style="font-size: 11px;" placeholder="俯仰角 Pitch" />
+          <input type="number" id="fRoll" step="0.1" style="font-size: 11px;" placeholder="翻滚角 Roll" />
+        </div>
       </div>
 
       <div class="form-row">
@@ -206,6 +217,16 @@
         sceneModePicker: false,
         navigationHelpButton: false
       });
+
+      // Initialize official Cesium Navigation plugin
+      if (typeof CesiumNavigation !== 'undefined') {
+        new CesiumNavigation(viewer, {
+          defaultResetView: Cesium.Cartographic.fromDegrees(81.2865, 30.9300, 7500),
+          enableCompass: true,
+          enableZoomControls: true,
+          enableDistanceLegend: false
+        });
+      }
 
       // Enable anti-aliasing
       viewer.scene.postProcessStages.fxaa.enabled = true;
@@ -472,19 +493,38 @@
       document.getElementById("fBubble").value = poi.bubble || "";
       document.getElementById("fNote").value = poi.note || "";
 
+      document.getElementById("fCamLng").value = typeof poi.camLng === "number" ? poi.camLng.toFixed(6) : "";
+      document.getElementById("fCamLat").value = typeof poi.camLat === "number" ? poi.camLat.toFixed(6) : "";
+      document.getElementById("fCamHeight").value = typeof poi.camHeight === "number" ? Math.round(poi.camHeight) : "";
+      document.getElementById("fHeading").value = typeof poi.heading === "number" ? poi.heading.toFixed(1) : "";
+      document.getElementById("fPitch").value = typeof poi.pitch === "number" ? poi.pitch.toFixed(1) : "";
+      document.getElementById("fRoll").value = typeof poi.roll === "number" ? poi.roll.toFixed(1) : "";
+
       renderList();
       refreshMarkers();
 
       // Pan camera to look at selected POI
-      viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(poi.lng, poi.lat - 0.015, 2500),
-        orientation: {
-          heading: Cesium.Math.toRadians(0.0),
-          pitch: Cesium.Math.toRadians(-35.0),
-          roll: 0.0
-        },
-        duration: 1.5
-      });
+      if (typeof poi.camLng === 'number' && typeof poi.camLat === 'number' && typeof poi.camHeight === 'number') {
+        viewer.camera.flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(poi.camLng, poi.camLat, poi.camHeight),
+          orientation: {
+            heading: Cesium.Math.toRadians(typeof poi.heading === 'number' ? poi.heading : 0.0),
+            pitch: Cesium.Math.toRadians(typeof poi.pitch === 'number' ? poi.pitch : -35.0),
+            roll: Cesium.Math.toRadians(typeof poi.roll === 'number' ? poi.roll : 0.0)
+          },
+          duration: 1.5
+        });
+      } else {
+        viewer.camera.flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(poi.lng, poi.lat - 0.015, poi.zoom || 2500),
+          orientation: {
+            heading: Cesium.Math.toRadians(0.0),
+            pitch: Cesium.Math.toRadians(-35.0),
+            roll: 0.0
+          },
+          duration: 1.5
+        });
+      }
     }
 
     // Save changes of active POI
@@ -501,14 +541,8 @@
       poi.name = document.getElementById("fName").value.trim();
       poi.type = document.getElementById("fType").value.trim();
       poi.section = document.getElementById("fSection").value.trim();
-      
-      if (document.getElementById("fFlat").checked) {
-        poi.flat = true;
-      } else {
-        delete poi.flat;
-      }
-
-      poi.zoom = parseFloat(document.getElementById("fZoom").value) || 1500;
+      poi.flat = document.getElementById("fFlat").checked;
+      poi.zoom = parseInt(document.getElementById("fZoom").value) || 1500;
       poi.viewLat = parseFloat(document.getElementById("fViewLat").value) || poi.lat;
       poi.viewLng = parseFloat(document.getElementById("fViewLng").value) || poi.lng;
       poi.bubble = document.getElementById("fBubble").value;
@@ -653,9 +687,26 @@
         range = cameraCarto.height;
       }
 
+      const cameraCarto = Cesium.Cartographic.fromCartesian(viewer.camera.position);
+      const camLng = Cesium.Math.toDegrees(cameraCarto.longitude);
+      const camLat = Cesium.Math.toDegrees(cameraCarto.latitude);
+      const camHeight = cameraCarto.height;
+
+      const heading = Cesium.Math.toDegrees(viewer.camera.heading);
+      const pitch = Cesium.Math.toDegrees(viewer.camera.pitch);
+      const roll = Cesium.Math.toDegrees(viewer.camera.roll);
+
       document.getElementById("fZoom").value = Math.round(range);
       document.getElementById("fViewLat").value = viewLat.toFixed(6);
       document.getElementById("fViewLng").value = viewLng.toFixed(6);
+
+      document.getElementById("fCamLng").value = camLng.toFixed(6);
+      document.getElementById("fCamLat").value = camLat.toFixed(6);
+      document.getElementById("fCamHeight").value = Math.round(camHeight);
+      document.getElementById("fHeading").value = heading.toFixed(1);
+      document.getElementById("fPitch").value = pitch.toFixed(1);
+      document.getElementById("fRoll").value = roll.toFixed(1);
+
       document.getElementById("status").textContent = "📡 已成功捕获当前 3D 相机视角 (倾斜对焦高度: " + Math.round(range) + " 米)";
     });
 

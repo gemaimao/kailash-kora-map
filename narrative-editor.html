@@ -7,6 +7,7 @@
   <!-- CesiumJS -->
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Cesium.js"></script>
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/cesium-navigation-es6-plugin@1.1.7/CesiumNavigation.min.js"></script>
   <style>
     :root {
       --bg-dark: #0d0d0f;
@@ -44,7 +45,6 @@
     .event-meta { font-size: 11px; color: var(--text-dim); }
 
     /* Map */
-    #map { height: 100%; width: 100%; background: #08080a; }
     .cesium-viewer-bottom { display: none !important; }
     
     .map-overlay-tools { position: absolute; top: 20px; left: 20px; z-index: 1000; display: flex; gap: 8px; }
@@ -53,9 +53,9 @@
       padding: 8px 16px; border-radius: 20px; font-size: 12px; cursor: pointer; backdrop-filter: blur(8px);
       display: flex; align-items: center; gap: 6px; transition: border-color 0.2s, background-color 0.2s;
     }
-    .tool-btn:hover { background: rgba(40,40,45,0.9); border-color: var(--accent); }
+    .tool-btn:hover { background: rgba(40,40,45,0.9); border-color: var(--accent); color: var(--accent); }
     .tool-btn.active { background: var(--accent); color: #000; font-weight: 600; }
-
+ 
     /* Timeline */
     .bottom-bar { 
       position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 80%; max-width: 800px;
@@ -190,6 +190,32 @@
               <input type="number" class="form-input" id="fLng" step="0.000001">
             </div>
           </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>相机经度 (Cam Lng)</label>
+              <input type="number" class="form-input" id="fCamLng" readonly style="background: rgba(255,255,255,0.02); color: #ccc;">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>相机纬度 (Cam Lat)</label>
+              <input type="number" class="form-input" id="fCamLat" readonly style="background: rgba(255,255,255,0.02); color: #ccc;">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>相机高度 (Cam Alt)</label>
+              <input type="number" class="form-input" id="fCamHeight" readonly style="background: rgba(255,255,255,0.02); color: #ccc;">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>偏航 (Heading°)</label>
+              <input type="number" class="form-input" id="fHeading" step="0.1">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>俯仰 (Pitch°)</label>
+              <input type="number" class="form-input" id="fPitch" step="0.1">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>翻滚 (Roll°)</label>
+              <input type="number" class="form-input" id="fRoll" step="0.1">
+            </div>
+          </div>
         </div>
 
         <div class="form-group" style="margin-top: 20px;">
@@ -250,6 +276,16 @@
           sceneModePicker: false,
           navigationHelpButton: false
         });
+
+        // Initialize official Cesium Navigation plugin
+        if (typeof CesiumNavigation !== 'undefined') {
+          new CesiumNavigation(viewer, {
+            defaultResetView: Cesium.Cartographic.fromDegrees(81.2865, 30.9300, 7500),
+            enableCompass: true,
+            enableZoomControls: true,
+            enableDistanceLegend: false
+          });
+        }
 
         viewer.scene.postProcessStages.fxaa.enabled = true;
         viewer.scene.globe.depthTestAgainstTerrain = true;
@@ -413,7 +449,6 @@
             refreshMarkers();
           }
         }, Cesium.ScreenSpaceEventType.LEFT_UP);
-
       } catch (err) {
         console.error("Init failed", err);
       }
@@ -575,19 +610,38 @@
       document.getElementById('fZoom').value = poi.zoom || 1500;
       document.getElementById('fDwell').value = poi.dwell || 8;
 
+      document.getElementById('fCamLng').value = typeof poi.camLng === 'number' ? poi.camLng.toFixed(6) : '';
+      document.getElementById('fCamLat').value = typeof poi.camLat === 'number' ? poi.camLat.toFixed(6) : '';
+      document.getElementById('fCamHeight').value = typeof poi.camHeight === 'number' ? Math.round(poi.camHeight) : '';
+      document.getElementById('fHeading').value = typeof poi.heading === 'number' ? poi.heading.toFixed(1) : '';
+      document.getElementById('fPitch').value = typeof poi.pitch === 'number' ? poi.pitch.toFixed(1) : '';
+      document.getElementById('fRoll').value = typeof poi.roll === 'number' ? poi.roll.toFixed(1) : '';
+
       refreshMarkers();
       refreshEventList();
       
       // Focus Camera onto selected POI
-      viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(poi.lng, poi.lat - 0.015, 2500),
-        orientation: {
-          heading: Cesium.Math.toRadians(0.0),
-          pitch: Cesium.Math.toRadians(-35.0),
-          roll: 0.0
-        },
-        duration: 1.5
-      });
+      if (typeof poi.camLng === 'number' && typeof poi.camLat === 'number' && typeof poi.camHeight === 'number') {
+        viewer.camera.flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(poi.camLng, poi.camLat, poi.camHeight),
+          orientation: {
+            heading: Cesium.Math.toRadians(typeof poi.heading === 'number' ? poi.heading : 0.0),
+            pitch: Cesium.Math.toRadians(typeof poi.pitch === 'number' ? poi.pitch : -35.0),
+            roll: Cesium.Math.toRadians(typeof poi.roll === 'number' ? poi.roll : 0.0)
+          },
+          duration: 1.5
+        });
+      } else {
+        viewer.camera.flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(poi.lng, poi.lat - 0.015, poi.zoom || 2500),
+          orientation: {
+            heading: Cesium.Math.toRadians(0.0),
+            pitch: Cesium.Math.toRadians(-35.0),
+            roll: 0.0
+          },
+          duration: 1.5
+        });
+      }
     }
 
     // Capture current 3D Camera Focus point on terrain
@@ -611,9 +665,26 @@
         range = cameraCarto.height;
       }
 
+      const cameraCarto = Cesium.Cartographic.fromCartesian(viewer.camera.position);
+      const camLng = Cesium.Math.toDegrees(cameraCarto.longitude);
+      const camLat = Cesium.Math.toDegrees(cameraCarto.latitude);
+      const camHeight = cameraCarto.height;
+
+      const heading = Cesium.Math.toDegrees(viewer.camera.heading);
+      const pitch = Cesium.Math.toDegrees(viewer.camera.pitch);
+      const roll = Cesium.Math.toDegrees(viewer.camera.roll);
+
       document.getElementById('fLat').value = viewLat.toFixed(6);
       document.getElementById('fLng').value = viewLng.toFixed(6);
       document.getElementById('fZoom').value = Math.round(range);
+
+      document.getElementById('fCamLng').value = camLng.toFixed(6);
+      document.getElementById('fCamLat').value = camLat.toFixed(6);
+      document.getElementById('fCamHeight').value = Math.round(camHeight);
+      document.getElementById('fHeading').value = heading.toFixed(1);
+      document.getElementById('fPitch').value = pitch.toFixed(1);
+      document.getElementById('fRoll').value = roll.toFixed(1);
+
       showStatus("📸 3D相机视角参数已成功捕获 (对焦高度: " + Math.round(range) + " 米)");
     }
 
@@ -641,6 +712,20 @@
       poi.viewLng = parseFloat(document.getElementById('fLng').value);
       poi.zoom = parseFloat(document.getElementById('fZoom').value);
       poi.dwell = parseInt(document.getElementById('fDwell').value) || 8;
+
+      const camLngVal = parseFloat(document.getElementById('fCamLng').value);
+      const camLatVal = parseFloat(document.getElementById('fCamLat').value);
+      const camHeightVal = parseFloat(document.getElementById('fCamHeight').value);
+      const headingVal = parseFloat(document.getElementById('fHeading').value);
+      const pitchVal = parseFloat(document.getElementById('fPitch').value);
+      const rollVal = parseFloat(document.getElementById('fRoll').value);
+
+      if (!isNaN(camLngVal)) poi.camLng = camLngVal; else delete poi.camLng;
+      if (!isNaN(camLatVal)) poi.camLat = camLatVal; else delete poi.camLat;
+      if (!isNaN(camHeightVal)) poi.camHeight = camHeightVal; else delete poi.camHeight;
+      if (!isNaN(headingVal)) poi.heading = headingVal; else delete poi.heading;
+      if (!isNaN(pitchVal)) poi.pitch = pitchVal; else delete poi.pitch;
+      if (!isNaN(rollVal)) poi.roll = rollVal; else delete poi.roll;
 
       showStatus("✅ 属性已保存到内存，同步中...");
       refreshMarkers();

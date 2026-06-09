@@ -7,6 +7,7 @@
   <!-- CesiumJS -->
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Cesium.js"></script>
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/cesium-navigation-es6-plugin@1.1.7/CesiumNavigation.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; width: 100%; font-family: -apple-system, "PingFang SC", sans-serif; background: #0d0d0f; color: #eee; overflow: hidden; }
@@ -47,6 +48,31 @@
     }
 
     .crosshair { cursor: crosshair !important; }
+
+    /* Floating Node Panel */
+    .node-panel {
+      position: absolute; z-index: 1000; top: 74px; right: 12px;
+      width: 260px; background: rgba(18,18,22,0.95); backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,205,85,0.3); border-radius: 8px;
+      padding: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      display: none; flex-direction: column; gap: 10px;
+    }
+    .node-panel h3 { font-size: 13px; color: #ffcd55; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; margin-bottom: 4px; }
+    .node-panel .field { display: flex; flex-direction: column; gap: 4px; }
+    .node-panel label { font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px; }
+    .node-panel input {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 4px; padding: 6px; color: #fff; font-size: 12px; outline: none;
+    }
+    .node-panel input:focus { border-color: #ffcd55; }
+    .node-panel .actions { display: flex; gap: 8px; margin-top: 4px; }
+    .node-panel button {
+      flex: 1; padding: 8px; border-radius: 6px; font-size: 12px; cursor: pointer; border: none; font-weight: 600;
+    }
+    .node-panel button.danger { background: rgba(255,80,80,0.2); border: 1px solid rgba(255,80,80,0.4); color: #ff8080; }
+    .node-panel button.danger:hover { background: rgba(255,80,80,0.3); }
+    .node-panel button.secondary { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.15); }
+    .node-panel button.secondary:hover { background: rgba(255,255,255,0.15); }
   </style>
 </head>
 <body>
@@ -69,6 +95,22 @@
     <button id="saveBtn" style="background:rgba(80,180,80,0.2); border-color:rgba(80,180,80,0.4); color: #8af;">💾 保存到服务器</button>
     <button id="exportBtn">↓ 导出 JSON</button>
     <span class="info" id="pointCount">0 个点</span>
+  </div>
+
+  <div class="node-panel" id="nodePanel">
+    <h3 id="panelTitle">选中节点 #1</h3>
+    <div class="field">
+      <label>经度 (Longitude)</label>
+      <input type="number" id="nodeLng" step="0.000001">
+    </div>
+    <div class="field">
+      <label>纬度 (Latitude)</label>
+      <input type="number" id="nodeLat" step="0.000001">
+    </div>
+    <div class="actions">
+      <button class="danger" id="delNodeBtn">删除此点</button>
+      <button class="secondary" id="closePanelBtn">关闭</button>
+    </div>
   </div>
 
   <div class="status-bar">
@@ -99,6 +141,7 @@
     let refVisible = true;
     let isDragging = false;
     let dragEntity = null;
+    let selectedNodeIdx = null; // Currently selected route point index
 
     // ---- Helpers ----
     function getCurrentCoords() {
@@ -135,6 +178,19 @@
         sceneModePicker: false,
         navigationHelpButton: false
       });
+
+      // Disable default double click zoom out
+      viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+
+      // Initialize official Cesium Navigation plugin
+      if (typeof CesiumNavigation !== 'undefined') {
+        new CesiumNavigation(viewer, {
+          defaultResetView: Cesium.Cartographic.fromDegrees(81.2865, 30.9300, 7500),
+          enableCompass: true,
+          enableZoomControls: true,
+          enableDistanceLegend: false
+        });
+      }
 
       viewer.scene.postProcessStages.fxaa.enabled = true;
       viewer.scene.globe.depthTestAgainstTerrain = true;
@@ -227,18 +283,26 @@
       // Build edit handle dots
       rebuildMarkers();
 
+      // Rebuild markers whenever camera finishes moving (panning/zooming)
+      viewer.camera.moveEnd.addEventListener(rebuildMarkers);
+
       // Interactions
       const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
 
-      // LEFT_CLICK: Add new route point (if not clicking on a drag handle)
+      // LEFT_CLICK: Add new route point or select an existing one
       handler.setInputAction((click) => {
         const picked = viewer.scene.pick(click.position);
         if (Cesium.defined(picked) && Cesium.defined(picked.id)) {
           const entity = picked.id;
           if (entity.id && entity.id.startsWith('drag_')) {
-            return; // Clicked on a point handle, do not add new coordinate
+            // Clicked on a point handle, select it!
+            selectNode(entity._ptIdx);
+            return;
           }
         }
+        
+        // Clicked empty space: deselect selected node
+        deselectNode();
 
         // Project clicked terrain point
         const ray = viewer.camera.getRay(click.position);
@@ -254,6 +318,29 @@
           rebuildMarkers();
         }
       }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+      // Disable default browser context menu on the map canvas to allow right-click events
+      viewer.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+      // RIGHT_CLICK: Delete a route point when clicking on its drag handle
+      handler.setInputAction((click) => {
+        const picked = viewer.scene.pick(click.position);
+        if (Cesium.defined(picked) && Cesium.defined(picked.id)) {
+          const entity = picked.id;
+          if (entity.id && entity.id.startsWith('drag_')) {
+            const idx = entity._ptIdx;
+            const coords = getCurrentCoords();
+            if (coords && coords.length > idx) {
+              const name = currentKey === "main" ? "主线" : "支线";
+              if (confirm(`是否删除${name}的第 ${idx + 1} 个点？`)) {
+                coords.splice(idx, 1);
+                rebuildMarkers();
+                saveToServer();
+              }
+            }
+          }
+        }
+      }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
 
       // MOUSE_MOVE: display coordinates & handle drag-to-move route point
       handler.setInputAction((movement) => {
@@ -278,6 +365,11 @@
             const coords = getCurrentCoords();
             if (coords[idx]) {
               coords[idx] = [lng, lat];
+              // Update selected node panel inputs in real-time
+              if (selectedNodeIdx === idx) {
+                document.getElementById("nodeLng").value = lng.toFixed(6);
+                document.getElementById("nodeLat").value = lat.toFixed(6);
+              }
             }
           }
         }
@@ -380,25 +472,60 @@
       dragMarkers = [];
 
       const coords = getCurrentCoords();
+      if (!coords || coords.length === 0) {
+        updateCount();
+        return;
+      }
+
+      // Check camera height to prevent rendering too many handles on the 12,500+ coordinates
+      const cameraCarto = Cesium.Cartographic.fromCartesian(viewer.camera.position);
+      const cameraHeight = cameraCarto ? cameraCarto.height : 5000;
+      const statusEl = document.getElementById("statusText");
+      if (cameraHeight > 18000) {
+        statusEl.textContent = "🔍 提示：请放大视角，系统将自动显示该区域的可编辑手势节点。";
+        updateCount();
+        return;
+      }
+
+      statusEl.textContent = "点击底图增加点，拖拽节点调整，左键点击手势点可选中编辑/删除。";
+
+      const rect = viewer.camera.computeViewRectangle();
       const isMain = currentKey === "main";
       const dotColor = isMain ? Cesium.Color.fromCssColorString('#00ff88') : Cesium.Color.fromCssColorString('#66ccff');
 
+      let renderedCount = 0;
       coords.forEach((c, idx) => {
+        const lng = c[0];
+        const lat = c[1];
+
+        // Filter: only show handles inside current viewport
+        if (rect) {
+          const radLng = Cesium.Math.toRadians(lng);
+          const radLat = Cesium.Math.toRadians(lat);
+          const inView = radLng >= rect.west && radLng <= rect.east && radLat >= rect.south && radLat <= rect.north;
+          if (!inView) return;
+        }
+
+        // Limit handles count to 150 to keep browser butter smooth
+        if (renderedCount >= 150) return;
+        renderedCount++;
+
+        const isSelected = selectedNodeIdx === idx;
         const ent = viewer.entities.add({
           id: 'drag_' + idx + '_' + Date.now(),
-          position: Cesium.Cartesian3.fromDegrees(c[0], c[1], 0.0),
+          position: Cesium.Cartesian3.fromDegrees(lng, lat, 0.0),
           point: {
-            pixelSize: 10,
-            color: dotColor,
-            outlineColor: Cesium.Color.WHITE,
-            outlineWidth: 2,
+            pixelSize: isSelected ? 14 : 10,
+            color: isSelected ? Cesium.Color.GOLD : dotColor,
+            outlineColor: isSelected ? Cesium.Color.RED : Cesium.Color.WHITE,
+            outlineWidth: isSelected ? 3 : 2,
             heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
             disableDepthTestDistance: 10000000.0
           },
           label: {
             text: (idx + 1).toString(),
-            font: 'bold 9px monospace',
-            fillColor: Cesium.Color.BLACK,
+            font: isSelected ? 'bold 10px monospace' : 'bold 9px monospace',
+            fillColor: isSelected ? Cesium.Color.RED : Cesium.Color.BLACK,
             outlineColor: Cesium.Color.WHITE,
             outlineWidth: 1.0,
             pixelOffset: new Cesium.Cartesian2(0, 0),
@@ -500,6 +627,67 @@
       URL.revokeObjectURL(url);
     }
 
+    // ---- Node Selection Panel Functions ----
+    function selectNode(idx) {
+      selectedNodeIdx = idx;
+      const coords = getCurrentCoords();
+      if (!coords || !coords[idx]) {
+        deselectNode();
+        return;
+      }
+      
+      const panel = document.getElementById("nodePanel");
+      panel.style.display = "flex";
+      document.getElementById("panelTitle").textContent = `选中节点 #${idx + 1}`;
+      document.getElementById("nodeLng").value = coords[idx][0].toFixed(6);
+      document.getElementById("nodeLat").value = coords[idx][1].toFixed(6);
+      
+      rebuildMarkers();
+    }
+
+    function deselectNode() {
+      if (selectedNodeIdx === null) return;
+      selectedNodeIdx = null;
+      document.getElementById("nodePanel").style.display = "none";
+      rebuildMarkers();
+    }
+
+    // Node Panel Inputs & Actions
+    document.getElementById("nodeLng").addEventListener("change", (e) => {
+      if (selectedNodeIdx === null) return;
+      const val = parseFloat(e.target.value);
+      if (!isNaN(val)) {
+        const coords = getCurrentCoords();
+        coords[selectedNodeIdx][0] = val;
+        rebuildMarkers();
+        saveToServer();
+      }
+    });
+
+    document.getElementById("nodeLat").addEventListener("change", (e) => {
+      if (selectedNodeIdx === null) return;
+      const val = parseFloat(e.target.value);
+      if (!isNaN(val)) {
+        const coords = getCurrentCoords();
+        coords[selectedNodeIdx][1] = val;
+        rebuildMarkers();
+        saveToServer();
+      }
+    });
+
+    document.getElementById("delNodeBtn").addEventListener("click", () => {
+      if (selectedNodeIdx === null) return;
+      const coords = getCurrentCoords();
+      const name = currentKey === "main" ? "主线" : "支线";
+      if (confirm(`是否删除${name}的第 ${selectedNodeIdx + 1} 个点？`)) {
+        coords.splice(selectedNodeIdx, 1);
+        deselectNode();
+        saveToServer();
+      }
+    });
+
+    document.getElementById("closePanelBtn").addEventListener("click", deselectNode);
+
     // ---- Bindings ----
     document.getElementById("undoBtn").addEventListener("click", undo);
     document.getElementById("clearBtn").addEventListener("click", clearCurrent);
@@ -507,6 +695,7 @@
     document.getElementById("saveBtn").addEventListener("click", saveToServer);
     document.getElementById("exportBtn").addEventListener("click", exportJSON);
     document.getElementById("routeSelect").addEventListener("change", (e) => {
+      deselectNode();
       switchRoute(e.target.value);
     });
 
