@@ -172,6 +172,14 @@
           <label>叙事内容 (Bubble)</label>
           <textarea class="form-textarea" id="fBubble" placeholder="在这里输入要展示的故事或说明文字..."></textarea>
         </div>
+        <div class="form-group">
+          <label>图片链接 (Image URL)</label>
+          <input type="text" class="form-input" id="fImageUrl" placeholder="粘贴图片直连 URL（支持谷歌硬盘直连）">
+        </div>
+        <div class="form-group">
+          <label>视频链接 (Video URL)</label>
+          <input type="text" class="form-input" id="fVideoUrl" placeholder="粘贴视频直连 URL">
+        </div>
         
         <div class="camera-card">
           <label style="color: var(--accent); margin-bottom: 12px; display: block;">镜头状态 (Camera State)</label>
@@ -605,6 +613,8 @@
       document.getElementById('fType').value = poi.type || 'POI';
       document.getElementById('fFlat').checked = !!poi.flat;
       document.getElementById('fBubble').value = poi.bubble || '';
+      document.getElementById('fImageUrl').value = poi.imageUrl || '';
+      document.getElementById('fVideoUrl').value = poi.videoUrl || '';
       document.getElementById('fLat').value = poi.viewLat || poi.lat;
       document.getElementById('fLng').value = poi.viewLng || poi.lng;
       document.getElementById('fZoom').value = poi.zoom || 1500;
@@ -708,6 +718,11 @@
       }
 
       poi.bubble = document.getElementById('fBubble').value;
+      poi.imageUrl = document.getElementById('fImageUrl').value.trim();
+      if (!poi.imageUrl) delete poi.imageUrl;
+      poi.videoUrl = document.getElementById('fVideoUrl').value.trim();
+      if (!poi.videoUrl) delete poi.videoUrl;
+      
       poi.viewLat = parseFloat(document.getElementById('fLat').value);
       poi.viewLng = parseFloat(document.getElementById('fLng').value);
       poi.zoom = parseFloat(document.getElementById('fZoom').value);

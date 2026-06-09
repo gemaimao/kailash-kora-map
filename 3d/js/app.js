@@ -721,7 +721,13 @@ if (btnSubmitMsg) {
                     const div = document.createElement('div');
                     div.className = 'ad-slide';
                     div.innerHTML = htmlStr;
-                    slider.appendChild(div);
+                    
+                    const targetChild = slider.children[5];
+                    if (targetChild) {
+                        slider.insertBefore(div, targetChild);
+                    } else {
+                        slider.appendChild(div);
+                    }
                     
                     const modalList = document.getElementById('modal-message-list');
                     if (modalList) {

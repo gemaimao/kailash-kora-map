@@ -176,6 +176,14 @@
         <textarea id="fBubble" placeholder="气泡窗叙事详情...支持 HTML"></textarea>
       </div>
       <div class="form-row">
+        <label>图片链接 (Image URL)</label>
+        <input type="text" id="fImageUrl" placeholder="粘贴图片直连 URL（支持谷歌硬盘直连）" />
+      </div>
+      <div class="form-row">
+        <label>视频链接 (Video URL)</label>
+        <input type="text" id="fVideoUrl" placeholder="粘贴视频直连 URL" />
+      </div>
+      <div class="form-row">
         <label>简注 (BGM/图片详情...)</label>
         <input type="text" id="fNote" placeholder="图片或视频的 html 标签..." />
       </div>
@@ -491,6 +499,8 @@
       document.getElementById("fViewLat").value = poi.viewLat || poi.lat;
       document.getElementById("fViewLng").value = poi.viewLng || poi.lng;
       document.getElementById("fBubble").value = poi.bubble || "";
+      document.getElementById("fImageUrl").value = poi.imageUrl || "";
+      document.getElementById("fVideoUrl").value = poi.videoUrl || "";
       document.getElementById("fNote").value = poi.note || "";
 
       document.getElementById("fCamLng").value = typeof poi.camLng === "number" ? poi.camLng.toFixed(6) : "";
@@ -546,6 +556,10 @@
       poi.viewLat = parseFloat(document.getElementById("fViewLat").value) || poi.lat;
       poi.viewLng = parseFloat(document.getElementById("fViewLng").value) || poi.lng;
       poi.bubble = document.getElementById("fBubble").value;
+      poi.imageUrl = document.getElementById("fImageUrl").value.trim();
+      if (!poi.imageUrl) delete poi.imageUrl;
+      poi.videoUrl = document.getElementById("fVideoUrl").value.trim();
+      if (!poi.videoUrl) delete poi.videoUrl;
       poi.note = document.getElementById("fNote").value.trim();
 
       renderList();
