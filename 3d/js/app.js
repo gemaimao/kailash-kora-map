@@ -837,6 +837,63 @@ if (dragHandle && uiPanel) {
     });
 }
 
+// 浮动窗口自定义高度调节滑动条逻辑 (拖拽 resizer 调节 poi-body 的高度)
+const poiResizer = document.getElementById('poi-resizer');
+const poiBody = document.querySelector('.poi-body');
+if (poiResizer && poiBody) {
+    let startY = 0;
+    let startHeight = 0;
+    let isDragging = false;
+
+    const initDrag = (e) => {
+        isDragging = true;
+        startY = e.clientY || (e.touches && e.touches[0].clientY);
+        startHeight = parseInt(document.defaultView.getComputedStyle(poiBody).height, 10) || 220;
+        
+        document.documentElement.addEventListener('mousemove', doDrag, false);
+        document.documentElement.addEventListener('touchmove', doDrag, false);
+        document.documentElement.addEventListener('mouseup', stopDrag, false);
+        document.documentElement.addEventListener('touchend', stopDrag, false);
+        
+        // 样式反馈：拖拽时添加高亮
+        poiResizer.style.background = 'rgba(255, 255, 255, 0.4)';
+        
+        // 防止文本选中干扰
+        if (e.cancelable) {
+            e.preventDefault();
+        }
+    };
+
+    const doDrag = (e) => {
+        if (!isDragging) return;
+        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        const deltaY = clientY - startY;
+        let newHeight = startHeight + deltaY;
+        
+        // 限制调节范围：最小 120px，最大为 70% 视口高度
+        if (newHeight < 120) newHeight = 120;
+        const maxHeight = window.innerHeight * 0.7;
+        if (newHeight > maxHeight) newHeight = maxHeight;
+        
+        poiBody.style.height = `${newHeight}px`;
+    };
+
+    const stopDrag = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        document.documentElement.removeEventListener('mousemove', doDrag, false);
+        document.documentElement.removeEventListener('touchmove', doDrag, false);
+        document.documentElement.removeEventListener('mouseup', stopDrag, false);
+        document.documentElement.removeEventListener('touchend', stopDrag, false);
+        
+        // 恢复原有样式
+        poiResizer.style.background = '';
+    };
+
+    poiResizer.addEventListener('mousedown', initDrag, false);
+    poiResizer.addEventListener('touchstart', initDrag, false);
+}
+
 // =========================================================
 // 新增：定位、导航、紧急救援功能
 // =========================================================
