@@ -49600,56 +49600,56 @@
       "lat": 31.03376283008522,
       "lng": 81.2726590419169,
       "heading": 23.02,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 1.5
     },
     {
       "lat": 31.04192883691108,
       "lng": 81.2768782816244,
       "heading": 17.69,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 1.5
     },
     {
       "lat": 31.05031812489147,
       "lng": 81.2801796292782,
       "heading": 12.31,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 1.5
     },
     {
       "lat": 31.05893322670458,
       "lng": 81.28127893694683,
       "heading": 11.63,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 1.5
     },
     {
       "lat": 31.06777216653715,
       "lng": 81.28180766307796,
       "heading": 13.73,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 1.5
     },
     {
       "lat": 31.07635352409812,
       "lng": 81.28355555096546,
       "heading": 20.85,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 1.5
     },
     {
       "lat": 31.08459977774932,
       "lng": 81.28715330273803,
       "heading": 35.08,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 1.5
     },
     {
@@ -49744,56 +49744,56 @@
       "lat": 31.08420441915677,
       "lng": 81.38457150611295,
       "heading": 165.3,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 5.0
     },
     {
       "lat": 31.07649102102273,
       "lng": 81.38599753317507,
       "heading": 179.14,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 4.9
     },
     {
       "lat": 31.06831098806309,
       "lng": 81.38171290760482,
       "heading": 187.91,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 2.8
     },
     {
       "lat": 31.05980484382115,
       "lng": 81.37973795720734,
       "heading": 190.59,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 3.9
     },
     {
       "lat": 31.05157367447226,
       "lng": 81.37679636429888,
       "heading": 185.5,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 4.2
     },
     {
       "lat": 31.04291131370536,
       "lng": 81.37749512919495,
       "heading": 182.53,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 2.7
     },
     {
       "lat": 31.03432275344363,
       "lng": 81.37671627279386,
       "heading": 182.5,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 2.4
     },
     {
@@ -49976,72 +49976,72 @@
       "lat": 31.03944702064223,
       "lng": 81.29792277357593,
       "heading": 26.43,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 5.0
     },
     {
       "lat": 31.04747125040658,
       "lng": 81.30046338236286,
       "heading": 37.31,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 5.0
     },
     {
       "lat": 31.05458633023142,
       "lng": 81.30605537114315,
       "heading": 67.23,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 3.4
     },
     {
       "lat": 31.06101338278068,
       "lng": 81.31076937963161,
       "heading": 111.96,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 4.2
     },
     {
       "lat": 31.05588643320242,
       "lng": 81.31674565886847,
       "heading": 168.02,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 5.0
     },
     {
       "lat": 31.0493494508645,
       "lng": 81.32156217003015,
       "heading": 194.64,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 4.6
     },
     {
       "lat": 31.04202551581316,
       "lng": 81.31630129254496,
       "heading": 215.15,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 3.7
     },
     {
       "lat": 31.03667754034398,
       "lng": 81.30835095584729,
       "heading": 226.45,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 3.6
     },
     {
       "lat": 31.03225382873127,
       "lng": 81.29985510112019,
       "heading": 225.93,
-      "pitch": -40,
-      "range": 500,
+      "pitch": -10,
+      "range": 750,
       "duration": 2.6
     },
     {
