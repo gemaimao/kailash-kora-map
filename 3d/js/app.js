@@ -518,36 +518,70 @@ function flyNext() {
     });
 }
 
+// 全局辅助：自动激活 BGM 播放，只要用户有任何交互即触发并持续播放
+function startBgm() {
+    const bgmAudio = document.getElementById('bgmAudio');
+    const bgmBtn = document.getElementById('btn-bgm');
+    if (bgmAudio && !isBgmPlaying) {
+        bgmAudio.play().then(() => {
+            isBgmPlaying = true;
+            if (bgmBtn) {
+                bgmBtn.style.opacity = '1';
+            }
+        }).catch(e => {
+            console.warn("BGM 自动播放受限，将在下一次用户交互时尝试:", e);
+        });
+    }
+}
+
+// 辅助函数：根据相机当前视点，计算路线中最近的飞行航点索引，以便无缝重对齐
+function findClosestFlightPathIndex() {
+    if (!flightPath || flightPath.length === 0) return 0;
+    const camPos = viewer.camera.positionCartographic;
+    const camLng = Cesium.Math.toDegrees(camPos.longitude);
+    const camLat = Cesium.Math.toDegrees(camPos.latitude);
+    
+    let minD = Infinity;
+    let closestIdx = 0;
+    for (let i = 0; i < flightPath.length; i++) {
+        const d = Math.pow(flightPath[i].lng - camLng, 2) + Math.pow(flightPath[i].lat - camLat, 2);
+        if (d < minD) {
+            minD = d;
+            closestIdx = i;
+        }
+    }
+    return closestIdx;
+}
+
 // 全屏定格遮罩按钮逻辑
 document.getElementById('btn-overlay-start').addEventListener('click', () => {
     document.getElementById('fullscreen-overlay').classList.add('hidden');
+    startBgm();
 });
 
 document.getElementById('btn-overlay-replay').addEventListener('click', () => {
     document.getElementById('fullscreen-overlay').classList.add('hidden');
     currentWaypoint = 0;
+    startBgm();
     document.getElementById('btn-start-tour').click();
 });
 
 // 绑定按钮事件：点击后开始巡航
 document.getElementById('btn-start-tour').addEventListener('click', async () => {
     if (flightPath.length === 0) return;
-    if (isPlaying) return; // 已经在播放了
     
-    // 如果是漫游结束，或者没开始过，则从 0 开始
-    if (currentWaypoint >= flightPath.length) {
-        currentWaypoint = 0;
-    }
+    startBgm(); // 尝试触发音乐播放
+
+    if (isPlaying) return; // 已经在播放了
     
     isPlaying = true;
     
-    // 不再隐藏任何按钮
-    // document.getElementById('btn-start-tour').classList.add('hidden');
-    // const stopBtn = document.getElementById('btn-stop-tour');
-    // stopBtn.classList.remove('hidden');
-    // document.getElementById('btn-free-explore').classList.remove('hidden');
+    // 自动定位到距离相机当前拖拽位置最近的那个航点，防止视角瞬间瞬移或错位
+    const closestIdx = findClosestFlightPathIndex();
+    currentWaypoint = closestIdx;
     
-    if (currentWaypoint === 0 && !flightPath[0].elevation) {
+    // 获取目标点数据进行地形纠偏及高度计算
+    if (!flightPath[currentWaypoint].elevation) {
         try {
             if (viewer.terrainProvider && !(viewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider)) {
                 const positions = flightPath.map(pt => Cesium.Cartographic.fromDegrees(pt.lng, pt.lat));
@@ -561,7 +595,7 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
                 }
             }
         } catch (error) {
-            console.error("高程计算失败，正在使用默认高程：", error);
+            console.error("高程计算失败：", error);
             for(let i = 0; i < flightPath.length; i++) {
                 if (flightPath[i].elevation === undefined) {
                     flightPath[i].elevation = 5000;
@@ -570,14 +604,34 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
         }
     }
     
-    flyNext();
+    const pt = flightPath[currentWaypoint];
+    const elevationVal = typeof pt.elevation === 'number' ? pt.elevation : 5000;
+    const absoluteAltitude = elevationVal + pt.range;
+
+    // 使用 3.5 秒的缓入缓出过渡飞行，将视角平滑地从自由探索拉回到正确的航线视角上
+    viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, absoluteAltitude),
+        orientation: {
+            heading: Cesium.Math.toRadians(pt.heading),
+            pitch: Cesium.Math.toRadians(pt.pitch),
+            roll: 0.0
+        },
+        duration: 3.5, // 缓动过渡时长
+        easingFunction: Cesium.EasingFunction.CUBIC_IN_OUT, // 缓入缓出
+        complete: () => {
+            if (isPlaying) {
+                currentWaypoint++;
+                flyNext();
+            }
+        }
+    });
 });
 
 // 720 自由探索（即停止巡航）
 document.getElementById('btn-free-explore').addEventListener('click', () => {
+    startBgm(); // 尝试触发音乐播放
     isPlaying = false;
     viewer.camera.cancelFlight();
-    // 不再切换按钮状态
 });
 
 // 打赏模态框逻辑
