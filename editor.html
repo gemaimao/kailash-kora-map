@@ -694,6 +694,21 @@
             });
           }
 
+          // Fallback: support Google Earth <gx:coord> track format
+          // <gx:coord> uses space instead of comma: <gx:coord>81.287 30.977 5000</gx:coord>
+          const gxCoordRegex = /<gx:coord>\s*([\s\S]*?)\s*<\/gx:coord>/ig;
+          while ((match = gxCoordRegex.exec(kmlText)) !== null) {
+            const text = match[1].trim();
+            const parts = text.split(/\s+/);
+            if (parts.length >= 2) {
+              const lng = parseFloat(parts[0]);
+              const lat = parseFloat(parts[1]);
+              if (!isNaN(lng) && !isNaN(lat)) {
+                coords.push([parseFloat(lng.toFixed(6)), parseFloat(lat.toFixed(6))]);
+              }
+            }
+          }
+
           if (coords.length === 0) {
             statusEl.textContent = '⚠️ KML 文件中未找到路线坐标数据';
             return;
