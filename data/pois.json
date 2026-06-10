@@ -206,6 +206,19 @@
     "lng": 81.36489033180918
   },
   {
+    "id": "evt_1781058504874",
+    "name": "贡波林宫殿",
+    "type": "POI",
+    "lat": 31.063765,
+    "lng": 81.291541,
+    "viewLat": 31.063765,
+    "viewLng": 81.291541,
+    "zoom": 1500,
+    "bubble": "传说魔鬼贡波林欲将岗仁波齐打包背回自己的地盘。所以佛神新率500罗汉前往阻止，并留下四颗不动地钉让神山永固。这处峰体被称为贡波林的宫殿",
+    "dwell": 8,
+    "flat": true
+  },
+  {
     "id": "msn_018",
     "name": "卓玛拉山口",
     "bubble": "\"海拔5650米的卓玛拉山口是神山转山道上海拔和心理双层面的制高点。作为朝圣艰辛的证明，无论前路是重返世间，还是迎向灵魂的新生，都足以体现其重量和价值。就算一路的祈求甚至诅咒，行走过那天边绸带似的山路，顶礼过卓玛拉风雪的人，都会感激这座神山所赐予他的力量和福泽。所以，它也必将成为一个时间的信标，根植在我们内心柔软的深处。\\nThe Zhuomala Pass, which is 5,650 meters above sea level, is the high point of altitude and psychology on the Shenshan Road. As a proof of the hardships of pilgrimage, whether the road ahead is to return to the world or to face the new life of the soul, it is enough to reflect its weight and value. Even if you pray or even curse all the way, those who walk through the silk-like mountain road that day and bow to the wind and snow of Zhuomala will be grateful for the power and blessings given to him by this divine mountain. Therefore, it will also become a beacomer of time, rooted in the soft depths of our hearts.\",\n全程制高点，海拔5660米。传说为度母化身的青狼将开创转山小径时迷路的郭仓巴引领到此处寻找到了正确的道路",
@@ -279,19 +292,6 @@
     "bubble": "\"1435年古格王室迎请当时声势正旺的萨迦派密教大师，俄尔支派的创始人俄尔钦贡嘎桑波（1382－1456）前来传法并主持古格国王出家仪式工。在此期间他朝圣神山所留神迹。\\nIn 1435, the Guge royal family welcomed the esoteric master of the Saga School, the founder of the Or tribe, Orchingonga Sanbo (1382-1456), to preach the Dharma and preside over the monking ceremony of King Guge. During this period, he pilgrimaged to the sacred mountain to leave a miracle.\",",
     "lat": 30.99727289051452,
     "lng": 81.35738519400964
-  },
-  {
-    "id": "evt_1781058504874",
-    "name": "贡波林宫殿",
-    "type": "POI",
-    "lat": 31.063765,
-    "lng": 81.291541,
-    "viewLat": 31.063765,
-    "viewLng": 81.291541,
-    "zoom": 1500,
-    "bubble": "传说魔鬼贡波林欲将岗仁波齐打包背回自己的地盘。所以佛神新率500罗汉前往阻止，并留下四颗不动地钉让神山永固。这处峰体被称为贡波林的宫殿",
-    "dwell": 8,
-    "flat": true
   },
   {
     "id": "msn_026",
