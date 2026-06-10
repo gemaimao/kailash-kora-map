@@ -198,6 +198,19 @@
     "density": "密集区"
   },
   {
+    "id": "evt_1781061389139",
+    "name": "格萨尔的骰子",
+    "type": "POI",
+    "lat": 31.054247,
+    "lng": 81.283932,
+    "viewLat": 31.054247,
+    "viewLng": 81.283932,
+    "zoom": 1500,
+    "bubble": "西转山道内侧流水滩处有一方形岩石形似骰子。",
+    "dwell": 8,
+    "flat": true
+  },
+  {
     "id": "msn_015",
     "name": "业之镜石",
     "bubble": "流石滩处一块光滑如镜的石头，传说可以照见人一生所造下“业”。对于信众而言，它相当于一本种因得果的记帐本。There is a mirror-like stone on the Liushi Beach. Legend has it that it can illuminate the \"karma\" made by people in their lives. For believers, it is equivalent to a kind of causal account book.",
@@ -271,19 +284,6 @@
     "bubble": "\"据巴沃.祖拉陈瓦[贤者喜宴.噶玛岗仓史]记载，1548年，八世噶玛巴应岗底斯十三大宗扎噶庄园知事香拉普瓦的迎请，于岗仁波齐神山朝山并留下神迹。\\nAccording to Bawo. Zula Chenwa [Sage's wedding banquet. It is recorded that in 1548, the eighth Kamapa was invited by the governor of Zaga Manor, the thirteen major sects of Gangdis, and left a miracle.\",",
     "lat": 31.01744230171729,
     "lng": 81.3773941508633
-  },
-  {
-    "id": "evt_1781061389139",
-    "name": "格萨尔的骰子",
-    "type": "POI",
-    "lat": 31.054247,
-    "lng": 81.283932,
-    "viewLat": 31.054247,
-    "viewLng": 81.283932,
-    "zoom": 1500,
-    "bubble": "西转山道内侧流水滩处有一方形岩石形似骰子。",
-    "dwell": 8,
-    "flat": true
   },
   {
     "id": "msn_023",
