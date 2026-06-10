@@ -7,7 +7,7 @@
   <!-- CesiumJS -->
   <script src="https://unpkg.com/cesium@1.107.0/Build/Cesium/Cesium.js"></script>
   <link href="https://unpkg.com/cesium@1.107.0/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/cesium-navigation-es6-plugin@1.1.7/CesiumNavigation.min.js"></script>
+  <!-- Navigation plugin removed to avoid module import errors -->
   <style>
     :root {
       --bg-dark: #0d0d0f;
@@ -24,7 +24,7 @@
     .app-container { display: flex; height: 100vh; width: 100vw; }
     
     .sidebar-left { width: 300px; background: var(--bg-panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
-    .main-canvas { flex: 1; position: relative; }
+    .main-canvas { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .sidebar-right { width: 340px; background: var(--bg-panel); border-left: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
 
     /* Header */
@@ -47,7 +47,13 @@
     /* Map */
     .cesium-viewer-bottom { display: none !important; }
     
-    .map-overlay-tools { position: absolute; top: 20px; left: 20px; z-index: 1000; display: flex; gap: 8px; }
+        #map {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
     .tool-btn { 
       background: rgba(0,0,0,0.8); border: 1px solid var(--border); color: #fff; 
       padding: 8px 16px; border-radius: 20px; font-size: 12px; cursor: pointer; backdrop-filter: blur(8px);
@@ -105,6 +111,11 @@
       background: #000; padding: 10px 20px; border-radius: 30px; border: 1px solid var(--accent);
       color: var(--accent); font-size: 12px; display: none; pointer-events: none;
     }
+    .map-overlay-tools { position: absolute; top: 20px; left: 20px; z-index: 1000; display: flex; gap: 8px; }
+
+    .dev-log {
+      font-family: monospace;
+    }
   </style>
 </head>
 <body>
@@ -126,10 +137,13 @@
     <!-- Main Map Canvas -->
     <div class="main-canvas">
       <div id="map"></div>
+      <!-- Developer error log panel -->
+      <div id="devLog" class="dev-log" style="display:none; position:absolute; bottom:0; left:0; right:0; max-height:150px; overflow:auto; background:rgba(0,0,0,0.8); color:#ff6666; font-size:12px; padding:8px; z-index:2000;"></div>
       
       <div class="map-overlay-tools">
         <button class="tool-btn" id="toolAddPoi"><span>📍</span> 添加节点</button>
         <button class="tool-btn" id="toolSync"><span>🔄</span> 同步数据</button>
+        <button class="tool-btn" id="btnFullscreen"><span>⛶</span> 全屏</button>
       </div>
 
       <div class="bottom-bar">
@@ -144,6 +158,8 @@
       <div class="panel-header">
         <h2>属性编辑 (Properties)</h2>
         <button class="secondary-btn" style="padding: 4px 10px; font-size: 11px;" id="btnDelete">删除</button>
+        <button class="secondary-btn" style="padding: 4px 10px; font-size: 11px;" id="btnMoveUp">上移</button>
+        <button class="secondary-btn" style="padding: 4px 10px; font-size: 11px;" id="btnMoveDown">下移</button>
       </div>
       <div class="edit-form" id="editForm" style="display:none;">
         <div class="form-group">
@@ -232,6 +248,7 @@
         </div>
       </div>
       <div class="action-bar" id="saveBar" style="display:none;">
+        <button id="btnUndo" class="secondary-btn">撤销</button>
         <button class="primary-btn" id="btnSave">保存节点</button>
       </div>
     </div>
@@ -256,20 +273,52 @@
     let playing = false;
     let progress = 0;
     let animationFrameId = null;
+    let previousPois = null;
 
     // Dragging state
     let isDragging = false;
     let dragEntity = null;
 
-    // --- Init ---
+
+
+
+// ---- Reference Lines ----
     async function init() {
       try {
+        const basePath = './';
         const [pRes, rRes] = await Promise.all([
-          fetch('data/pois.json'),
-          fetch('data/routes.json')
+          fetch(`${basePath}data/pois.json`).catch(() => null),
+          fetch(`${basePath}data/routes.json`).catch(() => null)
         ]);
-        data.pois = await pRes.json();
-        data.routes = await rRes.json();
+
+        // Load POI data with error handling
+        if (pRes && pRes.ok) {
+          data.pois = await pRes.json();
+          // Deduplicate POI entries by ID
+          const uniquePois = [];
+          const seenIds = new Set();
+          for (const p of data.pois) {
+            if (!p.id) continue;
+            if (seenIds.has(p.id)) {
+              console.warn(`Duplicate POI ID detected and removed: ${p.id}`);
+              continue;
+            }
+            seenIds.add(p.id);
+            uniquePois.push(p);
+          }
+          data.pois = uniquePois;
+        } else {
+          console.warn('Failed to load pois.json, starting with empty POI list');
+          data.pois = [];
+        }
+
+        // Load routes data with error handling
+        if (rRes && rRes.ok) {
+          data.routes = await rRes.json();
+        } else {
+          console.warn('Failed to load routes.json, starting with empty routes');
+          data.routes = { main: [], secondary: [] };
+        }
 
         // Init Cesium Viewer
         viewer = new Cesium.Viewer('map', {
@@ -284,16 +333,6 @@
           sceneModePicker: false,
           navigationHelpButton: false
         });
-
-        // Initialize official Cesium Navigation plugin
-        if (typeof CesiumNavigation !== 'undefined') {
-          new CesiumNavigation(viewer, {
-            defaultResetView: Cesium.Cartographic.fromDegrees(81.2865, 30.9300, 7500),
-            enableCompass: true,
-            enableZoomControls: true,
-            enableDistanceLegend: false
-          });
-        }
 
         viewer.scene.postProcessStages.fxaa.enabled = true;
         viewer.scene.globe.depthTestAgainstTerrain = true;
@@ -354,6 +393,7 @@
         // Bind UI Elements
         document.getElementById('toolAddPoi').addEventListener('click', toggleAddMode);
         document.getElementById('btnSave').addEventListener('click', saveActive);
+        document.getElementById('btnUndo').addEventListener('click', undoLastEdit);
         document.getElementById('btnCapture').addEventListener('click', captureCamera);
         document.getElementById('exportBtn').addEventListener('click', exportData);
         document.getElementById('playBtn').addEventListener('click', togglePlay);
@@ -363,7 +403,33 @@
           saveToServer();
         });
 
-        document.getElementById('timelineSlider').addEventListener('input', (e) => {
+        // Fullscreen toggle
+        document.getElementById('btnFullscreen').addEventListener('click', toggleFullScreen);
+
+        // Global error handling for developer panel
+        window.addEventListener('error', function (e) {
+          const log = document.getElementById('devLog');
+          if (log) {
+            const msg = `[Error] ${e.message} at ${e.filename}:${e.lineno}`;
+            log.textContent += msg + '\n';
+            log.style.display = 'block';
+          }
+          console.error(e);
+        });
+        window.addEventListener('unhandledrejection', function (e) {
+          const log = document.getElementById('devLog');
+          if (log) {
+            const msg = `[Promise Rejection] ${e.reason}`;
+            log.textContent += msg + '\n';
+            log.style.display = 'block';
+          }
+          console.error('Unhandled promise rejection:', e.reason);
+        });
+
+         // bind move up/down buttons (must be after DOM exists)
+         bindMoveButtons();
+
+         document.getElementById('timelineSlider').addEventListener('input', (e) => {
           updateProgress(e.target.value / 1000);
         });
 
@@ -383,8 +449,12 @@
           }
 
           if (addMode) {
-            const ray = viewer.camera.getRay(click.position);
-            const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
+            const ray = viewer.camera.getPickRay(click.position);
+            let cartesian = viewer.scene.globe.pick(ray, viewer.scene);
+            // Fallback to ellipsoid if terrain pick returns undefined
+            if (!Cesium.defined(cartesian)) {
+              cartesian = viewer.scene.camera.pickEllipsoid(click.position, viewer.scene.globe.ellipsoid);
+            }
             if (Cesium.defined(cartesian)) {
               const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
               const lat = parseFloat(Cesium.Math.toDegrees(cartographic.latitude).toFixed(6));
@@ -430,7 +500,7 @@
 
         handler.setInputAction((movement) => {
           if (isDragging && dragEntity) {
-            const ray = viewer.camera.getRay(movement.endPosition);
+            const ray = viewer.camera.getPickRay(movement.endPosition);
             const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
             if (Cesium.defined(cartesian)) {
               dragEntity.position = cartesian;
@@ -484,16 +554,36 @@
       
       if (playing) {
         // Smoothly look-at current pilgrim position in 3D
-        viewer.camera.setView({
-          destination: Cesium.Cartesian3.fromDegrees(lng, lat - 0.015, 3000),
-          orientation: {
-            heading: Cesium.Math.toRadians(0.0),
-            pitch: Cesium.Math.toRadians(-30.0),
-            roll: 0.0
-          }
-        });
+          viewer.camera.setView({
+            destination: Cesium.Cartesian3.fromDegrees(lng, lat, 7500),
+            orientation: {
+              heading: Cesium.Math.toRadians(0.0),
+              pitch: Cesium.Math.toRadians(-25.0),
+              roll: 0.0
+            }
+          });
       }
     }
+
+    // Fullscreen handler
+    function toggleFullScreen() {
+      const mapDiv = document.getElementById('map');
+      if (!document.fullscreenElement) {
+        mapDiv.requestFullscreen().catch(err => {
+          console.error('Fullscreen request failed:', err);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    // Adjust Cesium viewer when fullscreen changes
+    document.addEventListener('fullscreenchange', () => {
+      if (viewer) {
+        // Cesium will automatically handle canvas size, but we force a resize to be safe
+        viewer.resize();
+      }
+    });
 
     function togglePlay() {
       playing = !playing;
@@ -585,8 +675,19 @@
       list.innerHTML = '';
       
       data.pois.forEach(poi => {
+        // Debounce utility to limit rapid clicks
+        function debounce(func, wait) {
+          let timeout;
+          return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+          };
+        }
+
+        // Update event list creation to use debounced click
         const item = document.createElement('div');
         item.className = `event-item ${poi.id === activeId ? 'active' : ''}`;
+        item.setAttribute('data-poi-id', poi.id);
         item.innerHTML = `
           <div class="event-icon">${poi.type === 'VIEW' ? '🎥' : (poi.flat ? '📄' : '📍')}</div>
           <div class="event-info">
@@ -594,7 +695,7 @@
             <div class="event-meta">${poi.type || 'POI'} · ${poi.bubble ? poi.bubble.replace(/<[^>]*>/g, '').substring(0,12)+'...' : '无内容'}</div>
           </div>
         `;
-        item.onclick = () => selectEvent(poi.id);
+        item.onclick = debounce(() => selectEvent(poi.id), 150);
         list.appendChild(item);
       });
       document.getElementById('eventCount').textContent = data.pois.length + " 个节点";
@@ -605,43 +706,40 @@
       const poi = data.pois.find(p => p.id === id);
       if (!poi) return;
 
+      // Update list highlight efficiently (no full rebuild)
+      document.querySelectorAll('.event-item').forEach(item => {
+        const itemId = item.getAttribute('data-poi-id');
+        item.classList.toggle('active', itemId === id);
+      });
+
+      // Show and populate the edit form
       document.getElementById('editForm').style.display = 'block';
       document.getElementById('saveBar').style.display = 'flex';
-      
-      document.getElementById('fId').value = poi.id;
-      document.getElementById('fName').value = poi.name;
+      document.getElementById('fId').value = poi.id || '';
+      document.getElementById('fName').value = poi.name || '';
       document.getElementById('fType').value = poi.type || 'POI';
       document.getElementById('fFlat').checked = !!poi.flat;
       document.getElementById('fBubble').value = poi.bubble || '';
       document.getElementById('fImageUrl').value = poi.imageUrl || '';
       document.getElementById('fVideoUrl').value = poi.videoUrl || '';
-      document.getElementById('fLat').value = poi.viewLat || poi.lat;
-      document.getElementById('fLng').value = poi.viewLng || poi.lng;
-      document.getElementById('fZoom').value = poi.zoom || 1500;
+      document.getElementById('fLat').value = poi.viewLat || poi.lat || '';
+      document.getElementById('fLng').value = poi.viewLng || poi.lng || '';
+      document.getElementById('fZoom').value = poi.zoom || 2500;
       document.getElementById('fDwell').value = poi.dwell || 8;
 
-      document.getElementById('fCamLng').value = typeof poi.camLng === 'number' ? poi.camLng.toFixed(6) : '';
-      document.getElementById('fCamLat').value = typeof poi.camLat === 'number' ? poi.camLat.toFixed(6) : '';
-      document.getElementById('fCamHeight').value = typeof poi.camHeight === 'number' ? Math.round(poi.camHeight) : '';
-      document.getElementById('fHeading').value = typeof poi.heading === 'number' ? poi.heading.toFixed(1) : '';
-      document.getElementById('fPitch').value = typeof poi.pitch === 'number' ? poi.pitch.toFixed(1) : '';
-      document.getElementById('fRoll').value = typeof poi.roll === 'number' ? poi.roll.toFixed(1) : '';
+      // Camera state fields
+      document.getElementById('fCamLng').value = poi.camLng || '';
+      document.getElementById('fCamLat').value = poi.camLat || '';
+      document.getElementById('fCamHeight').value = poi.camHeight || '';
+      document.getElementById('fHeading').value = poi.heading || '';
+      document.getElementById('fPitch').value = poi.pitch || '';
+      document.getElementById('fRoll').value = poi.roll || '';
 
+      // Update markers to show active state
       refreshMarkers();
-      refreshEventList();
-      
-      // Focus Camera onto selected POI
-      if (typeof poi.camLng === 'number' && typeof poi.camLat === 'number' && typeof poi.camHeight === 'number') {
-        viewer.camera.flyTo({
-          destination: Cesium.Cartesian3.fromDegrees(poi.camLng, poi.camLat, poi.camHeight),
-          orientation: {
-            heading: Cesium.Math.toRadians(typeof poi.heading === 'number' ? poi.heading : 0.0),
-            pitch: Cesium.Math.toRadians(typeof poi.pitch === 'number' ? poi.pitch : -35.0),
-            roll: Cesium.Math.toRadians(typeof poi.roll === 'number' ? poi.roll : 0.0)
-          },
-          duration: 1.5
-        });
-      } else {
+
+      // Fly camera to the selected POI
+      if (viewer) {
         viewer.camera.flyTo({
           destination: Cesium.Cartesian3.fromDegrees(poi.lng, poi.lat - 0.015, poi.zoom || 2500),
           orientation: {
@@ -659,7 +757,7 @@
       if (!activeId) return;
       
       const canvasCenter = new Cesium.Cartesian2(viewer.container.clientWidth / 2, viewer.container.clientHeight / 2);
-      const ray = viewer.camera.getRay(canvasCenter);
+      const ray = viewer.camera.getPickRay(canvasCenter);
       const targetCartesian = viewer.scene.globe.pick(ray, viewer.scene);
       
       let viewLat, viewLng, range;
@@ -699,6 +797,8 @@
     }
 
     function saveActive() {
+      // Snapshot before modifying
+      previousPois = JSON.parse(JSON.stringify(data.pois));
       const poi = data.pois.find(p => p.id === activeId);
       if (!poi) return;
 
@@ -748,18 +848,69 @@
       saveToServer();
     }
 
-    function deleteActive() {
-      if (!activeId) return;
-      if (!confirm("确认删除此叙事节点吗？")) return;
-      
-      data.pois = data.pois.filter(p => p.id !== activeId);
+    // Undo last edit
+    function undoLastEdit() {
+      if (!previousPois) {
+        showStatus("⚠️ 没有可撤销的更改");
+        return;
+      }
+      data.pois = previousPois;
+      previousPois = null;
       activeId = null;
       document.getElementById('editForm').style.display = 'none';
       document.getElementById('saveBar').style.display = 'none';
       refreshMarkers();
       refreshEventList();
+      showStatus("🔄 已撤销上一次编辑");
       saveToServer();
     }
+
+      function deleteActive() {
+        if (!activeId) return;
+        if (!confirm("确认删除此叙事节点吗？")) return;
+        
+        // Remove from data.pois
+        data.pois = data.pois.filter(p => p.id !== activeId);
+        activeId = null;
+        document.getElementById('editForm').style.display = 'none';
+        document.getElementById('saveBar').style.display = 'none';
+        refreshMarkers();
+        refreshEventList();
+        showStatus("🗑 已删除节点");
+        saveToServer();
+      }
+
+      // Move selected node up or down in the list
+      function moveNode(direction) {
+        if (!activeId) {
+          showStatus("⚠️ 未选中节点");
+          return;
+        }
+        const idx = data.pois.findIndex(p => p.id === activeId);
+        if (idx === -1) return;
+        const newIdx = idx + direction;
+        if (newIdx < 0 || newIdx >= data.pois.length) {
+          showStatus("⚠️ 已达列表边界");
+          return;
+        }
+        // Swap entries
+        const temp = data.pois[idx];
+        data.pois[idx] = data.pois[newIdx];
+        data.pois[newIdx] = temp;
+        // Keep activeId unchanged (still points to same POI)
+        refreshMarkers();
+        refreshEventList();
+        // Reselect to keep UI highlight
+        selectEvent(activeId);
+        showStatus(direction === -1 ? "⬆ 已上移节点" : "⬇ 已下移节点");
+        saveToServer();
+      }
+
+      // Bind move buttons after init
+      function bindMoveButtons() {
+        document.getElementById('btnMoveUp').addEventListener('click', () => moveNode(-1));
+        document.getElementById('btnMoveDown').addEventListener('click', () => moveNode(1));
+      }
 
     async function saveToServer() {
       try {
@@ -810,6 +961,13 @@
     }
 
     function showStatus(msg) {
+        const basePath = (() => {
+          const path = window.location.pathname;
+          const segments = path.split('/').filter(s => s.length > 0);
+          // Remove file name (e.g., narrative-editor.html)
+          segments.pop();
+          return segments.length ? '/' + segments.join('/') + '/' : '';
+        })();
       const el = document.getElementById('statusMsg');
       el.textContent = msg;
       el.style.display = 'block';

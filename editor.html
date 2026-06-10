@@ -7,7 +7,7 @@
   <!-- CesiumJS -->
   <script src="https://unpkg.com/cesium@1.107.0/Build/Cesium/Cesium.js"></script>
   <link href="https://unpkg.com/cesium@1.107.0/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/cesium-navigation-es6-plugin@1.1.7/CesiumNavigation.min.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/cesium-navigation-es6-plugin@1.1.7/CesiumNavigation.min.js"></script> -->
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; width: 100%; font-family: -apple-system, "PingFang SC", sans-serif; background: #0d0d0f; color: #eee; overflow: hidden; }
@@ -88,12 +88,17 @@
     </select>
     <div class="sep"></div>
     <button id="undoBtn">↩ 撤销</button>
+    <button id="moveUpBtn" class="secondary">⏪ 前移</button>
+    <button id="moveDownBtn" class="secondary">⏩ 后移</button>
     <button id="clearBtn" class="danger">✕ 清空当前线</button>
     <div class="sep"></div>
     <button id="refToggle" class="active">👁 旧路线参考</button>
     <div class="sep"></div>
+    <button id="fullscreenBtn">🖵 全屏</button>
     <button id="saveBtn" style="background:rgba(80,180,80,0.2); border-color:rgba(80,180,80,0.4); color: #8af;">💾 保存到服务器</button>
     <button id="exportBtn">↓ 导出 JSON</button>
+    <button id="importKmlBtn" style="background:rgba(100,180,255,0.15); border-color:rgba(100,180,255,0.35); color: #8cf;">📂 导入 KML</button>
+    <input type="file" id="kmlFileInput" accept=".kml,.kmz" style="display:none;">
     <span class="info" id="pointCount">0 个点</span>
   </div>
 
@@ -305,7 +310,7 @@
         deselectNode();
 
         // Project clicked terrain point
-        const ray = viewer.camera.getRay(click.position);
+        const ray = viewer.camera.getPickRay(click.position);
         const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
         if (Cesium.defined(cartesian)) {
           const carto = Cesium.Cartographic.fromCartesian(cartesian);
@@ -344,7 +349,7 @@
 
       // MOUSE_MOVE: display coordinates & handle drag-to-move route point
       handler.setInputAction((movement) => {
-        const ray = viewer.camera.getRay(movement.endPosition);
+        const ray = viewer.camera.getPickRay(movement.endPosition);
         const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
         
         if (Cesium.defined(cartesian)) {
@@ -375,7 +380,29 @@
         }
       }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 
-      // LEFT_DOWN: start dragging point
+      function moveNodeUp() {
+      if (selectedNodeIdx === null || selectedNodeIdx === 0) return;
+      const coords = getCurrentCoords();
+      const idx = selectedNodeIdx;
+      // swap with previous
+      [coords[idx - 1], coords[idx]] = [coords[idx], coords[idx - 1]];
+      selectedNodeIdx = idx - 1;
+      rebuildMarkers();
+      selectNode(selectedNodeIdx);
+      saveToServer();
+    }
+
+    function moveNodeDown() {
+      const coords = getCurrentCoords();
+      if (selectedNodeIdx === null || selectedNodeIdx >= coords.length - 1) return;
+      const idx = selectedNodeIdx;
+      // swap with next
+      [coords[idx + 1], coords[idx]] = [coords[idx], coords[idx + 1]];
+      selectedNodeIdx = idx + 1;
+      rebuildMarkers();
+      selectNode(selectedNodeIdx);
+      saveToServer();
+    }
       handler.setInputAction((click) => {
         const picked = viewer.scene.pick(click.position);
         if (Cesium.defined(picked) && Cesium.defined(picked.id)) {
@@ -388,7 +415,18 @@
         }
       }, Cesium.ScreenSpaceEventType.LEFT_DOWN);
 
-      // LEFT_UP: stop dragging point
+      function toggleFullScreen() {
+      const mapDiv = document.getElementById('map');
+      if (!document.fullscreenElement) {
+        mapDiv.requestFullscreen().catch(err => console.error(`FullScreen error: ${err.message}`));
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+      if (viewer) viewer.resize();
+    });
       handler.setInputAction(() => {
         if (isDragging) {
           isDragging = false;
@@ -512,7 +550,7 @@
 
         const isSelected = selectedNodeIdx === idx;
         const ent = viewer.entities.add({
-          id: 'drag_' + idx + '_' + Date.now(),
+          id: 'drag_' + idx,
           position: Cesium.Cartesian3.fromDegrees(lng, lat, 0.0),
           point: {
             pixelSize: isSelected ? 14 : 10,
@@ -627,6 +665,89 @@
       URL.revokeObjectURL(url);
     }
 
+    // ---- KML Import ----
+    function importKML(file) {
+      const statusEl = document.getElementById('statusText');
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(e.target.result, 'text/xml');
+          const coords = [];
+
+          // Extract from <coordinates> inside <LineString> elements (route lines)
+          const lineStrings = xmlDoc.getElementsByTagName('LineString');
+          for (let i = 0; i < lineStrings.length; i++) {
+            const coordEls = lineStrings[i].getElementsByTagName('coordinates');
+            for (let j = 0; j < coordEls.length; j++) {
+              const text = coordEls[j].textContent.trim();
+              text.split(/\s+/).forEach(triplet => {
+                const parts = triplet.split(',');
+                if (parts.length >= 2) {
+                  const lng = parseFloat(parts[0]);
+                  const lat = parseFloat(parts[1]);
+                  if (!isNaN(lng) && !isNaN(lat)) {
+                    coords.push([parseFloat(lng.toFixed(6)), parseFloat(lat.toFixed(6))]);
+                  }
+                }
+              });
+            }
+          }
+
+          // If no LineString found, try extracting from <Point> Placemarks (POI markers as waypoints)
+          if (coords.length === 0) {
+            const points = xmlDoc.getElementsByTagName('Point');
+            for (let i = 0; i < points.length; i++) {
+              const coordEls = points[i].getElementsByTagName('coordinates');
+              for (let j = 0; j < coordEls.length; j++) {
+                const text = coordEls[j].textContent.trim();
+                const parts = text.split(',');
+                if (parts.length >= 2) {
+                  const lng = parseFloat(parts[0]);
+                  const lat = parseFloat(parts[1]);
+                  if (!isNaN(lng) && !isNaN(lat)) {
+                    coords.push([parseFloat(lng.toFixed(6)), parseFloat(lat.toFixed(6))]);
+                  }
+                }
+              }
+            }
+          }
+
+          if (coords.length === 0) {
+            statusEl.textContent = '⚠️ KML 文件中未找到路线坐标数据';
+            return;
+          }
+
+          // Ask user how to apply the imported data
+          const currentCoords = getCurrentCoords();
+          const routeName = currentKey === 'main' ? '主线' : document.getElementById('routeSelect').selectedOptions[0].text;
+
+          const action = currentCoords.length > 0
+            ? confirm(`从 KML 文件中解析出 ${coords.length} 个坐标点。\n\n当前路线「${routeName}」已有 ${currentCoords.length} 个点。\n\n点击【确定】→ 追加到当前路线末尾\n点击【取消】→ 替换当前路线所有点`)
+            : false;
+
+          if (currentCoords.length === 0 || !action) {
+            // Replace
+            if (currentCoords.length > 0 && !confirm(`⚠️ 确认要用 KML 的 ${coords.length} 个点替换「${routeName}」现有的 ${currentCoords.length} 个点？\n此操作不可撤销！`)) {
+              return;
+            }
+            setCurrentCoords(coords);
+          } else {
+            // Append
+            coords.forEach(c => currentCoords.push(c));
+          }
+
+          rebuildMarkers();
+          saveToServer();
+          statusEl.textContent = `✅ 成功导入 KML：${coords.length} 个坐标点已加载到「${routeName}」`;
+        } catch (err) {
+          console.error('KML parse error:', err);
+          statusEl.textContent = '⚠️ KML 文件解析失败: ' + err.message;
+        }
+      };
+      reader.readAsText(file);
+    }
+
     // ---- Node Selection Panel Functions ----
     function selectNode(idx) {
       selectedNodeIdx = idx;
@@ -693,7 +814,11 @@
     document.getElementById("clearBtn").addEventListener("click", clearCurrent);
     document.getElementById("refToggle").addEventListener("click", toggleRef);
     document.getElementById("saveBtn").addEventListener("click", saveToServer);
-    document.getElementById("exportBtn").addEventListener("click", exportJSON);
+    document.getElementById("importKmlBtn").addEventListener("click", () => document.getElementById('kmlFileInput').click());
+    document.getElementById("kmlFileInput").addEventListener("change", (e) => { if (e.target.files[0]) { importKML(e.target.files[0]); e.target.value = ''; } });
+    document.getElementById("fullscreenBtn").addEventListener("click", toggleFullScreen);
+    document.getElementById("moveUpBtn").addEventListener("click", moveNodeUp);
+    document.getElementById("moveDownBtn").addEventListener("click", moveNodeDown);
     document.getElementById("routeSelect").addEventListener("change", (e) => {
       deselectNode();
       switchRoute(e.target.value);
