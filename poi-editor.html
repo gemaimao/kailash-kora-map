@@ -263,7 +263,7 @@
 
       // Load main route line from routes.json
       try {
-        const rRes = await fetch("data/routes.json");
+        const rRes = await fetch("data/routes.json?t=" + Date.now());
         const rd = await rRes.json();
         if (rd.main && rd.main.length) {
           const rawPositions = rd.main.map(pt => Cesium.Cartesian3.fromDegrees(pt[0], pt[1]));
@@ -283,7 +283,7 @@
 
       // Load existing POIs
       try {
-        const pRes = await fetch("data/pois.json");
+        const pRes = await fetch("data/pois.json?t=" + Date.now());
         pois = await pRes.json();
         refreshMarkers();
         renderList();
@@ -309,7 +309,7 @@
 
         // If in addMode and clicked on terrain
         if (addMode) {
-          const ray = viewer.camera.getRay(click.position);
+          const ray = viewer.camera.getPickRay(click.position);
           const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
           if (Cesium.defined(cartesian)) {
             const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
@@ -341,7 +341,7 @@
 
       // Mouse move: Update coordinates display / Drag Entity
       handler.setInputAction((movement) => {
-        const ray = viewer.camera.getRay(movement.endPosition);
+        const ray = viewer.camera.getPickRay(movement.endPosition);
         const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
         
         if (Cesium.defined(cartesian)) {
@@ -684,7 +684,7 @@
     // Capture current 3D camera look-at coordinate & distance
     document.getElementById("captureViewBtn").addEventListener("click", () => {
       const canvasCenter = new Cesium.Cartesian2(viewer.container.clientWidth / 2, viewer.container.clientHeight / 2);
-      const ray = viewer.camera.getRay(canvasCenter);
+      const ray = viewer.camera.getPickRay(canvasCenter);
       const targetCartesian = viewer.scene.globe.pick(ray, viewer.scene);
       
       let viewLat, viewLng, range;

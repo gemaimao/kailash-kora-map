@@ -255,8 +255,9 @@
 
       // Load routes.json
       try {
-        const routesRes = await fetch("data/routes.json");
+        const routesRes = await fetch("data/routes.json?t=" + Date.now());
         const loadedData = await routesRes.json();
+        window.originalRouteData = loadedData;
         if (loadedData.main) routes.main = loadedData.main;
         if (loadedData.secondary) {
           loadedData.secondary.forEach((s, idx) => {
@@ -607,6 +608,7 @@
     // ---- Save & Export ----
     async function saveToServer() {
       const out = {
+        ...(window.originalRouteData || {}),
         main: routes.main,
         secondary: routes.secondary.map(s => ({ name: s.name, coords: s.coords }))
       };
@@ -671,46 +673,25 @@
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
-          const parser = new DOMParser();
-          const xmlDoc = parser.parseFromString(e.target.result, 'text/xml');
+          const kmlText = e.target.result;
           const coords = [];
 
-          // Extract from <coordinates> inside <LineString> elements (route lines)
-          const lineStrings = xmlDoc.getElementsByTagName('LineString');
-          for (let i = 0; i < lineStrings.length; i++) {
-            const coordEls = lineStrings[i].getElementsByTagName('coordinates');
-            for (let j = 0; j < coordEls.length; j++) {
-              const text = coordEls[j].textContent.trim();
-              text.split(/\s+/).forEach(triplet => {
-                const parts = triplet.split(',');
-                if (parts.length >= 2) {
-                  const lng = parseFloat(parts[0]);
-                  const lat = parseFloat(parts[1]);
-                  if (!isNaN(lng) && !isNaN(lat)) {
-                    coords.push([parseFloat(lng.toFixed(6)), parseFloat(lat.toFixed(6))]);
-                  }
-                }
-              });
-            }
-          }
-
-          // If no LineString found, try extracting from <Point> Placemarks (POI markers as waypoints)
-          if (coords.length === 0) {
-            const points = xmlDoc.getElementsByTagName('Point');
-            for (let i = 0; i < points.length; i++) {
-              const coordEls = points[i].getElementsByTagName('coordinates');
-              for (let j = 0; j < coordEls.length; j++) {
-                const text = coordEls[j].textContent.trim();
-                const parts = text.split(',');
-                if (parts.length >= 2) {
-                  const lng = parseFloat(parts[0]);
-                  const lat = parseFloat(parts[1]);
-                  if (!isNaN(lng) && !isNaN(lat)) {
-                    coords.push([parseFloat(lng.toFixed(6)), parseFloat(lat.toFixed(6))]);
-                  }
+          // Use regex to extract all <coordinates> blocks reliably (ignores XML namespaces)
+          const coordRegex = /<coordinates>\s*([\s\S]*?)\s*<\/coordinates>/ig;
+          let match;
+          while ((match = coordRegex.exec(kmlText)) !== null) {
+            const text = match[1].trim();
+            // KML coordinates are space/newline separated blocks of "lng,lat,alt"
+            text.split(/\s+/).forEach(triplet => {
+              const parts = triplet.split(',');
+              if (parts.length >= 2) {
+                const lng = parseFloat(parts[0]);
+                const lat = parseFloat(parts[1]);
+                if (!isNaN(lng) && !isNaN(lat)) {
+                  coords.push([parseFloat(lng.toFixed(6)), parseFloat(lat.toFixed(6))]);
                 }
               }
-            }
+            });
           }
 
           if (coords.length === 0) {

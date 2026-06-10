@@ -59,7 +59,7 @@ const OFFSET_LNG = 0.0;
 const OFFSET_LAT = 0.0;
 
 // 提前拉取数据
-fetch('../data/routes.json').then(r => r.json()).then(data => {
+fetch('../data/routes.json?t=' + Date.now()).then(r => r.json()).then(data => {
     flightPath = data.main_flight || [];
     fullRoute = data.main || []; 
     
