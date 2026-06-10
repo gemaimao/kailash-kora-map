@@ -416,18 +416,6 @@
         }
       }, Cesium.ScreenSpaceEventType.LEFT_DOWN);
 
-      function toggleFullScreen() {
-      const mapDiv = document.getElementById('map');
-      if (!document.fullscreenElement) {
-        mapDiv.requestFullscreen().catch(err => console.error(`FullScreen error: ${err.message}`));
-      } else {
-        document.exitFullscreen();
-      }
-    }
-
-    document.addEventListener('fullscreenchange', () => {
-      if (viewer) viewer.resize();
-    });
       handler.setInputAction(() => {
         if (isDragging) {
           isDragging = false;
@@ -442,6 +430,19 @@
     }
 
     // ---- Reference Lines ----
+    function toggleFullScreen() {
+      const mapDiv = document.getElementById('map');
+      if (!document.fullscreenElement) {
+        mapDiv.requestFullscreen().catch(err => console.error(`FullScreen error: ${err.message}`));
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+      if (viewer) viewer.resize();
+    });
+
     function drawRefLines(loadedData) {
       if (!loadedData) return;
       
