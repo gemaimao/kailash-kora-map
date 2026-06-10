@@ -23,11 +23,16 @@
     "lng": 81.25849147348777
   },
   {
-    "id": "msn_003",
-    "name": "色尔雄",
-    "bubble": "色尔雄意为黄金草滩，位于拉曲河岸，是转山的西入口。传说中富有商人罗布不单在这里遗落下了黄金，在通往卓玛拉山口的那段中，还留下了红糖和经板等。Serxiong means golden grass beach, located on the bank of the Laqu River, which is the western entrance to the mountain. Legend has it that Rob, a rich merchant, not only left gold here, but also left brown sugar and scriptures in the section leading to the Zhuomara Pass.",
+    "id": "msn_003_1",
+    "name": "格萨尔的骰子",
+    "bubble": "西转经道内侧流石滩上一块正方形的石头，被称为是格萨尔骨子",
     "lat": 31.01335051645296,
-    "lng": 81.26070623208025
+    "lng": 81.26070623208025,
+    "type": "POI",
+    "viewLat": 31.01335051645296,
+    "viewLng": 81.26070623208025,
+    "zoom": 1500,
+    "dwell": 8
   },
   {
     "id": "msn_004",
@@ -371,14 +376,6 @@
     "lat": 31.00501706617709,
     "lng": 81.2877286328109,
     "bubble": "<h3>第四天葬台</h3>",
-    "flat": true
-  },
-  {
-    "id": "msn_wht-blank",
-    "name": "小天葬台茶馆",
-    "lat": 31.09803656930616,
-    "lng": 81.3398220440023,
-    "bubble": "<h3>小天葬台茶馆</h3>",
     "flat": true
   }
 ]
