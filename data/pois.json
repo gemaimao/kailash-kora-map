@@ -116,6 +116,19 @@
     "lng": 81.2821261448395
   },
   {
+    "id": "evt_1781058504874",
+    "name": "贡波林宫殿",
+    "type": "POI",
+    "lat": 31.063765,
+    "lng": 81.291541,
+    "viewLat": 31.063765,
+    "viewLng": 81.291541,
+    "zoom": 1500,
+    "bubble": "传说魔鬼贡波林欲将岗仁波齐打包背回自己的地盘。所以佛神新率500罗汉前往阻止，并留下四颗不动地钉让神山永固。这处峰体被称为贡波林的宫殿",
+    "dwell": 8,
+    "flat": true
+  },
+  {
     "id": "msn_010",
     "name": "马头明王旅馆",
     "bubble": "\"经过西甬道东侧几处风化流石滩，快转向北行的位置是马头明王天生石。也是传统的转山途中休息地。至此，西甬道一段略显逼仄和压抑的空间渐次开阔，地势也将一路缓升。好马相伴，后路无忧。在此东望可观察到神山北壁形似眼镜蛇的冰冠，印度教称之为“那迦”。After passing through several weathered stone beaches on the east side of the West Road, the position of turning north is the Tianshengshi of Matou Mingwang. It is also a traditional resting place on the way to the mountain. At this point, the slightly cramped and oppressive space of Xiying Road will gradually open up, and the terrain will rise slowly all the way. Accompanied by good horses, the back road is worry-free. Looking east here, you can observe the ice crown shaped like a cobra on the north wall of the sacred mountain, which is called \\\"Naga\\\" in Hinduism.\",",
@@ -204,19 +217,6 @@
     "bubble": "从小天葬台至卓玛拉一段消耗体力最厉害的路途中有许多石头都被赋予了传说。主要是针对佛教伦理观中的各种善恶品质及转山故事而来。Many stones have been given legends on the road from the small heavenly burial platform to Zhuo Mara, which consumes the most physical strength. It is mainly aimed at various qualities of good and evil in Buddhist ethics and the story of turning mountains.",
     "lat": 31.09831609881481,
     "lng": 81.36489033180918
-  },
-  {
-    "id": "evt_1781058504874",
-    "name": "贡波林宫殿",
-    "type": "POI",
-    "lat": 31.063765,
-    "lng": 81.291541,
-    "viewLat": 31.063765,
-    "viewLng": 81.291541,
-    "zoom": 1500,
-    "bubble": "传说魔鬼贡波林欲将岗仁波齐打包背回自己的地盘。所以佛神新率500罗汉前往阻止，并留下四颗不动地钉让神山永固。这处峰体被称为贡波林的宫殿",
-    "dwell": 8,
-    "flat": true
   },
   {
     "id": "msn_018",
