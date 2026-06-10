@@ -381,29 +381,7 @@
         }
       }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 
-      function moveNodeUp() {
-      if (selectedNodeIdx === null || selectedNodeIdx === 0) return;
-      const coords = getCurrentCoords();
-      const idx = selectedNodeIdx;
-      // swap with previous
-      [coords[idx - 1], coords[idx]] = [coords[idx], coords[idx - 1]];
-      selectedNodeIdx = idx - 1;
-      rebuildMarkers();
-      selectNode(selectedNodeIdx);
-      saveToServer();
-    }
 
-    function moveNodeDown() {
-      const coords = getCurrentCoords();
-      if (selectedNodeIdx === null || selectedNodeIdx >= coords.length - 1) return;
-      const idx = selectedNodeIdx;
-      // swap with next
-      [coords[idx + 1], coords[idx]] = [coords[idx], coords[idx + 1]];
-      selectedNodeIdx = idx + 1;
-      rebuildMarkers();
-      selectNode(selectedNodeIdx);
-      saveToServer();
-    }
       handler.setInputAction((click) => {
         const picked = viewer.scene.pick(click.position);
         if (Cesium.defined(picked) && Cesium.defined(picked.id)) {
@@ -430,6 +408,30 @@
     }
 
     // ---- Reference Lines ----
+    function moveNodeUp() {
+      if (selectedNodeIdx === null || selectedNodeIdx === 0) return;
+      const coords = getCurrentCoords();
+      const idx = selectedNodeIdx;
+      // swap with previous
+      [coords[idx - 1], coords[idx]] = [coords[idx], coords[idx - 1]];
+      selectedNodeIdx = idx - 1;
+      rebuildMarkers();
+      selectNode(selectedNodeIdx);
+      saveToServer();
+    }
+
+    function moveNodeDown() {
+      const coords = getCurrentCoords();
+      if (selectedNodeIdx === null || selectedNodeIdx >= coords.length - 1) return;
+      const idx = selectedNodeIdx;
+      // swap with next
+      [coords[idx + 1], coords[idx]] = [coords[idx], coords[idx + 1]];
+      selectedNodeIdx = idx + 1;
+      rebuildMarkers();
+      selectNode(selectedNodeIdx);
+      saveToServer();
+    }
+
     function toggleFullScreen() {
       const mapDiv = document.getElementById('map');
       if (!document.fullscreenElement) {
