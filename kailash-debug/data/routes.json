@@ -49559,12 +49559,13 @@
       "heading": 309.3,
       "pitch": -40,
       "roll": 0,
-      "duration": 1.5,
+      "duration": 135.7,
       "wait_time": 0,
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 60
+      "fov": 60,
+      "speed_preset": "custom"
     },
     {
       "id": "evt_1781145179397_2",
