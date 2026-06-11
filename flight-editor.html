@@ -118,7 +118,7 @@
 
     /* Bottom Elevation Chart Container */
     .elevation-chart-container {
-      position: absolute; bottom: 92px; left: 50%; transform: translateX(-50%); width: calc(100% - 240px); max-width: 1100px; height: 260px;
+      position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 440px); max-width: 1100px; height: 260px;
       background: rgba(24, 24, 28, 0.95); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px;
       padding: 12px 16px; z-index: 1000; backdrop-filter: blur(16px);
       display: flex; flex-direction: column; gap: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.7);
@@ -130,16 +130,59 @@
     .chart-selection { font-size: 10px; color: var(--text-dim); font-family: monospace; }
     .chart-adjust-box { display: none; gap: 4px; align-items: center; }
 
-    /* Bottom Playback Bar */
-    .bottom-bar { 
-      position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 85%; max-width: 450px;
-      background: rgba(18, 18, 22, 0.95); border: 1px solid var(--border); border-radius: 30px; 
-      padding: 8px 18px; z-index: 1000; backdrop-filter: blur(12px);
-      display: flex; align-items: center; gap: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    /* Left and Right Side Mixer Panels */
+    .hud-left-mixer-panel {
+      position: absolute; bottom: 20px; left: 20px; width: 190px; height: 260px;
+      background: rgba(24, 24, 28, 0.95); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px;
+      padding: 14px 16px; z-index: 1000; backdrop-filter: blur(16px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+      display: flex; flex-direction: column; justify-content: space-between;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
     }
-    .play-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; transition: color 0.2s; }
-    .play-btn:hover { color: var(--accent-cyan); }
-    .preview-progress-text { font-size: 12px; font-family: monospace; color: var(--text-dim); }
+    .hud-right-mixer-panel {
+      position: absolute; bottom: 20px; right: 20px; width: 190px; height: 260px;
+      background: rgba(24, 24, 28, 0.95); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px;
+      padding: 14px 16px; z-index: 1000; backdrop-filter: blur(16px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+      display: flex; flex-direction: column; justify-content: space-between;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .mixer-panel-section {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .mixer-panel-header {
+      font-size: 9px;
+      color: var(--text-dim);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 4px;
+      margin-bottom: 4px;
+    }
+    .play-btn-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: var(--accent);
+      color: #000;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 6px auto;
+      transition: all 0.2s;
+      box-shadow: 0 4px 10px rgba(255, 205, 85, 0.25);
+    }
+    .play-btn-circle:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 15px rgba(255, 205, 85, 0.4);
+    }
+    .preview-progress-text { font-size: 11px; font-family: monospace; color: var(--text-dim); }
 
     /* Sidebar Footer Button Container */
     .action-bar { padding: 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
@@ -243,79 +286,82 @@
     .hud-zoom-ring .hud-vertical-slider::-webkit-slider-thumb { background: var(--accent-cyan); box-shadow: 0 0 8px rgba(0, 255, 170, 0.5); }
     .hud-pitch-ring .hud-vertical-slider::-webkit-slider-thumb { background: var(--accent); box-shadow: 0 0 8px rgba(255, 205, 85, 0.5); }
 
-    /* Rhythm Console HUD */
-    .hud-rhythm-console {
-      position: absolute;
-      bottom: 365px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(100% - 240px);
-      max-width: 520px;
-      background: rgba(10, 10, 14, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 20px;
-      padding: 12px 20px;
-      display: none; /* Shown dynamically on selection */
-      gap: 18px;
-      align-items: center;
-      z-index: 999;
-      backdrop-filter: blur(14px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-      border-bottom: 2.5px solid var(--accent-cyan);
+    /* Rhythm Section inside Target Lock Panel */
+    .hud-rhythm-section {
+      margin-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 10px;
     }
     .rhythm-control-group {
-      flex: 1;
       display: flex;
       flex-direction: column;
       gap: 4px;
-      min-width: 0;
+      margin-bottom: 8px;
+    }
+    .rhythm-control-group:last-child {
+      margin-bottom: 0;
+    }
+    .rhythm-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     .rhythm-control-group label {
       font-size: 9px;
       color: var(--text-dim);
       font-weight: 700;
-      letter-spacing: 0.8px;
+      letter-spacing: 0.5px;
       text-transform: uppercase;
     }
-    .rhythm-slider-container {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .rhythm-preset-label {
-      font-size: 9px;
-      color: rgba(255,255,255,0.4);
-      white-space: nowrap;
-    }
-    .rhythm-slider-container input[type="range"] {
-      flex: 1;
-      height: 4px;
-      background: rgba(255,255,255,0.12);
-      border-radius: 2px;
-      outline: none;
-      -webkit-appearance: none;
-    }
-    .rhythm-slider-container input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: var(--accent-cyan);
-      cursor: pointer;
-      border: 1.5px solid #000;
-      box-shadow: 0 0 6px rgba(0, 255, 170, 0.4);
-    }
-    .rhythm-header-row { display: flex; justify-content: space-between; align-items: center; }
-    .rhythm-value-display, .hud-wait-value {
+    .rhythm-value-display {
       font-size: 11px;
       font-weight: bold;
       color: var(--accent-cyan);
       font-family: monospace;
     }
-    .rhythm-separator {
-      width: 1px;
-      height: 38px;
-      background: rgba(255, 255, 255, 0.08);
+    .hud-wait-value {
+      font-size: 11px;
+      font-weight: bold;
+      color: var(--accent-purple);
+      font-family: monospace;
+    }
+    .rhythm-slider-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .rhythm-preset-label {
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.4);
+      white-space: nowrap;
+    }
+    .rhythm-slider-container input[type="range"] {
+      flex: 1;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 2px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    #hudSpeedSlider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      cursor: pointer;
+      border: 1px solid #000;
+      box-shadow: 0 0 4px rgba(0, 255, 170, 0.6);
+    }
+    #hudWaitSlider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent-purple);
+      cursor: pointer;
+      border: 1px solid #000;
+      box-shadow: 0 0 4px rgba(192, 132, 252, 0.6);
     }
 
     /* Target Lock & Vibe Panel (Top Right) */
@@ -538,6 +584,9 @@
         <button class="tool-btn" id="btnUndo">↩ 撤销</button>
         <button class="tool-btn" id="btnClear">✕ 清空导演轨</button>
         <button class="tool-btn" id="btnGenerateDraft" style="background: rgba(255, 205, 85, 0.1); border-color: var(--accent); color: var(--accent); display:none;">✨ 基于地理轨生成初稿</button>
+        <button class="tool-btn" id="btnImportGeoTrack" style="background: rgba(14, 165, 233, 0.15); border-color: #0ea5e9; color: #38bdf8;">📥 导入地理轨 (KML/GPX)</button>
+        <input type="file" id="geoTrackFileInput" accept=".kml,.xml,.gpx" style="display: none;" />
+        <button class="tool-btn" id="btnToggleRefLines" style="background: rgba(255, 205, 85, 0.2); border-color: var(--accent); color: var(--accent);">👁️ 隐藏地理轨</button>
       </div>
 
       <!-- ========================================================== -->
@@ -571,33 +620,6 @@
         <div class="hud-ring-value" id="hudPitchValue">-25°</div>
       </div>
 
-      <!-- Bottom Center Overlay: Rhythm Console (Speed & Dwell) -->
-      <div class="hud-rhythm-console" id="hudRhythmConsole">
-        <div class="rhythm-control-group">
-          <div class="rhythm-header-row">
-            <label>飞行速度 (Speed Track)</label>
-            <div class="rhythm-value-display" id="hudSpeedValue">36 km/h</div>
-          </div>
-          <div class="rhythm-slider-container">
-            <span class="rhythm-preset-label">缓慢</span>
-            <input type="range" id="hudSpeedSlider" min="12" max="72" step="1" value="36">
-            <span class="rhythm-preset-label">快速</span>
-          </div>
-        </div>
-        <div class="rhythm-separator"></div>
-        <div class="rhythm-control-group">
-          <div class="rhythm-header-row">
-            <label>到站悬停 (Wait Track)</label>
-            <div class="hud-wait-value" id="hudWaitValue">0s</div>
-          </div>
-          <div class="rhythm-slider-container">
-            <span class="rhythm-preset-label">通过</span>
-            <input type="range" id="hudWaitSlider" min="0" max="15" step="0.5" value="0">
-            <span class="rhythm-preset-label">凝望</span>
-          </div>
-        </div>
-      </div>
-
       <!-- Top Right Overlay: Target Lock & Vibe Preset Mixer -->
       <div class="hud-target-lock-panel" id="hudTargetLockPanel">
         <div class="target-status">
@@ -605,21 +627,43 @@
           <strong id="hudTargetName">走向前方</strong>
         </div>
         <div class="target-actions">
-          <button class="hud-mini-btn" id="btnHudLockForward">➡️ 走向前方 (沿轨道对齐)</button>
-          <button class="hud-mini-btn" id="btnHudLockSummit">🏔️ 凝望视角（锁定主体）</button>
-          <button class="hud-mini-btn" id="btnHudLockSide">➡️ 横向扫视 (航侧 90°)</button>
-          <button class="hud-mini-btn" id="btnHudLockBack">⬅️ 余光倒掠 (倒飞视角)</button>
-          <button class="hud-mini-btn" id="btnHudLockPoi">🎯 追踪最近地标 (POI 对焦)</button>
+          <button class="hud-mini-btn" id="btnHudLockForward">➡️ 沿轨道对齐</button>
+          <button class="hud-mini-btn" id="btnHudLockSummit">🏔️ 锁定主体</button>
+          <button class="hud-mini-btn" id="btnHudLockSide">➡️ 航侧 90°</button>
+          <button class="hud-mini-btn" id="btnHudLockBack">⬅️ 倒飞视角</button>
+          <button class="hud-mini-btn" id="btnHudLockPoi">🎯 POI 对焦</button>
           <button class="hud-mini-btn danger" id="btnHudUnlock" style="display:none;">🔓 解除锁定</button>
           <button class="hud-mini-btn" id="btnHudCaptureCamera" style="border-color: var(--accent); color: var(--accent); margin-top: 6px; justify-content: center; font-weight: bold;">📸 捕获当前三维坐标</button>
         </div>
+
         <div class="hud-shake-toggle">
-          <label for="hudChkHandheld">🎥 手持镜头纪实微颤</label>
+          <label for="hudChkHandheld">🎥 手持镜头</label>
           <input type="checkbox" id="hudChkHandheld">
         </div>
         
         <div style="font-size: 8px; color: var(--text-dim); margin-top: 8px; text-align: center; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 6px;">
-          提示：可在三维地图上 [双击] 锁定视线对焦目标
+          提示：双击锁定对焦目标
+        </div>
+      </div>
+
+      <!-- Left Panel: Playback & Speed -->
+      <div class="hud-left-mixer-panel" id="hudLeftMixerPanel">
+        <div class="mixer-panel-section">
+          <div class="mixer-panel-header">▶️ 预览播放</div>
+          <button class="play-btn-circle" id="btnPlay">▶</button>
+          <div class="preview-progress-text" id="previewStatus">就绪 (共 0 轨)</div>
+        </div>
+        
+        <div class="mixer-panel-section" id="hudSpeedGroup" style="opacity: 0.4; transition: opacity 0.2s;">
+          <div class="rhythm-header-row">
+            <label>飞行速度</label>
+            <div class="rhythm-value-display" id="hudSpeedValue">36 km/h</div>
+          </div>
+          <div class="rhythm-slider-container">
+            <span class="rhythm-preset-label">缓慢</span>
+            <input type="range" id="hudSpeedSlider" min="12" max="72" step="1" value="36" disabled>
+            <span class="rhythm-preset-label">快速</span>
+          </div>
         </div>
       </div>
 
@@ -641,10 +685,19 @@
         </div>
       </div>
 
-      <!-- Playback Bar -->
-      <div class="bottom-bar">
-        <button class="play-btn" id="btnPlay">▶</button>
-        <span class="preview-progress-text" id="previewStatus">就绪 (共 0 轨)</span>
+      <!-- Right Panel: Wait/Dwell -->
+      <div class="hud-right-mixer-panel" id="hudRightMixerPanel">
+        <div class="mixer-panel-section" id="hudWaitGroup" style="opacity: 0.4; transition: opacity 0.2s;">
+          <div class="rhythm-header-row">
+            <label>到站悬停</label>
+            <div class="hud-wait-value" id="hudWaitValue">0s</div>
+          </div>
+          <div class="rhythm-slider-container">
+            <span class="rhythm-preset-label">通过</span>
+            <input type="range" id="hudWaitSlider" min="0" max="15" step="0.5" value="0" disabled>
+            <span class="rhythm-preset-label">凝望</span>
+          </div>
+        </div>
       </div>
 
       <!-- Diagnostics Dashboard Panel moved to Sidebar -->
@@ -663,12 +716,13 @@
     
     let activeId = null;
     let selectedIds = []; // 批量选择的航点 ID 列表
+    let selectionAnchorId = null; // 批量选择起点的航点 ID (Anchor)
     let historyStack = []; // 撤销历史栈
     let viewer;
     let flightLineEntity = null;
     let refLineEntities = [];
     let keyframeMarkers = [];
-    let refVisible = false;
+    let refVisible = true;
     let isDragging = false;
     let dragEntity = null;
     let poisData = []; // Global POI cache
@@ -676,6 +730,8 @@
     // Preview playback engine state
     let isPreviewPlaying = false;
     let previewIndex = 0;
+    let previewStartIndex = 0;
+    let previewEndIndex = 0;
     let previewTimeout = null;
 
     // Elevation chart interactions
@@ -1097,6 +1153,102 @@
         saveToServer(true);
       });
 
+      // Bind Import Geopath button
+      const importInput = document.getElementById('geoTrackFileInput');
+      document.getElementById('btnImportGeoTrack').addEventListener('click', () => {
+        importInput.click();
+      });
+      importInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          try {
+            const text = evt.target.result;
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(text, "text/xml");
+            
+            let points = [];
+            
+            // Try parsing KML coordinates
+            const coordsNodes = xmlDoc.getElementsByTagName("coordinates");
+            if (coordsNodes.length > 0) {
+              for (let i = 0; i < coordsNodes.length; i++) {
+                const textVal = coordsNodes[i].textContent.trim();
+                const coordsLines = textVal.split(/\s+/);
+                coordsLines.forEach(line => {
+                  if (!line) return;
+                  const parts = line.split(",");
+                  if (parts.length >= 2) {
+                    const lng = parseFloat(parts[0]);
+                    const lat = parseFloat(parts[1]);
+                    if (!isNaN(lng) && !isNaN(lat)) {
+                      points.push([lng, lat]);
+                    }
+                  }
+                });
+              }
+            } else {
+              // Try parsing GPX trkpt
+              const trkpts = xmlDoc.getElementsByTagName("trkpt");
+              for (let i = 0; i < trkpts.length; i++) {
+                const node = trkpts[i];
+                const lat = parseFloat(node.getAttribute("lat"));
+                const lng = parseFloat(node.getAttribute("lon"));
+                if (!isNaN(lat) && !isNaN(lng)) {
+                  points.push([lng, lat]);
+                }
+              }
+            }
+            
+            if (points.length === 0) {
+              alert("未能在文件中解析出有效的 LineString 或 trkpt 经纬度坐标！");
+              return;
+            }
+            
+            pushHistoryState();
+            data.main = points;
+            drawRefLines();
+            
+            // Fly Cesium camera to focus on the imported track
+            if (viewer && points.length > 0) {
+              const cartesianPositions = points.map(pt => Cesium.Cartesian3.fromDegrees(pt[0], pt[1]));
+              const boundingSphere = Cesium.BoundingSphere.fromPoints(cartesianPositions);
+              viewer.camera.flyToBoundingSphere(boundingSphere, {
+                duration: 2.0
+              });
+            }
+            
+            // If data.main_flight is empty, show Generate Draft button
+            if (data.main_flight.length === 0) {
+              document.getElementById('btnGenerateDraft').style.display = 'block';
+            }
+            
+            saveToServer();
+            showToast(`成功导入地理轨 (${points.length} 个轨迹点)`);
+          } catch (err) {
+            alert("解析文件失败: " + err.message);
+          }
+          // Reset file input value so user can import the same file again if needed
+          importInput.value = '';
+        };
+        reader.readAsText(file);
+      });
+
+      // Bind Toggle Reference Line button
+      document.getElementById('btnToggleRefLines').addEventListener('click', () => {
+        refVisible = !refVisible;
+        const btn = document.getElementById('btnToggleRefLines');
+        if (refVisible) {
+          btn.textContent = '👁️ 隐藏地理轨';
+          btn.style.background = 'rgba(255, 205, 85, 0.2)';
+        } else {
+          btn.textContent = '👁️ 显示地理轨';
+          btn.style.background = '';
+        }
+        drawRefLines();
+      });
+
       // Bind Sidebar Toggle
       document.getElementById('btnToggleSidebar').addEventListener('click', () => {
         const sidebar = document.querySelector('.sidebar-left');
@@ -1132,7 +1284,7 @@
       refLineEntities.forEach(ent => viewer.entities.remove(ent));
       refLineEntities = [];
 
-      const color = Cesium.Color.RED.withAlpha(refVisible ? 0.25 : 0.0);
+      const color = Cesium.Color.fromCssColorString('#f59e0b').withAlpha(refVisible ? 0.6 : 0.0);
 
       // Render physical main route
       if (data.main && data.main.length) {
@@ -1349,7 +1501,7 @@
           <div class="keyframe-idx">${idx + 1}</div>
           <div class="keyframe-info">
             <input type="text" class="keyframe-name-input" value="${pt.name || ('导演空间轨 ' + (idx + 1))}" 
-              data-idx="${idx}" onclick="event.stopPropagation()">
+              data-idx="${idx}">
             <div class="keyframe-meta">高: ${pt.relative_alt}m · 视: ${directionLabel} · 约 ${pt.duration}s</div>
           </div>
           <div class="keyframe-actions" onclick="event.stopPropagation()">
@@ -1381,9 +1533,13 @@
       
       const clickedPt = list[idx];
       const clickedId = clickedPt.id;
+
+      if (event.shiftKey) {
+        event.preventDefault(); // 阻止浏览器默认文本选中行为
+      }
       
       if (event.ctrlKey || event.metaKey) {
-        // Toggle selection
+        // Toggle selection (加选/减选)
         const sIdx = selectedIds.indexOf(clickedId);
         if (sIdx !== -1) {
           if (selectedIds.length > 1) {
@@ -1398,26 +1554,29 @@
         } else {
           selectedIds.push(clickedId);
           activeId = clickedId;
+          selectionAnchorId = clickedId; // 更新多选锚点
         }
-      } else if (event.shiftKey && activeId) {
-        // Range selection
-        const activeIdx = list.findIndex(f => f.id === activeId);
-        if (activeIdx !== -1) {
-          const start = Math.min(activeIdx, idx);
-          const end = Math.max(activeIdx, idx);
+      } else if (event.shiftKey && selectionAnchorId) {
+        // Range selection (从多选锚点到当前点的范围选择)
+        const anchorIdx = list.findIndex(f => f.id === selectionAnchorId);
+        if (anchorIdx !== -1) {
+          const start = Math.min(anchorIdx, idx);
+          const end = Math.max(anchorIdx, idx);
           selectedIds = [];
           for (let i = start; i <= end; i++) {
             selectedIds.push(list[i].id);
           }
-          activeId = clickedId;
+          activeId = clickedId; // 活动点移至最新点击点，但 anchor 保持不变
         } else {
           selectedIds = [clickedId];
           activeId = clickedId;
+          selectionAnchorId = clickedId;
         }
       } else {
-        // Single selection
+        // Single selection (单选)
         selectedIds = [clickedId];
         activeId = clickedId;
+        selectionAnchorId = clickedId; // 设置新的单选锚点
       }
       
       const activeIdx = list.findIndex(f => f.id === activeId);
@@ -1429,7 +1588,27 @@
     function updateCount() {
       const len = data.main_flight.length;
       document.getElementById('keyframeCount').textContent = len + " 轨";
-      document.getElementById('previewStatus').textContent = isPreviewPlaying ? `正在混音预览 (${previewIndex + 1}/${len})` : `就绪 (共 ${len} 轨道)`;
+      
+      let statusText = "";
+      if (isPreviewPlaying) {
+        statusText = `正在播放预览 (${previewIndex + 1}/${len})`;
+      } else {
+        if (len === 0) {
+          statusText = "请在地图上点击添加航点，或导入地理轨";
+        } else if (selectedIds.length > 1) {
+          const list = data.main_flight;
+          const indices = selectedIds.map(id => list.findIndex(f => f.id === id)).filter(idx => idx !== -1);
+          const minIdx = Math.min(...indices);
+          const maxIdx = Math.max(...indices);
+          statusText = `▶ 点击播放选中区间 (#${minIdx + 1} - #${maxIdx + 1})`;
+        } else if (activeId) {
+          const activeIdx = data.main_flight.findIndex(f => f.id === activeId);
+          statusText = `▶ 点击从当前航点 #${activeIdx + 1} 播放至终点`;
+        } else {
+          statusText = "▶ 点击开始完整航线预览";
+        }
+      }
+      document.getElementById('previewStatus').textContent = statusText;
     }
 
     // ---- Selected Keyframe State Update ----
@@ -1457,11 +1636,11 @@
         }
       });
       rebuildMarkers();
+      updateCount();
 
       // Show HUD controls
       document.getElementById('hudZoomRing').style.display = 'flex';
       document.getElementById('hudPitchRing').style.display = 'flex';
-      document.getElementById('hudRhythmConsole').style.display = 'flex';
       document.getElementById('hudTargetLockPanel').style.display = 'block';
       document.getElementById('btnDeleteSelected').style.display = 'inline-flex';
 
@@ -1485,10 +1664,13 @@
       document.getElementById('hudSpeedSlider').value = speedKmh;
       document.getElementById('hudSpeedSlider').disabled = (idx === 0);
       document.getElementById('hudSpeedValue').textContent = idx === 0 ? "起飞点 (首帧)" : `${speedKmh} km/h`;
+      document.getElementById('hudSpeedGroup').style.opacity = (idx === 0) ? '0.4' : '1.0';
 
       const waitVal = pt.wait_time || 0.0;
       document.getElementById('hudWaitSlider').value = waitVal;
+      document.getElementById('hudWaitSlider').disabled = false;
       document.getElementById('hudWaitValue').textContent = `${waitVal}s`;
+      document.getElementById('hudWaitGroup').style.opacity = '1.0';
 
       // Handheld Shaking toggle
       document.getElementById('hudChkHandheld').checked = (pt.shot_mode === 'handheld');
@@ -1558,7 +1740,6 @@
       selectedIds = [];
       document.getElementById('hudZoomRing').style.display = 'none';
       document.getElementById('hudPitchRing').style.display = 'none';
-      document.getElementById('hudRhythmConsole').style.display = 'none';
       document.getElementById('hudTargetLockPanel').style.display = 'none';
       document.getElementById('btnDeleteSelected').style.display = 'none';
       
@@ -1572,6 +1753,7 @@
       clearTargetLockVisuals();
       rebuildMarkers();
       rebuildElevationChart();
+      updateCount();
     }
 
     function updateDiagnosticsPanel(pt, idx) {
@@ -3571,7 +3753,8 @@
 
     // ---- Continuous Preview Engine ----
     function togglePreviewPlayback() {
-      if (data.main_flight.length === 0) {
+      const list = data.main_flight;
+      if (list.length === 0) {
         showToast("无空间配置可供预览");
         return;
       }
@@ -3580,23 +3763,50 @@
       document.getElementById('btnPlay').textContent = isPreviewPlaying ? '⏸' : '▶';
 
       if (isPreviewPlaying) {
-        previewIndex = 0;
+        // Calculate play range:
+        // Case 1: Multiple items selected (Ctrl or Shift multi-select) -> play range
+        if (selectedIds.length > 1) {
+          const indices = selectedIds.map(id => list.findIndex(f => f.id === id)).filter(idx => idx !== -1);
+          previewStartIndex = Math.min(...indices);
+          previewEndIndex = Math.max(...indices);
+          showToast(`正在播放选中区间 (#${previewStartIndex + 1} - #${previewEndIndex + 1})`);
+        } 
+        // Case 2: One item selected -> play from that item to the end of the flight
+        else if (activeId) {
+          const activeIdx = list.findIndex(f => f.id === activeId);
+          if (activeIdx !== -1) {
+            previewStartIndex = activeIdx;
+            previewEndIndex = list.length - 1;
+            showToast(`从当前航点 #${previewStartIndex + 1} 开始播放至终点`);
+          } else {
+            previewStartIndex = 0;
+            previewEndIndex = list.length - 1;
+          }
+        } 
+        // Case 3: No items selected -> play entire flight from 0 to N
+        else {
+          previewStartIndex = 0;
+          previewEndIndex = list.length - 1;
+          showToast("开始完整飞行航线预览");
+        }
+
+        previewIndex = previewStartIndex;
         runPreviewStep();
       } else {
         if (previewTimeout) clearTimeout(previewTimeout);
         updatePreviewHandheldShake(false);
-        viewer.camera.cancelFlight();
+        if (viewer) viewer.camera.cancelFlight();
         updateCount();
       }
     }
 
     function runPreviewStep() {
-      if (!isPreviewPlaying || previewIndex >= data.main_flight.length) {
+      if (!isPreviewPlaying || previewIndex > previewEndIndex || previewIndex >= data.main_flight.length) {
         isPreviewPlaying = false;
         document.getElementById('btnPlay').textContent = '▶';
         updatePreviewHandheldShake(false);
         updateCount();
-        showToast("混音预览结束");
+        showToast("预览播放结束");
         return;
       }
 
@@ -3604,7 +3814,8 @@
       const pt = data.main_flight[previewIndex];
       const absoluteAlt = (pt.ground_alt || 5000) + (pt.relative_alt || 500);
 
-      selectKeyframe(previewIndex);
+      selectKeyframe(previewIndex, true); // Keep selection highlights
+      rebuildElevationChart();
 
       if (typeof pt.fov === 'number') {
         viewer.camera.frustum.fov = Cesium.Math.toRadians(pt.fov);
