@@ -50817,6 +50817,26 @@
       "perspective_pitch": "oblique",
       "speed_preset": "normal",
       "wait_preset": "none"
+    },
+    {
+      "id": "evt_1781172169060",
+      "name": "导演航点 84",
+      "lng": 81.279324,
+      "lat": 30.982788,
+      "ground_alt": 4740,
+      "relative_alt": 500,
+      "heading": 300.9,
+      "pitch": -40,
+      "roll": 0,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none"
     }
   ]
 }
