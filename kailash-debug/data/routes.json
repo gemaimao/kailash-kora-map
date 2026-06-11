@@ -49689,17 +49689,19 @@
     {
       "id": "evt_1781145179397_9",
       "name": "航点 10",
-      "lng": 81.2768782816244,
-      "lat": 31.04192883691108,
-      "ground_alt": 4745,
-      "relative_alt": 125,
-      "heading": 17.69,
-      "pitch": -40,
+      "lng": 81.276767,
+      "lat": 31.041911,
+      "ground_alt": 4743,
+      "relative_alt": 96,
+      "heading": 19.2,
+      "pitch": -35.1,
       "roll": 0,
       "duration": 1.5,
       "wait_time": 0,
       "fov": 120,
-      "perspective_fov": "custom"
+      "perspective_fov": "custom",
+      "look_at_intent": "custom",
+      "perspective_pitch": "custom"
     },
     {
       "id": "evt_1781145179397_10",
