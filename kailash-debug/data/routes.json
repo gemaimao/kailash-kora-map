@@ -50031,12 +50031,12 @@
     {
       "id": "evt_1781145179397_29",
       "name": "航点 30",
-      "lng": 81.379738,
-      "lat": 31.059805,
-      "ground_alt": 5094,
-      "relative_alt": 76,
-      "heading": 177.1,
-      "pitch": -17.1,
+      "lng": 81.375105,
+      "lat": 31.058697,
+      "ground_alt": 5120,
+      "relative_alt": 255,
+      "heading": 180,
+      "pitch": -20.5,
       "roll": 360,
       "duration": 49.6,
       "wait_time": 0,
@@ -50044,7 +50044,8 @@
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
       "fov": 112,
-      "speed_preset": "custom"
+      "speed_preset": "custom",
+      "shot_mode": "default"
     },
     {
       "id": "evt_1781145179397_30",
