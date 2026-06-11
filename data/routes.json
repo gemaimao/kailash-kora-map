@@ -49805,12 +49805,16 @@
       "lng": 81.32977597851797,
       "lat": 31.10084087298925,
       "ground_alt": 5107,
-      "relative_alt": 500,
-      "heading": 92.53,
+      "relative_alt": 301,
+      "heading": 92.5,
       "pitch": -40,
       "roll": 0,
       "duration": 1.5,
-      "wait_time": 0
+      "wait_time": 0,
+      "look_at_intent": "custom",
+      "perspective_fov": "custom",
+      "perspective_pitch": "custom",
+      "fov": 60
     },
     {
       "id": "evt_1781145179397_20",
