@@ -49641,11 +49641,15 @@
       "lat": 31.01823433791415,
       "ground_alt": 4702,
       "relative_alt": 346,
-      "heading": 21.43,
+      "heading": 21.4,
       "pitch": -40,
       "roll": 0,
       "duration": 1.5,
-      "wait_time": 0
+      "wait_time": 0,
+      "look_at_intent": "custom",
+      "perspective_fov": "custom",
+      "perspective_pitch": "custom",
+      "fov": 60
     },
     {
       "id": "evt_1781145179397_7",
