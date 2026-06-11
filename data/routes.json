@@ -49882,7 +49882,7 @@
       "duration": 5,
       "wait_time": 0,
       "look_at_intent": "custom",
-      "perspective_fov": "custom",
+      "perspective_fov": "natural",
       "perspective_pitch": "custom",
       "fov": 60
     },
