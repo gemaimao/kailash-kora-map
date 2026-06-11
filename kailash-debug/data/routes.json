@@ -49659,13 +49659,15 @@
       "lat": 31.0263208849897,
       "ground_alt": 4707,
       "relative_alt": 242,
-      "heading": 23.93,
+      "heading": 23.9,
       "pitch": -40,
       "roll": 0,
       "duration": 1.5,
       "wait_time": 0,
       "fov": 120,
-      "perspective_fov": "custom"
+      "perspective_fov": "custom",
+      "look_at_intent": "custom",
+      "perspective_pitch": "custom"
     },
     {
       "id": "evt_1781145179397_8",
