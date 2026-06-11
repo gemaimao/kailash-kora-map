@@ -1,0 +1,1231 @@
+{
+  "type": "FeatureCollection",
+  "name": "Spatial Narrative Track and POIs",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Flight Path (导演飞行航迹)",
+        "type": "flight_path",
+        "stroke": "#f59e0b",
+        "stroke-width": 4,
+        "stroke-opacity": 0.8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            81.28769229289169,
+            30.97740236524288,
+            5188.0
+          ],
+          [
+            81.27798910187693,
+            30.98031570406625,
+            5219.0
+          ],
+          [
+            81.26978871495055,
+            30.98523068065298,
+            5200.0
+          ],
+          [
+            81.26140567564103,
+            30.99095270388249,
+            5158.0
+          ],
+          [
+            81.25744610437074,
+            30.99811827393691,
+            5309.0
+          ],
+          [
+            81.25885209900402,
+            31.00943557087597,
+            5370.0
+          ],
+          [
+            81.26082731247337,
+            31.01823433791415,
+            5346.0
+          ],
+          [
+            81.26613896399897,
+            31.0263208849897,
+            5242.0
+          ],
+          [
+            81.2726590419169,
+            31.03376283008522,
+            5203.0
+          ],
+          [
+            81.2768782816244,
+            31.04192883691108,
+            5223.0
+          ],
+          [
+            81.2801796292782,
+            31.05031812489147,
+            5224.0
+          ],
+          [
+            81.28127893694683,
+            31.05893322670458,
+            5222.0
+          ],
+          [
+            81.28180766307796,
+            31.06777216653715,
+            5228.0
+          ],
+          [
+            81.28355555096546,
+            31.07635352409812,
+            5205.0
+          ],
+          [
+            81.28715330273803,
+            31.08459977774932,
+            5223.0
+          ],
+          [
+            81.29208959402686,
+            31.09216767324834,
+            5222.0
+          ],
+          [
+            81.29907684448713,
+            31.09883440367324,
+            5242.0
+          ],
+          [
+            81.30996755231847,
+            31.10107209298648,
+            5274.0
+          ],
+          [
+            81.3201817896454,
+            31.10211027637148,
+            5272.0
+          ],
+          [
+            81.32977597851797,
+            31.10084087298925,
+            5240.0
+          ],
+          [
+            81.33750933335567,
+            31.09832373055712,
+            5197.0
+          ],
+          [
+            81.34718276023735,
+            31.09545886907748,
+            5178.0
+          ],
+          [
+            81.35481108930327,
+            31.09931357569585,
+            5227.0
+          ],
+          [
+            81.36358029922226,
+            31.09945100860194,
+            5241.0
+          ],
+          [
+            81.3702007584181,
+            31.09431208371354,
+            5483.0
+          ],
+          [
+            81.37656148140964,
+            31.08922539687068,
+            5307.0
+          ],
+          [
+            81.38457150611295,
+            31.08420441915677,
+            5254.0
+          ],
+          [
+            81.38599753317507,
+            31.07649102102273,
+            5360.0
+          ],
+          [
+            81.38171290760482,
+            31.06831098806309,
+            5350.0
+          ],
+          [
+            81.379738,
+            31.059805,
+            5292.0
+          ],
+          [
+            81.37679636429888,
+            31.05157367447226,
+            5316.0
+          ],
+          [
+            81.37749512919495,
+            31.04291131370536,
+            5297.0
+          ],
+          [
+            81.37671627279386,
+            31.03432275344363,
+            5319.0
+          ],
+          [
+            81.37692546582615,
+            31.0259044650999,
+            5500.0
+          ],
+          [
+            81.3775487217487,
+            31.01722789444379,
+            5500.0
+          ],
+          [
+            81.37464968520044,
+            31.00903094993716,
+            5500.0
+          ],
+          [
+            81.36692747935503,
+            31.00343261395343,
+            5500.0
+          ],
+          [
+            81.36021894218231,
+            30.99900486933103,
+            5500.0
+          ],
+          [
+            81.35249041676455,
+            30.99347364659574,
+            5500.0
+          ],
+          [
+            81.34618273296935,
+            30.98667887419469,
+            5451.0
+          ],
+          [
+            81.33827517808976,
+            30.98118061793834,
+            5500.0
+          ],
+          [
+            81.33189666673118,
+            30.97425231565409,
+            5500.0
+          ],
+          [
+            81.32634496606626,
+            30.96695667071,
+            5500.0
+          ],
+          [
+            81.3194442717334,
+            30.96145639337546,
+            5500.0
+          ],
+          [
+            81.30962321396143,
+            30.96354009643086,
+            5500.0
+          ],
+          [
+            81.30037952007743,
+            30.96874193325068,
+            5500.0
+          ],
+          [
+            81.29240161921143,
+            30.97441461648696,
+            5500.0
+          ],
+          [
+            81.29047105805105,
+            30.97974317475557,
+            5500.0
+          ],
+          [
+            81.2893634571029,
+            30.98844972669029,
+            5500.0
+          ],
+          [
+            81.28600688147826,
+            30.99578572099689,
+            5500.0
+          ],
+          [
+            81.28021198385466,
+            31.00246525207456,
+            5500.0
+          ],
+          [
+            81.27935078454301,
+            31.01057099349701,
+            5500.0
+          ],
+          [
+            81.28366796526973,
+            31.01729195833174,
+            5500.0
+          ],
+          [
+            81.2894214332949,
+            31.02448489710402,
+            5500.0
+          ],
+          [
+            81.29630493421875,
+            31.03122285291546,
+            5500.0
+          ],
+          [
+            81.29792277357593,
+            31.03944702064223,
+            5500.0
+          ],
+          [
+            81.30046338236286,
+            31.04747125040658,
+            5500.0
+          ],
+          [
+            81.30605537114315,
+            31.05458633023142,
+            5500.0
+          ],
+          [
+            81.31076937963161,
+            31.06101338278068,
+            5700.0
+          ],
+          [
+            81.31674565886847,
+            31.05588643320242,
+            5500.0
+          ],
+          [
+            81.32156217003015,
+            31.0493494508645,
+            5500.0
+          ],
+          [
+            81.31630129254496,
+            31.04202551581316,
+            5500.0
+          ],
+          [
+            81.30835095584729,
+            31.03667754034398,
+            5500.0
+          ],
+          [
+            81.29985510112019,
+            31.03225382873127,
+            5500.0
+          ],
+          [
+            81.29173085664594,
+            31.02690631905128,
+            5500.0
+          ],
+          [
+            81.28550640415041,
+            31.01995500058019,
+            5500.0
+          ],
+          [
+            81.28063069304176,
+            31.012395815059,
+            5500.0
+          ],
+          [
+            81.28220841764872,
+            31.00448723487789,
+            5500.0
+          ],
+          [
+            81.28751505500024,
+            31.00563097683476,
+            5500.0
+          ],
+          [
+            81.29633081656317,
+            31.00806965630066,
+            5500.0
+          ],
+          [
+            81.29610455157813,
+            31.0013553639464,
+            5500.0
+          ],
+          [
+            81.29317961005053,
+            30.99502610987016,
+            5500.0
+          ],
+          [
+            81.28936183221718,
+            30.98711776706156,
+            5500.0
+          ],
+          [
+            81.29149912193502,
+            30.97896639764141,
+            5500.0
+          ],
+          [
+            81.28794589001001,
+            30.97740793498796,
+            5500.0
+          ],
+          [
+            81.284864,
+            30.985664,
+            5500.0
+          ],
+          [
+            81.274368,
+            30.995893,
+            5500.0
+          ],
+          [
+            81.256879,
+            31.011821,
+            5500.0
+          ],
+          [
+            81.380367,
+            31.088974,
+            5500.0
+          ],
+          [
+            81.389924,
+            31.082519,
+            5500.0
+          ],
+          [
+            81.263064,
+            31.025932,
+            5500.0
+          ],
+          [
+            81.27519,
+            31.033985,
+            5500.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_001",
+        "name": "塔尔钦镇",
+        "type": "poi",
+        "note": "塔尔钦意为大经幡，现为普兰县巴嘎镇所在地，神山朝圣大本营<br><img src=\"https://images.unsplash.com/photo-1544330691-628d0115049c?q=80&w=600&auto=format&fit=crop\" alt=\"雪山风光\">图片拍摄：墨小妖",
+        "bubble": "\"神山南麓世俗汇聚之地。南面是旷阔的巴嘎湖区平原与湿地，远方是纳木那尼绵延雪山，中间日月双湖波光湛蓝。拉昂错北部荒野中，柱状龙卷风常在午后狼奔虎逐，天地热力交换的重压下，连乌鸦也只能小回旋贴地短飞。北方的冈仁波齐峰只是稍露一头，显得冷寂，并且遥远。一面是天道往复不息的日升月起，世界般地宏阔无章，浩瀚的无趣感；一面又是久压的朝圣欲望，在每一个内心中最后的纠结，却又想一早跋涉圣途。The secular gathering place at the southern slope of the sacred mountain. To the south lies the vast Bagha Lake plain and wetland, in the distance are the endless snow-capped mountains of Namtso Nani, and in the middle are the twin lakes, their ripples a deep azure blue. In the northern wilderness of Lake Lhakang, towering tornadoes often race about in the afternoon, under the intense pressure of the exchange of terrestrial heat, even crows can only make small circles and short flights close to the ground. The Gangrenboqi peak in the north is barely visible, appearing desolate and distant. On one hand, there is the endless rise and fall of the sun and moon, vast and unordered, a sense of boredom as boundless as the world; on the other hand, there is the long-suppressed desire for pilgrimage, the final entanglement in every heart, yet yearning to embark on the sacred journey early in the morning.\",",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.28655440734049,
+          30.97362807215635,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_002",
+        "name": "恰采岗",
+        "type": "poi",
+        "note": "",
+        "bubble": "转岗过程中有四个点可以看见神山冈仁波齐的地方，恰采岗是藏语礼拜处（拜峰台）的音译，这是西北角第一个。其余的在西边马鞍石、东面空行秘道出口和宗堆茶馆附近，一共有四处。During the transfer process, there are four points where you can see Shenshangang Rinpoqi. Chacaigang is the transliteration of the Tibetan worship place (Baifengtai), which is the first in the northwest corner. The rest are near the horse saddle stone in the west, the empty secret exit in the east and the Zongdui teahouse, there are four in total.",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.25849147348777,
+          30.99383861274394,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_003",
+        "name": "色尔雄",
+        "type": "poi",
+        "note": "",
+        "bubble": "西转经道内侧流石滩上一块正方形的石头，被称为是格萨尔骨子",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.26070623208025,
+          31.01335051645296,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_004",
+        "name": "大经幡阵",
+        "type": "poi",
+        "note": "图片拍摄：丁丁",
+        "bubble": "\"位于西转山甬道入口，拉曲河东侧黄金草滩旁台地。1680年前后，甘丹才旺率蒙藏大军收复阿里失地，为宣示胜利、告慰将士，于此举行盛大祭山仪式，并树立大经幡柱“甘丹疯旗”，以此告诫胆敢入侵者需遭受甘丹才旺疯狂反击。环形大经幡阵迎风猎猎，灵魂在这里仿佛会受到牵引，沿那条壁立的西甬道，踏上充满希望的赎罪和重生之旅。At the entrance of the Xizhuan Mountain pass, on the terrace beside the Golden Grass Beach on the east side of the Laju River. Around 1680, Gandan Caiwang led the Mongolian and Tibetan forces to recapture the lost land of Ali. To declare victory and comfort the soldiers, a grand mountain sacrifice ceremony was held here, and a large prayer flag pole, the \\\"Gandan Crazy Flag,\\\" was erected to warn any invaders of Gandan Caiwang's fierce counterattack. The circular array of large prayer flags fluttered in the wind, as if the souls here were being drawn. Along the vertical west passageway, one embarks on a journey of hope, redemption, and rebirth.\",",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.26168724492955,
+          31.0152792240963,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_005",
+        "name": "双腿佛塔",
+        "type": "poi",
+        "note": "",
+        "bubble": "这是进入正式转山道的一个象征性的起点。印度教认为这里是地狱主阎摩之门，是由死向生循环的入口。This is a symbolic starting point for entering the formal pilgrimage route. Hinduism considers this the gate of Yama, the lord of hell, and the entrance to the cycle of death and rebirth.\",",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.25934028537252,
+          31.01540849522591,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_006",
+        "name": "大天葬台",
+        "type": "poi",
+        "note": "有五百罗汉会供加持的大天葬台",
+        "bubble": "\"大经幡阵北头高阶台地，是千百年以来生死的结界，肉体和灵魂得大解之地。传说佛祖曾亲率500阿罗汉化身黄鸭飞临此地以佑神山，并留下西南不动地钉永固圣地。结合甘丹才旺的故事，这里是勇者得解，无关悲欣的新起点。The high-level platform at the north end of the Great Prayer Banner is the boundary of life and death for thousands of years, and the place where the body and soul are greatly released. Legend has it that the Buddha once personally led 500 Arohans to fly here in the incarnation of yellow ducks to bless the divine mountain, and left the southwestern land to nail the eternal holy land. Combined with the story of Gan Dancaiwang, this is a new starting point for the brave to understand, which has nothing to do with sadness and happiness.\",",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.26462200577546,
+          31.01874665761069,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_007",
+        "name": "那若本琼洞",
+        "type": "poi",
+        "note": "",
+        "bubble": "\"那若琼巴洞位于大天葬台西北侧壁缘，经天葬台转山的必经地。该洞临近拉曲河，与曲古寺米拉日巴莲花修行洞隔岸相望。以米拉日巴为代表的新生势力在神山圣湖的不断崛起，那若琼巴所代表的苯教大师们则逐步淡出圣地。关于米拉日巴和那若琼巴（为争夺圣地修行主导权而）斗法的故事和遗迹，构成神山转山故事的主体之一。上面是天葬台，下方则是灵泉相伴的修行洞府。看似对立，实为循环一体。Na Ruo Qiongba Cave is located on the northwest wall of the Great Heavenly Burial Platform, and it is a must-see place to turn from the mountain through the Heavenly Burial Platform. The cave is close to the Laqu River and across the bank of the Mirazhiba Lotus Practice Cave of Qugu Temple. The new forces represented by Mirajpa continued to rise in the holy lake of Shenshan, and the masters of Bon Buddhism represented by Na Ruo Jomba gradually faded out of the holy place. The story and relics about the fight between Mirajpa and Narojunba (for the leadership of the holy place practice) constitute one of the main subjects of the story of the divine mountain. Above is the heavenly burial platform, and below is the practice cave accompanied by the spiritual spring. It seems to be an opposition, but it is actually a cycle.\",",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.26782815856193,
+          31.02412949650186,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_008",
+        "name": "曲古寺",
+        "type": "poi",
+        "note": "曲古意为法（身），是西转山甬道第一寺，有神山护法神岗日拉赞神像、无量光佛塑像和煮茶大锅等寺藏文物",
+        "bubble": "\"转山西甬道入口处，拉曲河西侧，以壁立之姿，越过西甬道两侧山体投下的漫长阴影，与光明处的岗仁波齐峰西侧遥相对望。曲古寺有岗仁波齐护法神岗日拉赞神像。传说中，曲古寺著名的无量光佛塑像是由他迎接而来。Turn to the entrance of the west corridor, on the west side of the Laqu River, standing on the wall, cross the long shadows cast by the mountains on both sides of the west corridor, and look at the west side of Gangrenbo Qifeng in the bright place. There is a statue of Gang Rilazan, the god of Gangrenbo Qihufa, in Qugu Temple. Legend has it that the famous Buddha statue of Immeasurable Light in Qugu Temple was welcomed by him.\",",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.2664839328629,
+          31.03355079422627,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "evt_1781061389139",
+        "name": "格萨尔的骰子",
+        "type": "poi",
+        "note": "",
+        "bubble": "西转山道内侧流水滩处有一方形岩石形似骰子。",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.283932,
+          31.054247,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_009",
+        "name": "马鞍石",
+        "type": "poi",
+        "note": "",
+        "bubble": "西侧拜峰台位置处一个形似马鞍的石头，是传说中格萨尔大王的马鞍。与此马鞍石正对的西转经道外圈，格萨尔和其大将峰的下面，也有一个山峰的形状像是马鞍。There is a saddle-shaped stone on the west side of the Baifengtai, which is the saddle of the legendary King Gesar. There is also a mountain peak in the shape of a saddle under the outer circle of the western turning meridian directly of this saddle stone, Gesar and its general peak.",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.2821261448395,
+          31.07370466943606,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "evt_1781058504874",
+        "name": "贡波林宫殿",
+        "type": "poi",
+        "note": "",
+        "bubble": "传说魔鬼贡波林欲将岗仁波齐打包背回自己的地盘。所以佛神新率500罗汉前往阻止，并留下四颗不动地钉让神山永固。这处峰体被称为贡波林的宫殿",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.291541,
+          31.063765,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_010",
+        "name": "马头明王旅馆",
+        "type": "poi",
+        "note": "",
+        "bubble": "\"经过西甬道东侧几处风化流石滩，快转向北行的位置是马头明王天生石。也是传统的转山途中休息地。至此，西甬道一段略显逼仄和压抑的空间渐次开阔，地势也将一路缓升。好马相伴，后路无忧。在此东望可观察到神山北壁形似眼镜蛇的冰冠，印度教称之为“那迦”。After passing through several weathered stone beaches on the east side of the West Road, the position of turning north is the Tianshengshi of Matou Mingwang. It is also a traditional resting place on the way to the mountain. At this point, the slightly cramped and oppressive space of Xiying Road will gradually open up, and the terrain will rise slowly all the way. Accompanied by good horses, the back road is worry-free. Looking east here, you can observe the ice crown shaped like a cobra on the north wall of the sacred mountain, which is called \\\"Naga\\\" in Hinduism.\",",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.28732025188906,
+          31.08544088626683,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_011",
+        "name": "郭仓巴足印",
+        "type": "poi",
+        "note": "",
+        "bubble": "郭仓巴是竹巴噶举派著名的修行大师，竹巴噶举派创始人藏巴甲热高足，有鹰巢修士美誉。蒙元铁骑逡巡高原之际，他远赴阿里神山圣湖进行开拓，以求留下佛教火种。在圣湖玛旁雍西岸的果初寺有他的塑像。神山正北的哲日浦寺也起源于他。前往卓玛拉山口的过程中，一路都有空行母护法变幻出牦牛、青狼等引领他开拓路线的遗迹。Guo Cangba was a renowned master of the Drukpa Kagyu school, a prominent disciple of Tsangpa Gyaltsen, the founder of the Drukpa Kagyu school, and was known as the \\\"Eagle's Nest Monk.\\\" When the Mongol cavalry roamed the plateau, he traveled to the sacred mountains and lakes of Ali to explore and preserve the seeds of Buddhism. A statue of him stands at Guochu Monastery on the western shore of Lake Manasarovar. Zheripu Monastery, located directly north of the sacred mountain, also originated from him. Along the way to the Dolma La Pass, there are remnants of dakinis (female deities) manifesting as yaks and wolves to guide the exploration of the route.\",",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.31158394271155,
+          31.10320521942027,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_012",
+        "name": "岗加宾馆",
+        "type": "poi",
+        "note": "",
+        "bubble": "\"塔尔钦镇西侧的冈加村人历代在此经营旅馆营生，照拂朝圣路人。同时，这里也是传统的转山休憩地。冈加一侧的冰川漂砾滩多呈红色，漂砾岩体千姿百态，如有奇幻。冈加再往东，将会一路爬升，直到卓玛拉山口。The people of Ganga Village on the west side of Tarchin Town have run hotels here for generations and take care of pilgrimage passers-by. At the same time, it is also a traditional mountain turning resting place. The glacial gravel flats on one side of Ganga are mostly red, and the gravel rocks are all kinds of shapes, such as fantasy. If you go to the east, you will climb all the way to the Chomara Pass.\",",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.32039769496062,
+          31.10197159383397,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_013",
+        "name": "芝热普寺",
+        "type": "poi",
+        "note": "",
+        "bubble": "\"神山转山道开创者竹巴噶举派大师郭仓巴曾得一母牦牛引路寻获此洞，而牦牛则隐入洞中，只余一处形似牛角的岩石槽痕，故得名哲日浦（牦牛幻化洞），后发展为寺院。哲日浦正对岗仁波齐峰北壁，位于贤劫千佛岩壁下方，两者之间形成一种空间的稳定结构：凸与凹，外与里，显与隐，高与低。哲日浦是为神山煨桑祝福的最佳位置。\\nGuo Cangba, the master of Zhubagaju School, the founder of the Shenshan Mountain Road, once got a mother yak to lead the way to find this cave, and the yak hid in the cave, leaving only a rock groove in the shape of an ox horn, so it was named Zheripu (Yak Illusion Cave), and later developed into a monastery. Zheripu is on the north wall of Qi Peak in Gang Rinpo, located under the rock wall of Xianjie Qianfu. A stable structure of space is formed between the two: convex and concave, outside and inside, visible and hidden, high and low. Zheripu is the best place to bless Shenshan simmered mulberry.\",",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.3209453409374,
+          31.10767179488995,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_014",
+        "name": "小天葬台",
+        "type": "poi",
+        "note": "此处天葬台比附为印度佛教时期八大尸陀林（也即天葬地）中北方清凉寒林，也叫斯瓦采寒林",
+        "bubble": "\"位于北段上坡途中的小天葬台，本身也是最为艰险且事故频发的地段。朝圣者容易在此处因高原反应和意外伤痛等遭遇不测。久而久之便形成了天葬台。因此处高寒，便以印度佛教八大尸陀林之清凉寒林附会命名。小天葬可往前可分为两路，一是往东抵达最高点卓玛拉山口下山。另一则是往南经空行秘径，翻康卓桑姆山口下山，但后者尤为险峻。    \"note\": \"此处天葬台比附为印度佛教时期八大尸陀林（也即天葬地）中北方清凉寒林，也叫斯瓦采寒林\",\n\\nThe small heavenly burial platform located on the uphill in the northern section is also the most difficult and accident-frequent area. Pilgrims are prone to encounters here due to altitude sickness and accidental injuries. Over time, a heavenly burial platform was formed. Therefore, it is high and cold, so it is named after the cool cold forest of the eight great corpse forests of Indian Buddhism. The small heavenly burial can be divided into two ways. One is to go east to reach the highest point, Zhuomala Pass, and go down the mountain. The other is to go south through the secret path through the air and go down the Kangzhuo Samm Pass, but the latter is particularly dangerous.\",",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.34666410799629,
+          31.09639823783888,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_015",
+        "name": "业之镜石",
+        "type": "poi",
+        "note": "",
+        "bubble": "流石滩处一块光滑如镜的石头，传说可以照见人一生所造下“业”。对于信众而言，它相当于一本种因得果的记帐本。There is a mirror-like stone on the Liushi Beach. Legend has it that it can illuminate the \"karma\" made by people in their lives. For believers, it is equivalent to a kind of causal account book.",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.35404691746817,
+          31.09654466971881,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_016",
+        "name": "斗法三叠石",
+        "type": "poi",
+        "note": "",
+        "bubble": "米拉日巴和那若本琼在此处斗法比试谁的力气大。米拉日巴将三块巨叠加起来轻易举起。",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.35369629542566,
+          31.0988401463458,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_017",
+        "name": "业之马石",
+        "type": "poi",
+        "note": "",
+        "bubble": "从小天葬台至卓玛拉一段消耗体力最厉害的路途中有许多石头都被赋予了传说。主要是针对佛教伦理观中的各种善恶品质及转山故事而来。Many stones have been given legends on the road from the small heavenly burial platform to Zhuo Mara, which consumes the most physical strength. It is mainly aimed at various qualities of good and evil in Buddhist ethics and the story of turning mountains.",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.36489033180918,
+          31.09831609881481,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_018",
+        "name": "卓玛拉山口",
+        "type": "poi",
+        "note": "全程制高点，海拔5660米。传说为度母化身的青狼将开创转山小径时迷路的郭仓巴引领到此处寻找到了正确的道路",
+        "bubble": "\"海拔5650米的卓玛拉山口是神山转山道上海拔和心理双层面的制高点。作为朝圣艰辛的证明，无论前路是重返世间，还是迎向灵魂的新生，都足以体现其重量和价值。就算一路的祈求甚至诅咒，行走过那天边绸带似的山路，顶礼过卓玛拉风雪的人，都会感激这座神山所赐予他的力量和福泽。所以，它也必将成为一个时间的信标，根植在我们内心柔软的深处。\\nThe Zhuomala Pass, which is 5,650 meters above sea level, is the high point of altitude and psychology on the Shenshan Road. As a proof of the hardships of pilgrimage, whether the road ahead is to return to the world or to face the new life of the soul, it is enough to reflect its weight and value. Even if you pray or even curse all the way, those who walk through the silk-like mountain road that day and bow to the wind and snow of Zhuomala will be grateful for the power and blessings given to him by this divine mountain. Therefore, it will also become a beacomer of time, rooted in the soft depths of our hearts.\",\n全程制高点，海拔5660米。传说为度母化身的青狼将开创转山小径时迷路的郭仓巴引领到此处寻找到了正确的道路",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.37033586836547,
+          31.09504061139545,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_019",
+        "name": "空行母浴池",
+        "type": "poi",
+        "note": "传说是胜乐金刚的空行母护法洗浴之地，也是印度教传说中乌玛天女沐浴处，藏地民间故事中称它为慈悲湖",
+        "bubble": "\"宗教的共性之一是净化。这处5000米之上最著名的冰湖，以其纯粹的冷洌和洁净，将为每一个朝圣人洗去征尘与倦意，并为他带来无尽的爱与慈悲的欢愉。\\nOne of the commonalties of religion is purification. This most famous ice lake above 5,000 meters, with its pure coldness and cleanliness, will wash away the dust and fatigue of every pilgrim, and bring him endless joy of love and compassion.\",\n\"传说是胜乐金刚的空行母护法洗浴之地，也是印度教传说中乌玛天女沐浴处，藏地民间故事中称它为慈悲湖\",",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.37078515005697,
+          31.09281276869594,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_01911",
+        "name": "东北不动地钉",
+        "type": "poi",
+        "note": "艰辛的北转山道结束后的休息补给处，有东北角佛祖不动地钉石",
+        "bubble": "\"从东北不动地钉北望，卓玛拉山口以下是天梯般的陡峭，而在这般险难结束处，那缕帐篷中飘出奶茶香味，是朝圣人最大的犒赏。\\nLooking north from the northeast, the Zhuomala Pass below is as steep as a ladder, and at the end of such danger, the fragrance of milk tea floats from the tent, which is the greatest reward for pilgrims.\",",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.3865707460063,
+          31.07967400626116,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_0192",
+        "name": "空行秘道出口",
+        "type": "poi",
+        "note": "",
+        "bubble": "空行秘道从小天葬台切入，需翻越冈仁波齐峰的东侧雪肩，海拔5700米左右的康卓桑姆拉山口，全长6.5公里左右。按转山不成文规定，外圈转够12圈后，方可选择此路。这和内圈转山的规矩是一样的。从安全角度考虑，不经历十二圈外圈转山累积起经验和那份对神山户外场景的熟习感，贸然转秘道和内圈确实有高风险。The secret passage of the air is cut in from the small heavenly burial platform, and you need to cross the snow shoulder on the east side of Gangrenboqi Peak. The Kangzhuo Sammula Pass, which is about 5,700 meters above sea level, is about 6.5 kilometers long. According to the unwritten rules of turning the mountain, you can choose this road after turning the outer circle for 12 laps. This is the same as the rule of turning the mountain in the inner circle. From the perspective of safety, it is indeed risky to go through the secret road and the inner circle without going through the experience accumulated in the outer circle and the sense of familiarity with the outdoor scene of Shenshan.",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.37945784508526,
+          31.06026722515874,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_020",
+        "name": "药师佛药囊石",
+        "type": "poi",
+        "note": "",
+        "bubble": "在药师佛宫殿和山谷出口处一个横卧宗曲漫滩上的巨石，被称为药师佛的药囊石。信众会敲击这个石的石粉用来祛病。A boulder lying on Zongqu Mantan at the exit of the Palace of the Medicine Buddha and the valley is called the medicine bag stone of the Medicine Buddha. The believers will knock on the stone powder of this stone to get rid of diseases.",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.37699362019937,
+          31.03016111543821,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_021",
+        "name": "黑宝冠石",
+        "type": "poi",
+        "note": "",
+        "bubble": "\"据巴沃.祖拉陈瓦[贤者喜宴.噶玛岗仓史]记载，1548年，八世噶玛巴应岗底斯十三大宗扎噶庄园知事香拉普瓦的迎请，于岗仁波齐神山朝山并留下神迹。\\nAccording to Bawo. Zula Chenwa [Sage's wedding banquet. It is recorded that in 1548, the eighth Kamapa was invited by the governor of Zaga Manor, the thirteen major sects of Gangdis, and left a miracle.\",",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.3773941508633,
+          31.01744230171729,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_023",
+        "name": "尊哲普寺",
+        "type": "poi",
+        "note": "",
+        "bubble": "\"整个东转山道宽阔，一路下坡省力，到达尊珠寺，都属愉悦的路程。尊珠寺内供米拉日巴银质塑像，是全阿里最神圣的存在。\\nThe whole east-turn mountain road is wide, and it saves effort all the way downhill. It is a pleasant journey to Zunzhu Temple. The silver statue of Mirajeba is enshrined in Zunzhu Temple, which is the most sacred existence in the whole Ali.\",",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.36221671086255,
+          31.00212092778092,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_024",
+        "name": "白足印天葬台",
+        "type": "poi",
+        "note": "",
+        "bubble": "在佛足东北不动地钉足印旁的古老天葬台。神山周围有大小天葬台和白足印天葬台等四处。另一个在江扎寺通往色龙寺的山脊处。The ancient burial platform next to the footprints in the northeast of the Buddha's feet. There are large and small celestial burial platforms and white-footed heavenly burial platforms around the sacred mountain. The other is at the ridge of Jiangza Temple leading to Selong Temple.",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.35708064760303,
+          31.00156803975118,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_025",
+        "name": "俄尔钦足印",
+        "type": "poi",
+        "note": "",
+        "bubble": "\"1435年古格王室迎请当时声势正旺的萨迦派密教大师，俄尔支派的创始人俄尔钦贡嘎桑波（1382－1456）前来传法并主持古格国王出家仪式工。在此期间他朝圣神山所留神迹。\\nIn 1435, the Guge royal family welcomed the esoteric master of the Saga School, the founder of the Or tribe, Orchingonga Sanbo (1382-1456), to preach the Dharma and preside over the monking ceremony of King Guge. During this period, he pilgrimaged to the sacred mountain to leave a miracle.\",",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.35738519400964,
+          30.99727289051452,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_026",
+        "name": "宗堆茶馆",
+        "type": "poi",
+        "note": "东转山道出山处",
+        "bubble": "\"经过一段深切险谷后，宗堆茶馆又迎来了巴嘎平原的开阔通透。大尺度的神山圣湖地景在阔别两日后会有一些亲切和熟悉。塔尔钦的建筑群也遥遥可见。\\nAfter a deep and dangerous valley, Zongdui Teahouse ushered in the openness of the Baga Plain. The large-scale scenery of Shenshan Holy Lake will be somewhat intimate and familiar after two days of separation. The building complex of Tarchin can also be seen in the distance.\",",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.31946302407816,
+          30.96113405240371,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_0252",
+        "name": "剑劈石",
+        "type": "poi",
+        "note": "",
+        "bubble": "一块被传说为格萨尔大将和魔鬼斗法劈石的地方A place that is said to be the place where General Gesar fought with the devil.",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.33621715889748,
+          30.98341112129936,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_0251",
+        "name": "空行女舞场",
+        "type": "poi",
+        "note": "",
+        "bubble": "据说这个地方为空心之地，空行母常在其上跳舞，以美妙舞姿和迷人的大地回响之声吸引朝圣者，实际上朝圣者走到这里已基本走完了转山道上最辛苦的路段，并洗净了自己双脚。这里的空行之舞代表一种轻松愉快的心情。It is said that this place is a hollow place, and the empty mother often dances on it, attracting pilgrims with its beautiful dance posture and the charming echo of the earth. In fact, the pilgrims have basically walked the most difficult section on the mountain road and washed their feet. The dance of the sky here represents a relaxed and happy mood.",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.33277233620802,
+          30.97964003897606,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_0253",
+        "name": "临谷危险路段",
+        "type": "poi",
+        "note": "",
+        "bubble": "这一段路土石为共红色，临近深谷，路窄且险This section of the road is red, close to the deep valley, and the road is narrow and dangerous.",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.32490838342028,
+          30.96567576003349,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_027",
+        "name": "塔钦寺遗址",
+        "type": "poi",
+        "note": "",
+        "bubble": "竹巴噶举在神山圣湖区域辉煌的见证，一度曾属于不丹Zhubaga was a glorious witness in the sacred lake area of Shenshan, which once belonged to Bhutan.",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.2879257010549,
+          30.97745860816583,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_028",
+        "name": "江扎寺",
+        "type": "poi",
+        "note": "",
+        "bubble": "教主仁钦贝高足古雅岗巴率数万修士前来岗仁波齐坐山修行,大道不成，誓死不归。并建江扎寺总理神山圣湖宗教事务。由此也形成了江扎寺主历为神山之主的传统。\\nMilarepa's ascetic practice and attainment of enlightenment sparked a religious frenzy in Tibet. The Drikung Kagyu school subsequently became the largest force in developing sacred religious sites within the Himalayas. Guya Gangpa, a prominent disciple of Rinchen Pelzang, led tens of thousands of ascetics to Mount Kailash for solitary practice, vowing not to return until they achieved enlightenment. He established Jiangzha Monastery to oversee religious affairs related to the sacred mountain and lake. This also established the tradition of the abbot of Jiangzha Monastery being considered the lord of the sacred mountain.\",",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.29731160808356,
+          31.00675444859086,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_029",
+        "name": "色龙寺",
+        "type": "poi",
+        "note": "",
+        "bubble": "内圈接近神山的一处修行寺院The inner circle is a practice temple near Shenshan.",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.27828247281577,
+          31.01031097231172,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_030",
+        "name": "13金塔",
+        "type": "poi",
+        "note": "",
+        "bubble": "在止页噶举掌控神山圣湖修行权时期，一共有13位神山之主——受止贡派委任的神山修士集团首领，江扎寺寺主——的灵塔所在地。供塔于此，意味着神山信仰的基业是由止页噶举派筑就。\\n在印度教话语系统中，这里是湿婆的七大祭司祭拜处，七大祭司传说根源于北斗七星仙人崇拜，因此这里也叫大熊圣洞。在此触拜岗底斯峰神圣的基岩、洞内凝结的冰柱林伽，以及为帕尔瓦蒂女神唱颂《美的流涌》（由印度教中兴大师商揭罗补撰完成，他曾亲临此处感受神迹），并绕行南迪（湿婆座骑山）圣道，是印度教徒最大的幸事。\\nDuring the period when the Drikung Kagyu school controlled the practice of the sacred mountains and lakes, this was the location of the stupas of 13 masters of the sacred mountains—leaders of the sacred mountain ascetic groups appointed by the Drikung school, and the abbots of Jiangzha Monastery. The placement of these stupas here signifies that the foundation of the sacred mountain faith was built by the Drikung Kagyu school. In the Hindu discourse, this is the site of worship for Shiva's seven high priests, whose legend originates from the worship of the Big Dipper constellation, hence the place is also called the Great Bear Cave. Touching the sacred bedrock of Mount Kailash, the icicles within the cave, and chanting the \\\"Flow of Beauty\\\" (a verse completed by the Hindu reviver Shangara, who personally experienced the miracles here) for the goddess Parvati, and circumambulating the sacred path of Nandi (Shiva's mount), is considered the greatest blessing for Hindus.\",",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.3106906391689,
+          31.0611169856459,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_031",
+        "name": "小冈底斯",
+        "type": "poi",
+        "note": "",
+        "bubble": "这处山峰被称为小冈底斯峰。印度教神话中将她比附为湿婆的爱妻雪山女神帕尔瓦蒂。This mountain peak is called Little Gandis Peak. In Hindu mythology, she is attached to Parwati, the goddess of Snow Mountain, the beloved wife of Shiva.",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.3062608424197,
+          31.06589429182233,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_032",
+        "name": "因揭陀峰",
+        "type": "poi",
+        "note": "",
+        "bubble": "佛教传说中它是十六罗汉尊者中因揭陀尊者的化身，印度教则认为它是湿婆的座骑公牛楠迪。围绕楠迪峰的朝圣环线在印度教中是最神圣的环线。According to Buddhist legend, the mountain is the manifestation of Angaja, one of the Sixteen Arhats; conversely, Hinduism holds it to be Nandi, the bull mount of Shiva. The pilgrimage circuit surrounding Nandi Parvat is revered as the most sacred circumambulation in Hinduism.",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.31173294548805,
+          31.05118621509697,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_033",
+        "name": "冈仁波齐峰",
+        "type": "poi",
+        "note": "这是第一处遥拜冈仁波齐的地方。<br><video src=\"https://www.w3schools.com/html/mov_bbb.mp4\" controls muted playsinline style=\"width:100%;\"></video>",
+        "bubble": "冈仁波齐，雪山中的珍宝。佛教宇宙观中世界中心须弥山的化身，藏传佛教认为胜乐金刚的无上净土，印度教中主神湿婆（希瓦）的宫殿，耆那教中认为了战胜一切外道的山王，苯教最重要的祖源神山Mount Kailash, the jewel among the sacred snow mountains. In Buddhist cosmology, it is the earthly manifestation of Mount Meru, the center of the universe. Tibetan Buddhism regards it as the supreme pure land of Chakrasamvara, while Hinduism reveres it as the celestial palace of Lord Shiva. In Jainism, it is honored as the king of mountains where spiritual victory over all heterodox doctrines was achieved, and in Bön, it stands as the most crucial ancestral sacred mountain.",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.31223477826595,
+          31.06627429696712,
+          130.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "msn_wht-blank",
+        "name": "第四天葬台",
+        "type": "poi",
+        "note": "",
+        "bubble": "<h3>第四天葬台</h3>",
+        "marker-color": "#ffcd55",
+        "marker-size": "medium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.2877286328109,
+          31.00501706617709,
+          130.0
+        ]
+      }
+    }
+  ]
+}
