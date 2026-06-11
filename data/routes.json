@@ -50831,7 +50831,7 @@
       "duration": 2.5,
       "wait_time": 0,
       "fov": 60,
-      "shot_mode": "default",
+      "shot_mode": "handheld",
       "look_at_intent": "forward",
       "perspective_fov": "natural",
       "perspective_pitch": "oblique",
