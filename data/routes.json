@@ -50543,11 +50543,15 @@
       "lat": 30.97740793498796,
       "ground_alt": 5000,
       "relative_alt": 500,
-      "heading": 219.61,
+      "heading": 219.6,
       "pitch": -40,
       "roll": 0,
       "duration": 1.7,
-      "wait_time": 0
+      "wait_time": 0,
+      "look_at_intent": "custom",
+      "perspective_fov": "custom",
+      "perspective_pitch": "custom",
+      "fov": 60
     }
   ]
 }
