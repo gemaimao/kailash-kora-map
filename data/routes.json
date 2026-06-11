@@ -49956,13 +49956,14 @@
       "heading": 306.2,
       "pitch": -37,
       "roll": 0,
-      "duration": 41.4,
+      "duration": 37.3,
       "wait_time": 0,
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
       "fov": 60,
-      "look_at_target": null
+      "look_at_target": null,
+      "speed_preset": "custom"
     },
     {
       "id": "evt_1781145179397_26",
