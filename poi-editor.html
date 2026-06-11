@@ -584,7 +584,7 @@
     // Save pois array to server.js
     async function saveToServer() {
       try {
-        const res = await fetch("/api/save-pois", {
+        const res = await fetch("api/save-pois", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(pois, null, 2)
@@ -613,7 +613,7 @@
       gitPollTimer = setInterval(async () => {
         attempts++;
         try {
-          const r = await fetch("/api/git-status");
+          const r = await fetch("api/git-status");
           const s = await r.json();
           if (s.status === "pending") {
             statusEl.textContent = "✅ 数据保存成功 · ⏳ 推送中...";

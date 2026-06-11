@@ -1,0 +1,3658 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>空间叙事调音台 (3D Spatial Storytelling Mixer) · 冈仁波齐转山</title>
+  <!-- CesiumJS -->
+  <script src="https://unpkg.com/cesium@1.107.0/Build/Cesium/Cesium.js"></script>
+  <link href="https://unpkg.com/cesium@1.107.0/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #070709;
+      --bg-panel: rgba(14, 14, 18, 0.96);
+      --accent: #ffcd55;
+      --accent-hover: #ffdf85;
+      --accent-cyan: #00ffaa;
+      --border: rgba(255, 255, 255, 0.08);
+      --text-dim: rgba(255, 255, 255, 0.5);
+      --input-bg: rgba(255, 255, 255, 0.04);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; width: 100%; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg-dark); color: #eee; overflow: hidden; }
+
+    /* Layout Structure: Left Sidebar + Huge Full-Screen Viewport */
+    .app-container { display: flex; height: 100vh; width: 100vw; }
+    
+    .sidebar-left {
+      width: 320px; background: var(--bg-panel); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; z-index: 10; box-shadow: 5px 0 25px rgba(0,0,0,0.5);
+      transition: margin-left 0.3s ease;
+    }
+    .sidebar-left.collapsed {
+      margin-left: -320px;
+    }
+    .main-canvas { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+    
+    /* Sidebar Toggle Button floating in Main Canvas */
+    .sidebar-toggle-btn {
+      position: absolute; top: 15px; left: 15px; width: 28px; height: 28px;
+      background: rgba(18, 18, 22, 0.95); border: 1px solid var(--border); border-radius: 6px;
+      color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      z-index: 1001; font-size: 11px; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    .sidebar-toggle-btn:hover {
+      background: var(--accent-cyan); color: #000; border-color: var(--accent-cyan);
+    }
+
+    /* Left Panel Headers */
+    .panel-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .panel-header h2 { font-size: 13px; font-weight: 600; letter-spacing: 1px; color: var(--accent); text-transform: uppercase; }
+    
+    /* Lists */
+    .keyframe-list {
+      flex: 1; overflow-y: auto; padding: 10px 0;
+      user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
+    }
+    
+    .keyframe-item { 
+      padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.02); cursor: pointer;
+      display: flex; gap: 10px; align-items: center; transition: all 0.2s; position: relative;
+    }
+    .keyframe-item:hover { background: rgba(255,255,255,0.03); }
+    .keyframe-item.active { background: rgba(0, 255, 170, 0.08); border-left: 4px solid var(--accent-cyan); }
+    .keyframe-item.selected {
+      background: rgba(255, 205, 85, 0.12) !important;
+      border-right: 3px solid var(--accent) !important;
+    }
+    .keyframe-item.selected.active {
+      background: rgba(0, 255, 170, 0.15) !important;
+      border-left: 4px solid var(--accent-cyan) !important;
+      border-right: 3px solid var(--accent) !important;
+    }
+    .keyframe-item.selected .keyframe-idx {
+      background: rgba(255, 205, 85, 0.3) !important;
+      border: 1.5px solid var(--accent);
+      color: #fff !important;
+    }
+    .keyframe-item.selected.active .keyframe-idx {
+      background: var(--accent-cyan) !important;
+      border: none;
+      color: #000 !important;
+    }
+    
+    .keyframe-idx { width: 26px; height: 26px; border-radius: 50%; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 12px; font-family: monospace; font-weight: bold; color: var(--text-dim); }
+    .keyframe-item.active .keyframe-idx { background: var(--accent-cyan); color: #000; font-weight: bold; }
+    
+    .keyframe-info { flex: 1; min-width: 0; }
+    .keyframe-name-input { 
+      width: 100%; background: transparent; border: none; border-bottom: 1px dashed transparent;
+      color: #eee; font-size: 13px; font-weight: 500; outline: none; padding: 2px 0;
+      text-overflow: ellipsis; white-space: nowrap; overflow: hidden;
+    }
+    .keyframe-name-input:focus { border-bottom-color: var(--accent-cyan); color: #fff; }
+    
+    .keyframe-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+    
+    /* Left Waypoint List Actions */
+    .keyframe-actions { display: flex; gap: 6px; opacity: 0.1; transition: opacity 0.2s; }
+    .keyframe-item:hover .keyframe-actions, .keyframe-item.active .keyframe-actions { opacity: 1; }
+    .action-icon-btn {
+      background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 12px; padding: 4px; border-radius: 4px; transition: all 0.15s;
+    }
+    .action-icon-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
+    .action-icon-btn.danger:hover { color: #ff8080; background: rgba(255,80,80,0.15); }
+
+    /* Overlay Toolbar (Top Left) */
+    .map-overlay-tools { position: absolute; top: 20px; left: 20px; z-index: 1000; display: flex; gap: 8px; flex-wrap: wrap; }
+    .tool-btn { 
+      background: rgba(10,10,12,0.9); border: 1px solid var(--border); color: #fff; 
+      padding: 8px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; backdrop-filter: blur(8px);
+      display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+    }
+    .tool-btn:hover { background: rgba(30,30,35,0.95); border-color: var(--accent-cyan); color: var(--accent-cyan); }
+    .tool-btn.active { background: var(--accent-cyan); color: #000; font-weight: 600; border-color: var(--accent-cyan); }
+    .tool-btn.danger { background: rgba(255, 80, 80, 0.15); border-color: rgba(255, 80, 80, 0.3); color: #ff8080; }
+    .tool-btn.danger:hover { background: rgba(255, 80, 80, 0.25); }
+
+    /* Bottom Elevation Chart Container */
+    .elevation-chart-container {
+      position: absolute; bottom: 92px; left: 50%; transform: translateX(-50%); width: calc(100% - 240px); max-width: 1100px; height: 260px;
+      background: rgba(24, 24, 28, 0.95); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px;
+      padding: 12px 16px; z-index: 1000; backdrop-filter: blur(16px);
+      display: flex; flex-direction: column; gap: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .chart-header { display: flex; justify-content: space-between; align-items: center; }
+    .chart-title { font-size: 11px; font-weight: 600; color: var(--accent-cyan); letter-spacing: 0.5px; }
+    .chart-controls { display: flex; gap: 8px; align-items: center; }
+    .chart-selection { font-size: 10px; color: var(--text-dim); font-family: monospace; }
+    .chart-adjust-box { display: none; gap: 4px; align-items: center; }
+
+    /* Bottom Playback Bar */
+    .bottom-bar { 
+      position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 85%; max-width: 450px;
+      background: rgba(18, 18, 22, 0.95); border: 1px solid var(--border); border-radius: 30px; 
+      padding: 8px 18px; z-index: 1000; backdrop-filter: blur(12px);
+      display: flex; align-items: center; gap: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .play-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; transition: color 0.2s; }
+    .play-btn:hover { color: var(--accent-cyan); }
+    .preview-progress-text { font-size: 12px; font-family: monospace; color: var(--text-dim); }
+
+    /* Sidebar Footer Button Container */
+    .action-bar { padding: 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+    .primary-btn { flex: 1; background: var(--accent-cyan); color: #000; border: none; padding: 10px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background-color 0.2s; }
+    .primary-btn:hover { background-color: #33ffbb; }
+    .secondary-btn { background: rgba(255,255,255,0.06); color: #fff; border: 1px solid var(--border); padding: 10px 14px; border-radius: 6px; cursor: pointer; transition: background-color 0.2s; }
+    .secondary-btn:hover { background: rgba(255,255,255,0.12); }
+
+    /* Toast Notification */
+    .toast-msg {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2000;
+      background: rgba(10,10,12,0.95); padding: 10px 20px; border-radius: 30px; border: 1px solid var(--accent-cyan);
+      color: var(--accent-cyan); font-size: 12px; display: none; pointer-events: none; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+
+    /* ========================================================== */
+    /* Viewport HUD Overlays (调音台界面) Styles */
+    /* ========================================================== */
+    
+    /* Left zoom ring & right pitch ring */
+    .hud-zoom-ring, .hud-pitch-ring {
+      position: absolute;
+      top: 30%;
+      transform: translateY(-50%);
+      width: 76px;
+      height: 310px;
+      background: rgba(10, 10, 14, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 38px;
+      display: none; /* Shown dynamically on selection */
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0;
+      z-index: 999;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.65);
+    }
+    .hud-zoom-ring { left: 20px; border-left: 2.5px solid var(--accent-cyan); }
+    .hud-pitch-ring { right: 20px; border-right: 2.5px solid var(--accent); }
+
+    .hud-ring-label {
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      text-align: center;
+    }
+    .hud-ring-value {
+      font-size: 11px;
+      font-weight: bold;
+      color: #fff;
+      font-family: monospace;
+      background: rgba(255,255,255,0.06);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .hud-ring-scale {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-size: 9px;
+      color: rgba(255,255,255,0.35);
+      align-items: center;
+    }
+    .scale-mark {
+      cursor: pointer;
+      transition: all 0.15s;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .scale-mark:hover, .scale-mark.active {
+      color: #fff;
+      background: rgba(255,255,255,0.08);
+    }
+    .hud-zoom-ring .scale-mark.active { color: var(--accent-cyan); }
+    .hud-pitch-ring .scale-mark.active { color: var(--accent); }
+
+    .hud-vertical-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 4px;
+      height: 120px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 2px;
+      outline: none;
+      writing-mode: bt-lr;
+      -webkit-appearance: slider-vertical;
+    }
+    .hud-vertical-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #fff;
+      cursor: pointer;
+      border: 2px solid #000;
+    }
+    .hud-zoom-ring .hud-vertical-slider::-webkit-slider-thumb { background: var(--accent-cyan); box-shadow: 0 0 8px rgba(0, 255, 170, 0.5); }
+    .hud-pitch-ring .hud-vertical-slider::-webkit-slider-thumb { background: var(--accent); box-shadow: 0 0 8px rgba(255, 205, 85, 0.5); }
+
+    /* Rhythm Console HUD */
+    .hud-rhythm-console {
+      position: absolute;
+      bottom: 365px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 240px);
+      max-width: 520px;
+      background: rgba(10, 10, 14, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 12px 20px;
+      display: none; /* Shown dynamically on selection */
+      gap: 18px;
+      align-items: center;
+      z-index: 999;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+      border-bottom: 2.5px solid var(--accent-cyan);
+    }
+    .rhythm-control-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+    .rhythm-control-group label {
+      font-size: 9px;
+      color: var(--text-dim);
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+    .rhythm-slider-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .rhythm-preset-label {
+      font-size: 9px;
+      color: rgba(255,255,255,0.4);
+      white-space: nowrap;
+    }
+    .rhythm-slider-container input[type="range"] {
+      flex: 1;
+      height: 4px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 2px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    .rhythm-slider-container input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      cursor: pointer;
+      border: 1.5px solid #000;
+      box-shadow: 0 0 6px rgba(0, 255, 170, 0.4);
+    }
+    .rhythm-header-row { display: flex; justify-content: space-between; align-items: center; }
+    .rhythm-value-display, .hud-wait-value {
+      font-size: 11px;
+      font-weight: bold;
+      color: var(--accent-cyan);
+      font-family: monospace;
+    }
+    .rhythm-separator {
+      width: 1px;
+      height: 38px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    /* Target Lock & Vibe Panel (Top Right) */
+    .hud-target-lock-panel {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(10, 10, 14, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 12px 14px;
+      z-index: 999;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      width: 240px;
+      border-top: 2.5px solid var(--accent);
+      display: none; /* Shown dynamically on selection */
+    }
+    .target-status {
+      font-size: 11px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+    .target-status span { color: var(--text-dim); }
+    .target-status strong { color: var(--accent); font-weight: 600; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; max-width: 140px; }
+    .target-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .hud-mini-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: #ccc;
+      font-size: 10px;
+      padding: 6px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .hud-mini-btn:hover {
+      background: rgba(255, 205, 85, 0.12);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .hud-mini-btn.active {
+      background: rgba(255, 205, 85, 0.18);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .hud-mini-btn.danger {
+      background: rgba(255, 80, 80, 0.08);
+      border-color: rgba(255, 80, 80, 0.15);
+      color: #ff8080;
+    }
+    .hud-mini-btn.danger:hover {
+      background: rgba(255, 80, 80, 0.16);
+      border-color: #ff8080;
+    }
+    
+    /* Stunt shake indicator */
+    .hud-shake-toggle {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .hud-shake-toggle label { font-size: 10px; color: var(--text-dim); cursor: pointer; }
+    .hud-shake-toggle input { cursor: pointer; }
+
+    /* Vibe Preset Mixer (氛围混音 preset bank) */
+    .hud-vibe-panel {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .vibe-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .vibe-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: #ccc;
+      font-size: 10px;
+      padding: 6px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .vibe-btn:hover {
+      background: rgba(0, 255, 170, 0.1);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+    .vibe-btn.active {
+      background: rgba(0, 255, 170, 0.15);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      font-weight: bold;
+      box-shadow: 0 0 8px rgba(0, 255, 170, 0.3);
+    }
+
+    /* Diagnostics Dashboard inside Sidebar */
+    .diagnostics-overlay {
+      background: rgba(0, 0, 0, 0.22);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      border-left: 3px solid var(--accent-cyan);
+      padding: 12px 16px;
+      font-size: 11px;
+      font-family: monospace;
+      color: #eee;
+      display: none; /* Hidden by default until selected */
+    }
+    .diag-title {
+      font-size: 9px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent-cyan);
+      margin-bottom: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding-bottom: 4px;
+    }
+    .diag-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .diag-label {
+      color: var(--text-dim);
+    }
+    .diag-value {
+      color: #fff;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Left: Keyframe List & Global Actions -->
+    <div class="sidebar-left">
+      <div class="panel-header">
+        <h2>🎚️ 空间轨混合单元 (Mixer)</h2>
+        <span style="font-size: 11px; color: var(--text-dim);" id="keyframeCount">0 轨</span>
+      </div>
+      <div class="keyframe-toolbar" style="padding: 10px 16px; border-bottom: 1px solid var(--border); display: flex; gap: 8px;">
+        <button class="tool-btn" id="btnAddWaypoint" style="flex: 1; font-size: 11px; justify-content: center; height: 32px;">➕ 捕获当前镜头为新航点</button>
+        <button class="tool-btn" id="btnDeleteSelected" style="font-size: 11px; justify-content: center; height: 32px; display: none; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #ff8080;">🗑️ 删除选中</button>
+      </div>
+      <div class="keyframe-list" id="keyframeList">
+        <!-- Keyframe items injected here -->
+      </div>
+
+      <!-- Upgraded Diagnostics Dashboard Panel inside sidebar -->
+      <div class="diagnostics-overlay" id="diagnosticsOverlay">
+        <div class="diag-title">🛰️ 空间飞行诊断仪 (DIAGNOSTICS)</div>
+        <div id="diagnosticsContent">
+          <div class="diag-row"><span class="diag-label">当前位置</span><span class="diag-value" id="diagPos">--</span></div>
+          <div class="diag-row"><span class="diag-label">累计里程</span><span class="diag-value" id="diagDist">--</span></div>
+          <div class="diag-row"><span class="diag-label">地面海拔</span><span class="diag-value" id="diagGround">--</span></div>
+          <div class="diag-row"><span class="diag-label">机位海拔</span><span class="diag-value" id="diagFlight">--</span></div>
+          <div class="diag-row"><span class="diag-label">离地高度</span><span class="diag-value" id="diagRel">--</span></div>
+          <div class="diag-row"><span class="diag-label">视线目标</span><span class="diag-value" id="diagTarget">--</span></div>
+          <div class="diag-row"><span class="diag-label">当前航速</span><span class="diag-value" id="diagSpeed">--</span></div>
+          <div class="diag-row"><span class="diag-label">段飞行用时</span><span class="diag-value" id="diagDuration">--</span></div>
+        </div>
+        <!-- Vibe Preset Mixer Bank moved to Sidebar -->
+        <div class="hud-vibe-panel" id="hudVibePanel">
+          <div class="hud-ring-label" style="transform:none; height:auto; margin-bottom:8px; text-align:left; color: var(--accent-cyan);">🔮 氛围混音 (Vibe Preset Mixer)</div>
+          <div class="vibe-buttons" id="vibeButtonGroup">
+            <button class="vibe-btn" data-vibe="pilgrimage">📿 朝圣</button>
+            <button class="vibe-btn" data-vibe="solemn">🏔️ 庄严</button>
+            <button class="vibe-btn" data-vibe="exploratory">🚶 探索</button>
+            <button class="vibe-btn" data-vibe="solitude">🌌 孤独</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <button class="secondary-btn" style="flex:1" id="btnExport">导出 JSON</button>
+        <button class="primary-btn" style="flex:1" id="btnSave">💾 保存混音配置</button>
+      </div>
+    </div>
+
+    <!-- Main Viewport Area -->
+    <div class="main-canvas">
+      <button class="sidebar-toggle-btn" id="btnToggleSidebar">◀</button>
+      <!-- 3D Globe Container -->
+      <div id="map" style="width:100%; height:100%;"></div>
+
+      <!-- Camera Grid Overlay (Rule of Thirds) -->
+      <div id="cameraGrid" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 950; display: none; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr;">
+        <div style="border-right: 1px dashed rgba(255, 255, 255, 0.15); border-bottom: 1px dashed rgba(255, 255, 255, 0.15);"></div>
+        <div style="border-right: 1px dashed rgba(255, 255, 255, 0.15); border-bottom: 1px dashed rgba(255, 255, 255, 0.15);"></div>
+        <div style="border-bottom: 1px dashed rgba(255, 255, 255, 0.15);"></div>
+        <div style="border-right: 1px dashed rgba(255, 255, 255, 0.15); border-bottom: 1px dashed rgba(255, 255, 255, 0.15);"></div>
+        <div style="border-right: 1px dashed rgba(255, 255, 255, 0.15); border-bottom: 1px dashed rgba(255, 255, 255, 0.15);"></div>
+        <div style="border-bottom: 1px dashed rgba(255, 255, 255, 0.15);"></div>
+        <div style="border-right: 1px dashed rgba(255, 255, 255, 0.15);"></div>
+        <div style="border-right: 1px dashed rgba(255, 255, 255, 0.15);"></div>
+        <div></div>
+      </div>
+      
+      <!-- Top Left Overlay: Utilities Toolbar -->
+      <div class="map-overlay-tools">
+        <button class="tool-btn" id="btnUndo">↩ 撤销</button>
+        <button class="tool-btn" id="btnClear">✕ 清空导演轨</button>
+        <button class="tool-btn" id="btnGenerateDraft" style="background: rgba(255, 205, 85, 0.1); border-color: var(--accent); color: var(--accent); display:none;">✨ 基于地理轨生成初稿</button>
+      </div>
+
+      <!-- ========================================================== -->
+      <!-- Viewport HUD Overlays (空间叙事调音台控制推子) -->
+      <!-- ========================================================== -->
+
+      <!-- Left Overlay: Zoom (Focal Length / FOV) Ring -->
+      <div class="hud-zoom-ring" id="hudZoomRing">
+        <div class="hud-ring-label">Lens Zoom</div>
+        <div class="hud-ring-scale" id="fovScaleGroup">
+          <span class="scale-mark" data-val="vast">辽阔</span>
+          <span class="scale-mark" data-val="natural">自然</span>
+          <span class="scale-mark" data-val="compressed">压缩</span>
+          <span class="scale-mark" data-val="custom" id="fovMarkCustom">手动</span>
+        </div>
+        <input type="range" class="hud-vertical-slider" id="hudFovSlider" min="15" max="120" value="60">
+        <div class="hud-ring-value" id="hudFovValue">60°</div>
+      </div>
+
+      <!-- Right Overlay: Gimbal Pitch Ring -->
+      <div class="hud-pitch-ring" id="hudPitchRing">
+        <div class="hud-ring-label">Gimbal Tilt</div>
+        <div class="hud-ring-scale" id="pitchScaleGroup">
+          <span class="scale-mark" data-val="lookup">仰视</span>
+          <span class="scale-mark" data-val="eyelevel">平视</span>
+          <span class="scale-mark" data-val="oblique">斜瞰</span>
+          <span class="scale-mark" data-val="overlook">俯瞰</span>
+          <span class="scale-mark" data-val="custom" id="pitchMarkCustom">手动</span>
+        </div>
+        <input type="range" class="hud-vertical-slider" id="hudPitchSlider" min="-90" max="90" value="-25">
+        <div class="hud-ring-value" id="hudPitchValue">-25°</div>
+      </div>
+
+      <!-- Bottom Center Overlay: Rhythm Console (Speed & Dwell) -->
+      <div class="hud-rhythm-console" id="hudRhythmConsole">
+        <div class="rhythm-control-group">
+          <div class="rhythm-header-row">
+            <label>飞行速度 (Speed Track)</label>
+            <div class="rhythm-value-display" id="hudSpeedValue">36 km/h</div>
+          </div>
+          <div class="rhythm-slider-container">
+            <span class="rhythm-preset-label">缓慢</span>
+            <input type="range" id="hudSpeedSlider" min="12" max="72" step="1" value="36">
+            <span class="rhythm-preset-label">快速</span>
+          </div>
+        </div>
+        <div class="rhythm-separator"></div>
+        <div class="rhythm-control-group">
+          <div class="rhythm-header-row">
+            <label>到站悬停 (Wait Track)</label>
+            <div class="hud-wait-value" id="hudWaitValue">0s</div>
+          </div>
+          <div class="rhythm-slider-container">
+            <span class="rhythm-preset-label">通过</span>
+            <input type="range" id="hudWaitSlider" min="0" max="15" step="0.5" value="0">
+            <span class="rhythm-preset-label">凝望</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Right Overlay: Target Lock & Vibe Preset Mixer -->
+      <div class="hud-target-lock-panel" id="hudTargetLockPanel">
+        <div class="target-status">
+          <span>🎥 视线对焦:</span>
+          <strong id="hudTargetName">走向前方</strong>
+        </div>
+        <div class="target-actions">
+          <button class="hud-mini-btn" id="btnHudLockForward">➡️ 走向前方 (沿轨道对齐)</button>
+          <button class="hud-mini-btn" id="btnHudLockSummit">🏔️ 凝望视角（锁定主体）</button>
+          <button class="hud-mini-btn" id="btnHudLockSide">➡️ 横向扫视 (航侧 90°)</button>
+          <button class="hud-mini-btn" id="btnHudLockBack">⬅️ 余光倒掠 (倒飞视角)</button>
+          <button class="hud-mini-btn" id="btnHudLockPoi">🎯 追踪最近地标 (POI 对焦)</button>
+          <button class="hud-mini-btn danger" id="btnHudUnlock" style="display:none;">🔓 解除锁定</button>
+          <button class="hud-mini-btn" id="btnHudCaptureCamera" style="border-color: var(--accent); color: var(--accent); margin-top: 6px; justify-content: center; font-weight: bold;">📸 捕获当前三维坐标</button>
+        </div>
+        <div class="hud-shake-toggle">
+          <label for="hudChkHandheld">🎥 手持镜头纪实微颤</label>
+          <input type="checkbox" id="hudChkHandheld">
+        </div>
+        
+        <div style="font-size: 8px; color: var(--text-dim); margin-top: 8px; text-align: center; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 6px;">
+          提示：可在三维地图上 [双击] 锁定视线对焦目标
+        </div>
+      </div>
+
+      <!-- Bottom Overlay: Canvas Elevation Chart Panel (Altitude Track) -->
+      <div class="elevation-chart-container" id="elevationChartContainer">
+        <div class="chart-header">
+          <span class="chart-title">🎛️ 空间轨道混合器 (Multi-Lane Space Mixer)</span>
+          <div class="chart-controls">
+            <button class="tool-btn" id="btnResampleHeights" style="padding: 2px 8px; font-size:11px; margin-right: 8px;">🏔️ 重新校准真实海拔</button>
+            <span class="chart-selection" id="chartSelectionLabel">未选中航点</span>
+            <div class="chart-adjust-box" id="chartAdjustControls">
+              <button class="tool-btn" id="btnHeightDec" style="padding: 2px 8px; font-size:10px; font-weight:bold;">－ 10m</button>
+              <button class="tool-btn" id="btnHeightInc" style="padding: 2px 8px; font-size:10px; font-weight:bold;">＋ 10m</button>
+            </div>
+          </div>
+        </div>
+        <div style="flex:1; position:relative; width:100%;">
+          <canvas id="elevationCanvas" style="width:100%; height:100%; display:block; cursor:crosshair;"></canvas>
+        </div>
+      </div>
+
+      <!-- Playback Bar -->
+      <div class="bottom-bar">
+        <button class="play-btn" id="btnPlay">▶</button>
+        <span class="preview-progress-text" id="previewStatus">就绪 (共 0 轨)</span>
+      </div>
+
+      <!-- Diagnostics Dashboard Panel moved to Sidebar -->
+    </div>
+  </div>
+
+  <div class="toast-msg" id="toastMsg">已保存</div>
+
+  <script>
+    // ---- State ----
+    let data = {
+      main: [],           // 地理轨 (物理主线坐标列表)
+      secondary: [],      // 地理轨支线
+      main_flight: []     // 导演轨关键帧列表 (编辑对象)
+    };
+    
+    let activeId = null;
+    let selectedIds = []; // 批量选择的航点 ID 列表
+    let historyStack = []; // 撤销历史栈
+    let viewer;
+    let flightLineEntity = null;
+    let refLineEntities = [];
+    let keyframeMarkers = [];
+    let refVisible = false;
+    let isDragging = false;
+    let dragEntity = null;
+    let poisData = []; // Global POI cache
+    
+    // Preview playback engine state
+    let isPreviewPlaying = false;
+    let previewIndex = 0;
+    let previewTimeout = null;
+
+    // Elevation chart interactions
+    let chartPoints = [];
+    let chartMinE = 3000;
+    let chartMaxE = 7000;
+    let isDraggingChartNode = false;
+    let draggedNodeIdx = -1;
+    let dragType = null; // 'elevation', 'speed', or 'wait'
+    let isScrubbing = false;
+    let scrubDist = null;
+
+    // Two-way camera sync variables
+    let isUpdatingCameraFromState = false;
+    let saveDebounceTimer = null;
+    
+    // Visual indicators for Target Lock
+    let targetLockLineEntity = null;
+    let targetLockMarkerEntity = null;
+
+    // ---- Helpers ----
+    function showToast(msg) {
+      const el = document.getElementById('toastMsg');
+      el.textContent = msg;
+      el.style.display = 'block';
+      setTimeout(() => el.style.display = 'none', 2000);
+    }
+
+    function saveToServerDebounced() {
+      if (saveDebounceTimer) clearTimeout(saveDebounceTimer);
+      saveDebounceTimer = setTimeout(() => {
+        saveToServer();
+      }, 800);
+    }
+
+    // Distance Calculation (Haversine)
+    function haversine(lat1, lon1, lat2, lon2) {
+      const R = 6371000.0;
+      const phi1 = lat1 * Math.PI / 180;
+      const phi2 = lat2 * Math.PI / 180;
+      const dphi = (lat2 - lat1) * Math.PI / 180;
+      const dlambda = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dphi/2)**2 + Math.cos(phi1)*Math.cos(phi2)*Math.sin(dlambda/2)**2;
+      return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    // Initial Bearing
+    function calculateBearing(lat1, lon1, lat2, lon2) {
+      const lat1Rad = lat1 * Math.PI / 180;
+      const lat2Rad = lat2 * Math.PI / 180;
+      const lon1Rad = lon1 * Math.PI / 180;
+      const lon2Rad = lon2 * Math.PI / 180;
+      const dlon = lon2Rad - lon1Rad;
+      const x = Math.sin(dlon) * Math.cos(lat2Rad);
+      const y = Math.cos(lat1Rad) * Math.sin(lat2Rad) - (Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dlon));
+      const initialBearing = Math.atan2(x, y);
+      return (initialBearing * 180 / Math.PI + 360) % 360;
+    }
+
+    // ---- Handheld camera shaking listener during preview ----
+    let handheldListener = null;
+    let lastHeadingNoise = 0;
+    let lastPitchNoise = 0;
+
+    function updatePreviewHandheldShake(active) {
+      if (handheldListener) {
+        viewer.scene.preRender.removeEventListener(handheldListener);
+        handheldListener = null;
+        if (viewer.camera) {
+          viewer.camera.lookRight(-lastHeadingNoise);
+          viewer.camera.lookUp(-lastPitchNoise);
+        }
+        lastHeadingNoise = 0;
+        lastPitchNoise = 0;
+      }
+      if (active) {
+        handheldListener = () => {
+          viewer.camera.lookRight(-lastHeadingNoise);
+          viewer.camera.lookUp(-lastPitchNoise);
+          
+          if (!isPreviewPlaying) return;
+          
+          const time = Date.now() / 150.0;
+          lastHeadingNoise = Math.sin(time) * Math.cos(time * 0.7) * Cesium.Math.toRadians(0.22);
+          lastPitchNoise = Math.cos(time * 1.3) * Math.sin(time * 0.5) * Cesium.Math.toRadians(0.14);
+          
+          viewer.camera.lookRight(lastHeadingNoise);
+          viewer.camera.lookUp(lastPitchNoise);
+        };
+        viewer.scene.preRender.addEventListener(handheldListener);
+      }
+    }
+
+    // ---- Initialization ----
+    async function init() {
+      // 1. Fetch JSON Data
+      try {
+        const res = await fetch("data/routes.json?t=" + Date.now());
+        if (res.ok) {
+          const raw = await res.json();
+          data.main = raw.main || [];
+          data.secondary = raw.secondary || [];
+          data.main_flight = raw.main_flight || [];
+        }
+      } catch (e) {
+        console.error("加载 routes.json 失败:", e);
+      }
+
+      // Check draft button visibility
+      if (data.main_flight.length === 0) {
+        document.getElementById('btnGenerateDraft').style.display = 'block';
+      }
+
+      // 2. Initialize Cesium
+      Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJhZDY0YWY3Yy1mZmQ1LTQ2MjgtYTRjZi01OTM0NzQ3YjljOGMiLCJpZCI6NDM2NzA2LCJpc3MiOiJodHRwczovL2FwaS5jZXNpdW0uY29tIiwiYXVkIjoidW5kZWZpbmVkX2RlZmF1bHQiLCJpYXQiOjE3Nzk4MDU4MjZ9.80efk41binldWGgit3mGqqZ3keritykzZUoNw0qoQc0';
+      viewer = new Cesium.Viewer("map", {
+        animation: false,
+        timeline: false,
+        baseLayerPicker: false,
+        fullscreenButton: false,
+        geocoder: false,
+        homeButton: false,
+        infoBox: false,
+        selectionIndicator: true,
+        sceneModePicker: false,
+        navigationHelpButton: false
+      });
+
+      viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+
+      viewer.scene.postProcessStages.fxaa.enabled = true;
+      viewer.scene.globe.depthTestAgainstTerrain = true;
+
+      // Load Terrain
+      try {
+        const tp = await Cesium.createWorldTerrainAsync();
+        viewer.terrainProvider = tp;
+        // Automatically sample real terrain heights for all waypoints once terrain provider is loaded
+        sampleAllWaypointHeights();
+      } catch (err) {
+        console.error("Terrain provider load failed:", err);
+      }
+
+      // Camera view default focusing based on project location data
+      if (data.main_flight && data.main_flight.length > 0) {
+        const firstPt = data.main_flight[0];
+        const absoluteAlt = (firstPt.ground_alt || 5000) + (firstPt.relative_alt || 500);
+        viewer.camera.setView({
+          destination: Cesium.Cartesian3.fromDegrees(firstPt.lng, firstPt.lat, absoluteAlt),
+          orientation: {
+            heading: Cesium.Math.toRadians(firstPt.heading || 0.0),
+            pitch: Cesium.Math.toRadians(firstPt.pitch || -25.0),
+            roll: Cesium.Math.toRadians(firstPt.roll || 0.0)
+          }
+        });
+      } else if (data.main && data.main.length > 0) {
+        viewer.camera.setView({
+          destination: Cesium.Cartesian3.fromDegrees(data.main[0][0], data.main[0][1], 9500),
+          orientation: {
+            heading: Cesium.Math.toRadians(0.0),
+            pitch: Cesium.Math.toRadians(-35.0),
+            roll: 0.0
+          }
+        });
+      } else {
+        // Completely empty project starting from scratch: focus on a global high view centered on China
+        viewer.camera.setView({
+          destination: Cesium.Cartesian3.fromDegrees(104.1954, 35.8617, 10000000.0),
+          orientation: {
+            heading: Cesium.Math.toRadians(0.0),
+            pitch: Cesium.Math.toRadians(-90.0),
+            roll: 0.0
+          }
+        });
+      }
+
+      // 3. Load reference POIs & Save globally
+      try {
+        const poisRes = await fetch("data/pois.json");
+        if (poisRes.ok) {
+          poisData = await poisRes.json();
+          poisData.forEach(poi => {
+            viewer.entities.add({
+              name: poi.name,
+              position: Cesium.Cartesian3.fromDegrees(poi.lng, poi.lat, 0.0),
+              point: {
+                pixelSize: 6,
+                color: Cesium.Color.fromCssColorString('#ffffff').withAlpha(0.4),
+                outlineColor: Cesium.Color.BLACK,
+                outlineWidth: 1.5,
+                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                disableDepthTestDistance: 10000000.0
+              },
+              label: {
+                text: poi.name,
+                font: '10px "PingFang SC", sans-serif',
+                fillColor: Cesium.Color.fromCssColorString('#cccccc').withAlpha(0.6),
+                outlineColor: Cesium.Color.BLACK,
+                outlineWidth: 2,
+                pixelOffset: new Cesium.Cartesian2(0, -10),
+                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                disableDepthTestDistance: 10000000.0
+              }
+            });
+          });
+        }
+      } catch(e) {
+        console.error("加载参考 POI 失败:", e);
+      }
+
+      // 4. Render lines and nodes
+      drawRefLines();
+      
+      // Draw Director Flight Path in 3D air
+      flightLineEntity = viewer.entities.add({
+        name: 'Director Flight Path',
+        polyline: {
+          positions: new Cesium.CallbackProperty(() => {
+            if (data.main_flight.length < 2) return undefined;
+            return data.main_flight.map(f => Cesium.Cartesian3.fromDegrees(f.lng, f.lat, (f.ground_alt || 5000) + f.relative_alt));
+          }, false),
+          width: 4.0,
+          material: Cesium.Color.fromCssColorString('#00ffaa'),
+          clampToGround: false
+        }
+      });
+
+      rebuildMarkers();
+      refreshKeyframeList();
+      rebuildElevationChart();
+      initElevationChartInteraction();
+      updateCount();
+
+      // Hook view changes to rebuild markers inside viewport dynamically
+      viewer.camera.moveEnd.addEventListener(rebuildMarkers);
+
+      // 5. Setup screen interactions
+      const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+
+      // LEFT_CLICK: Add keyframe or select keyframe
+      handler.setInputAction((click) => {
+        const picked = viewer.scene.pick(click.position);
+        if (Cesium.defined(picked) && Cesium.defined(picked.id)) {
+          const entity = picked.id;
+          if (entity.id && entity.id.startsWith('kframe_')) {
+            // Clicked a keyframe node
+            selectKeyframe(entity._kIdx);
+            return;
+          }
+        }
+
+        // Clicked terrain: add keyframe at that location
+        const ray = viewer.camera.getPickRay(click.position);
+        const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
+        if (Cesium.defined(cartesian)) {
+          const carto = Cesium.Cartographic.fromCartesian(cartesian);
+          const lat = parseFloat(Cesium.Math.toDegrees(carto.latitude).toFixed(6));
+          const lng = parseFloat(Cesium.Math.toDegrees(carto.longitude).toFixed(6));
+
+          // Query terrain height synchronously
+          let groundAlt = viewer.scene.globe.getHeight(carto);
+          if (groundAlt === undefined || isNaN(groundAlt)) groundAlt = 5000;
+          groundAlt = Math.round(groundAlt);
+
+          // Get orientation from camera
+          const heading = parseFloat(Cesium.Math.toDegrees(viewer.camera.heading).toFixed(1));
+          const pitch = parseFloat(Cesium.Math.toDegrees(viewer.camera.pitch).toFixed(1));
+          const roll = parseFloat(Cesium.Math.toDegrees(viewer.camera.roll).toFixed(1));
+
+          const id = 'evt_' + Date.now();
+          const newPt = {
+            id,
+            name: "导演航点 " + (data.main_flight.length + 1),
+            lng,
+            lat,
+            ground_alt: groundAlt,
+            relative_alt: 500,
+            heading,
+            pitch,
+            roll,
+            duration: 2.5,
+            wait_time: 0.0,
+            fov: 60.0,
+            shot_mode: "default",
+            look_at_intent: "forward",
+            perspective_fov: "natural",
+            perspective_pitch: "oblique",
+            speed_preset: "normal",
+            wait_preset: "none"
+          };
+
+          pushHistoryState();
+          data.main_flight.push(newPt);
+          
+          document.getElementById('btnGenerateDraft').style.display = 'none';
+          
+          rebuildMarkers();
+          refreshKeyframeList();
+          rebuildElevationChart();
+          updateCount();
+          selectKeyframe(data.main_flight.length - 1);
+          saveToServer();
+        }
+      }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+      // LEFT_DOUBLE_CLICK: Lock camera look-at target
+      handler.setInputAction((click) => {
+        if (!activeId) return;
+        const idx = data.main_flight.findIndex(f => f.id === activeId);
+        if (idx === -1) return;
+        
+        const ray = viewer.camera.getPickRay(click.position);
+        const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
+        if (Cesium.defined(cartesian)) {
+          const carto = Cesium.Cartographic.fromCartesian(cartesian);
+          const lat = parseFloat(Cesium.Math.toDegrees(carto.latitude).toFixed(6));
+          const lng = parseFloat(Cesium.Math.toDegrees(carto.longitude).toFixed(6));
+          
+          let alt = viewer.scene.globe.getHeight(carto) || 5000;
+          alt = Math.round(alt);
+          
+          pushHistoryState();
+          const pt = data.main_flight[idx];
+          pt.look_at_intent = 'custom_target';
+          pt.look_at_target = { lng, lat, alt, name: `锁定点 (${lng.toFixed(3)}, ${lat.toFixed(3)})` };
+          
+          showToast("🎯 镜头视线已锁定该点！");
+          
+          recomputeKeyframeValues(idx);
+          saveToServer();
+          rebuildMarkers();
+          rebuildElevationChart();
+          updateTargetLockUI(pt);
+          drawTargetLockVisualLine(pt);
+        }
+      }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+
+      // RIGHT_CLICK: delete point quickly
+      viewer.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+      handler.setInputAction((click) => {
+        const picked = viewer.scene.pick(click.position);
+        if (Cesium.defined(picked) && Cesium.defined(picked.id)) {
+          const entity = picked.id;
+          if (entity.id && entity.id.startsWith('kframe_')) {
+            const idx = entity._kIdx;
+            if (confirm(`是否删除第 ${idx + 1} 个导演航点？`)) {
+              deleteKeyframe(idx);
+            }
+          }
+        }
+      }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
+
+      // LEFT_DOWN: drag start (for 3D position dragging)
+      handler.setInputAction((click) => {
+        const picked = viewer.scene.pick(click.position);
+        if (Cesium.defined(picked) && Cesium.defined(picked.id)) {
+          const entity = picked.id;
+          if (entity.id && entity.id.startsWith('kframe_')) {
+            isDragging = true;
+            dragEntity = entity;
+            viewer.scene.screenSpaceCameraController.enableInputs = false; // Lock map movement
+          }
+        }
+      }, Cesium.ScreenSpaceEventType.LEFT_DOWN);
+
+      // LEFT_UP: drag end
+      handler.setInputAction(() => {
+        if (isDragging) {
+          isDragging = false;
+          dragEntity = null;
+          viewer.scene.screenSpaceCameraController.enableInputs = true; // Restore map movement
+          saveToServer();
+          rebuildMarkers();
+          refreshKeyframeList();
+          rebuildElevationChart();
+        }
+      }, Cesium.ScreenSpaceEventType.LEFT_UP);
+
+      // MOUSE_MOVE: drag handle
+      handler.setInputAction((movement) => {
+        if (isDragging && dragEntity) {
+          const ray = viewer.camera.getPickRay(movement.endPosition);
+          const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
+          if (Cesium.defined(cartesian)) {
+            dragEntity.position = cartesian;
+            const carto = Cesium.Cartographic.fromCartesian(cartesian);
+            const lat = parseFloat(Cesium.Math.toDegrees(carto.latitude).toFixed(6));
+            const lng = parseFloat(Cesium.Math.toDegrees(carto.longitude).toFixed(6));
+
+            let groundAlt = viewer.scene.globe.getHeight(carto);
+            if (groundAlt === undefined || isNaN(groundAlt)) groundAlt = 5000;
+            groundAlt = Math.round(groundAlt);
+
+            const idx = dragEntity._kIdx;
+            if (data.main_flight[idx]) {
+              data.main_flight[idx].lng = lng;
+              data.main_flight[idx].lat = lat;
+              data.main_flight[idx].ground_alt = groundAlt;
+
+              const activeIdx = data.main_flight.findIndex(f => f.id === activeId);
+              if (activeIdx === idx) {
+                updateFlightSpeedDisplay(idx);
+                drawTargetLockVisualLine(data.main_flight[idx]);
+              }
+              rebuildElevationChart();
+            }
+          }
+        }
+      }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
+      // 6. Bind Toolbar Actions
+      document.getElementById('btnUndo').addEventListener('click', undoLastAction);
+      updateUndoButtonState();
+      document.getElementById('btnClear').addEventListener('click', clearAllKeyframes);
+      document.getElementById('btnGenerateDraft').addEventListener('click', generateDraftFromGeoTrack);
+      document.getElementById('btnExport').addEventListener('click', exportFlightData);
+      document.getElementById('btnSave').addEventListener('click', () => {
+        saveToServer(true);
+      });
+
+      // Bind Sidebar Toggle
+      document.getElementById('btnToggleSidebar').addEventListener('click', () => {
+        const sidebar = document.querySelector('.sidebar-left');
+        const btn = document.getElementById('btnToggleSidebar');
+        sidebar.classList.toggle('collapsed');
+        const isCollapsed = sidebar.classList.contains('collapsed');
+        btn.textContent = isCollapsed ? '▶' : '◀';
+        
+        if (viewer) {
+          viewer.resize();
+          setTimeout(() => {
+            viewer.resize();
+          }, 350);
+        }
+      });
+
+      // 7. Bind Height micro adjustments near elevation chart
+      document.getElementById('btnHeightDec').addEventListener('click', () => adjustSelectedHeight(-10));
+      document.getElementById('btnHeightInc').addEventListener('click', () => adjustSelectedHeight(10));
+
+      // 8. Bind Viewport HUD Listeners
+      setupHUDListeners();
+
+      // 9. Playback controls
+      document.getElementById('btnPlay').addEventListener('click', togglePreviewPlayback);
+
+      // 10. Real-time Camera Framing Change Listener
+      setupCameraChangeListener();
+    }
+
+    // ---- Render Reference Geo Lines ----
+    function drawRefLines() {
+      refLineEntities.forEach(ent => viewer.entities.remove(ent));
+      refLineEntities = [];
+
+      const color = Cesium.Color.RED.withAlpha(refVisible ? 0.25 : 0.0);
+
+      // Render physical main route
+      if (data.main && data.main.length) {
+        const positions = data.main.map(pt => Cesium.Cartesian3.fromDegrees(pt[0], pt[1]));
+        const ent = viewer.entities.add({
+          name: 'Physical Geo Route Reference',
+          polyline: {
+            positions,
+            width: 2.0,
+            material: new Cesium.PolylineDashMaterialProperty({
+              color: color,
+              dashLength: 8.0
+            }),
+            clampToGround: true
+          }
+        });
+        refLineEntities.push(ent);
+      }
+
+      // Render secondary physical routes
+      if (data.secondary) {
+        data.secondary.forEach(s => {
+          if (s.coords && s.coords.length) {
+            const positions = s.coords.map(pt => Cesium.Cartesian3.fromDegrees(pt[0], pt[1]));
+            const ent = viewer.entities.add({
+              name: 'Physical Secondary Reference: ' + s.name,
+              polyline: {
+                positions,
+                width: 1.5,
+                material: new Cesium.PolylineDashMaterialProperty({
+                  color: Cesium.Color.ORANGE.withAlpha(refVisible ? 0.2 : 0.0),
+                  dashLength: 6.0
+                }),
+                clampToGround: true
+              }
+            });
+            refLineEntities.push(ent);
+          }
+        });
+      }
+    }
+
+    // toggleRefLines removed
+
+    // ---- Draw Keyframe Node Indicators ----
+    function rebuildMarkers() {
+      keyframeMarkers.forEach(ent => viewer.entities.remove(ent));
+      keyframeMarkers = [];
+
+      const list = data.main_flight;
+      if (!list || list.length === 0) return;
+
+      const rect = viewer.camera.computeViewRectangle();
+      const dotColor = Cesium.Color.fromCssColorString('#00ffaa');
+      const activeIdx = list.findIndex(f => f.id === activeId);
+
+      list.forEach((pt, idx) => {
+        if (rect) {
+          const radLng = Cesium.Math.toRadians(pt.lng);
+          const radLat = Cesium.Math.toRadians(pt.lat);
+          const inView = radLng >= rect.west && radLng <= rect.east && radLat >= rect.south && radLat <= rect.north;
+          if (!inView) return;
+        }
+
+        const isActive = activeIdx === idx;
+        const isSelected = selectedIds.includes(pt.id);
+        const absoluteAlt = (pt.ground_alt || 5000) + (pt.relative_alt || 500);
+        const camPos = Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, absoluteAlt);
+
+        // 1. Draw vertical drop line to ground
+        const anchorEnt = viewer.entities.add({
+          polyline: {
+            positions: [
+              Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, pt.ground_alt || 5000),
+              camPos
+            ],
+            width: 1.0,
+            material: new Cesium.PolylineDashMaterialProperty({
+              color: isActive ? Cesium.Color.GOLD.withAlpha(0.7) : (isSelected ? Cesium.Color.GOLD.withAlpha(0.4) : Cesium.Color.WHITE.withAlpha(0.25)),
+              dashLength: 4.0
+            })
+          }
+        });
+        keyframeMarkers.push(anchorEnt);
+
+        // 2. Draw Camera sightline vector pointer (Look Track visualization)
+        const headingRad = Cesium.Math.toRadians(pt.heading || 0.0);
+        const pitchRad = Cesium.Math.toRadians(pt.pitch || -25.0);
+        const distance = 150.0; // 150m sightline helper line
+        const enuVector = new Cesium.Cartesian3(
+          distance * Math.cos(pitchRad) * Math.sin(headingRad),
+          distance * Math.cos(pitchRad) * Math.cos(headingRad),
+          distance * Math.sin(pitchRad)
+        );
+        const transform = Cesium.Transforms.eastNorthUpToFixedFrame(camPos);
+        const offsetPos = Cesium.Matrix4.multiplyByPoint(transform, enuVector, new Cesium.Cartesian3());
+
+        const sightlineEnt = viewer.entities.add({
+          polyline: {
+            positions: [camPos, offsetPos],
+            width: isActive ? 2.5 : 1.5,
+            material: isActive ? Cesium.Color.fromCssColorString('#00ffaa') : Cesium.Color.WHITE.withAlpha(0.4)
+          }
+        });
+        keyframeMarkers.push(sightlineEnt);
+
+        const arrowTip = viewer.entities.add({
+          position: offsetPos,
+          point: {
+            pixelSize: isActive ? 5 : 3,
+            color: isActive ? Cesium.Color.fromCssColorString('#00ffaa') : Cesium.Color.WHITE.withAlpha(0.6)
+          }
+        });
+        keyframeMarkers.push(arrowTip);
+
+        // 3. Draw Target Lock Sightline if locked
+        let targetLat = null;
+        let targetLng = null;
+        let targetAlt = 0;
+        
+        if (pt.look_at_intent === 'custom_target' && pt.look_at_target) {
+          targetLat = pt.look_at_target.lat;
+          targetLng = pt.look_at_target.lng;
+          targetAlt = pt.look_at_target.alt || 5000;
+        } else if (pt.look_at_intent === 'summit') {
+          targetLat = 31.066;
+          targetLng = 81.312;
+          targetAlt = 6656;
+        } else if (pt.look_at_intent === 'poi') {
+          if (poisData && poisData.length > 0) {
+            let closestPoi = null;
+            let minDist = Infinity;
+            poisData.forEach(p => {
+              const dist = haversine(pt.lat, pt.lng, p.lat, p.lng);
+              if (dist < minDist) {
+                minDist = dist;
+                closestPoi = p;
+              }
+            });
+            if (closestPoi) {
+              targetLat = closestPoi.lat;
+              targetLng = closestPoi.lng;
+              targetAlt = closestPoi.elevation || 5000;
+            }
+          }
+        }
+
+        if (targetLat !== null && targetLng !== null) {
+          const targetPos = Cesium.Cartesian3.fromDegrees(targetLng, targetLat, targetAlt);
+          const targetLine = viewer.entities.add({
+            polyline: {
+              positions: [camPos, targetPos],
+              width: 1.0,
+              material: new Cesium.PolylineDashMaterialProperty({
+                color: isActive ? Cesium.Color.GOLD : (isSelected ? Cesium.Color.GOLD.withAlpha(0.6) : Cesium.Color.GRAY.withAlpha(0.4)),
+                dashLength: 6.0
+              })
+            }
+          });
+          keyframeMarkers.push(targetLine);
+        }
+
+        // 4. Draw Camera node point
+        const ent = viewer.entities.add({
+          id: 'kframe_' + pt.id,
+          position: camPos,
+          point: {
+            pixelSize: isActive ? 14 : (isSelected ? 12 : 10),
+            color: isActive ? Cesium.Color.GOLD : (isSelected ? Cesium.Color.fromCssColorString('#fcd34d') : dotColor),
+            outlineColor: isActive ? Cesium.Color.RED : (isSelected ? Cesium.Color.GOLD : Cesium.Color.WHITE),
+            outlineWidth: 2,
+            heightReference: Cesium.HeightReference.NONE,
+            disableDepthTestDistance: 10000000.0
+          },
+          label: {
+            text: (idx + 1).toString(),
+            font: 'bold 9px monospace',
+            fillColor: isActive ? Cesium.Color.RED : (isSelected ? Cesium.Color.RED : Cesium.Color.BLACK),
+            outlineColor: Cesium.Color.WHITE,
+            outlineWidth: 1.0,
+            verticalOrigin: Cesium.VerticalOrigin.CENTER,
+            horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+            heightReference: Cesium.HeightReference.NONE,
+            disableDepthTestDistance: 10000000.0
+          }
+        });
+        ent._kIdx = idx;
+        keyframeMarkers.push(ent);
+      });
+    }
+
+    // ---- Sidebar Waypoints List Render ----
+    // ---- Sidebar Waypoints List Render ----
+    function refreshKeyframeList() {
+      const container = document.getElementById('keyframeList');
+      container.innerHTML = '';
+
+      const list = data.main_flight;
+      list.forEach((pt, idx) => {
+        const isSelected = selectedIds.includes(pt.id);
+        const isActive = pt.id === activeId;
+        const item = document.createElement('div');
+        item.className = `keyframe-item ${isActive ? 'active' : ''} ${isSelected ? 'selected' : ''}`;
+        
+        let directionLabel = "向前";
+        if (pt.look_at_intent === 'summit') directionLabel = "凝望";
+        else if (pt.look_at_intent === 'side') directionLabel = "横扫";
+        else if (pt.look_at_intent === 'back') directionLabel = "后掠";
+        else if (pt.look_at_intent === 'poi') directionLabel = "地标";
+        else if (pt.look_at_intent === 'custom_target') directionLabel = "锁定";
+        else if (pt.look_at_intent === 'custom') directionLabel = "自由";
+
+        item.innerHTML = `
+          <div class="keyframe-idx">${idx + 1}</div>
+          <div class="keyframe-info">
+            <input type="text" class="keyframe-name-input" value="${pt.name || ('导演空间轨 ' + (idx + 1))}" 
+              data-idx="${idx}" onclick="event.stopPropagation()">
+            <div class="keyframe-meta">高: ${pt.relative_alt}m · 视: ${directionLabel} · 约 ${pt.duration}s</div>
+          </div>
+          <div class="keyframe-actions" onclick="event.stopPropagation()">
+            <button class="action-icon-btn" onclick="moveKeyframeIndex(${idx}, -1)" title="上移">⬆</button>
+            <button class="action-icon-btn" onclick="moveKeyframeIndex(${idx}, 1)" title="下移">⬇</button>
+            <button class="action-icon-btn danger" onclick="confirmDeleteKeyframe(${idx})" title="删除">✕</button>
+          </div>
+        `;
+        
+        // Keyframe selection click
+        item.addEventListener('click', (e) => handleKeyframeClick(idx, e));
+        
+        // Binding rename change listener
+        const input = item.querySelector('.keyframe-name-input');
+        input.addEventListener('change', (e) => {
+          const renameIdx = parseInt(e.target.getAttribute('data-idx'));
+          data.main_flight[renameIdx].name = e.target.value.trim();
+          saveToServerDebounced();
+          rebuildElevationChart();
+        });
+        
+        container.appendChild(item);
+      });
+    }
+
+    function handleKeyframeClick(idx, event) {
+      const list = data.main_flight;
+      if (list.length === 0) return;
+      
+      const clickedPt = list[idx];
+      const clickedId = clickedPt.id;
+      
+      if (event.ctrlKey || event.metaKey) {
+        // Toggle selection
+        const sIdx = selectedIds.indexOf(clickedId);
+        if (sIdx !== -1) {
+          if (selectedIds.length > 1) {
+            selectedIds.splice(sIdx, 1);
+            if (activeId === clickedId) {
+              activeId = selectedIds[0];
+            }
+          } else {
+            deselectKeyframe();
+            return;
+          }
+        } else {
+          selectedIds.push(clickedId);
+          activeId = clickedId;
+        }
+      } else if (event.shiftKey && activeId) {
+        // Range selection
+        const activeIdx = list.findIndex(f => f.id === activeId);
+        if (activeIdx !== -1) {
+          const start = Math.min(activeIdx, idx);
+          const end = Math.max(activeIdx, idx);
+          selectedIds = [];
+          for (let i = start; i <= end; i++) {
+            selectedIds.push(list[i].id);
+          }
+          activeId = clickedId;
+        } else {
+          selectedIds = [clickedId];
+          activeId = clickedId;
+        }
+      } else {
+        // Single selection
+        selectedIds = [clickedId];
+        activeId = clickedId;
+      }
+      
+      const activeIdx = list.findIndex(f => f.id === activeId);
+      if (activeIdx !== -1) {
+        selectKeyframe(activeIdx, true);
+      }
+    }
+
+    function updateCount() {
+      const len = data.main_flight.length;
+      document.getElementById('keyframeCount').textContent = len + " 轨";
+      document.getElementById('previewStatus').textContent = isPreviewPlaying ? `正在混音预览 (${previewIndex + 1}/${len})` : `就绪 (共 ${len} 轨道)`;
+    }
+
+    // ---- Selected Keyframe State Update ----
+    function selectKeyframe(idx, keepSelection = false) {
+      const pt = data.main_flight[idx];
+      if (!pt) {
+        deselectKeyframe();
+        return;
+      }
+      activeId = pt.id;
+
+      // Update list items active and selected states
+      if (!keepSelection) {
+        selectedIds = [pt.id];
+      } else {
+        if (selectedIds.length === 0 || !selectedIds.includes(pt.id)) {
+          selectedIds = [pt.id];
+        }
+      }
+      document.querySelectorAll('.keyframe-item').forEach((item, index) => {
+        const itemPt = data.main_flight[index];
+        if (itemPt) {
+          item.classList.toggle('active', index === idx);
+          item.classList.toggle('selected', selectedIds.includes(itemPt.id));
+        }
+      });
+      rebuildMarkers();
+
+      // Show HUD controls
+      document.getElementById('hudZoomRing').style.display = 'flex';
+      document.getElementById('hudPitchRing').style.display = 'flex';
+      document.getElementById('hudRhythmConsole').style.display = 'flex';
+      document.getElementById('hudTargetLockPanel').style.display = 'block';
+      document.getElementById('btnDeleteSelected').style.display = 'inline-flex';
+
+      // Load values into HUD inputs
+      const fovVal = pt.fov || 60.0;
+      document.getElementById('hudFovSlider').value = fovVal;
+      document.getElementById('hudFovValue').textContent = `${Math.round(fovVal)}°`;
+
+      const pitchVal = pt.pitch || -25.0;
+      document.getElementById('hudPitchSlider').value = pitchVal;
+      document.getElementById('hudPitchValue').textContent = `${Math.round(pitchVal)}°`;
+
+      // Speed slider
+      let speedKmh = 36;
+      if (idx > 0) {
+        const prevPt = data.main_flight[idx - 1];
+        const dist = haversine(prevPt.lat, prevPt.lng, pt.lat, pt.lng);
+        const dur = pt.duration || 2.5;
+        speedKmh = Math.round((dist / dur) * 3.6);
+      }
+      document.getElementById('hudSpeedSlider').value = speedKmh;
+      document.getElementById('hudSpeedSlider').disabled = (idx === 0);
+      document.getElementById('hudSpeedValue').textContent = idx === 0 ? "起飞点 (首帧)" : `${speedKmh} km/h`;
+
+      const waitVal = pt.wait_time || 0.0;
+      document.getElementById('hudWaitSlider').value = waitVal;
+      document.getElementById('hudWaitValue').textContent = `${waitVal}s`;
+
+      // Handheld Shaking toggle
+      document.getElementById('hudChkHandheld').checked = (pt.shot_mode === 'handheld');
+
+      // Update target status UI
+      updateTargetLockUI(pt);
+
+      // Re-activate active segment buttons in HUD
+      updateSegmentsUI('fovScaleGroup', pt.perspective_fov || 'natural');
+      updateSegmentsUI('pitchScaleGroup', pt.perspective_pitch || 'oblique');
+
+      // Highlight active vibe button
+      document.querySelectorAll('.vibe-btn').forEach(btn => btn.classList.remove('active'));
+      let activeVibe = null;
+      if (pt.look_at_intent === 'summit' && pt.relative_alt === 350 && pt.fov === 60 && pt.pitch === -25) {
+        activeVibe = 'pilgrimage';
+      } else if (pt.look_at_intent === 'summit' && pt.relative_alt === 700 && pt.fov === 28 && pt.pitch === -45) {
+        activeVibe = 'solemn';
+      } else if (pt.look_at_intent === 'forward' && pt.relative_alt === 180 && pt.fov === 90 && pt.pitch === -10 && pt.shot_mode === 'handheld') {
+        activeVibe = 'exploratory';
+      } else if (pt.look_at_intent === 'back' && pt.relative_alt === 600 && pt.fov === 75 && pt.pitch === -25) {
+        activeVibe = 'solitude';
+      }
+      if (activeVibe) {
+        const activeBtn = document.querySelector(`.vibe-btn[data-vibe="${activeVibe}"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+      }
+
+      // Draw dashed visual line in 3D
+      drawTargetLockVisualLine(pt);
+
+      // Diagnostics readout update
+      updateDiagnosticsPanel(pt, idx);
+
+      // Show Camera rule of thirds grid and sidebar diagnostics panel
+      document.getElementById('cameraGrid').style.display = 'grid';
+      document.getElementById('diagnosticsOverlay').style.display = 'block';
+
+      // Move camera to this point
+      if (viewer) {
+        isUpdatingCameraFromState = true;
+        
+        const absoluteAlt = (pt.ground_alt || 5000) + (pt.relative_alt || 500);
+        
+        viewer.camera.setView({
+          destination: Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, absoluteAlt),
+          orientation: {
+            heading: Cesium.Math.toRadians(pt.heading || 0.0),
+            pitch: Cesium.Math.toRadians(pt.pitch || -25.0),
+            roll: Cesium.Math.toRadians(pt.roll || 0.0)
+          }
+        });
+        viewer.camera.frustum.fov = Cesium.Math.toRadians(fovVal);
+        
+        isUpdatingCameraFromState = false;
+      }
+
+      // Update Chart selection label and buttons
+      document.getElementById('chartSelectionLabel').textContent = `选中空间轨 #${idx + 1} (${pt.name || ('轨道' + (idx+1))})`;
+      document.getElementById('chartAdjustControls').style.display = 'flex';
+
+      rebuildElevationChart();
+    }
+
+    function deselectKeyframe() {
+      activeId = null;
+      selectedIds = [];
+      document.getElementById('hudZoomRing').style.display = 'none';
+      document.getElementById('hudPitchRing').style.display = 'none';
+      document.getElementById('hudRhythmConsole').style.display = 'none';
+      document.getElementById('hudTargetLockPanel').style.display = 'none';
+      document.getElementById('btnDeleteSelected').style.display = 'none';
+      
+      document.getElementById('chartSelectionLabel').textContent = `未选中轨道`;
+      document.getElementById('chartAdjustControls').style.display = 'none';
+      
+      // Hide Camera grid overlay and sidebar diagnostics panel
+      document.getElementById('cameraGrid').style.display = 'none';
+      document.getElementById('diagnosticsOverlay').style.display = 'none';
+
+      clearTargetLockVisuals();
+      rebuildMarkers();
+      rebuildElevationChart();
+    }
+
+    function updateDiagnosticsPanel(pt, idx) {
+      const panel = document.getElementById('diagnosticsOverlay');
+      if (!panel || !pt) return;
+      if (typeof idx !== 'number') {
+        idx = data.main_flight.findIndex(f => f.id === pt.id);
+      }
+      
+      let nearestPoiName = "未知地段";
+      let minDist = 2000;
+      if (poisData && poisData.length > 0) {
+        poisData.forEach(poi => {
+          const dist = haversine(pt.lat, pt.lng, poi.lat, poi.lng);
+          if (dist < minDist) {
+            minDist = dist;
+            nearestPoiName = poi.name;
+          }
+        });
+      }
+
+      let cumDistance = 0;
+      let speedStr = "起飞点";
+      let durationStr = "首帧";
+      
+      if (idx !== -1 && chartPoints[idx]) {
+        cumDistance = chartPoints[idx].d;
+        if (idx > 0) {
+          speedStr = `${chartPoints[idx].speed} km/h`;
+          durationStr = `${pt.duration.toFixed(1)} s`;
+        }
+      }
+
+      let targetStr = "走向前方";
+      if (pt.look_at_intent === 'custom_target' && pt.look_at_target) {
+        targetStr = pt.look_at_target.name;
+      } else if (pt.look_at_intent === 'summit') {
+        targetStr = "冈仁波齐主峰";
+      } else if (pt.look_at_intent === 'poi') {
+        targetStr = "地标对焦";
+      } else if (pt.look_at_intent === 'back') {
+        targetStr = "余光倒掠 (后景)";
+      } else if (pt.look_at_intent === 'side') {
+        targetStr = "横向扫视 (90°)";
+      } else if (pt.look_at_intent === 'custom') {
+        targetStr = "自由运镜";
+      }
+
+      document.getElementById('diagPos').textContent = nearestPoiName;
+      document.getElementById('diagDist').textContent = `${(cumDistance / 1000).toFixed(2)} km`;
+      document.getElementById('diagGround').textContent = `${pt.ground_alt || 5000} m`;
+      document.getElementById('diagFlight').textContent = `${(pt.ground_alt || 5000) + pt.relative_alt} m`;
+      document.getElementById('diagRel').textContent = `${pt.relative_alt} m`;
+      document.getElementById('diagTarget').textContent = targetStr;
+      document.getElementById('diagSpeed').textContent = speedStr;
+      document.getElementById('diagDuration').textContent = durationStr;
+    }
+
+    function updateTargetLockUI(pt) {
+      const nameEl = document.getElementById('hudTargetName');
+      const unlockBtn = document.getElementById('btnHudUnlock');
+      
+      let label = "走向前方";
+      let showUnlock = false;
+      
+      if (pt.look_at_intent === 'custom_target' && pt.look_at_target) {
+        label = pt.look_at_target.name || "锁定视线";
+        showUnlock = true;
+      } else if (pt.look_at_intent === 'summit') {
+        label = "凝望视角（锁定主体）";
+        showUnlock = true;
+      } else if (pt.look_at_intent === 'poi') {
+        label = "对焦地标";
+        showUnlock = true;
+      } else if (pt.look_at_intent === 'back') {
+        label = "余光倒掠";
+      } else if (pt.look_at_intent === 'side') {
+        label = "横向扫视";
+      } else if (pt.look_at_intent === 'custom') {
+        label = "自由运镜";
+      }
+      
+      nameEl.textContent = label;
+      unlockBtn.style.display = showUnlock ? 'block' : 'none';
+
+      // Highlight active mode buttons
+      const mapping = {
+        'forward': 'btnHudLockForward',
+        'summit': 'btnHudLockSummit',
+        'side': 'btnHudLockSide',
+        'back': 'btnHudLockBack',
+        'poi': 'btnHudLockPoi'
+      };
+      
+      Object.keys(mapping).forEach(key => {
+        const btn = document.getElementById(mapping[key]);
+        if (btn) btn.classList.toggle('active', pt.look_at_intent === key);
+      });
+    }
+
+    function updateSegmentsUI(groupId, activeVal) {
+      const container = document.getElementById(groupId);
+      if (!container) return;
+      container.querySelectorAll('.scale-mark').forEach(btn => {
+        const val = btn.getAttribute('data-val');
+        btn.classList.toggle('active', val === activeVal);
+      });
+    }
+
+    // Velocity Calculator
+    function updateFlightSpeedDisplay(idx) {
+      const pt = data.main_flight[idx];
+      const speedSlider = document.getElementById('hudSpeedSlider');
+      const speedLabel = document.getElementById('hudSpeedValue');
+      if (idx === 0) {
+        speedLabel.textContent = "首帧 (起飞点)";
+      } else {
+        const prevPt = data.main_flight[idx - 1];
+        const dist = haversine(prevPt.lat, prevPt.lng, pt.lat, pt.lng);
+        const dur = pt.duration || 2.5;
+        const speed = (dist / dur) * 3.6; // km/h
+        speedLabel.textContent = `${Math.round(speed)} km/h`;
+        if (speedSlider) speedSlider.value = Math.round(speed);
+      }
+    }
+
+    function adjustSelectedHeight(amount) {
+      if (selectedIds.length === 0) return;
+      
+      let lastRelAlt = 500;
+      selectedIds.forEach(id => {
+        const idx = data.main_flight.findIndex(f => f.id === id);
+        if (idx !== -1) {
+          let relAlt = data.main_flight[idx].relative_alt || 500;
+          relAlt = Math.max(0, relAlt + amount);
+          data.main_flight[idx].relative_alt = relAlt;
+          lastRelAlt = relAlt;
+          recomputeKeyframeValues(idx);
+        }
+      });
+
+      rebuildMarkers();
+      refreshKeyframeList();
+      rebuildElevationChart();
+      saveToServerDebounced();
+      
+      if (selectedIds.length === 1) {
+        showToast(`离地高度已调整为 ${lastRelAlt}m`);
+      } else {
+        showToast(`批量调整了 ${selectedIds.length} 个镜头的离地高度`);
+      }
+    }
+
+    function confirmDeleteKeyframe(idx) {
+      if (confirm(`是否删除第 ${idx + 1} 个空间混合单元？`)) {
+        deleteKeyframe(idx);
+      }
+    }
+
+    function deleteKeyframe(idx) {
+      pushHistoryState();
+      data.main_flight.splice(idx, 1);
+      if (data.main_flight.length === 0) {
+        document.getElementById('btnGenerateDraft').style.display = 'block';
+      }
+      deselectKeyframe();
+      rebuildMarkers();
+      refreshKeyframeList();
+      rebuildElevationChart();
+      updateCount();
+      saveToServer();
+      showToast("已删除该混音单元");
+    }
+
+    function pushHistoryState() {
+      historyStack.push(JSON.parse(JSON.stringify(data.main_flight)));
+      if (historyStack.length > 50) {
+        historyStack.shift();
+      }
+      updateUndoButtonState();
+    }
+
+    function undoLastAction() {
+      if (historyStack.length === 0) {
+        showToast("无历史操作可撤销");
+        return;
+      }
+      data.main_flight = historyStack.pop();
+      if (data.main_flight.length === 0) {
+        document.getElementById('btnGenerateDraft').style.display = 'block';
+      } else {
+        document.getElementById('btnGenerateDraft').style.display = 'none';
+      }
+      
+      // If the current activeId is no longer in data.main_flight, deselect
+      if (activeId && !data.main_flight.some(f => f.id === activeId)) {
+        deselectKeyframe();
+      } else {
+        const activeIdx = data.main_flight.findIndex(f => f.id === activeId);
+        if (activeIdx !== -1) {
+          selectKeyframe(activeIdx, true);
+        } else {
+          deselectKeyframe();
+        }
+      }
+      
+      rebuildMarkers();
+      refreshKeyframeList();
+      rebuildElevationChart();
+      updateCount();
+      saveToServer();
+      showToast("↩ 已撤销上一步操作");
+      updateUndoButtonState();
+    }
+
+    function updateUndoButtonState() {
+      const btnUndo = document.getElementById('btnUndo');
+      if (btnUndo) {
+        if (historyStack.length === 0) {
+          btnUndo.style.opacity = '0.5';
+          btnUndo.title = "无历史操作可撤销";
+        } else {
+          btnUndo.style.opacity = '1.0';
+          btnUndo.title = `撤销上一步操作 (还有 ${historyStack.length} 步可撤销)`;
+        }
+      }
+    }
+
+    function clearAllKeyframes() {
+      if (!confirm("⚠️ 警告：确定要清空全部的导演运镜轨配置吗？这会抹去所有已设计的航点。\n\n（清空后若后悔，仍可通过点击左上角的【↩ 撤销】按钮恢复整个轨道）")) return;
+      pushHistoryState();
+      data.main_flight = [];
+      document.getElementById('btnGenerateDraft').style.display = 'block';
+      deselectKeyframe();
+      rebuildMarkers();
+      refreshKeyframeList();
+      rebuildElevationChart();
+      updateCount();
+      saveToServer();
+      showToast("🧹 导演轨配置已成功清空");
+    }
+
+    function moveKeyframeIndex(idx, direction) {
+      const targetIdx = idx + direction;
+      if (targetIdx < 0 || targetIdx >= data.main_flight.length) {
+        showToast("已到达队列边界");
+        return;
+      }
+
+      pushHistoryState();
+      const temp = data.main_flight[idx];
+      data.main_flight[idx] = data.main_flight[targetIdx];
+      data.main_flight[targetIdx] = temp;
+
+      refreshKeyframeList();
+      rebuildMarkers();
+      rebuildElevationChart();
+      selectKeyframe(targetIdx);
+      saveToServer();
+      showToast(direction === -1 ? "空间单元上移" : "空间单元下移");
+    }
+
+    // ---- Vibe Presets Application ----
+    function applyVibePreset(vibe) {
+      if (selectedIds.length === 0) return;
+      
+      const activeIdx = data.main_flight.findIndex(f => f.id === activeId);
+
+      selectedIds.forEach(id => {
+        const idx = data.main_flight.findIndex(f => f.id === id);
+        if (idx === -1) return;
+        const pt = data.main_flight[idx];
+        
+        if (vibe === 'pilgrimage') {
+          pt.look_at_intent = 'summit';
+          pt.relative_alt = 350;
+          pt.perspective_fov = 'natural';
+          pt.fov = 60;
+          pt.perspective_pitch = 'oblique';
+          pt.pitch = -25;
+          pt.speed_preset = 'slow';
+          pt.wait_preset = 'brief';
+          pt.wait_time = 5.0;
+          pt.shot_mode = 'default';
+        } else if (vibe === 'solemn') {
+          pt.look_at_intent = 'summit';
+          pt.relative_alt = 700;
+          pt.perspective_fov = 'compressed';
+          pt.fov = 28;
+          pt.perspective_pitch = 'overlook';
+          pt.pitch = -45;
+          pt.speed_preset = 'slow';
+          pt.wait_preset = 'deep';
+          pt.wait_time = 12.0;
+          pt.shot_mode = 'default';
+        } else if (vibe === 'exploratory') {
+          pt.look_at_intent = 'forward';
+          pt.relative_alt = 180;
+          pt.perspective_fov = 'vast';
+          pt.fov = 90;
+          pt.perspective_pitch = 'eyelevel';
+          pt.pitch = -10;
+          pt.speed_preset = 'custom';
+          pt.wait_preset = 'none';
+          pt.wait_time = 0.0;
+          pt.shot_mode = 'handheld';
+        } else if (vibe === 'solitude') {
+          pt.look_at_intent = 'back';
+          pt.relative_alt = 600;
+          pt.perspective_fov = 'custom';
+          pt.fov = 75;
+          pt.perspective_pitch = 'oblique';
+          pt.pitch = -25;
+          pt.speed_preset = 'slow';
+          pt.wait_preset = 'none';
+          pt.wait_time = 0.0;
+          pt.shot_mode = 'default';
+        }
+        recomputeKeyframeValues(idx);
+      });
+
+      if (activeIdx !== -1) {
+        selectKeyframe(activeIdx, true);
+      }
+      saveToServer();
+      showToast(`🔮 已批量载入【${vibe === 'pilgrimage' ? '朝圣' : (vibe === 'solemn' ? '庄严' : (vibe === 'exploratory' ? '探索' : '孤独'))}】氛围空间混音！`);
+    }
+
+    // ---- Camera State Capture ----
+    async function captureCurrentCamera() {
+      if (!activeId) return;
+      const idx = data.main_flight.findIndex(f => f.id === activeId);
+      if (idx === -1) return;
+
+      const cameraCarto = Cesium.Cartographic.fromCartesian(viewer.camera.position);
+      const camLng = Cesium.Math.toDegrees(cameraCarto.longitude);
+      const camLat = Cesium.Math.toDegrees(cameraCarto.latitude);
+      const camHeight = cameraCarto.height;
+
+      const heading = parseFloat(Cesium.Math.toDegrees(viewer.camera.heading).toFixed(1));
+      const pitch = parseFloat(Cesium.Math.toDegrees(viewer.camera.pitch).toFixed(1));
+      const roll = parseFloat(Cesium.Math.toDegrees(viewer.camera.roll).toFixed(1));
+      const fovVal = parseFloat(Cesium.Math.toDegrees(viewer.camera.frustum.fov).toFixed(1));
+
+      // Synchronous terrain lookup
+      let groundAlt = viewer.scene.globe.getHeight(cameraCarto);
+      if (groundAlt === undefined || isNaN(groundAlt)) {
+        showToast("正在高精度采样地形高度...");
+        try {
+          const res = await Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [cameraCarto]);
+          groundAlt = res[0].height || 5000;
+        } catch (e) {
+          groundAlt = 5000;
+        }
+      }
+      groundAlt = Math.round(groundAlt);
+      const relativeAlt = Math.max(0, Math.round(camHeight - groundAlt));
+
+      // Apply to model state
+      data.main_flight[idx].lng = parseFloat(camLng.toFixed(6));
+      data.main_flight[idx].lat = parseFloat(camLat.toFixed(6));
+      data.main_flight[idx].ground_alt = groundAlt;
+      data.main_flight[idx].relative_alt = relativeAlt;
+      data.main_flight[idx].heading = heading;
+      data.main_flight[idx].pitch = pitch;
+      data.main_flight[idx].roll = roll;
+      data.main_flight[idx].fov = fovVal;
+
+      data.main_flight[idx].look_at_intent = 'custom';
+      data.main_flight[idx].perspective_fov = 'custom';
+      data.main_flight[idx].perspective_pitch = 'custom';
+
+      selectKeyframe(idx);
+      saveToServer();
+      showToast("📸 画面运镜坐标与角度捕获成功！");
+    }
+
+    async function addWaypointAtCurrentCamera() {
+      const cameraCarto = Cesium.Cartographic.fromCartesian(viewer.camera.position);
+      const camLng = Cesium.Math.toDegrees(cameraCarto.longitude);
+      const camLat = Cesium.Math.toDegrees(cameraCarto.latitude);
+      const camHeight = cameraCarto.height;
+
+      const heading = parseFloat(Cesium.Math.toDegrees(viewer.camera.heading).toFixed(1));
+      const pitch = parseFloat(Cesium.Math.toDegrees(viewer.camera.pitch).toFixed(1));
+      const roll = parseFloat(Cesium.Math.toDegrees(viewer.camera.roll).toFixed(1));
+      const fovVal = parseFloat(Cesium.Math.toDegrees(viewer.camera.frustum.fov).toFixed(1));
+
+      let groundAlt = viewer.scene.globe.getHeight(cameraCarto);
+      if (groundAlt === undefined || isNaN(groundAlt)) {
+        showToast("正在采样当前点地形高度...");
+        try {
+          const res = await Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [cameraCarto]);
+          groundAlt = res[0].height || 5000;
+        } catch (e) {
+          groundAlt = 5000;
+        }
+      }
+      groundAlt = Math.round(groundAlt);
+      const relativeAlt = Math.max(0, Math.round(camHeight - groundAlt));
+
+      const id = 'evt_' + Date.now();
+      const newPt = {
+        id,
+        name: "自定义航点 " + (data.main_flight.length + 1),
+        lng: parseFloat(camLng.toFixed(6)),
+        lat: parseFloat(camLat.toFixed(6)),
+        ground_alt: groundAlt,
+        relative_alt: relativeAlt,
+        heading,
+        pitch,
+        roll,
+        duration: 2.5,
+        wait_time: 0.0,
+        fov: fovVal,
+        shot_mode: "default",
+        look_at_intent: "forward",
+        perspective_fov: "natural",
+        perspective_pitch: "oblique",
+        speed_preset: "normal",
+        wait_preset: "none"
+      };
+
+      const activeIdx = data.main_flight.findIndex(f => f.id === activeId);
+      let targetIdx;
+      if (activeIdx !== -1) {
+        data.main_flight.splice(activeIdx + 1, 0, newPt);
+        targetIdx = activeIdx + 1;
+      } else {
+        data.main_flight.push(newPt);
+        targetIdx = data.main_flight.length - 1;
+      }
+
+      document.getElementById('btnGenerateDraft').style.display = 'none';
+
+      rebuildMarkers();
+      refreshKeyframeList();
+      rebuildElevationChart();
+      updateCount();
+      selectKeyframe(targetIdx);
+      saveToServer();
+      showToast("➕ 成功添加当前镜头为新航点！");
+    }
+
+    function deleteSelectedWaypoint() {
+      if (selectedIds.length === 0) return;
+      const count = selectedIds.length;
+      if (confirm(`确定要删除选中的 ${count} 个航点吗？`)) {
+        data.main_flight = data.main_flight.filter(f => !selectedIds.includes(f.id));
+        if (data.main_flight.length === 0) {
+          document.getElementById('btnGenerateDraft').style.display = 'block';
+        }
+        selectedIds = [];
+        deselectKeyframe();
+        rebuildMarkers();
+        refreshKeyframeList();
+        rebuildElevationChart();
+        updateCount();
+        saveToServer();
+        showToast(`🗑️ ${count} 个空间混音单元已批量删除`);
+      }
+    }
+
+    // ---- Background Terrain Height Sampler ----
+    async function sampleAllWaypointHeights() {
+      if (!data.main_flight || data.main_flight.length === 0) return;
+      
+      console.log("Starting background terrain sampling for waypoints...");
+      const positions = data.main_flight.map(pt => Cesium.Cartographic.fromDegrees(pt.lng, pt.lat));
+      
+      try {
+        if (viewer.terrainProvider && !(viewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider)) {
+          const updated = await Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, positions);
+          
+          let changed = false;
+          updated.forEach((pos, i) => {
+            if (pos.height !== undefined && pos.height > 3000) {
+              const sampledHeight = Math.round(pos.height);
+              const pt = data.main_flight[i];
+              if (pt.ground_alt !== sampledHeight) {
+                pt.ground_alt = sampledHeight;
+                changed = true;
+              }
+            }
+          });
+          
+          if (changed) {
+            console.log("Terrain heights updated and synced successfully!");
+            rebuildMarkers();
+            rebuildElevationChart();
+            saveToServer();
+            
+            if (activeId !== null) {
+              const activeIdx = data.main_flight.findIndex(f => f.id === activeId);
+              if (activeIdx !== -1) selectKeyframe(activeIdx, true);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Background terrain height sampling failed:", e);
+      }
+    }
+
+    // ---- Draft Generator ----
+    async function generateDraftFromGeoTrack() {
+      const geo = data.main;
+      if (!geo || geo.length === 0) {
+        alert("地理轨主线坐标列表为空，请确认 routes.json 的数据完整性！");
+        return;
+      }
+
+      if (!confirm("是否基于现有地理轨的 12,000 个节点生成空间混合初稿？")) return;
+
+      const FLIGHT_STEP = 1000.0;
+      const sampled = [];
+      let accumulated = 0.0;
+      let lastPt = geo[0];
+      sampled.push(lastPt);
+
+      for (let i = 1; i < geo.length; i++) {
+        const pt = geo[i];
+        const dist = haversine(lastPt[1], lastPt[0], pt[1], pt[0]);
+        accumulated += dist;
+        lastPt = pt;
+        if (accumulated >= FLIGHT_STEP) {
+          sampled.push(pt);
+          accumulated = 0.0;
+        }
+      }
+
+      if (sampled[sampled.length - 1] !== geo[geo.length - 1]) {
+        sampled.push(geo[geo.length - 1]);
+      }
+
+      const N = sampled.length;
+      
+      // Calculate headings
+      const rawHeadings = [];
+      for (let i = 0; i < N - 1; i++) {
+        const h = calculateBearing(sampled[i][1], sampled[i][0], sampled[i+1][1], sampled[i+1][0]);
+        rawHeadings.push(h);
+      }
+      rawHeadings.push(rawHeadings[rawHeadings.length - 1] || 0.0);
+
+      // Heading Smooth
+      const smoothedHeadings = [];
+      for (let i = 0; i < N; i++) {
+        const start = Math.max(0, i - 2);
+        const end = Math.min(N, i + 3);
+        let sumCos = 0.0;
+        let sumSin = 0.0;
+        for (let idx = start; idx < end; idx++) {
+          const rad = rawHeadings[idx] * Math.PI / 180;
+          sumCos += Math.cos(rad);
+          sumSin += Math.sin(rad);
+        }
+        const avgRad = Math.atan2(sumSin, sumCos);
+        const avgDeg = (avgRad * 180 / Math.PI + 360) % 360;
+        smoothedHeadings.push(avgDeg);
+      }
+
+      // Sample terrain heights
+      const terrainPositions = sampled.map(pt => Cesium.Cartographic.fromDegrees(pt[0], pt[1]));
+      let sampledHeights = [];
+      
+      showToast("正在对三维地形进行高程采样，请稍候...");
+      try {
+        if (viewer.terrainProvider && !(viewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider)) {
+           const res = await Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, terrainPositions);
+          sampledHeights = res.map(pos => (pos.height !== undefined && pos.height > 3000) ? pos.height : 5000);
+        } else {
+          sampledHeights = terrainPositions.map(() => 5000);
+        }
+      } catch (err) {
+        console.warn("Terrain sampling failed, using 5000m base:", err);
+        sampledHeights = terrainPositions.map(() => 5000);
+      }
+
+      const draft = [];
+      const timestamp = Date.now();
+      for (let i = 0; i < N; i++) {
+        draft.push({
+          id: `evt_${timestamp}_${i}`,
+          name: `空间混合轨道 ${i + 1}`,
+          lng: parseFloat(sampled[i][0].toFixed(6)),
+          lat: parseFloat(sampled[i][1].toFixed(6)),
+          ground_alt: Math.round(sampledHeights[i]),
+          relative_alt: 500,
+          heading: parseFloat(smoothedHeadings[i].toFixed(2)),
+          pitch: -25.0,
+          roll: 0.0,
+          duration: 2.5,
+          wait_time: 0.0,
+          fov: 60.0,
+          shot_mode: "default",
+          look_at_intent: "forward",
+          perspective_fov: "natural",
+          perspective_pitch: "oblique",
+          speed_preset: "normal",
+          wait_preset: "none"
+        });
+      }
+
+      data.main_flight = draft;
+      document.getElementById('btnGenerateDraft').style.display = 'none';
+
+      rebuildMarkers();
+      refreshKeyframeList();
+      rebuildElevationChart();
+      updateCount();
+      saveToServer();
+      showToast(`成功生成 ${N} 个空间混合初稿轨道！`);
+    }
+
+    // ---- Save & Export API integration ----
+    async function saveToServer(manual = false) {
+      const out = {
+        main: data.main,
+        secondary: data.secondary,
+        main_flight: data.main_flight
+      };
+
+      try {
+        const res = await fetch("api/save-routes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(out, null, 2)
+        });
+        const result = await res.json();
+        if (result.ok) {
+          if (manual) showToast("✅ 配置保存至服务器，已触发推送更新！");
+          pollGitStatus();
+        } else {
+          throw new Error(result.error);
+        }
+      } catch (err) {
+        console.error(err);
+        if (manual) showToast("⚠️ 服务端保存失败，请点击 [导出 JSON] 备份");
+      }
+    }
+
+    let gitPollTimer = null;
+    function pollGitStatus() {
+      if (gitPollTimer) clearInterval(gitPollTimer);
+      let attempts = 0;
+      gitPollTimer = setInterval(async () => {
+        attempts++;
+        try {
+          const r = await fetch("api/git-status");
+          const s = await r.json();
+          if (s.status === "success") {
+            showToast("🚀 GitHub 同步成功，线上预览将自动刷新！");
+            clearInterval(gitPollTimer);
+          } else if (s.status === "error") {
+            showToast("⚠️ Git 同步错误: " + s.message);
+            clearInterval(gitPollTimer);
+          }
+        } catch(e) {}
+        if (attempts > 30) clearInterval(gitPollTimer);
+      }, 1500);
+    }
+
+    function exportFlightData() {
+      const blob = new Blob([JSON.stringify(data.main_flight, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "main_flight.json";
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("已成功导出配置 JSON");
+    }
+
+    // ---- Elevation Chart Drawing Engine ----
+    const paddingL = 60;
+    const paddingR = 25;
+    const paddingT = 15;
+    const paddingB = 55;
+
+    function getInterpolatedPoint(d) {
+      if (chartPoints.length === 0) return null;
+      if (d <= 0) {
+        const p = chartPoints[0];
+        return {
+          lng: p.pt.lng,
+          lat: p.pt.lat,
+          ground_alt: p.ground,
+          relative_alt: p.pt.relative_alt || 500,
+          heading: p.pt.heading || 0.0,
+          pitch: p.pt.pitch || -25.0,
+          roll: p.pt.roll || 0.0,
+          fov: p.pt.fov || 60.0
+        };
+      }
+      const dMax = chartPoints[chartPoints.length - 1].d;
+      if (d >= dMax) {
+        const p = chartPoints[chartPoints.length - 1];
+        return {
+          lng: p.pt.lng,
+          lat: p.pt.lat,
+          ground_alt: p.ground,
+          relative_alt: p.pt.relative_alt || 500,
+          heading: p.pt.heading || 0.0,
+          pitch: p.pt.pitch || -25.0,
+          roll: p.pt.roll || 0.0,
+          fov: p.pt.fov || 60.0
+        };
+      }
+
+      let idx = 0;
+      for (let i = 0; i < chartPoints.length - 1; i++) {
+        if (d >= chartPoints[i].d && d <= chartPoints[i+1].d) {
+          idx = i;
+          break;
+        }
+      }
+
+      const p1 = chartPoints[idx];
+      const p2 = chartPoints[idx + 1];
+      const diffD = p2.d - p1.d;
+      const ratio = diffD === 0 ? 0 : (d - p1.d) / diffD;
+
+      const lng = p1.pt.lng + (p2.pt.lng - p1.pt.lng) * ratio;
+      const lat = p1.pt.lat + (p2.pt.lat - p1.pt.lat) * ratio;
+      const ground_alt = p1.ground + (p2.ground - p1.ground) * ratio;
+      const relative_alt = p1.pt.relative_alt + (p2.pt.relative_alt - p1.pt.relative_alt) * ratio;
+      
+      let h1 = p1.pt.heading || 0.0;
+      let h2 = p2.pt.heading || 0.0;
+      let diffH = h2 - h1;
+      while (diffH < -180.0) diffH += 360.0;
+      while (diffH > 180.0) diffH -= 360.0;
+      const heading = (h1 + diffH * ratio + 360.0) % 360.0;
+
+      const pitch = p1.pt.pitch + (p2.pt.pitch - p1.pt.pitch) * ratio;
+      const roll = p1.pt.roll + (p2.pt.roll - p1.pt.roll) * ratio;
+      const fov = p1.pt.fov + (p2.pt.fov - p1.pt.fov) * ratio;
+
+      return {
+        lng, lat, ground_alt, relative_alt, heading, pitch, roll, fov
+      };
+    }
+
+    function rebuildElevationChart() {
+      const canvas = document.getElementById('elevationCanvas');
+      if (!canvas) return;
+
+      const ctx = canvas.getContext('2d');
+      const list = data.main_flight;
+
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+
+      const w = rect.width;
+      const h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      if (list.length === 0) {
+        ctx.fillStyle = '#888';
+        ctx.font = '11px "PingFang SC", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('暂无导演轨数据，请在 3D 地图上点击创建航点，或点击“生成初稿”', w / 2, h / 2);
+        return;
+      }
+
+      chartPoints = [];
+      let cumDist = 0.0;
+      let lastPt = list[0];
+      chartPoints.push({
+        d: 0.0,
+        ground: lastPt.ground_alt || 5000,
+        flight: (lastPt.ground_alt || 5000) + (lastPt.relative_alt || 500),
+        speed: 0,
+        wait: lastPt.wait_time || 0,
+        pt: lastPt
+      });
+
+      for (let i = 1; i < list.length; i++) {
+        const pt = list[i];
+        const dist = haversine(lastPt.lat, lastPt.lng, pt.lat, pt.lng);
+        cumDist += dist;
+        const dur = pt.duration || 2.5;
+        const speedKmh = Math.round((dist / dur) * 3.6);
+        chartPoints.push({
+          d: cumDist,
+          ground: pt.ground_alt || 5000,
+          flight: (pt.ground_alt || 5000) + (pt.relative_alt || 500),
+          speed: speedKmh,
+          wait: pt.wait_time || 0,
+          pt: pt
+        });
+        lastPt = pt;
+      }
+
+      const dMax = chartPoints[chartPoints.length - 1].d || 1.0;
+      const getX = d => paddingL + (d / dMax) * (w - paddingL - paddingR);
+
+      const availH = h - paddingT - paddingB;
+      const gap = 12;
+      const usableH = availH - 2 * gap;
+      
+      const h1 = usableH * 0.55;
+      const h2 = usableH * 0.20;
+      const h3 = usableH * 0.20;
+
+      const y1 = paddingT;
+      const y2 = y1 + h1;
+      const y3 = y2 + gap;
+      const y4 = y3 + h2;
+      const y5 = y4 + gap;
+      const y6 = y5 + h3;
+
+      const gVals = chartPoints.map(p => p.ground);
+      const fVals = chartPoints.map(p => p.flight);
+      chartMinE = Math.min(...gVals) - 150;
+      chartMaxE = Math.max(Math.max(...gVals) + 1800, Math.max(...fVals) + 200);
+
+      const getY_elev = e => y2 - ((e - chartMinE) / (chartMaxE - chartMinE)) * h1;
+      const getY_speed = s => y4 - (s / 80) * h2;
+      const getY_wait = wt => y6 - (wt / 15) * h3;
+
+      const activeIdx = list.findIndex(f => f.id === activeId);
+
+      // --- LANE 1: Elevation Lane ---
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+      ctx.lineWidth = 1;
+      [chartMinE, (chartMinE + chartMaxE) / 2, chartMaxE].forEach(elev => {
+        const y = getY_elev(elev);
+        ctx.beginPath();
+        ctx.moveTo(paddingL, y);
+        ctx.lineTo(w - paddingR, y);
+        ctx.stroke();
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '10px monospace';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(Math.round(elev) + 'm', paddingL - 8, y);
+      });
+
+      ctx.fillStyle = 'rgba(148, 163, 184, 0.45)';
+      ctx.font = '9px "PingFang SC", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText('海拔高度轨 (DEM & ALT)', paddingL + 8, y1 + 4);
+
+      ctx.beginPath();
+      ctx.moveTo(getX(chartPoints[0].d), y2);
+      chartPoints.forEach(p => {
+        ctx.lineTo(getX(p.d), getY_elev(p.ground));
+      });
+      ctx.lineTo(getX(chartPoints[chartPoints.length - 1].d), y2);
+      ctx.closePath();
+      const groundGrad = ctx.createLinearGradient(0, y1, 0, y2);
+      groundGrad.addColorStop(0, 'rgba(168, 162, 158, 0.08)');
+      groundGrad.addColorStop(1, 'rgba(24, 24, 28, 0.5)');
+      ctx.fillStyle = groundGrad;
+      ctx.fill();
+
+      ctx.strokeStyle = '#a8a29e';
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      chartPoints.forEach((p, i) => {
+        const x = getX(p.d);
+        const y = getY_elev(p.ground);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      ctx.strokeStyle = '#60a5fa';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      chartPoints.forEach((p, i) => {
+        const x = getX(p.d);
+        const y = getY_elev(p.flight);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      chartPoints.forEach((p, i) => {
+        const x = getX(p.d);
+        const y = getY_elev(p.flight);
+        const isActive = i === activeIdx;
+        const isSelected = selectedIds.includes(p.pt.id);
+
+        if (isActive || isSelected) {
+          ctx.strokeStyle = 'rgba(251, 191, 36, 0.45)';
+          ctx.lineWidth = 1.2;
+          ctx.setLineDash([3, 3]);
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.lineTo(x, getY_elev(p.ground));
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          ctx.fillStyle = '#f87171';
+          ctx.beginPath();
+          ctx.arc(x, getY_elev(p.ground), 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.fillStyle = isActive ? '#fbbf24' : (isSelected ? '#fcd34d' : '#60a5fa');
+        ctx.strokeStyle = '#18181c';
+        ctx.lineWidth = 2.0;
+        ctx.beginPath();
+        ctx.arc(x, y, isActive ? 7.5 : (isSelected ? 6.0 : 4.5), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = isActive ? '#fbbf24' : (isSelected ? '#fcd34d' : '#e2e8f0');
+        ctx.font = isActive ? 'bold 10px monospace' : (isSelected ? 'bold 9px monospace' : '9px monospace');
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        if (isActive) {
+          ctx.fillText(`${i + 1} (离地 ${p.pt.relative_alt}m)`, x, y - 8);
+        } else {
+          ctx.fillText((i + 1).toString(), x, y - 6);
+        }
+      });
+
+      // --- LANE 2: Speed Lane ---
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+      [0, 40, 80].forEach(spd => {
+        const y = getY_speed(spd);
+        ctx.beginPath();
+        ctx.moveTo(paddingL, y);
+        ctx.lineTo(w - paddingR, y);
+        ctx.stroke();
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '8px monospace';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(spd + 'km/h', paddingL - 8, y);
+      });
+
+      ctx.fillStyle = 'rgba(148, 163, 184, 0.45)';
+      ctx.font = '9px "PingFang SC", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText('航段速度轨 (SPD)', paddingL + 8, y3 + 2);
+
+      ctx.strokeStyle = '#2dd4bf';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      chartPoints.forEach((p, i) => {
+        const x = getX(p.d);
+        const y = getY_speed(p.speed);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      chartPoints.forEach((p, i) => {
+        const x = getX(p.d);
+        const y = getY_speed(p.speed);
+        const isActive = i === activeIdx;
+        const isSelected = selectedIds.includes(p.pt.id);
+
+        ctx.fillStyle = isActive ? '#fbbf24' : (isSelected ? '#fcd34d' : '#2dd4bf');
+        ctx.strokeStyle = '#18181c';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(x, y, isActive ? 5 : (isSelected ? 4.2 : 3.2), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        if (isActive && i > 0) {
+          ctx.fillStyle = '#fbbf24';
+          ctx.font = 'bold 9px monospace';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(`${p.speed}km/h`, x, y - 5);
+        }
+      });
+
+      // --- LANE 3: Wait Lane ---
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+      [0, 7.5, 15].forEach(wt => {
+        const y = getY_wait(wt);
+        ctx.beginPath();
+        ctx.moveTo(paddingL, y);
+        ctx.lineTo(w - paddingR, y);
+        ctx.stroke();
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '8px monospace';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(wt + 's', paddingL - 8, y);
+      });
+
+      ctx.fillStyle = 'rgba(148, 163, 184, 0.45)';
+      ctx.font = '9px "PingFang SC", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText('到站停驻轨 (WAIT)', paddingL + 8, y5 + 2);
+
+      ctx.strokeStyle = '#c084fc';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      chartPoints.forEach((p, i) => {
+        const x = getX(p.d);
+        const y = getY_wait(p.wait);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      chartPoints.forEach((p, i) => {
+        const x = getX(p.d);
+        const y = getY_wait(p.wait);
+        const isActive = i === activeIdx;
+        const isSelected = selectedIds.includes(p.pt.id);
+
+        ctx.fillStyle = isActive ? '#fbbf24' : (isSelected ? '#fcd34d' : '#c084fc');
+        ctx.strokeStyle = '#18181c';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(x, y, isActive ? 5 : (isSelected ? 4.2 : 3.2), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        if (isActive && p.wait > 0) {
+          ctx.fillStyle = '#fbbf24';
+          ctx.font = 'bold 9px monospace';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(`${p.wait}s`, x, y - 5);
+        }
+      });
+
+      // --- BOTTOM X-AXIS ---
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(paddingL, y6);
+      ctx.lineTo(w - paddingR, y6);
+      ctx.stroke();
+
+      chartPoints.forEach((p, i) => {
+        const x = getX(p.d);
+        const isActive = i === activeIdx;
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+        ctx.beginPath();
+        ctx.moveTo(x, y6);
+        ctx.lineTo(x, y6 + 4);
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(x, y6 + 12);
+        ctx.rotate(Math.PI / 6);
+        ctx.fillStyle = isActive ? '#fbbf24' : '#94a3b8';
+        ctx.font = '9px "PingFang SC", sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+
+        let labelText = "";
+        let closestPoi = null;
+        let minDist = 2000;
+        if (poisData && poisData.length > 0) {
+          poisData.forEach(poi => {
+            const dist = haversine(p.pt.lat, p.pt.lng, poi.lat, poi.lng);
+            if (dist < minDist) {
+              minDist = dist;
+              closestPoi = poi;
+            }
+          });
+        }
+        if (closestPoi) {
+          labelText = `${closestPoi.name} (${(p.d / 1000).toFixed(1)}km)`;
+        } else {
+          labelText = `${(p.d / 1000).toFixed(1)}km`;
+        }
+        ctx.fillText(labelText, 0, 0);
+        ctx.restore();
+      });
+
+      // --- PLAYHEAD ---
+      let playheadD = null;
+      if (isPreviewPlaying && previewIndex >= 0 && previewIndex < chartPoints.length) {
+        playheadD = chartPoints[previewIndex].d;
+      } else if (scrubDist !== null) {
+        playheadD = scrubDist;
+      } else if (activeIdx !== -1 && activeIdx < chartPoints.length) {
+        playheadD = chartPoints[activeIdx].d;
+      }
+
+      if (playheadD !== null) {
+        const px = getX(playheadD);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(px, y1);
+        ctx.lineTo(px, y6);
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.moveTo(px - 5, y1);
+        ctx.lineTo(px + 5, y1);
+        ctx.lineTo(px, y1 + 5);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    function initElevationChartInteraction() {
+      const canvas = document.getElementById('elevationCanvas');
+      if (!canvas) return;
+
+      function getMousePos(e) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
+      }
+
+      function getX(d, w) {
+        if (chartPoints.length === 0) return 0;
+        const dMax = chartPoints[chartPoints.length - 1].d || 1.0;
+        return paddingL + (d / dMax) * (w - paddingL - paddingR);
+      }
+
+      function getY_elev(elev, h) {
+        const availH = h - paddingT - paddingB;
+        const usableH = availH - 24;
+        const h1 = usableH * 0.55;
+        const y2 = paddingT + h1;
+        return y2 - ((elev - chartMinE) / (chartMaxE - chartMinE)) * h1;
+      }
+
+      function getElev_Y(pixelY, h) {
+        const availH = h - paddingT - paddingB;
+        const usableH = availH - 24;
+        const h1 = usableH * 0.55;
+        const y2 = paddingT + h1;
+        const ratio = (y2 - pixelY) / h1;
+        return chartMinE + ratio * (chartMaxE - chartMinE);
+      }
+
+      function getY_speed(s, h) {
+        const availH = h - paddingT - paddingB;
+        const usableH = availH - 24;
+        const h1 = usableH * 0.55;
+        const h2 = usableH * 0.20;
+        const y4 = paddingT + h1 + 12 + h2;
+        return y4 - (s / 80) * h2;
+      }
+
+      function getSpeed_Y(pixelY, h) {
+        const availH = h - paddingT - paddingB;
+        const usableH = availH - 24;
+        const h1 = usableH * 0.55;
+        const h2 = usableH * 0.20;
+        const y4 = paddingT + h1 + 12 + h2;
+        return ((y4 - pixelY) / h2) * 80;
+      }
+
+      function getY_wait(wt, h) {
+        const availH = h - paddingT - paddingB;
+        const usableH = availH - 24;
+        const h1 = usableH * 0.55;
+        const h2 = usableH * 0.20;
+        const h3 = usableH * 0.20;
+        const y6 = paddingT + h1 + 12 + h2 + 12 + h3;
+        return y6 - (wt / 15) * h3;
+      }
+
+      function getWait_Y(pixelY, h) {
+        const availH = h - paddingT - paddingB;
+        const usableH = availH - 24;
+        const h1 = usableH * 0.55;
+        const h2 = usableH * 0.20;
+        const h3 = usableH * 0.20;
+        const y6 = paddingT + h1 + 12 + h2 + 12 + h3;
+        return ((y6 - pixelY) / h3) * 15;
+      }
+
+      function handleScrub(pixelX, w) {
+        if (chartPoints.length === 0) return;
+        const dMax = chartPoints[chartPoints.length - 1].d || 1.0;
+        const pct = Math.max(0, Math.min(1, (pixelX - paddingL) / (w - paddingL - paddingR)));
+        const d = pct * dMax;
+        scrubDist = d;
+        
+        rebuildElevationChart();
+
+        const pt = getInterpolatedPoint(d);
+        if (pt && viewer) {
+          isUpdatingCameraFromState = true;
+          viewer.camera.setView({
+            destination: Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, pt.ground_alt + pt.relative_alt),
+            orientation: {
+              heading: Cesium.Math.toRadians(pt.heading || 0),
+              pitch: Cesium.Math.toRadians(pt.pitch || -25),
+              roll: Cesium.Math.toRadians(pt.roll || 0)
+            }
+          });
+          isUpdatingCameraFromState = false;
+
+          let nearestIdx = 0;
+          let minDist = Infinity;
+          chartPoints.forEach((cp, idx) => {
+            const dist = Math.abs(cp.d - d);
+            if (dist < minDist) {
+              minDist = dist;
+              nearestIdx = idx;
+            }
+          });
+          if (nearestIdx !== -1 && data.main_flight[nearestIdx] && activeId !== data.main_flight[nearestIdx].id) {
+            selectKeyframe(nearestIdx);
+          }
+        }
+      }
+
+      canvas.addEventListener('pointerdown', e => {
+        if (chartPoints.length === 0) return;
+        canvas.setPointerCapture(e.pointerId);
+        
+        const rect = canvas.getBoundingClientRect();
+        const w = rect.width;
+        const h = rect.height;
+        const { x, y } = getMousePos(e);
+
+        let closestIdx = -1;
+        let minDist = 16;
+        let foundDragType = null;
+
+        const availH = h - paddingT - paddingB;
+        const gap = 12;
+        const usableH = availH - 2 * gap;
+        const h1 = usableH * 0.55;
+        const h2 = usableH * 0.20;
+        const h3 = usableH * 0.20;
+
+        const y1 = paddingT;
+        const y2 = y1 + h1;
+        const y3 = y2 + gap;
+        const y4 = y3 + h2;
+        const y5 = y4 + gap;
+        const y6 = y5 + h3;
+
+        // 1. Elevation check
+        if (y >= y1 - 10 && y <= y2 + 10) {
+          chartPoints.forEach((p, idx) => {
+            const px = getX(p.d, w);
+            const py = getY_elev(p.flight, h);
+            const dist = Math.hypot(x - px, y - py);
+            if (dist < minDist) {
+              minDist = dist;
+              closestIdx = idx;
+              foundDragType = 'elevation';
+            }
+          });
+        }
+        // 2. Speed check
+        else if (y >= y3 - 10 && y <= y4 + 10) {
+          chartPoints.forEach((p, idx) => {
+            if (idx === 0) return;
+            const px = getX(p.d, w);
+            const py = getY_speed(p.speed, h);
+            const dist = Math.hypot(x - px, y - py);
+            if (dist < minDist) {
+              minDist = dist;
+              closestIdx = idx;
+              foundDragType = 'speed';
+            }
+          });
+        }
+        // 3. Wait check
+        else if (y >= y5 - 10 && y <= y6 + 10) {
+          chartPoints.forEach((p, idx) => {
+            const px = getX(p.d, w);
+            const py = getY_wait(p.wait, h);
+            const dist = Math.hypot(x - px, y - py);
+            if (dist < minDist) {
+              minDist = dist;
+              closestIdx = idx;
+              foundDragType = 'wait';
+            }
+          });
+        }
+
+        // Horizontal backup
+        if (closestIdx === -1) {
+          let minXDist = 12;
+          chartPoints.forEach((p, idx) => {
+            const px = getX(p.d, w);
+            const dx = Math.abs(x - px);
+            if (dx < minXDist) {
+              minXDist = dx;
+              closestIdx = idx;
+              if (y >= y1 - 10 && y <= y2 + 10) {
+                foundDragType = 'elevation';
+              } else if (y >= y3 - 10 && y <= y4 + 10 && idx > 0) {
+                foundDragType = 'speed';
+              } else if (y >= y5 - 10 && y <= y6 + 10) {
+                foundDragType = 'wait';
+              }
+            }
+          });
+        }
+
+        if (closestIdx !== -1 && foundDragType !== null) {
+          isDraggingChartNode = true;
+          draggedNodeIdx = closestIdx;
+          dragType = foundDragType;
+          selectKeyframe(closestIdx);
+          e.preventDefault();
+        } else {
+          isScrubbing = true;
+          handleScrub(x, w);
+          e.preventDefault();
+        }
+      });
+
+      canvas.addEventListener('pointermove', e => {
+        const rect = canvas.getBoundingClientRect();
+        const w = rect.width;
+        const h = rect.height;
+        const { x, y } = getMousePos(e);
+
+        if (isDraggingChartNode && draggedNodeIdx !== -1) {
+          const pt = data.main_flight[draggedNodeIdx];
+          const ground = pt.ground_alt || 5000;
+
+          if (dragType === 'elevation') {
+            let targetElev = getElev_Y(y, h);
+            let relativeAlt = Math.max(0, Math.min(2000, Math.round(targetElev - ground)));
+            pt.relative_alt = relativeAlt;
+          } 
+          else if (dragType === 'speed' && draggedNodeIdx > 0) {
+            let targetSpeed = getSpeed_Y(y, h);
+            targetSpeed = Math.max(5, Math.min(80, Math.round(targetSpeed)));
+            
+            const prevPt = data.main_flight[draggedNodeIdx - 1];
+            const dist = haversine(prevPt.lat, prevPt.lng, pt.lat, pt.lng);
+            pt.duration = parseFloat((dist / (targetSpeed / 3.6)).toFixed(1));
+            pt.speed_preset = 'custom';
+            
+            document.getElementById('hudSpeedSlider').value = targetSpeed;
+            document.getElementById('hudSpeedValue').textContent = `${targetSpeed} km/h`;
+          } 
+          else if (dragType === 'wait') {
+            let targetWait = getWait_Y(y, h);
+            targetWait = Math.max(0, Math.min(15, Math.round(targetWait * 2) / 2));
+            pt.wait_time = targetWait;
+            pt.wait_preset = targetWait === 0 ? 'none' : 'custom';
+            
+            document.getElementById('hudWaitSlider').value = targetWait;
+            document.getElementById('hudWaitValue').textContent = `${targetWait}s`;
+          }
+
+          rebuildMarkers();
+          rebuildElevationChart();
+          updateDiagnosticsPanel(pt, draggedNodeIdx);
+
+          if (viewer && activeId === pt.id) {
+            isUpdatingCameraFromState = true;
+            viewer.camera.setView({
+              destination: Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, ground + pt.relative_alt),
+              orientation: {
+                heading: Cesium.Math.toRadians(pt.heading || 0),
+                pitch: Cesium.Math.toRadians(pt.pitch || -25),
+                roll: Cesium.Math.toRadians(pt.roll || 0)
+              }
+            });
+            isUpdatingCameraFromState = false;
+          }
+          e.preventDefault();
+        } 
+        else if (isScrubbing) {
+          handleScrub(x, w);
+          e.preventDefault();
+        }
+      });
+
+      const handlePointerUp = e => {
+        if (isDraggingChartNode) {
+          isDraggingChartNode = false;
+          draggedNodeIdx = -1;
+          dragType = null;
+          saveToServer();
+          refreshKeyframeList();
+          showToast("轨道节点数值更新！");
+        }
+        if (isScrubbing) {
+          isScrubbing = false;
+          if (scrubDist !== null) {
+            let nearestIdx = 0;
+            let minDist = Infinity;
+            chartPoints.forEach((cp, idx) => {
+              const dist = Math.abs(cp.d - scrubDist);
+              if (dist < minDist) {
+                minDist = dist;
+                nearestIdx = idx;
+              }
+            });
+            if (nearestIdx !== -1) {
+              selectKeyframe(nearestIdx);
+            }
+          }
+          scrubDist = null;
+          rebuildElevationChart();
+        }
+      };
+
+      canvas.addEventListener('pointerup', handlePointerUp);
+      canvas.addEventListener('pointercancel', handlePointerUp);
+    }
+
+    // ---- Viewport HUD Controls Setup ----
+    function setupHUDListeners() {
+      // 1. Lens Zoom Slider
+      const fovSlider = document.getElementById('hudFovSlider');
+      fovSlider.addEventListener('input', e => {
+        if (selectedIds.length === 0) return;
+        const val = parseFloat(e.target.value);
+        
+        selectedIds.forEach(id => {
+          const idx = data.main_flight.findIndex(f => f.id === id);
+          if (idx === -1) return;
+          const pt = data.main_flight[idx];
+          pt.fov = val;
+          pt.perspective_fov = 'custom';
+        });
+        
+        document.getElementById('hudFovValue').textContent = `${Math.round(val)}°`;
+        updateSegmentsUI('fovScaleGroup', 'custom');
+
+        if (viewer) {
+          isUpdatingCameraFromState = true;
+          viewer.camera.frustum.fov = Cesium.Math.toRadians(val);
+          isUpdatingCameraFromState = false;
+        }
+        saveToServerDebounced();
+      });
+
+      // Zoom preset scales clicking
+      document.getElementById('fovScaleGroup').addEventListener('click', e => {
+        const mark = e.target.closest('.scale-mark');
+        if (!mark) return;
+        if (selectedIds.length === 0) return;
+        
+        const preset = mark.getAttribute('data-val');
+        let targetFov;
+        if (preset === 'vast') targetFov = 90.0;
+        else if (preset === 'natural') targetFov = 60.0;
+        else if (preset === 'compressed') targetFov = 28.0;
+        else return;
+
+        selectedIds.forEach(id => {
+          const idx = data.main_flight.findIndex(f => f.id === id);
+          if (idx === -1) return;
+          const pt = data.main_flight[idx];
+          pt.perspective_fov = preset;
+          pt.fov = targetFov;
+        });
+
+        fovSlider.value = targetFov;
+        document.getElementById('hudFovValue').textContent = `${targetFov}°`;
+        updateSegmentsUI('fovScaleGroup', preset);
+
+        if (viewer) {
+          isUpdatingCameraFromState = true;
+          viewer.camera.frustum.fov = Cesium.Math.toRadians(targetFov);
+          isUpdatingCameraFromState = false;
+        }
+        saveToServer();
+      });
+
+      // 2. Gimbal Pitch Slider
+      const pitchSlider = document.getElementById('hudPitchSlider');
+      pitchSlider.addEventListener('input', e => {
+        if (selectedIds.length === 0) return;
+        const val = parseFloat(e.target.value);
+        
+        selectedIds.forEach(id => {
+          const idx = data.main_flight.findIndex(f => f.id === id);
+          if (idx === -1) return;
+          const pt = data.main_flight[idx];
+          pt.pitch = val;
+          pt.perspective_pitch = 'custom';
+        });
+        
+        document.getElementById('hudPitchValue').textContent = `${Math.round(val)}°`;
+        updateSegmentsUI('pitchScaleGroup', 'custom');
+
+        const activeIdx = data.main_flight.findIndex(f => f.id === activeId);
+        if (viewer && activeIdx !== -1) {
+          const pt = data.main_flight[activeIdx];
+          isUpdatingCameraFromState = true;
+          viewer.camera.setView({
+            destination: Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, (pt.ground_alt || 5000) + pt.relative_alt),
+            orientation: {
+              heading: Cesium.Math.toRadians(pt.heading || 0),
+              pitch: Cesium.Math.toRadians(val),
+              roll: Cesium.Math.toRadians(pt.roll || 0)
+            }
+          });
+          isUpdatingCameraFromState = false;
+        }
+        saveToServerDebounced();
+      });
+
+      // Pitch preset scales clicking
+      document.getElementById('pitchScaleGroup').addEventListener('click', e => {
+        const mark = e.target.closest('.scale-mark');
+        if (!mark) return;
+        if (selectedIds.length === 0) return;
+        
+        const preset = mark.getAttribute('data-val');
+        let targetPitch;
+        if (preset === 'overlook') targetPitch = -45.0;
+        else if (preset === 'oblique') targetPitch = -25.0;
+        else if (preset === 'eyelevel') targetPitch = -10.0;
+        else if (preset === 'lookup') targetPitch = 5.0;
+        else return;
+
+        selectedIds.forEach(id => {
+          const idx = data.main_flight.findIndex(f => f.id === id);
+          if (idx === -1) return;
+          const pt = data.main_flight[idx];
+          pt.perspective_pitch = preset;
+          pt.pitch = targetPitch;
+        });
+
+        pitchSlider.value = targetPitch;
+        document.getElementById('hudPitchValue').textContent = `${targetPitch}°`;
+        updateSegmentsUI('pitchScaleGroup', preset);
+
+        const activeIdx = data.main_flight.findIndex(f => f.id === activeId);
+        if (viewer && activeIdx !== -1) {
+          const pt = data.main_flight[activeIdx];
+          isUpdatingCameraFromState = true;
+          viewer.camera.setView({
+            destination: Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, (pt.ground_alt || 5000) + pt.relative_alt),
+            orientation: {
+              heading: Cesium.Math.toRadians(pt.heading || 0),
+              pitch: Cesium.Math.toRadians(targetPitch),
+              roll: Cesium.Math.toRadians(pt.roll || 0)
+            }
+          });
+          isUpdatingCameraFromState = false;
+        }
+        saveToServer();
+      });
+
+      // 3. Rhythm Console Speed Slider
+      const speedSlider = document.getElementById('hudSpeedSlider');
+      speedSlider.addEventListener('input', e => {
+        if (selectedIds.length === 0) return;
+        const speedKmh = parseFloat(e.target.value);
+        
+        document.getElementById('hudSpeedValue').textContent = `${speedKmh} km/h`;
+        
+        selectedIds.forEach(id => {
+          const idx = data.main_flight.findIndex(f => f.id === id);
+          if (idx === -1) return;
+          const pt = data.main_flight[idx];
+          if (idx > 0) {
+            const prevPt = data.main_flight[idx - 1];
+            const dist = haversine(prevPt.lat, prevPt.lng, pt.lat, pt.lng);
+            pt.duration = parseFloat((dist / (speedKmh / 3.6)).toFixed(1));
+            if (pt.duration <= 0) pt.duration = 2.5;
+          }
+          pt.speed_preset = 'custom';
+        });
+        
+        refreshKeyframeList();
+        rebuildElevationChart();
+        saveToServerDebounced();
+      });
+
+      // 4. Rhythm Console Wait (Dwell) Slider
+      const waitSlider = document.getElementById('hudWaitSlider');
+      waitSlider.addEventListener('input', e => {
+        if (selectedIds.length === 0) return;
+        const waitTime = parseFloat(e.target.value);
+        
+        selectedIds.forEach(id => {
+          const idx = data.main_flight.findIndex(f => f.id === id);
+          if (idx === -1) return;
+          const pt = data.main_flight[idx];
+          pt.wait_time = waitTime;
+          pt.wait_preset = waitTime === 0 ? 'none' : (waitTime === 5 ? 'brief' : (waitTime === 12 ? 'deep' : 'custom'));
+        });
+        
+        document.getElementById('hudWaitValue').textContent = `${waitTime}s`;
+        
+        refreshKeyframeList();
+        rebuildElevationChart();
+        saveToServerDebounced();
+      });
+
+      // 5. Look-at Target Locking Options
+      const lockActions = {
+        'btnHudLockForward': 'forward',
+        'btnHudLockSummit': 'summit',
+        'btnHudLockSide': 'side',
+        'btnHudLockBack': 'back',
+        'btnHudLockPoi': 'poi'
+      };
+
+      Object.keys(lockActions).forEach(btnId => {
+        document.getElementById(btnId).addEventListener('click', () => {
+          if (selectedIds.length === 0) return;
+          
+          selectedIds.forEach(id => {
+            const idx = data.main_flight.findIndex(f => f.id === id);
+            if (idx === -1) return;
+            const pt = data.main_flight[idx];
+            pt.look_at_intent = lockActions[btnId];
+            pt.look_at_target = null;
+            recomputeKeyframeValues(idx);
+          });
+          
+          saveToServer();
+          rebuildMarkers();
+          refreshKeyframeList();
+          rebuildElevationChart();
+          
+          const activeIdx = data.main_flight.findIndex(f => f.id === activeId);
+          if (activeIdx !== -1) {
+            const pt = data.main_flight[activeIdx];
+            updateTargetLockUI(pt);
+            drawTargetLockVisualLine(pt);
+          }
+        });
+      });
+
+      // Target Unlock button
+      document.getElementById('btnHudUnlock').addEventListener('click', () => {
+        if (selectedIds.length === 0) return;
+        
+        selectedIds.forEach(id => {
+          const idx = data.main_flight.findIndex(f => f.id === id);
+          if (idx === -1) return;
+          const pt = data.main_flight[idx];
+          pt.look_at_intent = 'forward';
+          pt.look_at_target = null;
+          recomputeKeyframeValues(idx);
+        });
+        
+        saveToServer();
+        rebuildMarkers();
+        refreshKeyframeList();
+        rebuildElevationChart();
+        
+        const activeIdx = data.main_flight.findIndex(f => f.id === activeId);
+        if (activeIdx !== -1) {
+          const pt = data.main_flight[activeIdx];
+          updateTargetLockUI(pt);
+        }
+        clearTargetLockVisuals();
+        showToast("🔓 视线锁定已解除");
+      });
+
+      // Capture Camera button
+      document.getElementById('btnHudCaptureCamera').addEventListener('click', captureCurrentCamera);
+
+      // Add/Delete waypoints buttons
+      document.getElementById('btnAddWaypoint').addEventListener('click', addWaypointAtCurrentCamera);
+      document.getElementById('btnDeleteSelected').addEventListener('click', deleteSelectedWaypoint);
+
+      // Resample Heights button
+      document.getElementById('btnResampleHeights').addEventListener('click', async () => {
+        showToast("正在高精度采样地形高度，请稍候...");
+        await sampleAllWaypointHeights();
+        showToast("🏔️ 真实海拔校准同步成功！");
+      });
+
+      // Checkbox for Handheld camera shake
+      document.getElementById('hudChkHandheld').addEventListener('change', e => {
+        if (selectedIds.length === 0) return;
+        const checked = e.target.checked;
+        
+        selectedIds.forEach(id => {
+          const idx = data.main_flight.findIndex(f => f.id === id);
+          if (idx === -1) return;
+          const pt = data.main_flight[idx];
+          pt.shot_mode = checked ? 'handheld' : 'default';
+        });
+        saveToServer();
+      });
+
+      // Vibe Presets Mix bank click listener
+      document.getElementById('vibeButtonGroup').addEventListener('click', e => {
+        const btn = e.target.closest('.vibe-btn');
+        if (!btn) return;
+        const vibe = btn.getAttribute('data-vibe');
+        applyVibePreset(vibe);
+      });
+    }
+
+    // ---- Visual lines showing lock direction ----
+    function clearTargetLockVisuals() {
+      if (targetLockLineEntity) {
+        viewer.entities.remove(targetLockLineEntity);
+        targetLockLineEntity = null;
+      }
+      if (targetLockMarkerEntity) {
+        viewer.entities.remove(targetLockMarkerEntity);
+        targetLockMarkerEntity = null;
+      }
+    }
+
+    function drawTargetLockVisualLine(pt) {
+      clearTargetLockVisuals();
+      if (!pt) return;
+      
+      let targetLat = null;
+      let targetLng = null;
+      let targetAlt = 0;
+      let labelText = "";
+      
+      if (pt.look_at_intent === 'custom_target' && pt.look_at_target) {
+        targetLat = pt.look_at_target.lat;
+        targetLng = pt.look_at_target.lng;
+        targetAlt = pt.look_at_target.alt || 5000;
+        labelText = pt.look_at_target.name || "自定义锁定点";
+      } else if (pt.look_at_intent === 'summit') {
+        targetLat = 31.066;
+        targetLng = 81.312;
+        targetAlt = 6656;
+        labelText = "冈仁波齐主峰";
+      } else if (pt.look_at_intent === 'poi') {
+        if (poisData && poisData.length > 0) {
+          let closestPoi = null;
+          let minDist = Infinity;
+          poisData.forEach(p => {
+            const dist = haversine(pt.lat, pt.lng, p.lat, p.lng);
+            if (dist < minDist) {
+              minDist = dist;
+              closestPoi = p;
+            }
+          });
+          if (closestPoi) {
+            targetLat = closestPoi.lat;
+            targetLng = closestPoi.lng;
+            targetAlt = closestPoi.elevation || 5000;
+            labelText = closestPoi.name;
+          }
+        }
+      }
+      
+      if (targetLat !== null && targetLng !== null) {
+        const camPos = Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, (pt.ground_alt || 5000) + (pt.relative_alt || 500));
+        const targetPos = Cesium.Cartesian3.fromDegrees(targetLng, targetLat, targetAlt);
+        
+        targetLockLineEntity = viewer.entities.add({
+          name: 'Target Lock Line Reference',
+          polyline: {
+            positions: [camPos, targetPos],
+            width: 1.5,
+            material: new Cesium.PolylineDashMaterialProperty({
+              color: Cesium.Color.GOLD,
+              dashLength: 8.0
+            }),
+            disableDepthTestDistance: 10000000.0
+          }
+        });
+        
+        targetLockMarkerEntity = viewer.entities.add({
+          name: 'Target Lock Focal Target',
+          position: targetPos,
+          point: {
+            pixelSize: 12,
+            color: Cesium.Color.TRANSPARENT,
+            outlineColor: Cesium.Color.GOLD,
+            outlineWidth: 2,
+            disableDepthTestDistance: 10000000.0
+          },
+          label: {
+            text: `🎯 锁定: ${labelText}`,
+            font: '11px sans-serif',
+            fillColor: Cesium.Color.GOLD,
+            outlineColor: Cesium.Color.BLACK,
+            outlineWidth: 2,
+            pixelOffset: new Cesium.Cartesian2(0, -15),
+            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            disableDepthTestDistance: 10000000.0
+          }
+        });
+      }
+    }
+
+    // ---- Two-Way Camera Framing Sync Listener ----
+    function setupCameraChangeListener() {
+      viewer.camera.changed.addEventListener(() => {
+        if (isUpdatingCameraFromState) return;
+        if (!activeId) return;
+
+        const idx = data.main_flight.findIndex(f => f.id === activeId);
+        if (idx === -1) return;
+
+        const pt = data.main_flight[idx];
+
+        const heading = parseFloat(Cesium.Math.toDegrees(viewer.camera.heading).toFixed(1));
+        const pitch = parseFloat(Cesium.Math.toDegrees(viewer.camera.pitch).toFixed(1));
+        const fovVal = parseFloat(Cesium.Math.toDegrees(viewer.camera.frustum.fov).toFixed(1));
+
+        // Break target lock if they look around manually
+        if (pt.look_at_intent !== 'custom_target' && pt.look_at_intent !== 'summit' && pt.look_at_intent !== 'poi') {
+          pt.look_at_intent = 'custom';
+        }
+        pt.perspective_fov = 'custom';
+        pt.perspective_pitch = 'custom';
+
+        pt.heading = heading;
+        pt.pitch = pitch;
+        pt.fov = fovVal;
+
+        // Sync visual ring slider values
+        document.getElementById('hudFovSlider').value = fovVal;
+        document.getElementById('hudFovValue').textContent = `${Math.round(fovVal)}°`;
+        document.getElementById('hudPitchSlider').value = pitch;
+        document.getElementById('hudPitchValue').textContent = `${Math.round(pitch)}°`;
+        
+        updateTargetLockUI(pt);
+        updateSegmentsUI('fovScaleGroup', 'custom');
+        updateSegmentsUI('pitchScaleGroup', 'custom');
+        updateDiagnosticsPanel(pt, idx);
+
+        // De-light vibe presets when manual change occurs
+        document.querySelectorAll('.vibe-btn').forEach(btn => btn.classList.remove('active'));
+
+        saveToServerDebounced();
+        rebuildElevationChart();
+      });
+    }
+
+    // ---- Semantic Calculation Resolver ----
+    function getCalculatedHeading(pt, idx, list, pois) {
+      const intent = pt.look_at_intent || 'forward';
+      if (intent === 'custom') {
+        return pt.heading || 0.0;
+      }
+      
+      let refLat = pt.lat;
+      let refLng = pt.lng;
+      
+      let targetLat, targetLng;
+      if (idx < list.length - 1) {
+        targetLat = list[idx + 1].lat;
+        targetLng = list[idx + 1].lng;
+      } else if (idx > 0) {
+        targetLat = pt.lat;
+        targetLng = pt.lng;
+        refLat = list[idx - 1].lat;
+        refLng = list[idx - 1].lng;
+      } else {
+        return pt.heading || 0.0;
+      }
+      
+      const forwardBearing = calculateBearing(refLat, refLng, targetLat, targetLng);
+      
+      if (intent === 'forward') {
+        return parseFloat(forwardBearing.toFixed(2));
+      } else if (intent === 'back') {
+        return parseFloat(((forwardBearing + 180) % 360).toFixed(2));
+      } else if (intent === 'side') {
+        return parseFloat(((forwardBearing + 90) % 360).toFixed(2));
+      } else if (intent === 'summit') {
+        const summitBearing = calculateBearing(pt.lat, pt.lng, 31.066, 81.312);
+        return parseFloat(summitBearing.toFixed(2));
+      } else if (intent === 'poi') {
+        if (!pois || pois.length === 0) return parseFloat(forwardBearing.toFixed(2));
+        
+        let closestPoi = null;
+        let minDist = Infinity;
+        pois.forEach(p => {
+          const dist = haversine(pt.lat, pt.lng, p.lat, p.lng);
+          if (dist < minDist) {
+            minDist = dist;
+            closestPoi = p;
+          }
+        });
+        
+        if (closestPoi) {
+          const poiBearing = calculateBearing(pt.lat, pt.lng, closestPoi.lat, closestPoi.lng);
+          return parseFloat(poiBearing.toFixed(2));
+        }
+        return parseFloat(forwardBearing.toFixed(2));
+      }
+      
+      return pt.heading || 0.0;
+    }
+
+    // ---- Recalculate semantics and update keyframe values ----
+    function recomputeKeyframeValues(idx) {
+      const pt = data.main_flight[idx];
+      if (!pt) return;
+      
+      // 1. Perspective FOV calculations
+      if (pt.perspective_fov === 'vast') pt.fov = 90.0;
+      else if (pt.perspective_fov === 'natural') pt.fov = 60.0;
+      else if (pt.perspective_fov === 'compressed') pt.fov = 28.0;
+
+      // 2. Pitch calculations
+      if (pt.perspective_pitch === 'overlook') pt.pitch = -45.0;
+      else if (pt.perspective_pitch === 'oblique') pt.pitch = -25.0;
+      else if (pt.perspective_pitch === 'eyelevel') pt.pitch = -10.0;
+      else if (pt.perspective_pitch === 'lookup') pt.pitch = 5.0;
+
+      // 3. Speed rhythm calculations
+      let dist = 0;
+      if (idx > 0) {
+        const prevPt = data.main_flight[idx - 1];
+        dist = haversine(prevPt.lat, prevPt.lng, pt.lat, pt.lng);
+      }
+      
+      const speedKmh = parseFloat(document.getElementById('hudSpeedSlider').value);
+      if (idx === 0) {
+        pt.duration = 2.5;
+      } else {
+        pt.duration = parseFloat((dist / (speedKmh / 3.6)).toFixed(1));
+        if (pt.duration <= 0) pt.duration = 2.5;
+      }
+
+      // 4. Target look locks
+      if (pt.look_at_intent === 'custom_target' || pt.look_at_intent === 'summit' || pt.look_at_intent === 'poi') {
+        let targetLat = null;
+        let targetLng = null;
+        let targetAlt = 0;
+        
+        if (pt.look_at_intent === 'custom_target' && pt.look_at_target) {
+          targetLat = pt.look_at_target.lat;
+          targetLng = pt.look_at_target.lng;
+          targetAlt = pt.look_at_target.alt || 5000;
+        } else if (pt.look_at_intent === 'summit') {
+          targetLat = 31.066;
+          targetLng = 81.312;
+          targetAlt = 6656;
+        } else if (pt.look_at_intent === 'poi' && poisData.length > 0) {
+          let closestPoi = null;
+          let minDist = Infinity;
+          poisData.forEach(p => {
+            const dist = haversine(pt.lat, pt.lng, p.lat, p.lng);
+            if (dist < minDist) {
+              minDist = dist;
+              closestPoi = p;
+            }
+          });
+          if (closestPoi) {
+            targetLat = closestPoi.lat;
+            targetLng = closestPoi.lng;
+            targetAlt = closestPoi.elevation || 5000;
+          }
+        }
+        
+        if (targetLat !== null && targetLng !== null) {
+          const bearing = calculateBearing(pt.lat, pt.lng, targetLat, targetLng);
+          pt.heading = parseFloat(bearing.toFixed(1));
+          
+          const absoluteAlt = (pt.ground_alt || 5000) + pt.relative_alt;
+          const d = haversine(pt.lat, pt.lng, targetLat, targetLng);
+          const dh = targetAlt - absoluteAlt;
+          const pitchVal = Math.atan2(dh, d) * 180 / Math.PI;
+          pt.pitch = parseFloat(pitchVal.toFixed(1));
+          pt.perspective_pitch = 'custom';
+          updateSegmentsUI('pitchScaleGroup', 'custom');
+          document.getElementById('hudPitchSlider').value = pt.pitch;
+          document.getElementById('hudPitchValue').textContent = `${Math.round(pt.pitch)}°`;
+        }
+      } else {
+        pt.heading = getCalculatedHeading(pt, idx, data.main_flight, poisData);
+      }
+
+      // Sync Cesium camera view instantly if active
+      if (viewer && activeId === pt.id) {
+        isUpdatingCameraFromState = true;
+        
+        const absoluteAlt = (pt.ground_alt || 5000) + pt.relative_alt;
+        viewer.camera.setView({
+          destination: Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, absoluteAlt),
+          orientation: {
+            heading: Cesium.Math.toRadians(pt.heading || 0.0),
+            pitch: Cesium.Math.toRadians(pt.pitch || -25.0),
+            roll: Cesium.Math.toRadians(pt.roll || 0.0)
+          }
+        });
+        viewer.camera.frustum.fov = Cesium.Math.toRadians(pt.fov);
+        
+        isUpdatingCameraFromState = false;
+      }
+    }
+
+    // ---- Continuous Preview Engine ----
+    function togglePreviewPlayback() {
+      if (data.main_flight.length === 0) {
+        showToast("无空间配置可供预览");
+        return;
+      }
+
+      isPreviewPlaying = !isPreviewPlaying;
+      document.getElementById('btnPlay').textContent = isPreviewPlaying ? '⏸' : '▶';
+
+      if (isPreviewPlaying) {
+        previewIndex = 0;
+        runPreviewStep();
+      } else {
+        if (previewTimeout) clearTimeout(previewTimeout);
+        updatePreviewHandheldShake(false);
+        viewer.camera.cancelFlight();
+        updateCount();
+      }
+    }
+
+    function runPreviewStep() {
+      if (!isPreviewPlaying || previewIndex >= data.main_flight.length) {
+        isPreviewPlaying = false;
+        document.getElementById('btnPlay').textContent = '▶';
+        updatePreviewHandheldShake(false);
+        updateCount();
+        showToast("混音预览结束");
+        return;
+      }
+
+      updateCount();
+      const pt = data.main_flight[previewIndex];
+      const absoluteAlt = (pt.ground_alt || 5000) + (pt.relative_alt || 500);
+
+      selectKeyframe(previewIndex);
+
+      if (typeof pt.fov === 'number') {
+        viewer.camera.frustum.fov = Cesium.Math.toRadians(pt.fov);
+      }
+
+      // Calculate final direction
+      let finalHeading = pt.heading || 0.0;
+      if (pt.shot_mode === 'side') {
+        finalHeading += 90.0;
+      } else if (pt.shot_mode === 'back') {
+        finalHeading += 180.0;
+      }
+
+      updatePreviewHandheldShake(pt.shot_mode === 'handheld');
+
+      isUpdatingCameraFromState = true;
+      viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, absoluteAlt),
+        orientation: {
+          heading: Cesium.Math.toRadians(finalHeading),
+          pitch: Cesium.Math.toRadians(pt.pitch || -25.0),
+          roll: Cesium.Math.toRadians(pt.roll || 0.0)
+        },
+        duration: pt.duration || 2.5,
+        easingFunction: Cesium.EasingFunction.LINEAR_NONE,
+        complete: () => {
+          isUpdatingCameraFromState = false;
+          if (!isPreviewPlaying) return;
+          const waitTime = typeof pt.wait_time === 'number' ? pt.wait_time : 0.0;
+          if (waitTime > 0) {
+            document.getElementById('previewStatus').textContent = `暂停等待中 (${pt.wait_time}s)...`;
+            previewTimeout = setTimeout(() => {
+              if (isPreviewPlaying) {
+                previewIndex++;
+                runPreviewStep();
+              }
+            }, waitTime * 1000);
+          } else {
+            previewIndex++;
+            runPreviewStep();
+          }
+        }
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      init();
+    });
+  </script>
+</body>
+</html>

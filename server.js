@@ -28,7 +28,28 @@ const MIME = {
 function servStatic(req, res) {
   let url = req.url.split("?")[0];
   if (url === "/") url = "/index.html";
-  const filePath = path.join(ROOT, decodeURIComponent(url));
+  
+  const decodedUrl = decodeURIComponent(url);
+  let filePath = path.join(ROOT, decodedUrl);
+
+  // Strip project folder prefix if it's a registered project and the file doesn't exist locally
+  const parts = decodedUrl.split("/").filter(Boolean);
+  if (parts.length > 1) {
+    const firstSegment = parts[0];
+    const projPath = path.join(ROOT, "projects.json");
+    let projects = [];
+    if (fs.existsSync(projPath)) {
+      try {
+        projects = JSON.parse(fs.readFileSync(projPath, "utf-8"));
+      } catch (e) {}
+    }
+    if (projects.includes(firstSegment)) {
+      if (!fs.existsSync(filePath)) {
+        const rewrittenUrl = "/" + parts.slice(1).join("/");
+        filePath = path.join(ROOT, rewrittenUrl);
+      }
+    }
+  }
 
   // 安全检查：不允许访问项目目录外的文件
   if (!filePath.startsWith(ROOT)) {
@@ -66,7 +87,7 @@ function scheduleGitPush(changedFile) {
     console.log("📡 正在推送到 GitHub...");
 
     // 先 add，再检查是否有 staged 变更，有才 commit+push
-    exec(`git -C "${ROOT}" add data/pois.json data/routes.json`, (addErr) => {
+    exec(`git -C "${ROOT}" add "${relFile}"`, (addErr) => {
       if (addErr) {
         gitState = { status: "error", message: "git add 失败: " + addErr.message.slice(0, 80), updatedAt: Date.now() };
         console.error("❌ git add 失败:", addErr.message);
@@ -96,19 +117,34 @@ function scheduleGitPush(changedFile) {
 }
 
 function handleAPI(req, res) {
-  // POST /api/save-pois  → 写入 data/pois.json
-  // POST /api/save-routes → 写入 data/routes.json
-  const saveMap = {
-    "/api/save-pois": path.join(ROOT, "data", "pois.json"),
-    "/api/save-routes": path.join(ROOT, "data", "routes.json"),
-  };
+  let urlPath = req.url.split("?")[0];
+  let project = "";
+  let apiType = ""; // "pois" or "routes"
+  
+  if (urlPath.endsWith("/api/save-pois")) {
+    apiType = "pois";
+    project = urlPath.substring(0, urlPath.length - "/api/save-pois".length);
+  } else if (urlPath.endsWith("/api/save-routes")) {
+    apiType = "routes";
+    project = urlPath.substring(0, urlPath.length - "/api/save-routes".length);
+  }
+  
+  if (project.startsWith("/")) {
+    project = project.substring(1);
+  }
+  if (project.endsWith("/")) {
+    project = project.substring(0, project.length - 1);
+  }
 
-  const target = saveMap[req.url];
-  if (!target) {
+  if (!apiType) {
     res.writeHead(404, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "Unknown API" }));
     return;
   }
+
+  const target = project
+    ? path.join(ROOT, project, "data", apiType === "pois" ? "pois.json" : "routes.json")
+    : path.join(ROOT, "data", apiType === "pois" ? "pois.json" : "routes.json");
 
   let body = "";
   req.on("data", (chunk) => (body += chunk));
@@ -118,6 +154,12 @@ function handleAPI(req, res) {
       const data = JSON.parse(body);
       const pretty = JSON.stringify(data, null, 2);
 
+      // 确保父目录存在
+      const parentDir = path.dirname(target);
+      if (!fs.existsSync(parentDir)) {
+        fs.mkdirSync(parentDir, { recursive: true });
+      }
+
       // 备份旧文件
       if (fs.existsSync(target)) {
         const backup = target + ".bak";
@@ -125,7 +167,7 @@ function handleAPI(req, res) {
       }
 
       fs.writeFileSync(target, pretty, "utf-8");
-      console.log(`✅ 已保存 ${path.basename(target)} (${pretty.length} bytes)`);
+      console.log(`✅ 已保存 ${path.basename(target)} to ${target} (${pretty.length} bytes)`);
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ ok: true, size: pretty.length }));
 
@@ -164,14 +206,78 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // POST /api/create-project → 创建并初始化新子项目
+  if (req.method === "POST" && (req.url === "/api/create-project" || req.url.endsWith("/api/create-project"))) {
+    let body = "";
+    req.on("data", (chunk) => (body += chunk));
+    req.on("end", () => {
+      try {
+        const payload = JSON.parse(body);
+        const projectName = payload.projectName ? payload.projectName.trim().toLowerCase() : "";
+        
+        if (!projectName || !/^[a-z0-9-_]+$/.test(projectName)) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "项目名称无效。只能包含小写字母、数字、连字符和下划线。" }));
+          return;
+        }
+
+        const projPath = path.join(ROOT, "projects.json");
+        let projects = [];
+        if (fs.existsSync(projPath)) {
+          projects = JSON.parse(fs.readFileSync(projPath, "utf-8"));
+        }
+        
+        if (projects.includes(projectName)) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "该项目英文名称已存在。" }));
+          return;
+        }
+
+        projects.push(projectName);
+        fs.writeFileSync(projPath, JSON.stringify(projects, null, 2), "utf-8");
+
+        // 创建子项目目录
+        const projectDataDir = path.join(ROOT, projectName, "data");
+        fs.mkdirSync(projectDataDir, { recursive: true });
+
+        // 复制默认模版数据文件，或者初始化为空数据
+        const defaultRoutes = path.join(ROOT, "data", "routes.json");
+        if (!payload.empty && fs.existsSync(defaultRoutes)) {
+          fs.copyFileSync(defaultRoutes, path.join(projectDataDir, "routes.json"));
+        } else {
+          fs.writeFileSync(path.join(projectDataDir, "routes.json"), JSON.stringify({ main: [], secondary: [], main_flight: [] }, null, 2));
+        }
+
+        const defaultPois = path.join(ROOT, "data", "pois.json");
+        if (!payload.empty && fs.existsSync(defaultPois)) {
+          fs.copyFileSync(defaultPois, path.join(projectDataDir, "pois.json"));
+        } else {
+          fs.writeFileSync(path.join(projectDataDir, "pois.json"), JSON.stringify([], null, 2));
+        }
+
+        console.log(`🆕 新子项目已成功创建并初始化: ${projectName}`);
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: true, name: projectName }));
+
+        scheduleGitPush(projPath);
+        scheduleGitPush(path.join(projectDataDir, "routes.json"));
+        scheduleGitPush(path.join(projectDataDir, "pois.json"));
+      } catch (err) {
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: err.message }));
+      }
+    });
+    return;
+  }
+
   // GET /api/git-status → 返回当前 git push 状态
-  if (req.method === "GET" && req.url === "/api/git-status") {
+  if (req.method === "GET" && (req.url === "/api/git-status" || req.url.endsWith("/api/git-status"))) {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify(gitState));
     return;
   }
 
-  if (req.method === "POST" && req.url.startsWith("/api/")) {
+  if (req.method === "POST" && (req.url.startsWith("/api/") || req.url.includes("/api/"))) {
     handleAPI(req, res);
   } else {
     servStatic(req, res);

@@ -34,12 +34,7 @@
             <button id="btn-publish-msg" class="bar-btn-publish">发布</button>
             <div class="ad-banner">
                 <marquee class="ad-text-slider" scrollamount="4" scrolldelay="100">
-                    <span class="ad-slide">丁丁：户外大神级向导。微信：tinti_seu</span>
-                    <span class="ad-slide">多啦：一手好菜的豪爽姐。微信：lolo67</span>
-                    <span class="ad-slide">墨小妖：古道热肠的跑者。微信：moxiaoyao1111</span>
-                    <span class="ad-slide">龙虎林：独立研究和开发者。微信：gemaimao</span>
-                    <span class="ad-slide">颜伟：高原环保供氧保障。微信：parkyanwei</span>
-                    <!-- 动态加载留言 -->
+                    <span class="ad-slide">欢迎使用神山转山平台，敬请期待新功能！</span>
                 </marquee>
             </div>
             <button class="bar-btn-donate">打赏</button>
@@ -70,6 +65,9 @@
                     <path d="M19 3H9c-1.1 0-2 .9-2 2v11.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h10v7.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V5c0-1.1.9-2 2-2z"/>
                 </svg>
             </button>
+            <button class="tool-btn" id="btn-elev-chart" title="编辑高程曲线">📈</button>
+        </div>
+        <div id="elevation-chart" class="chart-overlay hidden"></div>
         </div>
 
         <!-- 功能面板下方：浮动解说窗口 (当进入雷达范围时显示) -->
@@ -114,7 +112,7 @@
                     <li>多啦：一手好菜的豪爽姐。微信：lolo67</li>
                     <li>墨小妖：古道热肠的跑者。微信：moxiaoyao1111</li>
                     <li>龙虎林：独立研究和开发者。微信：gemaimao</li>
-                    <li>颜伟：高原环保供氧保障。微信：parkyanwei</li>
+                    <li>颜伟：高原环保供氧保障。微信：Sparkyanwei</li>
                 </ul>
                 <h4 style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">最新实时发布</h4>
                 <ul class="sponsor-list" id="modal-message-list">
@@ -156,6 +154,6 @@
     <!-- 背景音乐 -->
     <audio id="bgmAudio" src="../assets/blue-sky-pilgrim.mp3?v=2" loop></audio>
 
-    <script src="js/app.js"></script>
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>

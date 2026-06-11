@@ -21,69 +21,11 @@ def calculate_bearing(lat1, lon1, lat2, lon2):
     initial_bearing = math.atan2(x, y)
     return (math.degrees(initial_bearing) + 360) % 360
 
-def regenerate_flight_path():
+def export_kml():
     with open(ROUTES_FILE, 'r', encoding='utf-8') as f:
         data = json.load(f)
         
-    main_route = data.get('main', [])
-    FLIGHT_STEP = 350.0  # 350m sampling
-    
-    flight_path = []
-    accumulated = 0.0
-    last_pt = main_route[0]
-    flight_path.append(last_pt)
-    
-    for pt in main_route[1:]:
-        dist = haversine(last_pt[0], last_pt[1], pt[0], pt[1])
-        accumulated += dist
-        if accumulated >= FLIGHT_STEP:
-            flight_path.append(pt)
-            accumulated = 0.0
-            last_pt = pt
-            
-    if flight_path[-1] != main_route[-1]:
-        flight_path.append(main_route[-1])
-        
-    N = len(flight_path)
-    raw_headings = []
-    for i in range(N - 1):
-        h = calculate_bearing(flight_path[i][0], flight_path[i][1], flight_path[i+1][0], flight_path[i+1][1])
-        raw_headings.append(h)
-    raw_headings.append(raw_headings[-1] if raw_headings else 0.0)
-    
-    smoothed_headings = []
-    for i in range(N):
-        start = max(0, i - 2)
-        end = min(N, i + 3)
-        sum_cos = 0.0
-        sum_sin = 0.0
-        for idx in range(start, end):
-            rad = math.radians(raw_headings[idx])
-            sum_cos += math.cos(rad)
-            sum_sin += math.sin(rad)
-        avg_rad = math.atan2(sum_sin, sum_cos)
-        avg_deg = (math.degrees(avg_rad) + 360) % 360
-        smoothed_headings.append(avg_deg)
-        
-    main_flight = []
-    for i in range(N):
-        main_flight.append({
-            "lat": flight_path[i][0],
-            "lng": flight_path[i][1],
-            "heading": round(smoothed_headings[i], 2),
-            "pitch": -32, # tilt 58 => 90 - 58 = 32, so pitch is -32
-            "range": 530,
-            "duration": 4
-        })
-        
-    data['main_flight'] = main_flight
-    with open(ROUTES_FILE, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-        
-    return main_flight
-
-def export_kml():
-    main_flight = regenerate_flight_path()
+    main_flight = data.get('main_flight', [])
     
     with open(POIS_FILE, 'r', encoding='utf-8') as f:
         pois = json.load(f)
@@ -133,16 +75,25 @@ def export_kml():
     kml.append('    <gx:Playlist>')
     
     for pt in main_flight:
+        # Map parameters from the new spec
+        lng = pt.get("lng", 0.0)
+        lat = pt.get("lat", 0.0)
+        heading = pt.get("heading", 0.0)
+        pitch = pt.get("pitch", -40.0)
+        tilt = round(90.0 + pitch, 1) # tilt = 90 + pitch
+        r = pt.get("relative_alt", pt.get("range", 500.0))
+        duration = pt.get("duration", 2.5)
+
         kml.append('      <gx:FlyTo>')
-        kml.append(f'        <gx:duration>{pt["duration"]}</gx:duration>')
+        kml.append(f'        <gx:duration>{duration}</gx:duration>')
         kml.append('        <gx:flyToMode>smooth</gx:flyToMode>')
         kml.append('        <LookAt>')
-        kml.append(f'          <longitude>{pt["lng"]}</longitude>')
-        kml.append(f'          <latitude>{pt["lat"]}</latitude>')
+        kml.append(f'          <longitude>{lng}</longitude>')
+        kml.append(f'          <latitude>{lat}</latitude>')
         kml.append('          <altitude>0</altitude>')
-        kml.append(f'          <heading>{pt["heading"]}</heading>')
-        kml.append('          <tilt>58</tilt>') # Flight angle = 58
-        kml.append(f'          <range>{pt["range"]}</range>')
+        kml.append(f'          <heading>{heading}</heading>')
+        kml.append(f'          <tilt>{tilt}</tilt>')
+        kml.append(f'          <range>{r}</range>')
         kml.append('          <altitudeMode>clampToGround</altitudeMode>')
         kml.append('        </LookAt>')
         kml.append('      </gx:FlyTo>')

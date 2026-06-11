@@ -322,15 +322,38 @@ function loadPoisAndStart(terrainProvider) {
             }
             document.getElementById('tour-status').innerText = '漫游已就绪';
             
-            viewer.camera.flyTo({
-                destination: Cesium.Cartesian3.fromDegrees(81.2865 + OFFSET_LNG, 30.9300 + OFFSET_LAT, 5800),
-                orientation: {
-                    heading: Cesium.Math.toRadians(0.0),
-                    pitch: Cesium.Math.toRadians(-12.0),
-                    roll: 0.0
-                },
-                duration: 4.0
-            });
+            if (flightPath && flightPath.length > 0) {
+                const firstPt = flightPath[0];
+                viewer.camera.flyTo({
+                    destination: Cesium.Cartesian3.fromDegrees(firstPt.lng, firstPt.lat, (firstPt.ground_alt || 5000) + (firstPt.relative_alt || 500)),
+                    orientation: {
+                        heading: Cesium.Math.toRadians(firstPt.heading || 0.0),
+                        pitch: Cesium.Math.toRadians(firstPt.pitch || -25.0),
+                        roll: Cesium.Math.toRadians(firstPt.roll || 0.0)
+                    },
+                    duration: 4.0
+                });
+            } else if (fullRoute && fullRoute.length > 0) {
+                viewer.camera.flyTo({
+                    destination: Cesium.Cartesian3.fromDegrees(fullRoute[0][0], fullRoute[0][1], 9500),
+                    orientation: {
+                        heading: Cesium.Math.toRadians(0.0),
+                        pitch: Cesium.Math.toRadians(-35.0),
+                        roll: 0.0
+                    },
+                    duration: 4.0
+                });
+            } else {
+                viewer.camera.flyTo({
+                    destination: Cesium.Cartesian3.fromDegrees(104.1954, 35.8617, 10000000.0),
+                    orientation: {
+                        heading: Cesium.Math.toRadians(0.0),
+                        pitch: Cesium.Math.toRadians(-90.0),
+                        roll: 0.0
+                    },
+                    duration: 4.0
+                });
+            }
         };
 
         if (terrainProvider) {
@@ -418,6 +441,40 @@ function findClosestIndex(route, lat, lng) {
     return idx;
 }
 
+let handheldListener = null;
+let lastHeadingNoise = 0;
+let lastPitchNoise = 0;
+
+function updateHandheldShake(active) {
+    if (handheldListener) {
+        viewer.scene.preRender.removeEventListener(handheldListener);
+        handheldListener = null;
+        if (viewer.camera) {
+            viewer.camera.lookRight(-lastHeadingNoise);
+            viewer.camera.lookUp(-lastPitchNoise);
+        }
+        lastHeadingNoise = 0;
+        lastPitchNoise = 0;
+    }
+    if (active) {
+        handheldListener = () => {
+            // Restore previous frame's offset
+            viewer.camera.lookRight(-lastHeadingNoise);
+            viewer.camera.lookUp(-lastPitchNoise);
+            
+            if (!isPlaying) return;
+            
+            const time = Date.now() / 150.0;
+            lastHeadingNoise = Math.sin(time) * Math.cos(time * 0.7) * Cesium.Math.toRadians(0.25);
+            lastPitchNoise = Math.cos(time * 1.3) * Math.sin(time * 0.5) * Cesium.Math.toRadians(0.15);
+            
+            viewer.camera.lookRight(lastHeadingNoise);
+            viewer.camera.lookUp(lastPitchNoise);
+        };
+        viewer.scene.preRender.addEventListener(handheldListener);
+    }
+}
+
 // 自定义飞行递归引擎
 function flyNext() {
     if (!isPlaying || currentWaypoint >= flightPath.length) {
@@ -492,28 +549,60 @@ function flyNext() {
         let dynamicDuration = Math.max(2.5, distMeters / 40.0);
         
         // 在原有设定值和动态值之间取较大者，确保绝不“狂奔”
-        pt._actualDuration = Math.max(pt.duration * 1.5, dynamicDuration);
+        const ptDuration = typeof pt.duration === 'number' ? pt.duration : 2.5;
+        pt._actualDuration = Math.max(ptDuration * 1.5, dynamicDuration);
 
         currentSegmentStartTime = Date.now();
         currentSegmentDuration = pt._actualDuration * 1000; // 与 flyTo 动画时间完美同步
     }
     
-    // 核心修复：相机高度 = 真实的地球表面海拔 + 530米的相对净空高度
-    const elevationVal = typeof pt.elevation === 'number' ? pt.elevation : 5000;
-    const absoluteAltitude = elevationVal + pt.range; 
+    // 核心修改：相机高度 = 地面真实海拔 (ground_alt 或 elevation) + 相对高度 (relative_alt 或 range)
+    const elevationVal = typeof pt.ground_alt === 'number' ? pt.ground_alt : (typeof pt.elevation === 'number' ? pt.elevation : 5000);
+    const relativeAlt = typeof pt.relative_alt === 'number' ? pt.relative_alt : (typeof pt.range === 'number' ? pt.range : 500);
+    const absoluteAltitude = elevationVal + relativeAlt; 
+
+    // 视角焦距 (FOV) 应用
+    if (typeof pt.fov === 'number') {
+        viewer.camera.frustum.fov = Cesium.Math.toRadians(pt.fov);
+    } else {
+        viewer.camera.frustum.fov = Cesium.Math.toRadians(60.0); // 默认 60度
+    }
+
+    // 运镜特技：计算侧飞与倒飞的 heading 偏向角偏移
+    let finalHeading = pt.heading || 0.0;
+    if (!pt.look_at_intent) {
+        if (pt.shot_mode === 'side') {
+            finalHeading += 90.0;
+        } else if (pt.shot_mode === 'back') {
+            finalHeading += 180.0;
+        }
+    }
+
+    // 启用/禁用手震呼吸感
+    updateHandheldShake(pt.shot_mode === 'handheld');
     
     viewer.camera.flyTo({
         destination: Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, absoluteAltitude),
         orientation: {
-            heading: Cesium.Math.toRadians(pt.heading),
-            pitch: Cesium.Math.toRadians(pt.pitch), // -32度
-            roll: 0.0
+            heading: Cesium.Math.toRadians(finalHeading),
+            pitch: Cesium.Math.toRadians(pt.pitch || -40.0),
+            roll: Cesium.Math.toRadians(pt.roll || 0.0)
         },
-        duration: pt._actualDuration || (pt.duration * 1.5),
+        duration: pt._actualDuration || (pt.duration * 1.5) || 2.5,
         easingFunction: Cesium.EasingFunction.LINEAR_NONE, // 匀速平滑过渡，不卡顿
         complete: () => {
-            currentWaypoint++;
-            flyNext();
+            const waitTime = typeof pt.wait_time === 'number' ? pt.wait_time : 0.0;
+            if (waitTime > 0 && isPlaying) {
+                setTimeout(() => {
+                    if (isPlaying) {
+                        currentWaypoint++;
+                        flyNext();
+                    }
+                }, waitTime * 1000);
+            } else {
+                currentWaypoint++;
+                flyNext();
+            }
         }
     });
 }
@@ -581,7 +670,14 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
     currentWaypoint = closestIdx;
     
     // 获取目标点数据进行地形纠偏及高度计算
-    if (!flightPath[currentWaypoint].elevation) {
+    let needsSampling = false;
+    for (let i = 0; i < flightPath.length; i++) {
+        if (typeof flightPath[i].ground_alt !== 'number' && typeof flightPath[i].elevation !== 'number') {
+            needsSampling = true;
+            break;
+        }
+    }
+    if (needsSampling) {
         try {
             if (viewer.terrainProvider && !(viewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider)) {
                 const positions = flightPath.map(pt => Cesium.Cartographic.fromDegrees(pt.lng, pt.lat));
@@ -605,23 +701,54 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
     }
     
     const pt = flightPath[currentWaypoint];
-    const elevationVal = typeof pt.elevation === 'number' ? pt.elevation : 5000;
-    const absoluteAltitude = elevationVal + pt.range;
+    const elevationVal = typeof pt.ground_alt === 'number' ? pt.ground_alt : (typeof pt.elevation === 'number' ? pt.elevation : 5000);
+    const relativeAlt = typeof pt.relative_alt === 'number' ? pt.relative_alt : (typeof pt.range === 'number' ? pt.range : 500);
+    const absoluteAltitude = elevationVal + relativeAlt;
+
+    // 视角焦距 (FOV) 应用
+    if (typeof pt.fov === 'number') {
+        viewer.camera.frustum.fov = Cesium.Math.toRadians(pt.fov);
+    } else {
+        viewer.camera.frustum.fov = Cesium.Math.toRadians(60.0);
+    }
+
+    // 运镜特技：侧飞与倒飞的 heading 偏向角偏移
+    let finalHeading = pt.heading || 0.0;
+    if (!pt.look_at_intent) {
+        if (pt.shot_mode === 'side') {
+            finalHeading += 90.0;
+        } else if (pt.shot_mode === 'back') {
+            finalHeading += 180.0;
+        }
+    }
+
+    // 启用/禁用手震呼吸感
+    updateHandheldShake(pt.shot_mode === 'handheld');
 
     // 使用 3.5 秒的缓入缓出过渡飞行，将视角平滑地从自由探索拉回到正确的航线视角上
     viewer.camera.flyTo({
         destination: Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, absoluteAltitude),
         orientation: {
-            heading: Cesium.Math.toRadians(pt.heading),
-            pitch: Cesium.Math.toRadians(pt.pitch),
-            roll: 0.0
+            heading: Cesium.Math.toRadians(finalHeading),
+            pitch: Cesium.Math.toRadians(pt.pitch || -40.0),
+            roll: Cesium.Math.toRadians(pt.roll || 0.0)
         },
         duration: 3.5, // 缓动过渡时长
         easingFunction: Cesium.EasingFunction.CUBIC_IN_OUT, // 缓入缓出
         complete: () => {
             if (isPlaying) {
-                currentWaypoint++;
-                flyNext();
+                const waitTime = typeof pt.wait_time === 'number' ? pt.wait_time : 0.0;
+                if (waitTime > 0) {
+                    setTimeout(() => {
+                        if (isPlaying) {
+                            currentWaypoint++;
+                            flyNext();
+                        }
+                    }, waitTime * 1000);
+                } else {
+                    currentWaypoint++;
+                    flyNext();
+                }
             }
         }
     });
@@ -631,6 +758,7 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
 document.getElementById('btn-free-explore').addEventListener('click', () => {
     startBgm(); // 尝试触发音乐播放
     isPlaying = false;
+    updateHandheldShake(false); // 禁用手持呼吸感震动
     viewer.camera.cancelFlight();
 });
 

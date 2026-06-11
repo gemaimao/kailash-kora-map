@@ -41,9 +41,13 @@
 <body>
   <nav class="admin-nav">
     <span class="brand">后台管理</span>
+    <select id="projectSelect" style="margin-left:12px; background:#222; color:#eee; border:none; padding:4px 8px;">
+    </select>
+    <button id="btnNewProject" style="margin-left:8px; margin-right:4px; background:#444; color:#eee; border:none; padding:4px 10px; cursor:pointer; border-radius:4px; font-size:12px;">➕ 新建项目</button>
+    <button id="btnPreviewFront" style="margin-left:4px; margin-right:12px; background:#444; color:#eee; border:none; padding:4px 10px; cursor:pointer; border-radius:4px; font-size:12px;">👁️ 预览前台成果</button>
     <button class="tab active" data-src="narrative-editor.html">叙事编辑 (720yun Style)</button>
     <button class="tab" data-src="poi-editor.html">POI 基础编辑</button>
-    <button class="tab" data-src="editor.html">路线轨迹编辑</button>
+    <button class="tab" data-src="flight-editor.html">导演轨编辑</button>
     <button class="tab" data-src="moderation.html">留言审核</button>
     <span class="spacer"></span>
     <a class="link" href="index.html" target="_blank">← 返回前台</a>
@@ -53,12 +57,98 @@
   <script>
     const tabs = document.querySelectorAll('.tab');
     const frame = document.getElementById('editorFrame');
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        frame.src = tab.dataset.src;
+    const projectSelect = document.getElementById('projectSelect');
+
+    document.getElementById('btnNewProject').addEventListener('click', () => {
+      const name = prompt("请输入新项目的英文名目录名称 (如 kailash-2 ):");
+      if (!name) return;
+      const cleanName = name.trim().toLowerCase();
+      if (!cleanName) return;
+      
+      if (!/^[a-z0-9-_]+$/.test(cleanName)) {
+        alert("项目标识名无效！只能包含小写字母、数字、连字符和下划线。");
+        return;
+      }
+
+      const empty = confirm("是否从【完全空白】的数据开始设计新项目？\n\n- 点击【确定】：创建完全空白的项目（从零数据点位和零导演航点开始自绘）\n- 点击【取消】：拷贝默认的冈仁波齐转山数据模板（带参考路线）");
+
+      fetch('api/create-project', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectName: cleanName, empty: empty })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.error) {
+          alert("创建失败: " + res.error);
+        } else {
+          alert(`项目 【${cleanName}】 创建成功！已自动切换为当前项目。`);
+          const opt = document.createElement('option');
+          opt.value = cleanName;
+          opt.textContent = cleanName;
+          projectSelect.appendChild(opt);
+          
+          projectSelect.value = cleanName;
+          currentProject = cleanName;
+          
+          const activeTab = document.querySelector('.tab.active') || tabs[0];
+          loadTabContent(activeTab);
+        }
+      })
+      .catch(err => {
+        alert("请求失败: " + err.message);
       });
+    });
+
+    document.getElementById('btnPreviewFront').addEventListener('click', () => {
+      const url = (currentProject && currentProject !== '') ? `${currentProject}/index.html` : 'index.html';
+      window.open(url, '_blank');
+    });
+
+    let currentProject = projectSelect.value || '';
+    // Load project list and populate select
+    fetch('projects.json')
+      .then(r => r.json())
+      .then(list => {
+        // Add an empty option representing the default project (root)
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = '';
+        defaultOpt.textContent = '默认项目';
+        projectSelect.appendChild(defaultOpt);
+        // Populate other projects
+        list.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p;
+          opt.textContent = p;
+          projectSelect.appendChild(opt);
+        });
+        // Set initial selection to default (empty)
+        currentProject = '';
+        projectSelect.value = '';
+        // Load default tab content for the default project
+        loadTabContent(tabs[0]);
+      })
+      .catch(err => console.error('Failed to load projects.json', err));
+    // Update frame when tab clicked
+    function loadTabContent(tab) {
+      const src = tab.dataset.src;
+      const path = (currentProject && currentProject !== '') ? `${currentProject}/${src}` : src;
+      frame.src = path;
+    }
+    // Tab click handler
+    Array.from(tabs).forEach(tab => {
+      tab.addEventListener('click', () => {
+        Array.from(tabs).forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        loadTabContent(tab);
+      });
+    });
+    // Project change handler
+    projectSelect.addEventListener('change', () => {
+      currentProject = projectSelect.value;
+      // Reload current active tab
+      const activeTab = document.querySelector('.tab.active') || tabs[0];
+      loadTabContent(activeTab);
     });
   </script>
 </body>
