@@ -49538,7 +49538,7 @@
       "lng": 81.28769229289169,
       "lat": 30.97740236524288,
       "ground_alt": 4659,
-      "relative_alt": 500,
+      "relative_alt": 578,
       "heading": 300.95,
       "pitch": -40,
       "roll": 0,
@@ -49886,7 +49886,7 @@
       "duration": 5,
       "wait_time": 0,
       "look_at_intent": "custom",
-      "perspective_fov": "natural",
+      "perspective_fov": "custom",
       "perspective_pitch": "custom",
       "fov": 60
     },
