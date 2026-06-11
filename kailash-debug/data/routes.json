@@ -49706,17 +49706,19 @@
     {
       "id": "evt_1781145179397_10",
       "name": "航点 11",
-      "lng": 81.2801796292782,
-      "lat": 31.05031812489147,
-      "ground_alt": 4756,
-      "relative_alt": 147,
-      "heading": 12.31,
-      "pitch": -40,
-      "roll": 0,
+      "lng": 81.279589,
+      "lat": 31.050284,
+      "ground_alt": 4755,
+      "relative_alt": 105,
+      "heading": 20,
+      "pitch": -33.8,
+      "roll": 360,
       "duration": 1.5,
       "wait_time": 0,
       "fov": 120,
-      "perspective_fov": "custom"
+      "perspective_fov": "custom",
+      "look_at_intent": "custom",
+      "perspective_pitch": "custom"
     },
     {
       "id": "evt_1781145179397_11",
