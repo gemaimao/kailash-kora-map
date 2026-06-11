@@ -49768,11 +49768,15 @@
       "lat": 31.10107209298648,
       "ground_alt": 5000,
       "relative_alt": 500,
-      "heading": 82.65,
+      "heading": 82.7,
       "pitch": -40,
       "roll": 0,
       "duration": 1.5,
-      "wait_time": 0
+      "wait_time": 0,
+      "look_at_intent": "custom",
+      "perspective_fov": "custom",
+      "perspective_pitch": "custom",
+      "fov": 60
     },
     {
       "id": "evt_1781145179397_18",
@@ -49872,11 +49876,15 @@
       "lat": 31.08922539687068,
       "ground_alt": 5000,
       "relative_alt": 500,
-      "heading": 152.22,
+      "heading": 152.2,
       "pitch": -40,
       "roll": 0,
       "duration": 5,
-      "wait_time": 0
+      "wait_time": 0,
+      "look_at_intent": "custom",
+      "perspective_fov": "custom",
+      "perspective_pitch": "custom",
+      "fov": 60
     },
     {
       "id": "evt_1781145179397_26",
