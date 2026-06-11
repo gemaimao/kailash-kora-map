@@ -49879,7 +49879,7 @@
       "lng": 81.37656148140964,
       "lat": 31.08922539687068,
       "ground_alt": 5488,
-      "relative_alt": 600,
+      "relative_alt": 405,
       "heading": 152.5,
       "pitch": -37,
       "roll": 0,
@@ -49901,7 +49901,11 @@
       "pitch": -40,
       "roll": 0,
       "duration": 5,
-      "wait_time": 0
+      "wait_time": 0,
+      "look_at_intent": "custom",
+      "perspective_fov": "custom",
+      "perspective_pitch": "custom",
+      "fov": 60
     },
     {
       "id": "evt_1781145179397_27",
