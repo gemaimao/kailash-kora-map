@@ -792,15 +792,30 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
     // 启用/禁用手震呼吸感
     updateHandheldShake(pt.shot_mode === 'handheld');
 
-    // 使用 3.5 秒的缓入缓出过渡飞行，将视角平滑地从自由探索拉回到正确的航线视角上
+    const currentCamPos = viewer.camera.position;
+    const targetPos = Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, absoluteAltitude);
+    const distance = Cesium.Cartesian3.distance(currentCamPos, targetPos);
+    
+    // 动态计算过渡飞行时间与最大飞行高度，避免长距离瞬间拉扯与大尺度旋转带来的眩晕感
+    let flyDuration = 3.5;
+    let maxFlightHeight = undefined;
+    
+    if (distance > 2500) {
+        // 距离较远时，拉长过渡时间，并自动将相机拉升至高空进行弧线飞行转场（类似 Google Earth Space Bounce 效果）
+        flyDuration = Math.min(6.0, 3.0 + distance / 5000.0);
+        maxFlightHeight = Math.max(absoluteAltitude + 3000.0, 15000.0);
+    }
+
+    // 使用缓入缓出过渡飞行，将视角平滑地从自由探索拉回到正确的航线视角上
     viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, absoluteAltitude),
+        destination: targetPos,
         orientation: {
             heading: Cesium.Math.toRadians(finalHeading),
             pitch: Cesium.Math.toRadians(pt.pitch || -40.0),
             roll: Cesium.Math.toRadians(pt.roll || 0.0)
         },
-        duration: 3.5, // 缓动过渡时长
+        duration: flyDuration,
+        maximumHeight: maxFlightHeight,
         easingFunction: Cesium.EasingFunction.CUBIC_IN_OUT, // 缓入缓出
         complete: () => {
             if (isPlaying) {
