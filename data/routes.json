@@ -51019,6 +51019,26 @@
       "perspective_pitch": "oblique",
       "speed_preset": "normal",
       "wait_preset": "none"
+    },
+    {
+      "id": "evt_1781233743664",
+      "name": "导演航点 94",
+      "lng": 81.242904,
+      "lat": 31.014586,
+      "ground_alt": 4830,
+      "relative_alt": 500,
+      "heading": 354.4,
+      "pitch": -40,
+      "roll": 360,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none"
     }
   ]
 }
