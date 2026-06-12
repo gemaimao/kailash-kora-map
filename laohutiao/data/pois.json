@@ -12,5 +12,19 @@
     "bubble": "",
     "note": "",
     "density": 1
+  },
+  {
+    "id": "poi_1781235197432",
+    "name": "新标记",
+    "type": "",
+    "section": "",
+    "lat": 26.273433,
+    "lng": 98.867205,
+    "zoom": 1500,
+    "viewLat": 26.273433,
+    "viewLng": 98.867205,
+    "bubble": "",
+    "note": "",
+    "density": 1
   }
 ]
