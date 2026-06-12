@@ -616,7 +616,7 @@
       
       data.pois.forEach(poi => {
         const isFlat = !!poi.flat;
-        const poiId = poi.id.replace('msn_', '');
+        const poiId = String(poi.id).replace('msn_', '');
 
         const entityConfig = {
           id: 'poi_' + poi.id,

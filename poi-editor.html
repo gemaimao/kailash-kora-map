@@ -335,6 +335,13 @@
             refreshMarkers();
             renderList();
             selectPoi(id);
+            saveToServer(); // Save immediately to server
+
+            // Toggle addMode to false, consistent with narrative-editor
+            addMode = false;
+            document.getElementById("addModeBtn").classList.remove("active");
+            document.getElementById("map").classList.remove("crosshair");
+            document.getElementById("status").textContent = "已成功新增标记！可通过右侧面板调整参数并点击[保存修改]";
           }
         }
       }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
@@ -412,7 +419,7 @@
 
       pois.forEach(poi => {
         const isFlat = !!poi.flat;
-        const poiId = poi.id.replace('msn_', '');
+        const poiId = String(poi.id).replace('msn_', '');
 
         const entityConfig = {
           id: 'poi_' + poi.id,

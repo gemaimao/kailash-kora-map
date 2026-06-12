@@ -284,7 +284,7 @@ function loadPoisAndStart(terrainProvider) {
         const renderPois = (positions) => {
             for (let i = 0; i < allPoisData.length; i++) {
                 const poi = allPoisData[i];
-                const poiId = poi.id.replace('msn_', '');
+                const poiId = String(poi.id).replace('msn_', '');
                 const fixedLng = poi.lng + OFFSET_LNG;
                 const fixedLat = poi.lat + OFFSET_LAT;
                 
