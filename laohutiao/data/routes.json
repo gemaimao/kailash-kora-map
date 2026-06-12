@@ -121,6 +121,26 @@
       "perspective_pitch": "custom",
       "speed_preset": "normal",
       "wait_preset": "none"
+    },
+    {
+      "id": "evt_1781249627692",
+      "name": "自定义航点 7",
+      "lng": 98.872469,
+      "lat": 26.287679,
+      "ground_alt": 910,
+      "relative_alt": 19,
+      "heading": 150.4,
+      "pitch": -19.9,
+      "roll": 360,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none"
     }
   ]
 }
