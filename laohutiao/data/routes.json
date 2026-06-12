@@ -1,26 +1,5 @@
 {
   "main": [],
   "secondary": [],
-  "main_flight": [
-    {
-      "id": "evt_1781249469283",
-      "name": "导演航点 2",
-      "lng": 98.863122,
-      "lat": 26.296784,
-      "ground_alt": 1028,
-      "relative_alt": 500,
-      "heading": 135.9,
-      "pitch": -77.7,
-      "roll": 360,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "custom",
-      "perspective_fov": "custom",
-      "perspective_pitch": "custom",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    }
-  ]
+  "main_flight": []
 }
