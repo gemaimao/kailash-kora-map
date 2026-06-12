@@ -33,14 +33,14 @@
       "pitch": -39.4,
       "roll": 0,
       "duration": 141.2,
-      "wait_time": 0,
+      "wait_time": 2,
       "fov": 60,
       "shot_mode": "default",
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
       "speed_preset": "custom",
-      "wait_preset": "none"
+      "wait_preset": "custom"
     },
     {
       "id": "evt_1781249568860",
