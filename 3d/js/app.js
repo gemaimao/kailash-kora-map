@@ -53,6 +53,10 @@ let allPoisData = []; // 全局存储 POI 数据，用于雷达测距
 let nearbyPois = [];  // 当前进入雷达探测范围的所有 POI
 let currentNearbyIndex = 0; // 当前正在展示的 POI 索引
 const poiPopups = []; // 存储气泡弹窗以防 ReferenceError
+let fullRouteDistances = [];
+let currentProgressMileage = 0.0;
+let currentProgressTime = 0.0;
+let tourStartTime = 0;
 
 // 手动校准偏差（新版KML已贴地，无需偏移）
 const OFFSET_LNG = 0.0;
@@ -86,6 +90,17 @@ fetch('../data/routes.json?t=' + Date.now()).then(r => r.json()).then(data => {
         }
     });
 
+    // 计算并初始化地理轨累计里程 (km)
+    if (fullRoutePositions && fullRoutePositions.length > 0) {
+        let totalDist = 0.0;
+        fullRouteDistances = [0.0];
+        for (let i = 1; i < fullRoutePositions.length; i++) {
+            const d = Cesium.Cartesian3.distance(fullRoutePositions[i-1], fullRoutePositions[i]) / 1000.0; // distance in km
+            totalDist += d;
+            fullRouteDistances.push(totalDist);
+        }
+    }
+
     // 2. 动态飞行轨迹（完美丝滑版，随漫游实时生长）
     let progressPositions = [];
     viewer.entities.add({
@@ -107,6 +122,17 @@ fetch('../data/routes.json?t=' + Date.now()).then(r => r.json()).then(data => {
                 if (newPositions.length >= 2) {
                     progressPositions = newPositions;
                 }
+
+                // 实时更新里程累计值
+                if (fullRouteDistances && fullRouteDistances.length > exactIdx) {
+                    currentProgressMileage = fullRouteDistances[exactIdx];
+                }
+
+                // 实时更新行程用时值
+                if (tourStartTime > 0) {
+                    currentProgressTime = (Date.now() - tourStartTime) / 1000.0;
+                }
+
                 return progressPositions.length >= 2 ? progressPositions : undefined;
             }, false),
             width: 8,
@@ -115,6 +141,43 @@ fetch('../data/routes.json?t=' + Date.now()).then(r => r.json()).then(data => {
                 color: Cesium.Color.fromCssColorString('#f59e0b') // 实体明黄光晕进度线
             }),
             clampToGround: true
+        }
+    });
+
+    // 3. 动态路线头部浮动信息框（里程与用时）
+    function formatProgressTime(seconds) {
+        if (isNaN(seconds) || seconds < 0) return "00:00";
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = Math.floor(seconds % 60);
+        if (h > 0) {
+            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    viewer.entities.add({
+        name: 'Kora Route Progress Head Info',
+        position: new Cesium.CallbackProperty(() => {
+            if (!isPlaying || progressPositions.length === 0) return undefined;
+            return progressPositions[progressPositions.length - 1];
+        }, false),
+        label: {
+            text: new Cesium.CallbackProperty(() => {
+                return `🏁 ${currentProgressMileage.toFixed(1)} km\n⏱️ ${formatProgressTime(currentProgressTime)}`;
+            }, false),
+            font: 'bold 11px monospace, "PingFang SC", sans-serif',
+            fillColor: Cesium.Color.fromCssColorString('#ffcd55'),
+            outlineColor: Cesium.Color.fromCssColorString('#090d16'),
+            outlineWidth: 3,
+            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+            showBackground: true,
+            backgroundColor: Cesium.Color.fromCssColorString('#0f172a').withAlpha(0.85),
+            backgroundPadding: new Cesium.Cartesian2(8, 6),
+            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            pixelOffset: new Cesium.Cartesian2(0, -15),
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
         }
     });
 });
@@ -489,6 +552,7 @@ function flyNext() {
         }
         
         isPlaying = false;
+        tourStartTime = 0;
         // 不再改变按钮文本
         return;
     }
@@ -664,6 +728,9 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
     if (isPlaying) return; // 已经在播放了
     
     isPlaying = true;
+    tourStartTime = Date.now();
+    currentProgressMileage = 0.0;
+    currentProgressTime = 0.0;
     
     // 自动定位到距离相机当前拖拽位置最近的那个航点，防止视角瞬间瞬移或错位
     const closestIdx = findClosestFlightPathIndex();
@@ -758,6 +825,7 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
 document.getElementById('btn-free-explore').addEventListener('click', () => {
     startBgm(); // 尝试触发音乐播放
     isPlaying = false;
+    tourStartTime = 0;
     updateHandheldShake(false); // 禁用手持呼吸感震动
     viewer.camera.cancelFlight();
 });
