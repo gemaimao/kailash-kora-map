@@ -118,7 +118,7 @@
 
     /* Bottom Elevation Chart Container */
     .elevation-chart-container {
-      position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 440px); max-width: 1100px; height: 260px;
+      position: absolute; bottom: 20px; left: 230px; right: 20px; height: 260px;
       background: rgba(24, 24, 28, 0.95); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px;
       padding: 12px 16px; z-index: 1000; backdrop-filter: blur(16px);
       display: flex; flex-direction: column; gap: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.7);
@@ -130,21 +130,13 @@
     .chart-selection { font-size: 10px; color: var(--text-dim); font-family: monospace; }
     .chart-adjust-box { display: none; gap: 4px; align-items: center; }
 
-    /* Left and Right Side Mixer Panels */
+    /* Left Side Mixer Panel (Speed, Wait & Playback) */
     .hud-left-mixer-panel {
-      position: absolute; bottom: 20px; left: 20px; width: 190px; height: 260px;
+      position: absolute; bottom: 20px; left: 20px; width: 190px; height: 320px;
       background: rgba(24, 24, 28, 0.95); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px;
       padding: 14px 16px; z-index: 1000; backdrop-filter: blur(16px);
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
-      display: flex; flex-direction: column; justify-content: space-between;
-      border-top: 1px solid rgba(255, 255, 255, 0.12);
-    }
-    .hud-right-mixer-panel {
-      position: absolute; bottom: 20px; right: 20px; width: 190px; height: 260px;
-      background: rgba(24, 24, 28, 0.95); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px;
-      padding: 14px 16px; z-index: 1000; backdrop-filter: blur(16px);
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
-      display: flex; flex-direction: column; justify-content: space-between;
+      display: flex; flex-direction: column; justify-content: flex-start; gap: 14px;
       border-top: 1px solid rgba(255, 255, 255, 0.12);
     }
     .mixer-panel-section {
@@ -584,9 +576,9 @@
         <button class="tool-btn" id="btnUndo">↩ 撤销</button>
         <button class="tool-btn" id="btnClear">✕ 清空导演轨</button>
         <button class="tool-btn" id="btnGenerateDraft" style="background: rgba(255, 205, 85, 0.1); border-color: var(--accent); color: var(--accent); display:none;">✨ 基于地理轨生成初稿</button>
-        <button class="tool-btn" id="btnImportGeoTrack" style="background: rgba(14, 165, 233, 0.15); border-color: #0ea5e9; color: #38bdf8;">📥 导入地理轨 (KML/GPX)</button>
+        <button class="tool-btn" id="btnImportGeoTrack" style="background: rgba(14, 165, 233, 0.15); border-color: #0ea5e9; color: #38bdf8;">📥 导入 KML</button>
         <input type="file" id="geoTrackFileInput" accept=".kml,.xml,.gpx" style="display: none;" />
-        <button class="tool-btn" id="btnToggleRefLines" style="background: rgba(255, 205, 85, 0.2); border-color: var(--accent); color: var(--accent);">👁️ 隐藏地理轨</button>
+        <button class="tool-btn" id="btnToggleRefLines" style="background: rgba(255, 205, 85, 0.2); border-color: var(--accent); color: var(--accent);">👁️ 物理轨</button>
       </div>
 
       <!-- ========================================================== -->
@@ -647,6 +639,7 @@
       </div>
 
       <!-- Left Panel: Playback & Speed -->
+      <!-- Left Panel: Playback, Speed & Wait -->
       <div class="hud-left-mixer-panel" id="hudLeftMixerPanel">
         <div class="mixer-panel-section">
           <div class="mixer-panel-header">▶️ 预览播放</div>
@@ -663,6 +656,18 @@
             <span class="rhythm-preset-label">缓慢</span>
             <input type="range" id="hudSpeedSlider" min="12" max="72" step="1" value="36" disabled>
             <span class="rhythm-preset-label">快速</span>
+          </div>
+        </div>
+
+        <div class="mixer-panel-section" id="hudWaitGroup" style="opacity: 0.4; transition: opacity 0.2s;">
+          <div class="rhythm-header-row">
+            <label>到站悬停</label>
+            <div class="hud-wait-value" id="hudWaitValue">0s</div>
+          </div>
+          <div class="rhythm-slider-container">
+            <span class="rhythm-preset-label">通过</span>
+            <input type="range" id="hudWaitSlider" min="0" max="15" step="0.5" value="0" disabled>
+            <span class="rhythm-preset-label">凝望</span>
           </div>
         </div>
       </div>
@@ -682,21 +687,6 @@
         </div>
         <div style="flex:1; position:relative; width:100%;">
           <canvas id="elevationCanvas" style="width:100%; height:100%; display:block; cursor:crosshair;"></canvas>
-        </div>
-      </div>
-
-      <!-- Right Panel: Wait/Dwell -->
-      <div class="hud-right-mixer-panel" id="hudRightMixerPanel">
-        <div class="mixer-panel-section" id="hudWaitGroup" style="opacity: 0.4; transition: opacity 0.2s;">
-          <div class="rhythm-header-row">
-            <label>到站悬停</label>
-            <div class="hud-wait-value" id="hudWaitValue">0s</div>
-          </div>
-          <div class="rhythm-slider-container">
-            <span class="rhythm-preset-label">通过</span>
-            <input type="range" id="hudWaitSlider" min="0" max="15" step="0.5" value="0" disabled>
-            <span class="rhythm-preset-label">凝望</span>
-          </div>
         </div>
       </div>
 
@@ -1240,10 +1230,8 @@
         refVisible = !refVisible;
         const btn = document.getElementById('btnToggleRefLines');
         if (refVisible) {
-          btn.textContent = '👁️ 隐藏地理轨';
           btn.style.background = 'rgba(255, 205, 85, 0.2)';
         } else {
-          btn.textContent = '👁️ 显示地理轨';
           btn.style.background = '';
         }
         drawRefLines();

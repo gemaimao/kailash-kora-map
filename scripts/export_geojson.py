@@ -10,11 +10,11 @@ def export_to_geojson(project_dir=None):
     if project_dir:
         routes_file = os.path.join(base_dir, project_dir, 'data', 'routes.json')
         pois_file = os.path.join(base_dir, project_dir, 'data', 'pois.json')
-        geojson_out = os.path.join(base_dir, project_dir, 'data', 'spatial_narrative.geojson')
+        geojson_out = os.path.join(base_dir, project_dir, 'data', 'spatial_narrative.json')
     else:
         routes_file = os.path.join(base_dir, 'data', 'routes.json')
         pois_file = os.path.join(base_dir, 'data', 'pois.json')
-        geojson_out = os.path.join(base_dir, 'data', 'spatial_narrative.geojson')
+        geojson_out = os.path.join(base_dir, 'data', 'spatial_narrative.json')
         
     print(f"Loading routes from: {routes_file}")
     print(f"Loading POIs from: {pois_file}")
