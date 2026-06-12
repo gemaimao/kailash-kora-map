@@ -1,0 +1,545 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "loc_yudu",
+        "type": "location",
+        "name": "于都河畔",
+        "region": "江西赣州",
+        "aliases": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          115.4208,
+          25.9523,
+          120.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "loc_xiangjiang",
+        "type": "location",
+        "name": "湘江渡口",
+        "region": "广西桂林",
+        "aliases": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.8205,
+          25.7533,
+          150.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "loc_tongdao",
+        "type": "location",
+        "name": "通道县城",
+        "region": "湖南怀化",
+        "aliases": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          109.7823,
+          26.1554,
+          320.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "loc_zunyi",
+        "type": "location",
+        "name": "遵义会址",
+        "region": "贵州遵义",
+        "aliases": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.9272,
+          27.6963,
+          850.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "evt_001_departure",
+        "type": "event",
+        "title": "1. 战略突围·星夜渡过于都河",
+        "description": "中央红军主力八万余人，分别在于都县的八个渡口渡过于都河，踏上战略突围长征路。这是整个长征史诗的起点。",
+        "date_start": "1934-10-16",
+        "date_end": "1934-10-20",
+        "location_id": "loc_yudu",
+        "importance": 5,
+        "narrative_cues": [
+          {
+            "trigger": "on_enter",
+            "action": "camera",
+            "payload": {
+              "heading": 180.0,
+              "pitch": -30.0,
+              "range": 12000.0
+            }
+          },
+          {
+            "trigger": "on_enter",
+            "action": "subtitle",
+            "payload": {
+              "text": "【长征起点】中央红军八万精兵渡过于都河，长征第一步！"
+            }
+          }
+        ],
+        "media": [
+          {
+            "file": "assets/1jt.png",
+            "caption": "于都河畔长征集结",
+            "type": "image"
+          }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          115.4208,
+          25.9523,
+          120.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "evt_002_xiangjiang",
+        "type": "event",
+        "title": "2. 惨烈会战·血战湘江",
+        "description": "红军突破国民党第四道封锁线，与敌人在全州、兴安展开生死决战。红军伤亡过半，人员锐减至三万人。",
+        "date_start": "1934-11-27",
+        "date_end": "1934-12-01",
+        "location_id": "loc_xiangjiang",
+        "importance": 5,
+        "narrative_cues": [
+          {
+            "trigger": "on_enter",
+            "action": "camera",
+            "payload": {
+              "heading": 200.0,
+              "pitch": -28.0,
+              "range": 16000.0
+            }
+          },
+          {
+            "trigger": "on_enter",
+            "action": "subtitle",
+            "payload": {
+              "text": "【血战湘江】三年不饮湘江水，十年不食湘江鱼"
+            }
+          },
+          {
+            "trigger": "on_enter",
+            "action": "symbol",
+            "payload": {
+              "symbol_type": "arrow",
+              "color": "#ef4444",
+              "width_ratio": 0.04
+            }
+          }
+        ],
+        "media": []
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.8205,
+          25.7533,
+          150.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "evt_003_tongdao",
+        "type": "event",
+        "title": "3. 战略抉择·通道转兵",
+        "description": "鉴于蒋介石已在湘西集结重兵设伏，红军在湖南通道召开会议，毛泽东极力主张转兵贵州，避实就虚，挽救了危机中的红军。",
+        "date_start": "1934-12-12",
+        "date_end": "1934-12-14",
+        "location_id": "loc_tongdao",
+        "importance": 4,
+        "narrative_cues": [
+          {
+            "trigger": "on_enter",
+            "action": "camera",
+            "payload": {
+              "heading": 260.0,
+              "pitch": -35.0,
+              "range": 10000.0
+            }
+          },
+          {
+            "trigger": "on_enter",
+            "action": "subtitle",
+            "payload": {
+              "text": "【通道决策】紧急避开湘西重兵封锁线，红军改投兵力薄弱的贵州！"
+            }
+          },
+          {
+            "trigger": "on_enter",
+            "action": "symbol",
+            "payload": {
+              "symbol_type": "arrow",
+              "color": "#f97316",
+              "width_ratio": 0.035,
+              "from_location": "loc_xiangjiang"
+            }
+          }
+        ],
+        "media": []
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          109.7823,
+          26.1554,
+          320.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "evt_004_zunyi",
+        "type": "event",
+        "title": "4. 历史转折·遵义会议",
+        "description": "中共中央在贵州遵义召开政治局扩大会议。会议结束了“左”倾冒险主义在中央的统治，事实上确立了毛泽东同志在红军和党中央的领导地位。",
+        "date_start": "1935-01-15",
+        "date_end": "1935-01-17",
+        "location_id": "loc_zunyi",
+        "importance": 5,
+        "narrative_cues": [
+          {
+            "trigger": "on_enter",
+            "action": "camera",
+            "payload": {
+              "heading": 320.0,
+              "pitch": -32.0,
+              "range": 6500.0
+            }
+          },
+          {
+            "trigger": "on_enter",
+            "action": "subtitle",
+            "payload": {
+              "text": "【伟大转折】遵义会议确立了毛泽东的军事指挥权，战略局势彻底改观！"
+            }
+          },
+          {
+            "trigger": "on_enter",
+            "action": "symbol",
+            "payload": {
+              "symbol_type": "arrow",
+              "color": "#10b981",
+              "width_ratio": 0.03,
+              "from_location": "loc_tongdao"
+            }
+          }
+        ],
+        "media": []
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.9272,
+          27.6963,
+          850.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "route_yudu_to_xiangjiang",
+        "type": "route",
+        "from_event": "evt_001_departure",
+        "to_event": "evt_002_xiangjiang",
+        "route_type": "march",
+        "geometry_mode": "line",
+        "growth_mode": "accumulated"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            115.4208,
+            25.9523,
+            120.0
+          ],
+          [
+            114.3055,
+            25.4022,
+            350.0
+          ],
+          [
+            113.1022,
+            24.8011,
+            480.0
+          ],
+          [
+            111.9022,
+            25.2011,
+            400.0
+          ],
+          [
+            110.8205,
+            25.7533,
+            150.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "route_xiangjiang_to_tongdao",
+        "type": "route",
+        "from_event": "evt_002_xiangjiang",
+        "to_event": "evt_003_tongdao",
+        "route_type": "march",
+        "geometry_mode": "line",
+        "growth_mode": "accumulated"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            110.8205,
+            25.7533,
+            150.0
+          ],
+          [
+            110.1022,
+            25.9011,
+            280.0
+          ],
+          [
+            109.7823,
+            26.1554,
+            320.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "route_tongdao_to_zunyi",
+        "type": "route",
+        "from_event": "evt_003_tongdao",
+        "to_event": "evt_004_zunyi",
+        "route_type": "march",
+        "geometry_mode": "line",
+        "growth_mode": "accumulated"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            109.7823,
+            26.1554,
+            320.0
+          ],
+          [
+            108.5022,
+            26.5011,
+            600.0
+          ],
+          [
+            107.5022,
+            27.2011,
+            750.0
+          ],
+          [
+            106.9272,
+            27.6963,
+            850.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "sym_arrow_cue_evt_002_xiangjiang_2",
+        "type": "military_symbol",
+        "symbol_type": "arrow",
+        "event_id": "evt_002_xiangjiang",
+        "date": "1934-11-27",
+        "fill": "#ef4444",
+        "stroke": "#ef4444",
+        "fill-opacity": 0.6,
+        "stroke-width": 2,
+        "title": "攻势/行军箭头: 2. 惨烈会战·血战湘江"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              110.8205,
+              25.7533
+            ],
+            [
+              111.97597720395015,
+              25.678166789789493
+            ],
+            [
+              111.97273588158006,
+              25.7530967159158
+            ],
+            [
+              115.42296088158007,
+              25.9023467159158
+            ],
+            [
+              115.41863911841993,
+              26.0022532840842
+            ],
+            [
+              111.96841411841993,
+              25.8530032840842
+            ],
+            [
+              111.96517279604984,
+              25.927933210210504
+            ],
+            [
+              110.8205,
+              25.7533
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "sym_arrow_cue_evt_003_tongdao_2",
+        "type": "military_symbol",
+        "symbol_type": "arrow",
+        "event_id": "evt_003_tongdao",
+        "date": "1934-12-12",
+        "fill": "#f97316",
+        "stroke": "#f97316",
+        "fill-opacity": 0.6,
+        "stroke-width": 2,
+        "title": "攻势/行军箭头: 3. 战略抉择·通道转兵"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              109.7823,
+              26.1554
+            ],
+            [
+              110.02425812500002,
+              26.00945375
+            ],
+            [
+              110.03481325000001,
+              26.036706499999998
+            ],
+            [
+              110.81346325,
+              25.735131499999998
+            ],
+            [
+              110.82753675,
+              25.7714685
+            ],
+            [
+              110.04888675000001,
+              26.0730435
+            ],
+            [
+              110.059441875,
+              26.10029625
+            ],
+            [
+              109.7823,
+              26.1554
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "sym_arrow_cue_evt_004_zunyi_2",
+        "type": "military_symbol",
+        "symbol_type": "arrow",
+        "event_id": "evt_004_zunyi",
+        "date": "1935-01-15",
+        "fill": "#10b981",
+        "stroke": "#10b981",
+        "fill-opacity": 0.6,
+        "stroke-width": 2,
+        "title": "攻势/行军箭头: 4. 历史转折·遵义会议"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              106.9272,
+              27.6963
+            ],
+            [
+              107.58319125,
+              27.204008750000003
+            ],
+            [
+              107.6178615,
+              27.268248500000002
+            ],
+            [
+              109.75918650000001,
+              26.1125735
+            ],
+            [
+              109.8054135,
+              26.1982265
+            ],
+            [
+              107.66408849999999,
+              27.353901500000003
+            ],
+            [
+              107.69875875,
+              27.41814125
+            ],
+            [
+              106.9272,
+              27.6963
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
