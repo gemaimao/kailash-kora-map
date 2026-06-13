@@ -21,32 +21,6 @@
       "perspective_pitch": "oblique",
       "speed_preset": "normal",
       "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781316506938",
-      "name": "导演航点 3",
-      "lng": 98.351151,
-      "lat": 29.641053,
-      "ground_alt": 2653,
-      "relative_alt": 500,
-      "heading": 80.3,
-      "pitch": -22.1,
-      "roll": 0,
-      "duration": 6.3,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "custom_target",
-      "perspective_fov": "natural",
-      "perspective_pitch": "custom",
-      "speed_preset": "normal",
-      "wait_preset": "none",
-      "look_at_target": {
-        "lng": 98.357483,
-        "lat": 29.641997,
-        "alt": 2901,
-        "name": "锁定点 (98.357, 29.642)"
-      }
     }
   ]
 }
