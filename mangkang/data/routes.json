@@ -19,7 +19,7 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "speed_preset": "normal",
+      "speed_preset": "custom",
       "wait_preset": "none"
     },
     {
@@ -32,14 +32,14 @@
       "heading": 54.2,
       "pitch": -17.1,
       "roll": 360,
-      "duration": 2.5,
+      "duration": 12.6,
       "wait_time": 0,
       "fov": 60,
       "shot_mode": "default",
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "speed_preset": "normal",
+      "speed_preset": "custom",
       "wait_preset": "none"
     },
     {
