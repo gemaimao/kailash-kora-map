@@ -6,9 +6,9 @@
       "properties": {
         "id": "loc_yudu",
         "type": "location",
-        "name": "于都河畔",
+        "name": "于都河畔 (Yudu River)",
         "region": "江西赣州",
-        "aliases": null
+        "aliases": "于都渡口,红军出发地"
       },
       "geometry": {
         "type": "Point",
@@ -24,9 +24,9 @@
       "properties": {
         "id": "loc_xiangjiang",
         "type": "location",
-        "name": "湘江渡口",
-        "region": "广西桂林",
-        "aliases": null
+        "name": "湘江渡口 (Xiang River)",
+        "region": "广西桂林兴安",
+        "aliases": "兴安渡口,血战湘江发生地"
       },
       "geometry": {
         "type": "Point",
@@ -42,9 +42,9 @@
       "properties": {
         "id": "loc_tongdao",
         "type": "location",
-        "name": "通道县城",
+        "name": "通道侗族自治县 (Tongdao)",
         "region": "湖南怀化",
-        "aliases": null
+        "aliases": "通道会议旧址,通道转兵"
       },
       "geometry": {
         "type": "Point",
@@ -60,9 +60,9 @@
       "properties": {
         "id": "loc_zunyi",
         "type": "location",
-        "name": "遵义会址",
+        "name": "遵义 (Zunyi)",
         "region": "贵州遵义",
-        "aliases": null
+        "aliases": "遵义会议旧址,地缘战略转折点"
       },
       "geometry": {
         "type": "Point",
@@ -76,10 +76,82 @@
     {
       "type": "Feature",
       "properties": {
+        "id": "loc_chishui",
+        "type": "location",
+        "name": "赤水河畔 (Chishui River)",
+        "region": "贵州/四川交界",
+        "aliases": "四渡赤水发生地"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          105.8543,
+          28.2323,
+          350.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "loc_luding",
+        "type": "location",
+        "name": "泸定桥 (Luding Bridge)",
+        "region": "四川甘孜泸定",
+        "aliases": "飞夺泸定桥"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          102.2355,
+          29.9142,
+          1330.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "loc_jiajinshan",
+        "type": "location",
+        "name": "夹金山 (Jiajin Mountain)",
+        "region": "四川雅安宝兴",
+        "aliases": "翻雪山过草地起点"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          102.7543,
+          30.4123,
+          4114.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "loc_wuqi",
+        "type": "location",
+        "name": "吴起镇 (Wuqi Town)",
+        "region": "陕西延安吴起",
+        "aliases": "红军长征胜利终点"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          108.1755,
+          36.9242,
+          1250.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
         "id": "evt_001_departure",
         "type": "event",
         "title": "1. 战略突围·星夜渡过于都河",
-        "description": "中央红军主力八万余人，分别在于都县的八个渡口渡过于都河，踏上战略突围长征路。这是整个长征史诗的起点。",
+        "description": "中央红军主力八万余人，分别在于都县的八个渡口渡过于都河，踏上战略突围漫漫征程。",
         "date_start": "1934-10-16",
         "date_end": "1934-10-20",
         "location_id": "loc_yudu",
@@ -98,14 +170,22 @@
             "trigger": "on_enter",
             "action": "subtitle",
             "payload": {
-              "text": "【长征起点】中央红军八万精兵渡过于都河，长征第一步！"
+              "text": "【长征的起点】中央红军主力集结于都，夜渡于都河",
+              "style": "accent"
+            }
+          },
+          {
+            "trigger": "on_enter",
+            "action": "voice",
+            "payload": {
+              "file": "media/narratives/yudu_departure.mp3"
             }
           }
         ],
         "media": [
           {
-            "file": "assets/1jt.png",
-            "caption": "于都河畔长征集结",
+            "file": "media/images/yudu_monument.jpg",
+            "caption": "江西于都：中央红军长征出发纪念碑",
             "type": "image"
           }
         ]
@@ -125,7 +205,7 @@
         "id": "evt_002_xiangjiang",
         "type": "event",
         "title": "2. 惨烈会战·血战湘江",
-        "description": "红军突破国民党第四道封锁线，与敌人在全州、兴安展开生死决战。红军伤亡过半，人员锐减至三万人。",
+        "description": "红军在广西灌阳、全州激战，惨烈突破国民党封锁线渡过湘江，人员由出发时的八万锐减至三万人。",
         "date_start": "1934-11-27",
         "date_end": "1934-12-01",
         "location_id": "loc_xiangjiang",
@@ -135,16 +215,17 @@
             "trigger": "on_enter",
             "action": "camera",
             "payload": {
-              "heading": 200.0,
-              "pitch": -28.0,
-              "range": 16000.0
+              "heading": 210.0,
+              "pitch": -25.0,
+              "range": 15000.0
             }
           },
           {
             "trigger": "on_enter",
             "action": "subtitle",
             "payload": {
-              "text": "【血战湘江】三年不饮湘江水，十年不食湘江鱼"
+              "text": "【生死决战】血战湘江：突破第四道封锁线，红军折损过半",
+              "style": "warning"
             }
           },
           {
@@ -152,12 +233,18 @@
             "action": "symbol",
             "payload": {
               "symbol_type": "arrow",
-              "color": "#ef4444",
+              "color": "#dc2626",
               "width_ratio": 0.04
             }
           }
         ],
-        "media": []
+        "media": [
+          {
+            "file": "media/images/xiangjiang.jpg",
+            "caption": "湘江战役纪念碑林",
+            "type": "image"
+          }
+        ]
       },
       "geometry": {
         "type": "Point",
@@ -173,8 +260,8 @@
       "properties": {
         "id": "evt_003_tongdao",
         "type": "event",
-        "title": "3. 战略抉择·通道转兵",
-        "description": "鉴于蒋介石已在湘西集结重兵设伏，红军在湖南通道召开会议，毛泽东极力主张转兵贵州，避实就虚，挽救了危机中的红军。",
+        "title": "3. 紧急转兵·通道决策",
+        "description": "面对敌人在湘西方向设立的口袋阵，中共中央在通道县召开紧急会议，采纳毛泽东同志主张，放弃去湘西，改向敌人兵力薄弱的贵州进军。",
         "date_start": "1934-12-12",
         "date_end": "1934-12-14",
         "location_id": "loc_tongdao",
@@ -184,7 +271,7 @@
             "trigger": "on_enter",
             "action": "camera",
             "payload": {
-              "heading": 260.0,
+              "heading": 270.0,
               "pitch": -35.0,
               "range": 10000.0
             }
@@ -193,7 +280,8 @@
             "trigger": "on_enter",
             "action": "subtitle",
             "payload": {
-              "text": "【通道决策】紧急避开湘西重兵封锁线，红军改投兵力薄弱的贵州！"
+              "text": "【地缘转折】通道会议：紧急转兵，改向敌人兵力薄弱的贵州进军",
+              "style": "info"
             }
           },
           {
@@ -201,7 +289,7 @@
             "action": "symbol",
             "payload": {
               "symbol_type": "arrow",
-              "color": "#f97316",
+              "color": "#ea580c",
               "width_ratio": 0.035,
               "from_location": "loc_xiangjiang"
             }
@@ -224,7 +312,7 @@
         "id": "evt_004_zunyi",
         "type": "event",
         "title": "4. 历史转折·遵义会议",
-        "description": "中共中央在贵州遵义召开政治局扩大会议。会议结束了“左”倾冒险主义在中央的统治，事实上确立了毛泽东同志在红军和党中央的领导地位。",
+        "description": "中共中央在遵义召开政治局扩大会议，纠正了错误的军事路线，确立了毛泽东同志在党和红军中的领导地位，是生死攸关的伟大转折点。",
         "date_start": "1935-01-15",
         "date_end": "1935-01-17",
         "location_id": "loc_zunyi",
@@ -235,15 +323,16 @@
             "action": "camera",
             "payload": {
               "heading": 320.0,
-              "pitch": -32.0,
-              "range": 6500.0
+              "pitch": -30.0,
+              "range": 8000.0
             }
           },
           {
             "trigger": "on_enter",
             "action": "subtitle",
             "payload": {
-              "text": "【伟大转折】遵义会议确立了毛泽东的军事指挥权，战略局势彻底改观！"
+              "text": "【历史性伟大转折】遵义会议：挽救了党，挽救了红军",
+              "style": "success"
             }
           },
           {
@@ -251,9 +340,66 @@
             "action": "symbol",
             "payload": {
               "symbol_type": "arrow",
-              "color": "#10b981",
+              "color": "#22c55e",
               "width_ratio": 0.03,
               "from_location": "loc_tongdao"
+            }
+          }
+        ],
+        "media": [
+          {
+            "file": "media/images/zunyi_meeting.jpg",
+            "caption": "贵州遵义：遵义会议会址",
+            "type": "image"
+          }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.9272,
+          27.6963,
+          850.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "evt_005_chishui",
+        "type": "event",
+        "title": "5. 出奇制胜·四渡赤水",
+        "description": "毛泽东指挥红军巧妙穿插于川滇黔边境，四次横渡赤水河，打乱蒋介石围剿部署，是军事史上的得意之笔。",
+        "date_start": "1935-01-29",
+        "date_end": "1935-03-22",
+        "location_id": "loc_chishui",
+        "importance": 5,
+        "narrative_cues": [
+          {
+            "trigger": "on_enter",
+            "action": "camera",
+            "payload": {
+              "heading": 300.0,
+              "pitch": -28.0,
+              "range": 14000.0
+            }
+          },
+          {
+            "trigger": "on_enter",
+            "action": "subtitle",
+            "payload": {
+              "text": "【出奇制胜】四渡赤水：穿插合围，打乱蒋介石围剿部署",
+              "style": "accent"
+            }
+          },
+          {
+            "trigger": "on_enter",
+            "action": "symbol",
+            "payload": {
+              "symbol_type": "arrow",
+              "color": "#ea580c",
+              "width_ratio": 0.035,
+              "from_location": "loc_zunyi"
             }
           }
         ],
@@ -262,9 +408,148 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          106.9272,
-          27.6963,
-          850.0
+          105.8543,
+          28.2323,
+          350.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "evt_006_luding",
+        "type": "event",
+        "title": "6. 奇兵突袭·飞夺泸定桥",
+        "description": "红军勇士昼夜兼程240华里，攀着悬空铁链突破天险大渡河，成功夺取泸定桥，粉碎了蒋介石将红军变成石达开第二的企图。",
+        "date_start": "1935-05-25",
+        "date_end": "1935-05-29",
+        "location_id": "loc_luding",
+        "importance": 5,
+        "narrative_cues": [
+          {
+            "trigger": "on_enter",
+            "action": "camera",
+            "payload": {
+              "heading": 260.0,
+              "pitch": -25.0,
+              "range": 9000.0
+            }
+          },
+          {
+            "trigger": "on_enter",
+            "action": "subtitle",
+            "payload": {
+              "text": "【奇兵突击】飞夺泸定桥：强渡大渡河，冲破围追堵截",
+              "style": "warning"
+            }
+          },
+          {
+            "trigger": "on_enter",
+            "action": "symbol",
+            "payload": {
+              "symbol_type": "arrow",
+              "color": "#dc2626",
+              "width_ratio": 0.03,
+              "from_location": "loc_chishui"
+            }
+          }
+        ],
+        "media": []
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          102.2355,
+          29.9142,
+          1330.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "evt_007_snowmountain",
+        "type": "event",
+        "title": "7. 征服天险·翻雪山过草地",
+        "description": "红军翻越终年积雪的夹金山，走过荒无人烟的茫茫大草地，经受严寒饥饿考验，实现了红一方面军与红四方面军会师。",
+        "date_start": "1935-06-12",
+        "date_end": "1935-08-28",
+        "location_id": "loc_jiajinshan",
+        "importance": 5,
+        "narrative_cues": [
+          {
+            "trigger": "on_enter",
+            "action": "camera",
+            "payload": {
+              "heading": 20.0,
+              "pitch": -32.0,
+              "range": 22000.0
+            }
+          },
+          {
+            "trigger": "on_enter",
+            "action": "subtitle",
+            "payload": {
+              "text": "【生命奇迹】过雪山草地：翻越积雪夹金山，踏破荒凉草滩",
+              "style": "info"
+            }
+          }
+        ],
+        "media": []
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          102.7543,
+          30.4123,
+          4114.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "evt_008_wuqi",
+        "type": "event",
+        "title": "8. 胜利会师·吴起镇红旗飘",
+        "description": "中央红军主力历经万水千山，胜利到达陕北吴起镇，同陕北红军胜利会师，长征宣告胜利结束。",
+        "date_start": "1935-10-19",
+        "date_end": "1935-10-22",
+        "location_id": "loc_wuqi",
+        "importance": 5,
+        "narrative_cues": [
+          {
+            "trigger": "on_enter",
+            "action": "camera",
+            "payload": {
+              "heading": 45.0,
+              "pitch": -20.0,
+              "range": 12000.0
+            }
+          },
+          {
+            "trigger": "on_enter",
+            "action": "subtitle",
+            "payload": {
+              "text": "【三军会师】长征胜利结束：胜利到达陕北吴起镇！",
+              "style": "success"
+            }
+          }
+        ],
+        "media": [
+          {
+            "file": "media/images/wuqi_monument.jpg",
+            "caption": "陕北吴起县：长征胜利会师纪念碑",
+            "type": "image"
+          }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          108.1755,
+          36.9242,
+          1250.0
         ]
       }
     },
@@ -382,13 +667,156 @@
     {
       "type": "Feature",
       "properties": {
+        "id": "route_zunyi_to_chishui",
+        "type": "route",
+        "from_event": "evt_004_zunyi",
+        "to_event": "evt_005_chishui",
+        "route_type": "march",
+        "geometry_mode": "line",
+        "growth_mode": "accumulated"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            106.9272,
+            27.6963,
+            850.0
+          ],
+          [
+            106.4022,
+            27.9011,
+            700.0
+          ],
+          [
+            105.8543,
+            28.2323,
+            350.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "route_chishui_to_luding",
+        "type": "route",
+        "from_event": "evt_005_chishui",
+        "to_event": "evt_006_luding",
+        "route_type": "march",
+        "geometry_mode": "line",
+        "growth_mode": "accumulated"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.8543,
+            28.2323,
+            350.0
+          ],
+          [
+            104.5022,
+            27.8011,
+            1000.0
+          ],
+          [
+            103.2022,
+            28.9011,
+            1200.0
+          ],
+          [
+            102.2355,
+            29.9142,
+            1330.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "route_luding_to_jiajinshan",
+        "type": "route",
+        "from_event": "evt_006_luding",
+        "to_event": "evt_007_snowmountain",
+        "route_type": "march",
+        "geometry_mode": "line",
+        "growth_mode": "accumulated"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            102.2355,
+            29.9142,
+            1330.0
+          ],
+          [
+            102.5022,
+            30.1511,
+            2500.0
+          ],
+          [
+            102.7543,
+            30.4123,
+            4114.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "route_jiajinshan_to_wuqi",
+        "type": "route",
+        "from_event": "evt_007_snowmountain",
+        "to_event": "evt_008_wuqi",
+        "route_type": "march",
+        "geometry_mode": "line",
+        "growth_mode": "accumulated"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            102.7543,
+            30.4123,
+            4114.0
+          ],
+          [
+            102.9022,
+            32.5011,
+            3500.0
+          ],
+          [
+            103.8022,
+            34.0011,
+            2000.0
+          ],
+          [
+            106.5022,
+            35.5011,
+            1600.0
+          ],
+          [
+            108.1755,
+            36.9242,
+            1250.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
         "id": "sym_arrow_cue_evt_002_xiangjiang_2",
         "type": "military_symbol",
         "symbol_type": "arrow",
         "event_id": "evt_002_xiangjiang",
         "date": "1934-11-27",
-        "fill": "#ef4444",
-        "stroke": "#ef4444",
+        "fill": "#dc2626",
+        "stroke": "#dc2626",
         "fill-opacity": 0.6,
         "stroke-width": 2,
         "title": "攻势/行军箭头: 2. 惨烈会战·血战湘江"
@@ -441,11 +869,11 @@
         "symbol_type": "arrow",
         "event_id": "evt_003_tongdao",
         "date": "1934-12-12",
-        "fill": "#f97316",
-        "stroke": "#f97316",
+        "fill": "#ea580c",
+        "stroke": "#ea580c",
         "fill-opacity": 0.6,
         "stroke-width": 2,
-        "title": "攻势/行军箭头: 3. 战略抉择·通道转兵"
+        "title": "攻势/行军箭头: 3. 紧急转兵·通道决策"
       },
       "geometry": {
         "type": "Polygon",
@@ -495,8 +923,8 @@
         "symbol_type": "arrow",
         "event_id": "evt_004_zunyi",
         "date": "1935-01-15",
-        "fill": "#10b981",
-        "stroke": "#10b981",
+        "fill": "#22c55e",
+        "stroke": "#22c55e",
         "fill-opacity": 0.6,
         "stroke-width": 2,
         "title": "攻势/行军箭头: 4. 历史转折·遵义会议"
@@ -536,6 +964,114 @@
             [
               106.9272,
               27.6963
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "sym_arrow_cue_evt_005_chishui_2",
+        "type": "military_symbol",
+        "symbol_type": "arrow",
+        "event_id": "evt_005_chishui",
+        "date": "1935-01-29",
+        "fill": "#ea580c",
+        "stroke": "#ea580c",
+        "fill-opacity": 0.6,
+        "stroke-width": 2,
+        "title": "攻势/行军箭头: 5. 出奇制胜·四渡赤水"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              105.8543,
+              28.2323
+            ],
+            [
+              106.099075,
+              28.051360624999997
+            ],
+            [
+              106.113145,
+              28.07952425
+            ],
+            [
+              106.91782,
+              27.67752425
+            ],
+            [
+              106.93657999999999,
+              27.71507575
+            ],
+            [
+              106.13190499999999,
+              28.117075749999998
+            ],
+            [
+              106.14597499999999,
+              28.145239375
+            ],
+            [
+              105.8543,
+              28.2323
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "sym_arrow_cue_evt_006_luding_2",
+        "type": "military_symbol",
+        "symbol_type": "arrow",
+        "event_id": "evt_006_luding",
+        "date": "1935-05-25",
+        "fill": "#dc2626",
+        "stroke": "#dc2626",
+        "fill-opacity": 0.6,
+        "stroke-width": 2,
+        "title": "攻势/行军箭头: 6. 奇兵突袭·飞夺泸定桥"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              102.2355,
+              29.9142
+            ],
+            [
+              103.08751617885908,
+              29.380369739910357
+            ],
+            [
+              103.11912647154362,
+              29.448382895964144
+            ],
+            [
+              105.83322647154363,
+              28.18695789596414
+            ],
+            [
+              105.87537352845636,
+              28.277642104035856
+            ],
+            [
+              103.16127352845636,
+              29.53906710403586
+            ],
+            [
+              103.19288382114091,
+              29.607080260089646
+            ],
+            [
+              102.2355,
+              29.9142
             ]
           ]
         ]
