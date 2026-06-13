@@ -170,8 +170,8 @@
       "lat": 29.71933,
       "ground_alt": 3748,
       "relative_alt": 89,
-      "heading": 91.7,
-      "pitch": -22.9,
+      "heading": 279.5,
+      "pitch": 0.1,
       "roll": 360,
       "duration": 2.5,
       "wait_time": 4.5,
@@ -181,7 +181,8 @@
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
       "speed_preset": "custom",
-      "wait_preset": "custom"
+      "wait_preset": "custom",
+      "look_at_target": null
     }
   ]
 }
