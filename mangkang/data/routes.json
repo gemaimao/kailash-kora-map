@@ -129,10 +129,10 @@
       "lat": 29.71933,
       "ground_alt": 3748,
       "relative_alt": 753,
-      "heading": 91.7,
-      "pitch": -22.9,
+      "heading": 279.5,
+      "pitch": 0.1,
       "roll": 0,
-      "duration": 2.5,
+      "duration": 19.6,
       "wait_time": 0,
       "fov": 90,
       "shot_mode": "default",
@@ -140,7 +140,8 @@
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
       "speed_preset": "normal",
-      "wait_preset": "none"
+      "wait_preset": "none",
+      "look_at_target": null
     },
     {
       "id": "evt_1781316767802",
