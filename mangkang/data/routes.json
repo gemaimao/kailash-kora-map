@@ -180,7 +180,7 @@
       "look_at_intent": "forward",
       "perspective_fov": "natural",
       "perspective_pitch": "oblique",
-      "speed_preset": "normal",
+      "speed_preset": "custom",
       "wait_preset": "none"
     }
   ]
