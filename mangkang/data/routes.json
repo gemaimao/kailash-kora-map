@@ -52,7 +52,7 @@
       "heading": 32.9,
       "pitch": -10,
       "roll": 360,
-      "duration": 12.5,
+      "duration": 15.6,
       "wait_time": 0,
       "fov": 90,
       "shot_mode": "handheld",
@@ -79,7 +79,7 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "speed_preset": "normal",
+      "speed_preset": "custom",
       "wait_preset": "none"
     },
     {
