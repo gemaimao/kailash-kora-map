@@ -1,46 +1,5 @@
 {
   "main": [],
   "secondary": [],
-  "main_flight": [
-    {
-      "id": "evt_1781416134604",
-      "name": "导演航点 1",
-      "lng": 121.494172,
-      "lat": 31.239779,
-      "ground_alt": 51,
-      "relative_alt": 500,
-      "heading": 190.3,
-      "pitch": -28.9,
-      "roll": 360,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "custom",
-      "perspective_fov": "custom",
-      "perspective_pitch": "custom",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781416159958",
-      "name": "导演航点 2",
-      "lng": 121.490277,
-      "lat": 31.233857,
-      "ground_alt": 15,
-      "relative_alt": 500,
-      "heading": 270,
-      "pitch": -38.3,
-      "roll": 0,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "custom",
-      "perspective_fov": "custom",
-      "perspective_pitch": "custom",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    }
-  ]
+  "main_flight": []
 }
