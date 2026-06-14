@@ -51,14 +51,14 @@
       "relative_alt": 252,
       "heading": 28.5,
       "pitch": -14.8,
-      "roll": 0,
+      "roll": 360,
       "duration": 2.5,
       "wait_time": 0,
       "fov": 60,
       "shot_mode": "default",
-      "look_at_intent": "forward",
-      "perspective_fov": "natural",
-      "perspective_pitch": "oblique",
+      "look_at_intent": "custom",
+      "perspective_fov": "custom",
+      "perspective_pitch": "custom",
       "speed_preset": "normal",
       "wait_preset": "none"
     }
