@@ -81,6 +81,26 @@
       "perspective_pitch": "custom",
       "speed_preset": "normal",
       "wait_preset": "none"
+    },
+    {
+      "id": "evt_1781425948167",
+      "name": "自定义航点 5",
+      "lng": 81.253059,
+      "lat": 31.003879,
+      "ground_alt": 4696,
+      "relative_alt": 309,
+      "heading": 37.3,
+      "pitch": -11.8,
+      "roll": 0,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none"
     }
   ]
 }
