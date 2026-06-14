@@ -123,28 +123,8 @@
       "wait_preset": "custom"
     },
     {
-      "id": "evt_1781403086056",
-      "name": "自定义航点 7",
-      "lng": 98.370016,
-      "lat": 29.66609,
-      "ground_alt": 2860,
-      "relative_alt": 564,
-      "heading": 360,
-      "pitch": -10,
-      "roll": 0,
-      "duration": 27.4,
-      "wait_time": 0,
-      "fov": 90,
-      "shot_mode": "handheld",
-      "look_at_intent": "custom",
-      "perspective_fov": "custom",
-      "perspective_pitch": "custom",
-      "speed_preset": "custom",
-      "wait_preset": "none"
-    },
-    {
       "id": "evt_1781403196370",
-      "name": "自定义航点 8",
+      "name": "自定义航点 7",
       "lng": 98.409326,
       "lat": 29.706401,
       "ground_alt": 3326,
@@ -164,7 +144,7 @@
     },
     {
       "id": "evt_1781403223536",
-      "name": "自定义航点 9",
+      "name": "自定义航点 8",
       "lng": 98.465595,
       "lat": 29.716216,
       "ground_alt": 3853,
@@ -185,7 +165,7 @@
     },
     {
       "id": "evt_1781403249308",
-      "name": "自定义航点 10",
+      "name": "自定义航点 9",
       "lng": 98.465595,
       "lat": 29.716216,
       "ground_alt": 3853,
@@ -205,7 +185,7 @@
     },
     {
       "id": "evt_1781407032135",
-      "name": "导演航点 11",
+      "name": "导演航点 10",
       "lng": 98.371976,
       "lat": 29.668732,
       "ground_alt": 2892,
@@ -225,7 +205,7 @@
     },
     {
       "id": "evt_1781414711970",
-      "name": "导演航点 12",
+      "name": "导演航点 11",
       "lng": 98.369896,
       "lat": 29.673288,
       "ground_alt": 3003,
@@ -245,7 +225,7 @@
     },
     {
       "id": "evt_1781414957796",
-      "name": "导演航点 13",
+      "name": "导演航点 12",
       "lng": 98.375104,
       "lat": 29.685727,
       "ground_alt": 3166,
@@ -265,7 +245,7 @@
     },
     {
       "id": "evt_1781414988780",
-      "name": "导演航点 14",
+      "name": "导演航点 13",
       "lng": 98.387652,
       "lat": 29.704759,
       "ground_alt": 3585,
