@@ -112,7 +112,7 @@
       "heading": 107.9,
       "pitch": -12.4,
       "roll": 0,
-      "duration": 42.5,
+      "duration": 39.5,
       "wait_time": 0,
       "fov": 60,
       "shot_mode": "default",
@@ -139,7 +139,7 @@
       "look_at_intent": "forward",
       "perspective_fov": "natural",
       "perspective_pitch": "oblique",
-      "speed_preset": "normal",
+      "speed_preset": "custom",
       "wait_preset": "none"
     }
   ]
