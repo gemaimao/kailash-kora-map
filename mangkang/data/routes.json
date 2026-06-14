@@ -33,7 +33,7 @@
       "heading": 108.7,
       "pitch": -27,
       "roll": 360,
-      "duration": 2.2,
+      "duration": 18,
       "wait_time": 0,
       "fov": 90,
       "shot_mode": "handheld",
@@ -42,7 +42,10 @@
       "perspective_pitch": "custom",
       "speed_preset": "custom",
       "wait_preset": "none",
-      "look_at_target": null
+      "look_at_target": null,
+      "narration_text": "这里是著名的川zang公路如美段，澜沧江边的大竹卡渡口一带。竹卡是藏语渡口之意。",
+      "narration_audio": "/mangkang/media/narratives/evt_1781404204957.mp3",
+      "narration_duration": 15.980666666666666
     },
     {
       "id": "evt_1781404275273",
