@@ -117,7 +117,7 @@
       "fov": 90,
       "shot_mode": "handheld",
       "look_at_intent": "custom",
-      "perspective_fov": "vast",
+      "perspective_fov": "custom",
       "perspective_pitch": "custom",
       "speed_preset": "custom",
       "wait_preset": "custom"
