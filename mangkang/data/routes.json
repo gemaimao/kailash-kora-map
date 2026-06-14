@@ -172,14 +172,14 @@
       "heading": 271.7,
       "pitch": -11.4,
       "roll": 0,
-      "duration": 39.5,
+      "duration": 33.3,
       "wait_time": 5,
       "fov": 60,
       "shot_mode": "default",
       "look_at_intent": "summit",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "speed_preset": "slow",
+      "speed_preset": "custom",
       "wait_preset": "brief"
     },
     {
