@@ -161,26 +161,6 @@
       "perspective_pitch": "custom",
       "speed_preset": "normal",
       "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781404077972",
-      "name": "导演航点 9",
-      "lng": 98.420277,
-      "lat": 29.686477,
-      "ground_alt": 3999,
-      "relative_alt": 500,
-      "heading": 241.2,
-      "pitch": -47.7,
-      "roll": 0,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "custom",
-      "perspective_fov": "custom",
-      "perspective_pitch": "custom",
-      "speed_preset": "normal",
-      "wait_preset": "none"
     }
   ]
 }
