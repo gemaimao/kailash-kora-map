@@ -63,6 +63,26 @@
       "wait_preset": "none"
     },
     {
+      "id": "evt_1781404346120",
+      "name": "自定义航点 8",
+      "lng": 98.346576,
+      "lat": 29.630432,
+      "ground_alt": 2758,
+      "relative_alt": 268,
+      "heading": 25.4,
+      "pitch": -28.2,
+      "roll": 360,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 90,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none"
+    },
+    {
       "id": "evt_1781403170053",
       "name": "自定义航点 4",
       "lng": 98.368879,
