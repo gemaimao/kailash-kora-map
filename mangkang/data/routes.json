@@ -41,6 +41,26 @@
       "perspective_pitch": "oblique",
       "speed_preset": "normal",
       "wait_preset": "none"
+    },
+    {
+      "id": "evt_1781403031944",
+      "name": "导演航点 3",
+      "lng": 98.352232,
+      "lat": 29.633137,
+      "ground_alt": 2641,
+      "relative_alt": 500,
+      "heading": 353.4,
+      "pitch": -24.6,
+      "roll": 0,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "custom",
+      "perspective_fov": "custom",
+      "perspective_pitch": "custom",
+      "speed_preset": "normal",
+      "wait_preset": "none"
     }
   ]
 }
