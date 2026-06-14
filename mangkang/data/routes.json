@@ -8,19 +8,19 @@
       "lng": 98.353131,
       "lat": 29.610415,
       "ground_alt": 2670,
-      "relative_alt": 180,
-      "heading": 5.5,
-      "pitch": -10,
+      "relative_alt": 350,
+      "heading": 279.9,
+      "pitch": 0.1,
       "roll": 0,
       "duration": 2.5,
-      "wait_time": 0,
-      "fov": 90,
-      "shot_mode": "handheld",
-      "look_at_intent": "custom",
+      "wait_time": 5,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "summit",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "speed_preset": "custom",
-      "wait_preset": "none"
+      "speed_preset": "slow",
+      "wait_preset": "brief"
     }
   ]
 }
