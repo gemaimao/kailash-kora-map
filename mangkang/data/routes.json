@@ -50,7 +50,8 @@
       "look_at_target": null,
       "narration_text": "这里是著名的川zang公路如美段，澜沧江边的大竹卡渡口一带。竹卡是藏语渡口之意。",
       "narration_audio": "/mangkang/media/narratives/evt_1781404204957.mp3",
-      "narration_duration": 15.980666666666666
+      "narration_duration": 15.980666666666666,
+      "narration_voice": "voxcpm"
     },
     {
       "id": "evt_1781404275273",
