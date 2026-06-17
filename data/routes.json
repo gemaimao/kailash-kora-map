@@ -49547,7 +49547,113 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 60
+      "fov": 60,
+      "fractionalIndex": 0
+    },
+    {
+      "id": "evt_1781172164087",
+      "name": "导演航点 2",
+      "lng": 81.285564,
+      "lat": 30.978834,
+      "ground_alt": 4662,
+      "relative_alt": 500,
+      "heading": 300.9,
+      "pitch": -40,
+      "roll": 0,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 2.794230391130828
+    },
+    {
+      "id": "evt_1781621843136",
+      "name": "导演航点 3",
+      "lng": 81.284924,
+      "lat": 30.980749,
+      "ground_alt": 4698,
+      "relative_alt": 500,
+      "heading": 300.9,
+      "pitch": -40,
+      "roll": 360,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 3.5726542473770344
+    },
+    {
+      "id": "evt_1781405077543",
+      "name": "导演航点 4",
+      "lng": 81.284329,
+      "lat": 30.978709,
+      "ground_alt": 4656,
+      "relative_alt": 500,
+      "heading": 300.9,
+      "pitch": -40,
+      "roll": 360,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 3.6985636274076255
+    },
+    {
+      "id": "evt_1781172169060",
+      "name": "导演航点 5",
+      "lng": 81.279324,
+      "lat": 30.982788,
+      "ground_alt": 4740,
+      "relative_alt": 500,
+      "heading": 300.9,
+      "pitch": -40,
+      "roll": 0,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "handheld",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 17
+    },
+    {
+      "id": "evt_1781621938164",
+      "name": "导演航点 6",
+      "lng": 81.279176,
+      "lat": 30.981772,
+      "ground_alt": 4709,
+      "relative_alt": 500,
+      "heading": 300.9,
+      "pitch": -40,
+      "roll": 360,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 17
     },
     {
       "id": "evt_1781145179397_1",
@@ -49564,7 +49670,8 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 60
+      "fov": 60,
+      "fractionalIndex": 19
     },
     {
       "id": "evt_1781145179397_2",
@@ -49581,7 +49688,134 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 60
+      "fov": 60,
+      "fractionalIndex": 68
+    },
+    {
+      "id": "evt_1781621997879",
+      "name": "导演航点 9",
+      "lng": 81.26841,
+      "lat": 30.982609,
+      "ground_alt": 4631,
+      "relative_alt": 500,
+      "heading": 300.9,
+      "pitch": -40,
+      "roll": 0,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 68
+    },
+    {
+      "id": "evt_1781172199101",
+      "name": "导演航点 10",
+      "lng": 81.268101,
+      "lat": 30.984705,
+      "ground_alt": 4645,
+      "relative_alt": 500,
+      "heading": 300.9,
+      "pitch": -40,
+      "roll": 360,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 72
+    },
+    {
+      "id": "evt_1781622337386",
+      "name": "导演航点 11",
+      "lng": 81.262409,
+      "lat": 30.976172,
+      "ground_alt": 4608,
+      "relative_alt": 500,
+      "heading": 300.9,
+      "pitch": -40,
+      "roll": 0,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "custom",
+      "perspective_fov": "custom",
+      "perspective_pitch": "custom",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 72
+    },
+    {
+      "id": "evt_1781622017552",
+      "name": "导演航点 12",
+      "lng": 81.2624,
+      "lat": 30.984949,
+      "ground_alt": 4658,
+      "relative_alt": 500,
+      "heading": 300.9,
+      "pitch": -40,
+      "roll": 360,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 90
+    },
+    {
+      "id": "evt_1781622339628",
+      "name": "导演航点 13",
+      "lng": 81.257098,
+      "lat": 30.976768,
+      "ground_alt": 4627,
+      "relative_alt": 500,
+      "heading": 300.9,
+      "pitch": -40,
+      "roll": 360,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 93
+    },
+    {
+      "id": "evt_1781622340954",
+      "name": "导演航点 14",
+      "lng": 81.251612,
+      "lat": 30.977383,
+      "ground_alt": 4631,
+      "relative_alt": 500,
+      "heading": 300.9,
+      "pitch": -40,
+      "roll": 360,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 106
     },
     {
       "id": "evt_1781145179397_3",
@@ -49598,7 +49832,71 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 60
+      "fov": 60,
+      "fractionalIndex": 108
+    },
+    {
+      "id": "evt_1781172361811",
+      "name": "导演航点 16",
+      "lng": 81.259378,
+      "lat": 30.99001,
+      "ground_alt": 4703,
+      "relative_alt": 500,
+      "heading": 300.9,
+      "pitch": -40,
+      "roll": 360,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "custom",
+      "perspective_fov": "custom",
+      "perspective_pitch": "custom",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 109.06062286082762
+    },
+    {
+      "id": "evt_1781622018450",
+      "name": "导演航点 17",
+      "lng": 81.253892,
+      "lat": 30.988132,
+      "ground_alt": 4688,
+      "relative_alt": 500,
+      "heading": 300.9,
+      "pitch": -40,
+      "roll": 360,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "custom",
+      "perspective_fov": "custom",
+      "perspective_pitch": "custom",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 175
+    },
+    {
+      "id": "evt_1781172530750",
+      "name": "导演航点 18",
+      "lng": 81.257617,
+      "lat": 30.994794,
+      "ground_alt": 4742,
+      "relative_alt": 500,
+      "heading": 300.9,
+      "pitch": -40,
+      "roll": 0,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 197.93580152589283
     },
     {
       "id": "evt_1781145179397_4",
@@ -49615,7 +49913,51 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 60
+      "fov": 60,
+      "fractionalIndex": 222
+    },
+    {
+      "id": "evt_1781172533275",
+      "name": "导演航点 20",
+      "lng": 81.254587,
+      "lat": 31.000889,
+      "ground_alt": 4687,
+      "relative_alt": 500,
+      "heading": 300.9,
+      "pitch": -40,
+      "roll": 360,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 239
+    },
+    {
+      "id": "evt_1781172546576",
+      "name": "导演航点 21",
+      "lng": 81.249741,
+      "lat": 31.005989,
+      "ground_alt": 4712,
+      "relative_alt": 500,
+      "heading": 51.2,
+      "pitch": 0.6,
+      "roll": 360,
+      "duration": 36.6,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "custom",
+      "perspective_fov": "custom",
+      "perspective_pitch": "custom",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "look_at_target": null,
+      "fractionalIndex": 253
     },
     {
       "id": "evt_1781145179397_5",
@@ -49632,7 +49974,29 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 60
+      "fov": 60,
+      "fractionalIndex": 255
+    },
+    {
+      "id": "evt_1781166383459",
+      "name": "导演航点 23",
+      "lng": 81.256879,
+      "lat": 31.011821,
+      "ground_alt": 4705,
+      "relative_alt": 500,
+      "heading": 316.5,
+      "pitch": -30,
+      "roll": 0,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "custom",
+      "perspective_fov": "custom",
+      "perspective_pitch": "custom",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 255.6445691958969
     },
     {
       "id": "evt_1781145179397_6",
@@ -49649,7 +50013,29 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 60
+      "fov": 60,
+      "fractionalIndex": 276
+    },
+    {
+      "id": "evt_1781169481201",
+      "name": "导演航点 25",
+      "lng": 81.263064,
+      "lat": 31.025932,
+      "ground_alt": 4710,
+      "relative_alt": 500,
+      "heading": 33.2,
+      "pitch": -22,
+      "roll": 0,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 294.4579446146899
     },
     {
       "id": "evt_1781145179397_7",
@@ -49664,7 +50050,8 @@
       "duration": 1.5,
       "wait_time": 0,
       "fov": 120,
-      "perspective_fov": "custom"
+      "perspective_fov": "custom",
+      "fractionalIndex": 297
     },
     {
       "id": "evt_1781145179397_8",
@@ -49681,7 +50068,29 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 120
+      "fov": 120,
+      "fractionalIndex": 315
+    },
+    {
+      "id": "evt_1781169501992",
+      "name": "导演航点 28",
+      "lng": 81.27519,
+      "lat": 31.033985,
+      "ground_alt": 4746,
+      "relative_alt": 500,
+      "heading": 31.5,
+      "pitch": -18.5,
+      "roll": 0,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 318
     },
     {
       "id": "evt_1781145179397_9",
@@ -49696,7 +50105,8 @@
       "duration": 1.5,
       "wait_time": 0,
       "fov": 120,
-      "perspective_fov": "custom"
+      "perspective_fov": "custom",
+      "fractionalIndex": 342
     },
     {
       "id": "evt_1781145179397_10",
@@ -49711,7 +50121,8 @@
       "duration": 1.5,
       "wait_time": 0,
       "fov": 120,
-      "perspective_fov": "custom"
+      "perspective_fov": "custom",
+      "fractionalIndex": 376
     },
     {
       "id": "evt_1781145179397_11",
@@ -49728,7 +50139,8 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 120
+      "fov": 120,
+      "fractionalIndex": 409
     },
     {
       "id": "evt_1781145179397_12",
@@ -49745,7 +50157,8 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 120
+      "fov": 120,
+      "fractionalIndex": 436
     },
     {
       "id": "evt_1781145179397_13",
@@ -49760,7 +50173,8 @@
       "duration": 1.5,
       "wait_time": 0,
       "fov": 120,
-      "perspective_fov": "custom"
+      "perspective_fov": "custom",
+      "fractionalIndex": 476
     },
     {
       "id": "evt_1781145179397_14",
@@ -49777,7 +50191,8 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 119
+      "fov": 119,
+      "fractionalIndex": 510
     },
     {
       "id": "evt_1781145179397_15",
@@ -49794,7 +50209,8 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 115
+      "fov": 115,
+      "fractionalIndex": 538
     },
     {
       "id": "evt_1781145179397_16",
@@ -49811,7 +50227,8 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 120
+      "fov": 120,
+      "fractionalIndex": 563
     },
     {
       "id": "evt_1781145179397_17",
@@ -49828,7 +50245,8 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 119
+      "fov": 119,
+      "fractionalIndex": 595
     },
     {
       "id": "evt_1781145179397_18",
@@ -49845,7 +50263,8 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 96
+      "fov": 96,
+      "fractionalIndex": 621
     },
     {
       "id": "evt_1781145179397_19",
@@ -49862,7 +50281,8 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 120
+      "fov": 120,
+      "fractionalIndex": 657
     },
     {
       "id": "evt_1781145179397_20",
@@ -49875,7 +50295,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 1.5,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 694
     },
     {
       "id": "evt_1781145179397_21",
@@ -49892,7 +50313,8 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 60
+      "fov": 60,
+      "fractionalIndex": 775
     },
     {
       "id": "evt_1781145179397_22",
@@ -49909,7 +50331,8 @@
       "look_at_intent": "custom",
       "perspective_fov": "natural",
       "perspective_pitch": "custom",
-      "fov": 60
+      "fov": 60,
+      "fractionalIndex": 912
     },
     {
       "id": "evt_1781145179397_23",
@@ -49926,7 +50349,8 @@
       "look_at_intent": "custom",
       "perspective_fov": "natural",
       "perspective_pitch": "custom",
-      "fov": 60
+      "fov": 60,
+      "fractionalIndex": 982
     },
     {
       "id": "evt_1781145179397_24",
@@ -49944,7 +50368,29 @@
       "perspective_fov": "vast",
       "perspective_pitch": "custom",
       "fov": 90,
-      "shot_mode": "handheld"
+      "shot_mode": "handheld",
+      "fractionalIndex": 1311
+    },
+    {
+      "id": "evt_1781191512309",
+      "name": "导演航点 45",
+      "lng": 81.375558,
+      "lat": 31.091134,
+      "ground_alt": 5517,
+      "relative_alt": 466,
+      "heading": 306.2,
+      "pitch": -37,
+      "roll": 0,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "custom",
+      "perspective_fov": "custom",
+      "perspective_pitch": "custom",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 1993.760693238898
     },
     {
       "id": "evt_1781145179397_25",
@@ -49963,7 +50409,29 @@
       "perspective_pitch": "custom",
       "fov": 60,
       "look_at_target": null,
-      "speed_preset": "custom"
+      "speed_preset": "custom",
+      "fractionalIndex": 2133
+    },
+    {
+      "id": "evt_1781168199106",
+      "name": "导演航点 47",
+      "lng": 81.380367,
+      "lat": 31.088974,
+      "ground_alt": 5468,
+      "relative_alt": 500,
+      "heading": 130.3,
+      "pitch": -40,
+      "roll": 360,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 2276
     },
     {
       "id": "evt_1781145179397_26",
@@ -49980,7 +50448,29 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 60
+      "fov": 60,
+      "fractionalIndex": 2493
+    },
+    {
+      "id": "evt_1781168201348",
+      "name": "导演航点 49",
+      "lng": 81.389924,
+      "lat": 31.082519,
+      "ground_alt": 5226,
+      "relative_alt": 500,
+      "heading": 130.3,
+      "pitch": -40,
+      "roll": 360,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 2593
     },
     {
       "id": "evt_1781145179397_27",
@@ -49997,7 +50487,8 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 60
+      "fov": 60,
+      "fractionalIndex": 2785
     },
     {
       "id": "evt_1781145179397_28",
@@ -50014,7 +50505,8 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 115
+      "fov": 115,
+      "fractionalIndex": 2953
     },
     {
       "id": "evt_1781145179397_29",
@@ -50031,7 +50523,8 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 112
+      "fov": 112,
+      "fractionalIndex": 3187
     },
     {
       "id": "evt_1781145179397_30",
@@ -50048,7 +50541,8 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 120
+      "fov": 120,
+      "fractionalIndex": 3436
     },
     {
       "id": "evt_1781145179397_31",
@@ -50065,7 +50559,8 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 120
+      "fov": 120,
+      "fractionalIndex": 3598
     },
     {
       "id": "evt_1781145179397_32",
@@ -50082,7 +50577,8 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 105
+      "fov": 105,
+      "fractionalIndex": 3743
     },
     {
       "id": "evt_1781145179397_33",
@@ -50095,7 +50591,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 2.3,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 3883
     },
     {
       "id": "evt_1781145179397_34",
@@ -50108,7 +50605,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 5,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 4255
     },
     {
       "id": "evt_1781145179397_35",
@@ -50121,7 +50619,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 4.8,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 4545
     },
     {
       "id": "evt_1781145179397_36",
@@ -50134,7 +50633,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 4.6,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 4823
     },
     {
       "id": "evt_1781145179397_37",
@@ -50151,7 +50651,8 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 60
+      "fov": 60,
+      "fractionalIndex": 5078
     },
     {
       "id": "evt_1781145179397_38",
@@ -50164,7 +50665,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 4.8,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 5367
     },
     {
       "id": "evt_1781145179397_39",
@@ -50181,7 +50683,8 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 95
+      "fov": 95,
+      "fractionalIndex": 5605
     },
     {
       "id": "evt_1781145179397_40",
@@ -50200,7 +50703,8 @@
       "perspective_pitch": "custom",
       "fov": 68,
       "speed_preset": "custom",
-      "wait_preset": "custom"
+      "wait_preset": "custom",
+      "fractionalIndex": 5845
     },
     {
       "id": "evt_1781145179397_41",
@@ -50213,7 +50717,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 3.5,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 6054
     },
     {
       "id": "evt_1781145179397_42",
@@ -50226,7 +50731,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 5,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 6469
     },
     {
       "id": "evt_1781145179397_43",
@@ -50239,7 +50745,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 5,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 7044
     },
     {
       "id": "evt_1781145179397_44",
@@ -50252,7 +50759,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 1.5,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 7078
     },
     {
       "id": "evt_1781145179397_45",
@@ -50265,7 +50773,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 1.5,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 7100
     },
     {
       "id": "evt_1781145179397_46",
@@ -50278,7 +50787,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 1.5,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 7120
     },
     {
       "id": "evt_1781145179397_47",
@@ -50291,7 +50801,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 1.5,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 7189
     },
     {
       "id": "evt_1781145179397_48",
@@ -50304,7 +50815,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 1.5,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 7262
     },
     {
       "id": "evt_1781145179397_49",
@@ -50317,7 +50829,29 @@
       "pitch": -40,
       "roll": 0,
       "duration": 1.5,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 7322
+    },
+    {
+      "id": "evt_1781166371662",
+      "name": "导演航点 73",
+      "lng": 81.274368,
+      "lat": 30.995893,
+      "ground_alt": 4958,
+      "relative_alt": 500,
+      "heading": 316.5,
+      "pitch": -30,
+      "roll": 360,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 7498
     },
     {
       "id": "evt_1781145179397_50",
@@ -50330,7 +50864,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 3.6,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 7536
     },
     {
       "id": "evt_1781145179397_51",
@@ -50343,7 +50878,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 4.2,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 7791
     },
     {
       "id": "evt_1781145179397_52",
@@ -50356,7 +50892,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 4.8,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 8080
     },
     {
       "id": "evt_1781145179397_53",
@@ -50369,7 +50906,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 1.5,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 8151
     },
     {
       "id": "evt_1781145179397_54",
@@ -50386,7 +50924,8 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 60
+      "fov": 60,
+      "fractionalIndex": 8191
     },
     {
       "id": "evt_1781145179397_55",
@@ -50399,7 +50938,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 5,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 8608
     },
     {
       "id": "evt_1781145179397_56",
@@ -50412,7 +50952,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 5,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 8927
     },
     {
       "id": "evt_1781145179397_57",
@@ -50425,7 +50966,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 3.4,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 9133
     },
     {
       "id": "evt_1781145179397_58",
@@ -50445,7 +50987,8 @@
       "fov": 104,
       "speed_preset": "slow",
       "wait_preset": "deep",
-      "shot_mode": "default"
+      "shot_mode": "default",
+      "fractionalIndex": 9388
     },
     {
       "id": "evt_1781145179397_59",
@@ -50458,7 +51001,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 5,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 9703
     },
     {
       "id": "evt_1781145179397_60",
@@ -50471,7 +51015,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 4.6,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 9978
     },
     {
       "id": "evt_1781145179397_61",
@@ -50484,7 +51029,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 3.7,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 10200
     },
     {
       "id": "evt_1781145179397_62",
@@ -50497,7 +51043,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 3.6,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 10416
     },
     {
       "id": "evt_1781145179397_63",
@@ -50510,7 +51057,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 2.6,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 10574
     },
     {
       "id": "evt_1781145179397_64",
@@ -50523,7 +51071,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 3.5,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 10786
     },
     {
       "id": "evt_1781145179397_65",
@@ -50536,7 +51085,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 5,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 11129
     },
     {
       "id": "evt_1781145179397_66",
@@ -50549,7 +51099,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 3.3,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 11327
     },
     {
       "id": "evt_1781145179397_67",
@@ -50562,7 +51113,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 2.9,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 11498
     },
     {
       "id": "evt_1781145179397_68",
@@ -50575,7 +51127,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 1.8,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 11603
     },
     {
       "id": "evt_1781145179397_69",
@@ -50588,7 +51141,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 2,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 11726
     },
     {
       "id": "evt_1781145179397_70",
@@ -50601,7 +51155,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 2.9,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 11898
     },
     {
       "id": "evt_1781145179397_71",
@@ -50614,7 +51169,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 2.5,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 12047
     },
     {
       "id": "evt_1781145179397_72",
@@ -50627,7 +51183,29 @@
       "pitch": -40,
       "roll": 0,
       "duration": 2.6,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 12206
+    },
+    {
+      "id": "evt_1781166342256",
+      "name": "导演航点 97",
+      "lng": 81.284864,
+      "lat": 30.985664,
+      "ground_alt": 4846,
+      "relative_alt": 500,
+      "heading": 324.5,
+      "pitch": -32.3,
+      "roll": 360,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "custom",
+      "perspective_fov": "custom",
+      "perspective_pitch": "custom",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 12207
     },
     {
       "id": "evt_1781145179397_73",
@@ -50640,7 +51218,8 @@
       "pitch": -40,
       "roll": 0,
       "duration": 1.5,
-      "wait_time": 0
+      "wait_time": 0,
+      "fractionalIndex": 12276
     },
     {
       "id": "evt_1781145179397_74",
@@ -50657,488 +51236,8 @@
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 60
-    },
-    {
-      "id": "evt_1781166342256",
-      "name": "导演航点 76",
-      "lng": 81.284864,
-      "lat": 30.985664,
-      "ground_alt": 4846,
-      "relative_alt": 500,
-      "heading": 324.5,
-      "pitch": -32.3,
-      "roll": 360,
-      "duration": 2.5,
-      "wait_time": 0,
       "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "custom",
-      "perspective_fov": "custom",
-      "perspective_pitch": "custom",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781166371662",
-      "name": "导演航点 77",
-      "lng": 81.274368,
-      "lat": 30.995893,
-      "ground_alt": 4958,
-      "relative_alt": 500,
-      "heading": 316.5,
-      "pitch": -30,
-      "roll": 360,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "forward",
-      "perspective_fov": "natural",
-      "perspective_pitch": "oblique",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781166383459",
-      "name": "导演航点 78",
-      "lng": 81.256879,
-      "lat": 31.011821,
-      "ground_alt": 4705,
-      "relative_alt": 500,
-      "heading": 316.5,
-      "pitch": -30,
-      "roll": 0,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "custom",
-      "perspective_fov": "custom",
-      "perspective_pitch": "custom",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781168199106",
-      "name": "导演航点 79",
-      "lng": 81.380367,
-      "lat": 31.088974,
-      "ground_alt": 5468,
-      "relative_alt": 500,
-      "heading": 130.3,
-      "pitch": -40,
-      "roll": 360,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "forward",
-      "perspective_fov": "natural",
-      "perspective_pitch": "oblique",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781168201348",
-      "name": "导演航点 80",
-      "lng": 81.389924,
-      "lat": 31.082519,
-      "ground_alt": 5226,
-      "relative_alt": 500,
-      "heading": 130.3,
-      "pitch": -40,
-      "roll": 360,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "forward",
-      "perspective_fov": "natural",
-      "perspective_pitch": "oblique",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781169481201",
-      "name": "导演航点 81",
-      "lng": 81.263064,
-      "lat": 31.025932,
-      "ground_alt": 4710,
-      "relative_alt": 500,
-      "heading": 33.2,
-      "pitch": -22,
-      "roll": 0,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "forward",
-      "perspective_fov": "natural",
-      "perspective_pitch": "oblique",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781169501992",
-      "name": "导演航点 82",
-      "lng": 81.27519,
-      "lat": 31.033985,
-      "ground_alt": 4746,
-      "relative_alt": 500,
-      "heading": 31.5,
-      "pitch": -18.5,
-      "roll": 0,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "forward",
-      "perspective_fov": "natural",
-      "perspective_pitch": "oblique",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781172164087",
-      "name": "导演航点 83",
-      "lng": 81.285564,
-      "lat": 30.978834,
-      "ground_alt": 4662,
-      "relative_alt": 500,
-      "heading": 300.9,
-      "pitch": -40,
-      "roll": 0,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "forward",
-      "perspective_fov": "natural",
-      "perspective_pitch": "oblique",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781172169060",
-      "name": "导演航点 84",
-      "lng": 81.279324,
-      "lat": 30.982788,
-      "ground_alt": 4740,
-      "relative_alt": 500,
-      "heading": 300.9,
-      "pitch": -40,
-      "roll": 0,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "handheld",
-      "look_at_intent": "forward",
-      "perspective_fov": "natural",
-      "perspective_pitch": "oblique",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781172199101",
-      "name": "导演航点 85",
-      "lng": 81.268101,
-      "lat": 30.984705,
-      "ground_alt": 4645,
-      "relative_alt": 500,
-      "heading": 300.9,
-      "pitch": -40,
-      "roll": 360,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "forward",
-      "perspective_fov": "natural",
-      "perspective_pitch": "oblique",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781172361811",
-      "name": "导演航点 86",
-      "lng": 81.259378,
-      "lat": 30.99001,
-      "ground_alt": 4703,
-      "relative_alt": 500,
-      "heading": 300.9,
-      "pitch": -40,
-      "roll": 360,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "custom",
-      "perspective_fov": "custom",
-      "perspective_pitch": "custom",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781172530750",
-      "name": "导演航点 87",
-      "lng": 81.257617,
-      "lat": 30.994794,
-      "ground_alt": 4742,
-      "relative_alt": 500,
-      "heading": 300.9,
-      "pitch": -40,
-      "roll": 0,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "forward",
-      "perspective_fov": "natural",
-      "perspective_pitch": "oblique",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781172533275",
-      "name": "导演航点 88",
-      "lng": 81.254587,
-      "lat": 31.000889,
-      "ground_alt": 4687,
-      "relative_alt": 500,
-      "heading": 300.9,
-      "pitch": -40,
-      "roll": 360,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "forward",
-      "perspective_fov": "natural",
-      "perspective_pitch": "oblique",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781172546576",
-      "name": "导演航点 89",
-      "lng": 81.249741,
-      "lat": 31.005989,
-      "ground_alt": 4712,
-      "relative_alt": 500,
-      "heading": 51.2,
-      "pitch": 0.6,
-      "roll": 360,
-      "duration": 36.6,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "custom",
-      "perspective_fov": "custom",
-      "perspective_pitch": "custom",
-      "speed_preset": "normal",
-      "wait_preset": "none",
-      "look_at_target": null
-    },
-    {
-      "id": "evt_1781191512309",
-      "name": "导演航点 90",
-      "lng": 81.375558,
-      "lat": 31.091134,
-      "ground_alt": 5517,
-      "relative_alt": 466,
-      "heading": 306.2,
-      "pitch": -37,
-      "roll": 0,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "custom",
-      "perspective_fov": "custom",
-      "perspective_pitch": "custom",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781405077543",
-      "name": "导演航点 91",
-      "lng": 81.284329,
-      "lat": 30.978709,
-      "ground_alt": 4656,
-      "relative_alt": 500,
-      "heading": 300.9,
-      "pitch": -40,
-      "roll": 360,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "forward",
-      "perspective_fov": "natural",
-      "perspective_pitch": "oblique",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781621843136",
-      "name": "导演航点 92",
-      "lng": 81.284924,
-      "lat": 30.980749,
-      "ground_alt": 4698,
-      "relative_alt": 500,
-      "heading": 300.9,
-      "pitch": -40,
-      "roll": 360,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "forward",
-      "perspective_fov": "natural",
-      "perspective_pitch": "oblique",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781621938164",
-      "name": "导演航点 93",
-      "lng": 81.279176,
-      "lat": 30.981772,
-      "ground_alt": 4709,
-      "relative_alt": 500,
-      "heading": 300.9,
-      "pitch": -40,
-      "roll": 360,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "forward",
-      "perspective_fov": "natural",
-      "perspective_pitch": "oblique",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781621997879",
-      "name": "导演航点 94",
-      "lng": 81.26841,
-      "lat": 30.982609,
-      "ground_alt": 4631,
-      "relative_alt": 500,
-      "heading": 300.9,
-      "pitch": -40,
-      "roll": 0,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "forward",
-      "perspective_fov": "natural",
-      "perspective_pitch": "oblique",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781622017552",
-      "name": "导演航点 95",
-      "lng": 81.2624,
-      "lat": 30.984949,
-      "ground_alt": 4658,
-      "relative_alt": 500,
-      "heading": 300.9,
-      "pitch": -40,
-      "roll": 360,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "forward",
-      "perspective_fov": "natural",
-      "perspective_pitch": "oblique",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781622018450",
-      "name": "导演航点 96",
-      "lng": 81.253892,
-      "lat": 30.988132,
-      "ground_alt": 4688,
-      "relative_alt": 500,
-      "heading": 300.9,
-      "pitch": -40,
-      "roll": 360,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "custom",
-      "perspective_fov": "custom",
-      "perspective_pitch": "custom",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781622337386",
-      "name": "导演航点 97",
-      "lng": 81.262409,
-      "lat": 30.976172,
-      "ground_alt": 4608,
-      "relative_alt": 500,
-      "heading": 300.9,
-      "pitch": -40,
-      "roll": 0,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "custom",
-      "perspective_fov": "custom",
-      "perspective_pitch": "custom",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781622339628",
-      "name": "导演航点 98",
-      "lng": 81.257098,
-      "lat": 30.976768,
-      "ground_alt": 4627,
-      "relative_alt": 500,
-      "heading": 300.9,
-      "pitch": -40,
-      "roll": 360,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "forward",
-      "perspective_fov": "natural",
-      "perspective_pitch": "oblique",
-      "speed_preset": "normal",
-      "wait_preset": "none"
-    },
-    {
-      "id": "evt_1781622340954",
-      "name": "导演航点 99",
-      "lng": 81.251612,
-      "lat": 30.977383,
-      "ground_alt": 4631,
-      "relative_alt": 500,
-      "heading": 300.9,
-      "pitch": -40,
-      "roll": 360,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "forward",
-      "perspective_fov": "natural",
-      "perspective_pitch": "oblique",
-      "speed_preset": "normal",
-      "wait_preset": "none"
+      "fractionalIndex": 12377
     }
   ]
 }
