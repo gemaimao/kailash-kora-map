@@ -51234,9 +51234,9 @@
       "duration": 1.7,
       "wait_time": 0,
       "look_at_intent": "custom",
-      "perspective_fov": "custom",
+      "perspective_fov": "vast",
       "perspective_pitch": "custom",
-      "fov": 60,
+      "fov": 90,
       "fractionalIndex": 12377
     }
   ]
