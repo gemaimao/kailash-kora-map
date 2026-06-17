@@ -51240,7 +51240,12 @@
       "fractionalIndex": 12377,
       "speed_preset": "custom",
       "wait_preset": "none",
-      "look_at_target": null
+      "look_at_target": null,
+      "shot_mode": "fisheye",
+      "shot_params": {
+        "fisheye_fov": 140,
+        "fisheye_warp": 5
+      }
     }
   ]
 }
