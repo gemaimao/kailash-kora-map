@@ -51229,14 +51229,14 @@
       "ground_alt": 4657,
       "relative_alt": 500,
       "heading": 219.6,
-      "pitch": -36,
+      "pitch": -10,
       "roll": 0,
       "duration": 1.7,
       "wait_time": 0,
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "fov": 60,
+      "fov": 90,
       "fractionalIndex": 12377
     }
   ]
