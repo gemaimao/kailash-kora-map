@@ -8,7 +8,7 @@
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
-const { exec } = require("child_process");
+const { exec, execFile } = require("child_process");
 
 const PORT = 8090;
 const ROOT = __dirname;
@@ -18,6 +18,8 @@ const MIME = {
   ".css": "text/css; charset=utf-8",
   ".js": "application/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
+  ".czml": "application/json; charset=utf-8",
+  ".geojson": "application/json; charset=utf-8",
   ".png": "image/png",
   ".jpg": "image/jpeg",
   ".mp3": "audio/mpeg",
@@ -188,7 +190,9 @@ const server = http.createServer((req, res) => {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   if (req.method === "OPTIONS") { res.writeHead(204); res.end(); return; }
 
-  if (req.method === "POST" && req.url === "/api/visit") {
+  const urlPath = req.url.split("?")[0];
+
+  if (req.method === "POST" && urlPath === "/api/visit") {
     const statsPath = path.join(ROOT, "data", "stats.json");
     let stats = { totalVisits: 0 };
     if (fs.existsSync(statsPath)) {
@@ -206,8 +210,60 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // POST /api/compile-narrative -> Compile YAML DSL to CZML/GeoJSON
+  if (req.method === "POST" && (urlPath === "/api/compile-narrative" || urlPath.endsWith("/api/compile-narrative"))) {
+    let body = "";
+    req.on("data", (chunk) => (body += chunk));
+    req.on("end", () => {
+      try {
+        const payload = JSON.parse(body);
+        const yamlContent = payload.yamlContent;
+        if (!yamlContent) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "Missing yamlContent" }));
+          return;
+        }
+
+        const draftPath = path.join(ROOT, "data", "narrative_draft.yaml");
+        fs.writeFileSync(draftPath, yamlContent, "utf-8");
+
+        let projectId = "longmarch_campaign";
+        const match = yamlContent.match(/id:\s*["']?([a-zA-Z0-9_-]+)["']?/);
+        if (match && match[1]) {
+          projectId = match[1];
+        }
+
+        const cmd = `python3 -m geonarrative.cli "${draftPath}" -o "${path.join(ROOT, "data", "compiled")}"`;
+        exec(cmd, (err, stdout, stderr) => {
+          if (err) {
+            console.error("Compilation error:", stderr || err.message);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: stderr || err.message, log: stdout }));
+          } else {
+            console.log(`✅ Compiled successfully! Project: ${projectId}`);
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({
+              ok: true,
+              czmlUrl: `/data/compiled/${projectId}.czml`,
+              geojsonUrl: `/data/compiled/${projectId}.geojson`
+            }));
+            
+            // Auto git push compiled outputs & draft
+            scheduleGitPush(draftPath);
+            scheduleGitPush(path.join(ROOT, "data", "compiled", `${projectId}.czml`));
+            scheduleGitPush(path.join(ROOT, "data", "compiled", `${projectId}.geojson`));
+          }
+        });
+      } catch (err) {
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: err.message }));
+      }
+    });
+    return;
+  }
+
   // POST /api/create-project → 创建并初始化新子项目
-  if (req.method === "POST" && (req.url === "/api/create-project" || req.url.endsWith("/api/create-project"))) {
+  if (req.method === "POST" && (urlPath === "/api/create-project" || urlPath.endsWith("/api/create-project"))) {
     let body = "";
     req.on("data", (chunk) => (body += chunk));
     req.on("end", () => {
@@ -270,14 +326,274 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // POST /api/delete-project → 删除子项目并清理目录
+  if (req.method === "POST" && (urlPath === "/api/delete-project" || urlPath.endsWith("/api/delete-project"))) {
+    let body = "";
+    req.on("data", (chunk) => (body += chunk));
+    req.on("end", () => {
+      try {
+        const payload = JSON.parse(body);
+        const projectName = payload.projectName ? payload.projectName.trim().toLowerCase() : "";
+        
+        if (!projectName) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "项目名称为空。" }));
+          return;
+        }
+
+        // 禁止删除默认项目
+        if (projectName === "" || projectName === "default" || projectName === "默认项目") {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "默认项目禁止删除。" }));
+          return;
+        }
+
+        const projPath = path.join(ROOT, "projects.json");
+        let projects = [];
+        if (fs.existsSync(projPath)) {
+          projects = JSON.parse(fs.readFileSync(projPath, "utf-8"));
+        }
+        
+        const idx = projects.indexOf(projectName);
+        if (idx === -1) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "该子项目不存在或已被删除。" }));
+          return;
+        }
+
+        // 从 projects.json 中移出
+        projects.splice(idx, 1);
+        fs.writeFileSync(projPath, JSON.stringify(projects, null, 2), "utf-8");
+
+        // 删除子项目物理目录
+        const projectDir = path.join(ROOT, projectName);
+        if (fs.existsSync(projectDir)) {
+          fs.rmSync(projectDir, { recursive: true, force: true });
+        }
+
+        console.log(`🗑️ 子项目已成功删除: ${projectName}`);
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: true, name: projectName }));
+
+        scheduleGitPush(projPath);
+      } catch (err) {
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: err.message }));
+      }
+    });
+    return;
+  }
+
+  // POST /api/generate-icon → 本地算力生成/处理 POI 立体图标
+  if (req.method === "POST" && (urlPath === "/api/generate-icon" || urlPath.endsWith("/api/generate-icon"))) {
+    let body = "";
+    req.on("data", (chunk) => (body += chunk));
+    req.on("end", () => {
+      try {
+        const payload = JSON.parse(body);
+        const poiId = payload.poiId ? payload.poiId.trim() : "";
+        const prompt = payload.prompt ? payload.prompt.trim() : "Tibetan temple icon";
+        const bgMode = payload.bgMode ? payload.bgMode.trim() : "black";
+        
+        // 提取项目名称
+        let project = urlPath.substring(0, urlPath.indexOf("/api/generate-icon"));
+        if (project.startsWith("/")) project = project.substring(1);
+        if (project.endsWith("/")) project = project.substring(0, project.length - 1);
+
+        if (!poiId) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "Missing poiId" }));
+          return;
+        }
+
+        // 拼接输出路径
+        const relativeIconPath = project 
+          ? `${project}/assets/icons/${poiId}.png`
+          : `assets/icons/${poiId}.png`;
+        const absoluteIconPath = path.join(ROOT, relativeIconPath);
+
+        // 确保父文件夹存在
+        fs.mkdirSync(path.dirname(absoluteIconPath), { recursive: true });
+
+        console.log(`🤖 开始本地算力生成图标. ID: ${poiId}, Prompt: "${prompt}", Path: ${relativeIconPath}`);
+        
+        execFile("python3", [
+          path.join(ROOT, "scripts", "local_ai_helper.py"),
+          "--action", "generate-icon",
+          "--prompt", prompt,
+          "--poi-id", poiId,
+          "--bg-mode", bgMode,
+          "--output", absoluteIconPath
+        ], (err, stdout, stderr) => {
+          if (err) {
+            console.error("❌ 图标生成失败:", stderr || err.message);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: stderr || err.message }));
+          } else {
+            console.log(`✅ 图标生成成功: ${relativeIconPath}`);
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ ok: true, iconUrl: "/" + relativeIconPath }));
+            
+            // 异步自动推送 Git
+            scheduleGitPush(absoluteIconPath);
+          }
+        });
+      } catch (err) {
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: err.message }));
+      }
+    });
+    return;
+  }
+
+  // POST /api/upload-voice-ref → 接收 Base64 编码的参考音频并保存到本地
+  if (req.method === "POST" && (urlPath === "/api/upload-voice-ref" || urlPath.endsWith("/api/upload-voice-ref"))) {
+    let body = "";
+    req.on("data", (chunk) => (body += chunk));
+    req.on("end", () => {
+      try {
+        const payload = JSON.parse(body);
+        const waypointId = payload.waypointId ? payload.waypointId.trim() : "";
+        const fileName = payload.fileName ? payload.fileName.trim() : "";
+        const base64Data = payload.base64Data ? payload.base64Data.trim() : "";
+
+        // 提取项目名称
+        let project = urlPath.substring(0, urlPath.indexOf("/api/upload-voice-ref"));
+        if (project.startsWith("/")) project = project.substring(1);
+        if (project.endsWith("/")) project = project.substring(0, project.length - 1);
+
+        if (!waypointId || !fileName || !base64Data) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "Missing waypointId, fileName, or base64Data" }));
+          return;
+        }
+
+        const ext = path.extname(fileName) || ".wav";
+        const relativeRefPath = project
+          ? `${project}/media/references/${waypointId}_ref${ext}`
+          : `media/references/${waypointId}_ref${ext}`;
+        const absoluteRefPath = path.join(ROOT, relativeRefPath);
+
+        // 确保文件夹存在
+        fs.mkdirSync(path.dirname(absoluteRefPath), { recursive: true });
+
+        // 解码并保存
+        const buffer = Buffer.from(base64Data, 'base64');
+        fs.writeFileSync(absoluteRefPath, buffer);
+
+        console.log(`📤 已成功保存参考人声样本. Waypoint: ${waypointId} -> ${relativeRefPath}`);
+
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({
+          ok: true,
+          audioUrl: "/" + relativeRefPath
+        }));
+      } catch (err) {
+        console.error("❌ 上传参考人声失败:", err);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: err.message }));
+      }
+    });
+    return;
+  }
+
+  // POST /api/generate-tts → 本地算力合成/克隆航点语音解说
+  if (req.method === "POST" && (urlPath === "/api/generate-tts" || urlPath.endsWith("/api/generate-tts"))) {
+    let body = "";
+    req.on("data", (chunk) => (body += chunk));
+    req.on("end", () => {
+      try {
+        const payload = JSON.parse(body);
+        const waypointId = payload.waypointId ? payload.waypointId.trim() : "";
+        const text = payload.text ? payload.text.trim() : "";
+        const voice = payload.voice ? payload.voice.trim() : "default";
+        const refAudio = payload.refAudio ? payload.refAudio.trim() : "";
+        const refText = payload.refText ? payload.refText.trim() : "";
+
+        // 提取项目名称
+        let project = urlPath.substring(0, urlPath.indexOf("/api/generate-tts"));
+        if (project.startsWith("/")) project = project.substring(1);
+        if (project.endsWith("/")) project = project.substring(0, project.length - 1);
+
+        if (!waypointId || !text) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "Missing waypointId or text" }));
+          return;
+        }
+
+        // 拼接输出路径
+        const relativeAudioPath = project 
+          ? `${project}/media/narratives/${waypointId}.mp3`
+          : `media/narratives/${waypointId}.mp3`;
+        const absoluteAudioPath = path.join(ROOT, relativeAudioPath);
+
+        // 确保父文件夹存在
+        fs.mkdirSync(path.dirname(absoluteAudioPath), { recursive: true });
+
+        console.log(`🤖 开始本地算力合成语音. Waypoint: ${waypointId}, Text: "${text.slice(0, 15)}..."`);
+
+        const execArgs = [
+          path.join(ROOT, "scripts", "local_ai_helper.py"),
+          "--action", "generate-tts",
+          "--text", text,
+          "--voice", voice,
+          "--output", absoluteAudioPath
+        ];
+
+        if (refAudio) {
+          const cleanRefAudio = refAudio.startsWith("/") ? refAudio.substring(1) : refAudio;
+          const absoluteRefAudio = path.join(ROOT, cleanRefAudio);
+          execArgs.push("--ref-audio", absoluteRefAudio);
+        }
+        if (refText) {
+          execArgs.push("--ref-text", refText);
+        }
+
+        execFile("python3", execArgs, (err, stdout, stderr) => {
+          if (err) {
+            console.error("❌ 语音合成失败:", stderr || err.message);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: stderr || err.message }));
+          } else {
+            // 解析 python 输出中的 JSON_RESULT
+            let result = { success: true, duration: 5.0 };
+            const match = stdout.match(/JSON_RESULT:(\{.*\})/);
+            if (match) {
+              try {
+                result = JSON.parse(match[1]);
+              } catch (e) {
+                console.error("解析 python 结果 JSON 失败:", e);
+              }
+            }
+            
+            console.log(`✅ 语音合成成功. Duration: ${result.duration}s -> ${relativeAudioPath}`);
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({
+              ok: true,
+              audioUrl: "/" + relativeAudioPath,
+              duration: result.duration
+            }));
+
+            // 异步自动推送 Git
+            scheduleGitPush(absoluteAudioPath);
+          }
+        });
+      } catch (err) {
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: err.message }));
+      }
+    });
+    return;
+  }
+
   // GET /api/git-status → 返回当前 git push 状态
-  if (req.method === "GET" && (req.url === "/api/git-status" || req.url.endsWith("/api/git-status"))) {
+  if (req.method === "GET" && (urlPath === "/api/git-status" || urlPath.endsWith("/api/git-status"))) {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify(gitState));
     return;
   }
 
-  if (req.method === "POST" && (req.url.startsWith("/api/") || req.url.includes("/api/"))) {
+  if (req.method === "POST" && (urlPath.startsWith("/api/") || urlPath.includes("/api/"))) {
     handleAPI(req, res);
   } else {
     servStatic(req, res);

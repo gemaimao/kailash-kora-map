@@ -14,29 +14,180 @@ const viewer = new Cesium.Viewer('cesiumContainer', {
     navigationHelpButton: false 
 });
 
-// 监听 POI 选中事件，如果 POI 包含自定义 3D 相机视角则自动飞往该视角
+// 全局启用光照与阴影系统，并将时钟动画交由巡航引擎接管
+viewer.scene.globe.enableLighting = true;
+viewer.shadows = false;
+viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAtmosphereLighting = true;
+viewer.clock.shouldAnimate = false;
+viewer.clock.currentTime = Cesium.JulianDate.fromIso8601("2024-06-21T02:00:00Z"); // Default morning (10:00 Beijing time)
+
+// 光照时间推移（延时摄影）引擎全局变量
+let sunlightTransition = null;
+let currentFlightSegment = null;
+
+viewer.scene.preRender.addEventListener(function() {
+    if (currentFlightSegment && isPlaying) {
+        const now = Date.now();
+        const elapsed = now - currentFlightSegment.startTime;
+        currentFlightSegment.progress = elapsed / (currentFlightSegment.duration * 1000);
+        if (currentFlightSegment.progress > 1.0) currentFlightSegment.progress = 1.0;
+    }
+
+    if (sunlightTransition && isPlaying) {
+        const now = Date.now();
+        const elapsed = now - sunlightTransition.startTime;
+        let progress = elapsed / (sunlightTransition.duration * 1000);
+        if (progress > 1.0) progress = 1.0;
+        
+        const currentVal = sunlightTransition.startVal + (sunlightTransition.endVal - sunlightTransition.startVal) * progress;
+        let hrs = Math.floor(currentVal);
+        let mins = Math.floor((currentVal - hrs) * 60);
+        // Ensure hrs and mins are within bounds
+        hrs = Math.max(0, Math.min(23, hrs));
+        mins = Math.max(0, Math.min(59, mins));
+        
+        viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(`2024-06-21T${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00Z`);
+        
+        if (progress === 1.0) {
+            sunlightTransition = null;
+        }
+    }
+});
+
+// ========================================================
+// POI 全景环视特技 (Cinematic POI Orbit)
+// ========================================================
+let isOrbitingPoi = false;
+let orbitRemoveCallback = null;
+
+function stopPoiOrbit() {
+    isOrbitingPoi = false;
+    if (orbitRemoveCallback) {
+        orbitRemoveCallback();
+        orbitRemoveCallback = null;
+    }
+}
+
+// 监听用户交互，打断自动旋转（但不解除视角锁定，允许用户手动360°观察POI）
+const interruptPoiOrbit = () => {
+    if (isOrbitingPoi) {
+        stopPoiOrbit();
+        const _ts = document.getElementById('timeline-status');
+        if (_ts) _ts.textContent = '自由探索模式';
+    }
+};
+viewer.scene.canvas.addEventListener('mousedown', interruptPoiOrbit);
+viewer.scene.canvas.addEventListener('wheel', interruptPoiOrbit);
+viewer.scene.canvas.addEventListener('touchstart', interruptPoiOrbit);
+
+// 当点击/取消选择 POI 时
 viewer.selectedEntityChanged.addEventListener(function(selectedEntity) {
     if (Cesium.defined(selectedEntity) && selectedEntity.id && selectedEntity.id.startsWith('poi_')) {
         const id = selectedEntity.id.replace('poi_', '');
         const poi = allPoisData.find(p => p.id === id);
-        if (poi && typeof poi.camLng === 'number' && typeof poi.camLat === 'number' && typeof poi.camHeight === 'number') {
-            viewer.camera.flyTo({
-                destination: Cesium.Cartesian3.fromDegrees(poi.camLng, poi.camLat, poi.camHeight),
-                orientation: {
-                    heading: Cesium.Math.toRadians(typeof poi.heading === 'number' ? poi.heading : 0.0),
-                    pitch: Cesium.Math.toRadians(typeof poi.pitch === 'number' ? poi.pitch : -35.0),
-                    roll: Cesium.Math.toRadians(typeof poi.roll === 'number' ? poi.roll : 0.0)
-                },
-                duration: 2.0
-            });
+        
+        stopPoiOrbit();
+        // 如果正在巡航，暂停
+        if (typeof isPlaying !== 'undefined' && isPlaying) {
+            isPlaying = false;
+            if (typeof stopNarrationAndUnduck === 'function') stopNarrationAndUnduck();
+            viewer.camera.cancelFlight();
         }
+
+        const targetPos = selectedEntity.position.getValue(viewer.clock.currentTime);
+        if (!targetPos) return;
+
+        // 计算距离与角度
+        const h = typeof poi.heading === 'number' ? poi.heading : 0;
+        const p = typeof poi.pitch === 'number' ? poi.pitch : -35;
+        // 默认环绕距离：如果指定了 camHeight 则用其作为半径，否则根据地形给一个默认的 2500 米
+        const distance = typeof poi.camHeight === 'number' ? poi.camHeight : 2500; 
+        
+        const offset = new Cesium.HeadingPitchRange(
+            Cesium.Math.toRadians(h),
+            Cesium.Math.toRadians(p),
+            distance
+        );
+
+        // 飞向 POI
+        viewer.camera.flyToBoundingSphere(new Cesium.BoundingSphere(targetPos, 0), {
+            offset: offset,
+            duration: 2.0,
+            complete: function() {
+                isOrbitingPoi = true;
+                let currentHeading = Cesium.Math.toRadians(h);
+                
+                // 开启每帧自动旋转，每帧强制 lookAt 锁定，避免镜头飘移或直冲过去
+                orbitRemoveCallback = viewer.scene.preUpdate.addEventListener(function(scene, time) {
+                    if (isOrbitingPoi) {
+                        currentHeading += 0.002; // 每帧旋转速度
+                        const newOffset = new Cesium.HeadingPitchRange(
+                            currentHeading,
+                            Cesium.Math.toRadians(p),
+                            distance
+                        );
+                        viewer.camera.lookAt(targetPos, newOffset);
+                    }
+                });
+            }
+        });
+    } else {
+        // 取消选择 POI，停止环绕并解除相机锁定
+        stopPoiOrbit();
+        viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
     }
 });
+// ========================================================
 
 // 默认开启抗锯齿
 viewer.scene.postProcessStages.fxaa.enabled = true;
 // 开启深度测试，防止山体背后的图标透视穿模
 viewer.scene.globe.depthTestAgainstTerrain = true;
+
+// 底图切换逻辑
+function changeBaseMap(type) {
+    if (!viewer) return;
+    const layers = viewer.imageryLayers;
+    
+    // 移除最底层的图层 (即索引 0)
+    if (layers.length > 0) {
+        layers.remove(layers.get(0));
+    }
+
+    let provider;
+    if (type === 'bing') {
+        provider = Cesium.createWorldImagery({
+            style: Cesium.IonWorldImageryStyle.AERIAL
+        });
+    } else if (type === 'google_satellite') {
+        provider = new Cesium.UrlTemplateImageryProvider({
+            url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+            minimumLevel: 0,
+            maximumLevel: 20
+        });
+    } else if (type === 'osm') {
+        provider = new Cesium.OpenStreetMapImageryProvider({
+            url: 'https://a.tile.openstreetmap.org/'
+        });
+    } else if (type === 'mapbox') {
+        provider = new Cesium.MapboxStyleImageryProvider({
+            styleId: 'satellite-v9',
+            accessToken: Cesium.Ion.defaultAccessToken // Or your actual mapbox token
+        });
+    }
+
+    if (provider) {
+        layers.addImageryProvider(provider, 0);
+    }
+}
+
+const mapLayerSelector = document.getElementById('map-layer-selector');
+if (mapLayerSelector) {
+    mapLayerSelector.addEventListener('change', (e) => {
+        changeBaseMap(e.target.value);
+    });
+}
+
 
 // 全局飞行状态控制
 let isPlaying = false;
@@ -63,7 +214,17 @@ const OFFSET_LNG = 0.0;
 const OFFSET_LAT = 0.0;
 
 // 提前拉取数据
-fetch('../data/routes.json?t=' + Date.now()).then(r => r.json()).then(data => {
+const urlParams = new URLSearchParams(window.location.search);
+const routeType = urlParams.get('route') || 'outer';
+const routeFile = routeType === 'inner' ? 'routes_inner.json' : 'routes.json';
+
+fetch(`../data/${routeFile}?t=` + Date.now()).then(r => {
+    if (!r.ok && routeType === 'inner') {
+        alert('内环路线数据 (routes_inner.json) 尚未生成，请先在后台编辑器中编辑并导出该文件！\n系统将默认加载外环数据。');
+        return fetch('../data/routes.json?t=' + Date.now()).then(r2 => r2.json());
+    }
+    return r.json();
+}).then(data => {
     flightPath = data.main_flight || [];
     fullRoute = data.main || []; 
     
@@ -144,8 +305,17 @@ fetch('../data/routes.json?t=' + Date.now()).then(r => r.json()).then(data => {
         }
     });
 
+    if (urlParams.get('start') === '1') {
+        setTimeout(() => {
+            document.getElementById('fullscreen-overlay').classList.add('hidden');
+            startBgm();
+            const btnTour = document.getElementById('btn-start-tour');
+            if (btnTour) btnTour.click();
+        }, 500);
+    }
+
     // 3. 动态路线头部浮动信息框（里程与用时）
-    function formatProgressTime(seconds) {
+    window.formatProgressTime = function(seconds) {
         if (isNaN(seconds) || seconds < 0) return "00:00";
         const h = Math.floor(seconds / 3600);
         const m = Math.floor((seconds % 3600) / 60);
@@ -331,7 +501,7 @@ function loadPoisAndStart(terrainProvider) {
                         scaleByDistance: new Cesium.NearFarScalar(100, 1.0, 15000, 0.4)
                     };
                 } else {
-                    let billboardImage = `../assets/kailashpic/${poiId}.png`;
+                    let billboardImage = poi.icon || `../assets/kailashpic/${poiId}.png`;
                     let useSvgSign = false;
                     let svgIconPath = "";
                     let svgType = "";
@@ -541,12 +711,20 @@ function updateHandheldShake(active) {
 // 自定义飞行递归引擎
 function flyNext() {
     if (!isPlaying || currentWaypoint >= flightPath.length) {
+        stopNarrationAndUnduck(); // 停止语音解说并恢复音乐音量
+        const tlContainer = document.getElementById('flight-timeline-container');
+        if (tlContainer) tlContainer.style.display = 'none';
         // 漫游结束，显示全屏谢幕
         const overlay = document.getElementById('fullscreen-overlay');
         if (overlay && currentWaypoint >= flightPath.length) {
             document.getElementById('overlay-title').innerText = '愿转山者吉祥';
             document.getElementById('overlay-desc').innerHTML = '感谢长久以来<br>为神山圣湖在地文化贡献信仰之力与纪录的所有人！';
-            document.getElementById('btn-overlay-start').style.display = 'none';
+                        const btnStart = document.getElementById('btn-overlay-start');
+            if (btnStart) btnStart.style.display = 'none';
+            const btnStartOuter = document.getElementById('btn-overlay-start-outer');
+            if (btnStartOuter) btnStartOuter.style.display = 'none';
+            const btnStartInner = document.getElementById('btn-overlay-start-inner');
+            if (btnStartInner) btnStartInner.style.display = 'none';
             document.getElementById('btn-overlay-replay').style.display = 'inline-block';
             overlay.classList.remove('hidden');
         }
@@ -558,6 +736,11 @@ function flyNext() {
     }
     
     const pt = flightPath[currentWaypoint];
+    
+    // 自动播放解说音频并进行 BGM 压限
+    if (pt.narration_audio && isPlaying) {
+        playNarration(pt.narration_audio);
+    }
     
     // ==========================================
     // HUD 雷达同步系统：密集点位抓取机制
@@ -645,6 +828,26 @@ function flyNext() {
     // 启用/禁用手震呼吸感
     updateHandheldShake(pt.shot_mode === 'handheld');
     
+    const flyDur = pt._actualDuration || (pt.duration * 1.5) || 2.5;
+    
+    currentFlightSegment = {
+        startTime: Date.now(),
+        duration: flyDur,
+        progress: 0.0
+    };
+    
+    // 触发延时摄影光照推移
+    if (typeof pt.timeOfDay === 'number') {
+        const prevPt = currentWaypoint > 0 ? flightPath[currentWaypoint - 1] : pt;
+        const startVal = typeof prevPt.timeOfDay === 'number' ? prevPt.timeOfDay : pt.timeOfDay;
+        sunlightTransition = {
+            startVal: startVal,
+            endVal: pt.timeOfDay,
+            duration: flyDur,
+            startTime: Date.now()
+        };
+    }
+
     viewer.camera.flyTo({
         destination: Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, absoluteAltitude),
         orientation: {
@@ -652,7 +855,7 @@ function flyNext() {
             pitch: Cesium.Math.toRadians(pt.pitch || -40.0),
             roll: Cesium.Math.toRadians(pt.roll || 0.0)
         },
-        duration: pt._actualDuration || (pt.duration * 1.5) || 2.5,
+        duration: flyDur,
         easingFunction: Cesium.EasingFunction.LINEAR_NONE, // 匀速平滑过渡，不卡顿
         complete: () => {
             const waitTime = typeof pt.wait_time === 'number' ? pt.wait_time : 0.0;
@@ -707,7 +910,20 @@ function findClosestFlightPathIndex() {
 }
 
 // 全屏定格遮罩按钮逻辑
-document.getElementById('btn-overlay-start').addEventListener('click', () => {
+document.getElementById('btn-overlay-start-outer').addEventListener('click', () => {
+    if (routeType !== 'outer') {
+        window.location.href = window.location.pathname + '?route=outer&start=1';
+        return;
+    }
+    document.getElementById('fullscreen-overlay').classList.add('hidden');
+    startBgm();
+});
+
+document.getElementById('btn-overlay-start-inner').addEventListener('click', () => {
+    if (routeType !== 'inner') {
+        window.location.href = window.location.pathname + '?route=inner&start=1';
+        return;
+    }
     document.getElementById('fullscreen-overlay').classList.add('hidden');
     startBgm();
 });
@@ -721,6 +937,48 @@ document.getElementById('btn-overlay-replay').addEventListener('click', () => {
 
 // 绑定按钮事件：点击后开始巡航
 document.getElementById('btn-start-tour').addEventListener('click', async () => {
+    
+    // 点击画面可以暂停/继续，但需排除点击 POI 的情况
+    if (!window.__canvasClickListenerAdded) {
+        viewer.canvas.addEventListener('click', (e) => {
+            // 如果点击到了任何实体（如 POI 图标），则不要触发暂停/播放逻辑
+            const pickedObject = viewer.scene.pick(new Cesium.Cartesian2(e.clientX, e.clientY));
+            if (Cesium.defined(pickedObject) && Cesium.defined(pickedObject.id)) {
+                return;
+            }
+
+            const timeline = document.getElementById('flight-timeline-container');
+            if (flightPath.length > 0 && timeline && timeline.style.display !== 'none') {
+                isPlaying = !isPlaying;
+                if (!isPlaying) {
+                    viewer.camera.cancelFlight();
+                } else {
+                    if (typeof flyNext === 'function') flyNext();
+                }
+                
+                // Show a brief visual indicator
+                const indicator = document.createElement('div');
+                indicator.textContent = isPlaying ? "▶ 播放" : "⏸ 暂停";
+                indicator.style.position = 'absolute';
+                indicator.style.top = '50%';
+                indicator.style.left = '50%';
+                indicator.style.transform = 'translate(-50%, -50%)';
+                indicator.style.color = 'rgba(255,255,255,0.9)';
+                indicator.style.fontSize = '36px';
+                indicator.style.fontWeight = 'bold';
+                indicator.style.textShadow = '0 4px 12px rgba(0,0,0,0.5)';
+                indicator.style.pointerEvents = 'none';
+                indicator.style.zIndex = '9999';
+                indicator.style.opacity = '1';
+                indicator.style.transition = 'opacity 0.4s';
+                document.body.appendChild(indicator);
+                
+                setTimeout(() => { indicator.style.opacity = '0'; }, 600);
+                setTimeout(() => { indicator.remove(); }, 1000);
+            }
+        });
+        window.__canvasClickListenerAdded = true;
+    }
     if (flightPath.length === 0) return;
     
     startBgm(); // 尝试触发音乐播放
@@ -729,11 +987,37 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
     
     isPlaying = true;
     tourStartTime = Date.now();
+    
+    // 显示时间轴
+    const tlContainer = document.getElementById('flight-timeline-container');
+    if (tlContainer) tlContainer.style.display = 'flex';
+    
+    // 初始化时间轴刻度和 max
+    const slider = document.getElementById('flight-timeline-slider');
+    const ticksContainer = document.getElementById('timeline-ticks');
+    if (slider && ticksContainer && flightPath.length > 0) {
+        slider.max = flightPath.length - 1;
+        ticksContainer.innerHTML = '';
+        for (let i = 0; i < flightPath.length; i++) {
+            const tick = document.createElement('div');
+            tick.style.width = '4px';
+            tick.style.height = '4px';
+            tick.style.borderRadius = '50%';
+            tick.style.backgroundColor = 'rgba(255,255,255,0.3)';
+            tick.style.marginTop = '-2px';
+            ticksContainer.appendChild(tick);
+        }
+    }
+
     currentProgressMileage = 0.0;
     currentProgressTime = 0.0;
     
     // 自动定位到距离相机当前拖拽位置最近的那个航点，防止视角瞬间瞬移或错位
-    const closestIdx = findClosestFlightPathIndex();
+    let closestIdx = findClosestFlightPathIndex();
+    // 修复环形路线 Bug：如果相机靠近终点区域，直接从起点开始，避免“一巡航就结束”
+    if (flightPath.length > 0 && closestIdx >= flightPath.length - 5) {
+        closestIdx = 0;
+    }
     currentWaypoint = closestIdx;
     
     // 获取目标点数据进行地形纠偏及高度计算
@@ -766,8 +1050,8 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
             }
         }
     }
-    
     const pt = flightPath[currentWaypoint];
+    
     const elevationVal = typeof pt.ground_alt === 'number' ? pt.ground_alt : (typeof pt.elevation === 'number' ? pt.elevation : 5000);
     const relativeAlt = typeof pt.relative_alt === 'number' ? pt.relative_alt : (typeof pt.range === 'number' ? pt.range : 500);
     const absoluteAltitude = elevationVal + relativeAlt;
@@ -798,6 +1082,28 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
     
     // 动态计算过渡飞行时间与最大飞行高度，避免长距离瞬间拉扯与大尺度旋转带来的眩晕感
     let flyDuration = 3.5;
+    
+    currentFlightSegment = {
+        startTime: Date.now(),
+        duration: flyDuration,
+        progress: 0.0
+    };
+
+    // 初始化时段过渡 (Swoop-in transition)
+    if (typeof pt.timeOfDay === 'number') {
+        const currentIso = Cesium.JulianDate.toIso8601(viewer.clock.currentTime);
+        const match = currentIso.match(/T(\d\d):(\d\d)/);
+        let startVal = 10.0;
+        if (match) {
+            startVal = parseInt(match[1]) + parseInt(match[2])/60.0;
+        }
+        sunlightTransition = {
+            startVal: startVal,
+            endVal: pt.timeOfDay,
+            duration: flyDuration,
+            startTime: Date.now()
+        };
+    }
     let maxFlightHeight = undefined;
     
     if (distance > 2500) {
@@ -819,6 +1125,11 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
         easingFunction: Cesium.EasingFunction.CUBIC_IN_OUT, // 缓入缓出
         complete: () => {
             if (isPlaying) {
+                // 抵达第一个航点，正式开始巡航，此时才触发第一段解说
+                if (pt.narration_audio) {
+                    playNarration(pt.narration_audio);
+                }
+
                 const waitTime = typeof pt.wait_time === 'number' ? pt.wait_time : 0.0;
                 if (waitTime > 0) {
                     setTimeout(() => {
@@ -841,6 +1152,9 @@ document.getElementById('btn-free-explore').addEventListener('click', () => {
     startBgm(); // 尝试触发音乐播放
     isPlaying = false;
     tourStartTime = 0;
+    stopNarrationAndUnduck(); // 停止语音解说
+    const tlContainer = document.getElementById('flight-timeline-container');
+    if (tlContainer) tlContainer.style.display = 'none';
     updateHandheldShake(false); // 禁用手持呼吸感震动
     viewer.camera.cancelFlight();
 });
@@ -882,6 +1196,19 @@ if (adBanner && sponsorsModal && closeSponsorsModal) {
         if (e.target === sponsorsModal) {
             sponsorsModal.classList.add('hidden');
         }
+    });
+}
+
+// 顶部发布栏折叠/展开逻辑
+const btnTogglePublish = document.getElementById('btn-toggle-publish');
+const publishBar = document.getElementById('publish-bar');
+const togglePublishArrow = document.getElementById('toggle-publish-arrow');
+
+if (btnTogglePublish && publishBar && togglePublishArrow) {
+    btnTogglePublish.addEventListener('click', () => {
+        const isCollapsed = publishBar.classList.toggle('collapsed');
+        btnTogglePublish.classList.toggle('collapsed', isCollapsed);
+        togglePublishArrow.style.transform = isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)';
     });
 }
 
@@ -1060,6 +1387,65 @@ if (bgmBtn && bgmAudio) {
     });
     // 默认样式降低透明度表示未播放
     bgmBtn.style.opacity = '0.5';
+}
+
+// ------------------ AI 语音解说播放与 BGM 自动压限 (Ducking) ------------------
+let duckInterval = null;
+
+function playNarration(audioUrl) {
+    if (!window.narrationAudio) {
+        window.narrationAudio = new Audio();
+    }
+    // 暂停上一段播放以防声音重叠
+    window.narrationAudio.pause();
+    
+    // 自动添加项目前缀（如有，且 audioUrl 不是以 http 或绝对路径开头）
+    let srcUrl = audioUrl;
+    if (srcUrl.startsWith('/')) {
+        // 使用相对域名根的绝对路径
+        srcUrl = srcUrl + "?t=" + Date.now();
+    } else {
+        srcUrl = "../" + srcUrl + "?t=" + Date.now();
+    }
+    
+    window.narrationAudio.src = srcUrl;
+    window.narrationAudio.play().then(() => {
+        duckBgm(true);
+    }).catch(err => {
+        console.warn("播放语音解说失败:", err);
+    });
+
+    window.narrationAudio.onended = () => {
+        duckBgm(false);
+    };
+}
+
+function duckBgm(duck) {
+    const bgm = document.getElementById('bgmAudio');
+    if (!bgm) return;
+    
+    if (duckInterval) clearInterval(duckInterval);
+    
+    const targetVolume = duck ? 0.15 : 1.0;
+    const step = duck ? -0.05 : 0.05;
+    
+    duckInterval = setInterval(() => {
+        let cur = bgm.volume;
+        cur += step;
+        if ((step < 0 && cur <= targetVolume) || (step > 0 && cur >= targetVolume)) {
+            bgm.volume = targetVolume;
+            clearInterval(duckInterval);
+        } else {
+            bgm.volume = Math.max(0, Math.min(1.0, cur));
+        }
+    }, 40); // 约在 0.6 秒内渐变完成压限/恢复
+}
+
+function stopNarrationAndUnduck() {
+    if (window.narrationAudio) {
+        window.narrationAudio.pause();
+    }
+    duckBgm(false);
 }
 
 // 绑定轮播翻页事件
@@ -1415,3 +1801,111 @@ function checkUrlParametersAndFocus() {
 // 启动执行
 checkUrlParametersAndFocus();
 
+
+
+// ==================== 时间轴拖拽逻辑 ====================
+let isScrubbing = false;
+
+document.getElementById('flight-timeline-slider').addEventListener('input', (e) => {
+    if (flightPath.length === 0) return;
+    isScrubbing = true;
+    isPlaying = false; // 暂停巡航
+    viewer.camera.cancelFlight(); // 打断当前飞行
+    stopNarrationAndUnduck(); // 停止解说
+    sunlightTransition = null; // 打断光照插值
+    currentFlightSegment = null;
+    
+    const _tsInput = document.getElementById('timeline-status');
+    if (_tsInput) { _tsInput.textContent = '拖拽跳转中...'; _tsInput.style.color = '#f59e0b'; }
+    
+    // 计算目标航点索引
+    const progress = parseFloat(e.target.value);
+    const targetIdx = Math.max(0, Math.min(flightPath.length - 1, Math.round(progress)));
+    
+    // 如果想要在拖拽时具备吸附感，可以取消下一行的注释，但保留平滑滑动可能体验更好
+    // e.target.value = targetIdx; 
+    
+    // 我们只在相机视角上吸附，滑块保持平滑拖拽
+    currentWaypoint = targetIdx;
+    
+    // 瞬间吸附 (Snap)
+    const pt = flightPath[currentWaypoint];
+    if (!pt) return;
+    
+    const absoluteAltitude = (typeof pt.ground_alt === 'number' ? pt.ground_alt : (typeof pt.elevation === 'number' ? pt.elevation : 5000)) + (typeof pt.relative_alt === 'number' ? pt.relative_alt : (typeof pt.range === 'number' ? pt.range : 500));
+    
+    let finalHeading = pt.heading || 0.0;
+    if (!pt.look_at_intent) {
+        if (pt.shot_mode === 'side') finalHeading += 90.0;
+        else if (pt.shot_mode === 'back') finalHeading += 180.0;
+    }
+
+    viewer.camera.setView({
+        destination: Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, absoluteAltitude),
+        orientation: {
+            heading: Cesium.Math.toRadians(finalHeading),
+            pitch: Cesium.Math.toRadians(pt.pitch || -40.0),
+            roll: Cesium.Math.toRadians(pt.roll || 0.0)
+        }
+    });
+    
+    // 同步光照
+    if (typeof pt.timeOfDay === 'number') {
+        let hrs = Math.floor(pt.timeOfDay);
+        let mins = Math.floor((pt.timeOfDay - hrs) * 60);
+        hrs = Math.max(0, Math.min(23, hrs));
+        mins = Math.max(0, Math.min(59, mins));
+        viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(`2024-06-21T${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00Z`);
+    }
+
+    document.getElementById('timeline-total-time').textContent = `${currentWaypoint + 1} / ${flightPath.length} 航点`;
+});
+
+document.getElementById('flight-timeline-slider').addEventListener('change', (e) => {
+    if (!isScrubbing || flightPath.length === 0) return;
+    isScrubbing = false;
+    isPlaying = true;
+    const _tsChange = document.getElementById('timeline-status');
+    if (_tsChange) { _tsChange.textContent = '巡航中'; _tsChange.style.color = '#20e5b5'; }
+    
+    // 重新校准游览时间，防止时间突变
+    // 假设当前时间的比例
+    const progressPercent = parseFloat(e.target.value) / 100.0;
+    const estimatedTotalTime = currentProgressTime > 0 ? (currentProgressTime / (currentWaypoint === 0 ? 0.01 : (currentWaypoint / flightPath.length))) : 120;
+    currentProgressTime = estimatedTotalTime * progressPercent;
+    tourStartTime = Date.now() - (currentProgressTime * 1000);
+
+    startBgm();
+    
+    // 直接进入该航点的巡航逻辑（会播放该点解说并飞向下一个点，如果是航点0，相当于跳过了swoop）
+    // 为了和启动保持一致，我们手动触发一次当前点的解说
+    const pt = flightPath[currentWaypoint];
+    if (pt.narration_audio) {
+        playNarration(pt.narration_audio);
+    }
+    
+    currentWaypoint++;
+    if (typeof flyNext === 'function') flyNext();
+});
+
+// Sync timeline in renderLoop or regular intervals
+setInterval(() => {
+    if (typeof isPlaying !== 'undefined' && isPlaying && !isScrubbing && flightPath && flightPath.length > 1) {
+        // Safe fallback to update time if CallbackProperty didn't
+        if (tourStartTime > 0) {
+            currentProgressTime = (Date.now() - tourStartTime) / 1000.0;
+        }
+        const slider = document.getElementById('flight-timeline-slider');
+        if (slider) {
+            let fractional = 0.0;
+            if (typeof currentFlightSegment !== 'undefined' && currentFlightSegment) fractional = currentFlightSegment.progress;
+            // Use currentWaypoint + fractional
+            slider.value = Math.min(flightPath.length - 1, currentWaypoint + Math.max(0, fractional));
+            if (typeof window.formatProgressTime === 'function') {
+                document.getElementById('timeline-current-time').textContent = window.formatProgressTime(currentProgressTime);
+            }
+            document.getElementById('timeline-total-time').textContent = `${currentWaypoint + 1} / ${flightPath.length} 航点`;
+        }
+    }
+}, 100); // 提高刷新频率到 100ms
+// ========================================================

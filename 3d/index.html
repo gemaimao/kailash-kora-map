@@ -16,7 +16,10 @@
             <img src="../assets/logo-lungta-trans.png" class="overlay-logo" alt="风马旗">
             <h1 id="overlay-title">2026马年大转山</h1>
             <p id="overlay-desc">一山之缘，众生之幸。愿以此行，祈福平安。</p>
-            <button id="btn-overlay-start" class="btn primary" style="font-size: 16px; padding: 12px 30px; margin-top: 20px;">▶️ 开始启程</button>
+            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;" id="start-buttons">
+                <button id="btn-overlay-start-outer" class="btn primary" style="font-size: 16px; padding: 12px 24px;">▶️ 外环启程</button>
+                <button id="btn-overlay-start-inner" class="btn primary" style="font-size: 16px; padding: 12px 24px; background: rgba(0,255,170,0.2); border-color: rgba(0,255,170,0.5); color: #00ffaa;">▶️ 内环启程</button>
+            </div>
             <button id="btn-overlay-replay" class="btn secondary" style="font-size: 16px; padding: 12px 30px; margin-top: 20px; display: none;">🔄 再次巡航</button>
         </div>
     </div>
@@ -27,8 +30,14 @@
 
     <!-- 顶部左侧区域 (标题 + 独立发布条) -->
     <div id="top-left-container" class="top-left-panel">
-        <div class="map-title-header">
+        <div class="map-title-header" id="btn-toggle-publish" style="pointer-events: auto; cursor: pointer; display: flex; align-items: center; gap: 8px;">
             <span>2026马年大转山</span>
+            <span id="toggle-publish-arrow" style="font-size: 10px; color: #ffd700; transition: transform 0.3s ease; display: inline-block;">▲</span>
+            <button id="btn-bgm" class="btn-music" title="播放/暂停音乐" onclick="event.stopPropagation()" style="background: none; border: none; cursor: pointer; padding: 0; margin-left: 4px; display: flex; align-items: center;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="display: block; color: #ffd700; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));">
+                    <path d="M19 3H9c-1.1 0-2 .9-2 2v11.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h10v7.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V5c0-1.1.9-2 2-2z"/>
+                </svg>
+            </button>
         </div>
         <div id="publish-bar" class="publish-bar-panel">
             <button id="btn-publish-msg" class="bar-btn-publish">发布</button>
@@ -49,26 +58,22 @@
         <!-- 顶部的三个功能键 -->
         <div class="controls-compact">
             <button id="btn-start-tour" class="btn-tour">
-                <span class="btn-icon-emoji">▶️</span>
-                <span>巡航飞行</span>
+                <span>巡航</span>
             </button>
             <button id="btn-free-explore" class="btn-explore">
-                <span class="btn-icon-emoji">🌍</span>
-                <span>全景探索</span>
+                <span>探索</span>
             </button>
             <button id="btn-my-location" class="btn-explore" title="在地图上标记我当前的位置">
-                <span class="btn-icon-emoji">📍</span>
-                <span>我的定位</span>
+                <span>定位</span>
             </button>
-            <button id="btn-bgm" class="btn-music" title="播放/暂停音乐">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="display: block; color: #ffd700; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));">
-                    <path d="M19 3H9c-1.1 0-2 .9-2 2v11.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h10v7.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V5c0-1.1.9-2 2-2z"/>
-                </svg>
-            </button>
-            <button class="tool-btn" id="btn-elev-chart" title="编辑高程曲线">📈</button>
+            <select id="map-layer-selector" class="btn-select" title="切换底图">
+                <option value="bing">basic map</option>
+                <option value="google_satellite">google map</option>
+                <option value="osm">OSM</option>
+                <option value="mapbox">mapbox</option>
+            </select>
         </div>
-        <div id="elevation-chart" class="chart-overlay hidden"></div>
-        </div>
+    </div>
 
         <!-- 功能面板下方：浮动解说窗口 (当进入雷达范围时显示) -->
         <div id="poi-info-panel" class="poi-info-content hidden">
@@ -149,6 +154,18 @@
             </div>
             <p id="pub-status" style="color: green; font-size: 12px; text-align: center; margin-top: 10px; display: none;"></p>
         </div>
+    </div>
+
+
+    <!-- 全局飞行进度时间轴 -->
+    <div id="flight-timeline-container" style="display: none; position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 60%; max-width: 800px; background: rgba(10, 14, 23, 0.38); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 10px 20px; z-index: 1000; flex-direction: row; align-items: center; gap: 15px; font-family: sans-serif;">
+        <span id="timeline-current-time" style="font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap;">00:00</span>
+        <div style="position: relative; width: 100%; flex: 1; display: flex; align-items: center;">
+            <div id="timeline-ticks" style="position: absolute; top: 50%; transform: translateY(-50%); left: 0; right: 0; height: 4px; pointer-events: none; display: flex; justify-content: space-between;"></div>
+            <input type="range" id="flight-timeline-slider" min="0" max="1" step="0.001" value="0" style="width: 100%; cursor: pointer; accent-color: #20e5b5; position: relative; z-index: 2; margin: 0; background: transparent;">
+        </div>
+        <span id="timeline-total-time" style="font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap;">00:00</span>
+        <span id="timeline-status" style="font-size: 11px; color: #20e5b5; font-weight: 500; white-space: nowrap; min-width: 50px; text-align: right;">巡航中</span>
     </div>
 
     <!-- 背景音乐 -->
