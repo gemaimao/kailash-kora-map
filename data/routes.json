@@ -50341,20 +50341,24 @@
       "lat": 31.099853,
       "ground_alt": 5408,
       "relative_alt": 595,
-      "heading": 183.5,
+      "heading": 228,
       "pitch": 6.6,
       "roll": 0,
       "duration": 2.5,
       "wait_time": 0,
       "fov": 60,
       "shot_mode": "default",
-      "look_at_intent": "custom",
+      "look_at_intent": "summit",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
       "speed_preset": "normal",
       "wait_preset": "none",
       "fractionalIndex": 915.6635894851055,
-      "look_at_target": null
+      "look_at_target": null,
+      "shot_params": {
+        "fisheye_fov": 140,
+        "fisheye_warp": 5
+      }
     },
     {
       "id": "evt_1781145179397_23",
