@@ -51228,7 +51228,7 @@
       "lat": 30.97740793498796,
       "ground_alt": 4657,
       "relative_alt": 660,
-      "heading": 332.9,
+      "heading": 242.9,
       "pitch": 2.4,
       "roll": 0,
       "duration": 137,
@@ -51241,7 +51241,7 @@
       "speed_preset": "custom",
       "wait_preset": "none",
       "look_at_target": null,
-      "shot_mode": "tunnel",
+      "shot_mode": "fisheye",
       "shot_params": {
         "fisheye_fov": 170,
         "fisheye_warp": 9,
