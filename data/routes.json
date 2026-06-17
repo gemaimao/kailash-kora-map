@@ -51238,7 +51238,8 @@
       "perspective_pitch": "custom",
       "fov": 28,
       "fractionalIndex": 12377,
-      "speed_preset": "custom"
+      "speed_preset": "custom",
+      "wait_preset": "none"
     }
   ]
 }
