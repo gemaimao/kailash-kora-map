@@ -115,14 +115,14 @@
       "heading": 29.4,
       "pitch": -22.1,
       "roll": 360,
-      "duration": 2.5,
+      "duration": 5.8,
       "wait_time": 0,
       "fov": 90,
       "shot_mode": "default",
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "speed_preset": "normal",
+      "speed_preset": "custom",
       "wait_preset": "none"
     },
     {
@@ -135,14 +135,14 @@
       "heading": 62.2,
       "pitch": -30,
       "roll": 360,
-      "duration": 2.5,
+      "duration": 13.2,
       "wait_time": 0,
       "fov": 90,
       "shot_mode": "default",
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "speed_preset": "normal",
+      "speed_preset": "custom",
       "wait_preset": "none"
     },
     {
