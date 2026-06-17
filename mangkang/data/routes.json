@@ -199,7 +199,7 @@
       "wait_time": 0,
       "fov": 90,
       "shot_mode": "default",
-      "look_at_intent": "free",
+      "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
       "speed_preset": "custom",
