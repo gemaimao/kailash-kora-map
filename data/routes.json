@@ -50374,25 +50374,6 @@
       "fractionalIndex": 982
     },
     {
-      "id": "evt_1781145179397_24",
-      "name": "航点 25",
-      "lng": 81.279473,
-      "lat": 31.010359,
-      "ground_alt": 4970,
-      "relative_alt": 1047,
-      "heading": 130.3,
-      "pitch": -40,
-      "roll": 0,
-      "duration": 5,
-      "wait_time": 0,
-      "look_at_intent": "custom",
-      "perspective_fov": "custom",
-      "perspective_pitch": "custom",
-      "fov": 90,
-      "shot_mode": "handheld",
-      "fractionalIndex": 1311
-    },
-    {
       "id": "evt_1781145179397_25",
       "name": "航点 26",
       "lng": 81.37656148140964,
@@ -50411,6 +50392,25 @@
       "look_at_target": null,
       "speed_preset": "custom",
       "fractionalIndex": 2133
+    },
+    {
+      "id": "evt_1781145179397_24",
+      "name": "航点 25",
+      "lng": 81.29108,
+      "lat": 30.975794,
+      "ground_alt": 4652,
+      "relative_alt": 1329,
+      "heading": 130.3,
+      "pitch": -40,
+      "roll": 0,
+      "duration": 5,
+      "wait_time": 0,
+      "look_at_intent": "custom",
+      "perspective_fov": "custom",
+      "perspective_pitch": "custom",
+      "fov": 90,
+      "shot_mode": "handheld",
+      "fractionalIndex": 1311
     },
     {
       "id": "evt_1781168199106",
