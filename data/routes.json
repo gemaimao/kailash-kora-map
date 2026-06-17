@@ -50341,14 +50341,14 @@
       "lat": 31.099853,
       "ground_alt": 5408,
       "relative_alt": 595,
-      "heading": 228,
+      "heading": 183.5,
       "pitch": 6.6,
       "roll": 0,
       "duration": 2.5,
       "wait_time": 0,
       "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "summit",
+      "shot_mode": "handheld",
+      "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
       "speed_preset": "normal",
@@ -50357,7 +50357,14 @@
       "look_at_target": null,
       "shot_params": {
         "fisheye_fov": 140,
-        "fisheye_warp": 5
+        "fisheye_warp": 5,
+        "tunnel_fov": 25,
+        "tunnel_speed": 3,
+        "crane_arm": 15,
+        "crane_start": -10,
+        "crane_end": 20,
+        "via_offset": 20,
+        "via_smooth": 5
       }
     },
     {
