@@ -51243,8 +51243,8 @@
       "look_at_target": null,
       "shot_mode": "fisheye",
       "shot_params": {
-        "fisheye_fov": 140,
-        "fisheye_warp": 5
+        "fisheye_fov": 170,
+        "fisheye_warp": 9
       }
     }
   ]
