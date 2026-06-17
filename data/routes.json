@@ -51228,18 +51228,19 @@
       "lat": 30.97740793498796,
       "ground_alt": 4657,
       "relative_alt": 660,
-      "heading": 219.6,
-      "pitch": -25,
+      "heading": 332.9,
+      "pitch": 7.5,
       "roll": 0,
       "duration": 137,
       "wait_time": 0,
       "look_at_intent": "custom",
-      "perspective_fov": "compressed",
+      "perspective_fov": "custom",
       "perspective_pitch": "custom",
       "fov": 28,
       "fractionalIndex": 12377,
       "speed_preset": "custom",
-      "wait_preset": "none"
+      "wait_preset": "none",
+      "look_at_target": null
     }
   ]
 }
