@@ -51231,13 +51231,14 @@
       "heading": 219.6,
       "pitch": -25,
       "roll": 0,
-      "duration": 1.7,
+      "duration": 137,
       "wait_time": 0,
       "look_at_intent": "custom",
       "perspective_fov": "compressed",
       "perspective_pitch": "custom",
       "fov": 28,
-      "fractionalIndex": 12377
+      "fractionalIndex": 12377,
+      "speed_preset": "custom"
     }
   ]
 }
