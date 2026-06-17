@@ -51241,10 +51241,12 @@
       "speed_preset": "custom",
       "wait_preset": "none",
       "look_at_target": null,
-      "shot_mode": "fisheye",
+      "shot_mode": "tunnel",
       "shot_params": {
         "fisheye_fov": 170,
-        "fisheye_warp": 9
+        "fisheye_warp": 9,
+        "tunnel_fov": 25,
+        "tunnel_speed": 3
       }
     }
   ]
