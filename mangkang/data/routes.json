@@ -196,14 +196,14 @@
       "pitch": -28.7,
       "roll": 360,
       "duration": 19.9,
-      "wait_time": 0,
+      "wait_time": 6,
       "fov": 90,
       "shot_mode": "default",
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
       "speed_preset": "custom",
-      "wait_preset": "none",
+      "wait_preset": "custom",
       "look_at_target": null
     },
     {
