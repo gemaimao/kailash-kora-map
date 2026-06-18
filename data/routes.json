@@ -28536,7 +28536,7 @@
       "ground_alt": 4659,
       "relative_alt": 500,
       "heading": 300.95,
-      "pitch": -25,
+      "pitch": -29,
       "roll": 0,
       "duration": 2.5,
       "wait_time": 0,
@@ -28544,7 +28544,7 @@
       "shot_mode": "default",
       "look_at_intent": "forward",
       "perspective_fov": "natural",
-      "perspective_pitch": "oblique",
+      "perspective_pitch": "custom",
       "speed_preset": "normal",
       "wait_preset": "none",
       "fractionalIndex": 0.00215793787835071
