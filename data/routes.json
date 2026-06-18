@@ -29154,7 +29154,8 @@
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
       "speed_preset": "custom",
-      "wait_preset": "custom"
+      "wait_preset": "custom",
+      "timeOfDay": 24
     }
   ]
 }
