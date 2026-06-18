@@ -28529,48 +28529,6 @@
   ],
   "main_flight": [
     {
-      "id": "evt_1781794236055",
-      "name": "自定义航点 1",
-      "lng": 81.284173,
-      "lat": 30.962305,
-      "ground_alt": 4598,
-      "relative_alt": 177,
-      "heading": 314.8,
-      "pitch": -17.8,
-      "roll": 0,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "custom",
-      "perspective_fov": "custom",
-      "perspective_pitch": "custom",
-      "speed_preset": "normal",
-      "wait_preset": "none",
-      "timeOfDay": 10
-    },
-    {
-      "id": "evt_1781794291210",
-      "name": "自定义航点 2",
-      "lng": 81.291011,
-      "lat": 30.974727,
-      "ground_alt": 4637,
-      "relative_alt": 224,
-      "heading": 314,
-      "pitch": -18.1,
-      "roll": 360,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "forward",
-      "perspective_fov": "natural",
-      "perspective_pitch": "oblique",
-      "speed_preset": "normal",
-      "wait_preset": "none",
-      "timeOfDay": 10
-    },
-    {
       "id": "evt_1781756921145_2",
       "name": "空间混合轨道 3",
       "lng": 81.273791,
@@ -28675,6 +28633,50 @@
       "speed_preset": "normal",
       "wait_preset": "none",
       "fractionalIndex": 307.0968753522365
+    },
+    {
+      "id": "evt_1781792930189",
+      "name": "自定义航点 6",
+      "lng": 81.305406,
+      "lat": 31.027525,
+      "ground_alt": 5675,
+      "relative_alt": 343,
+      "heading": 10.7,
+      "pitch": -9,
+      "roll": 360,
+      "duration": 2995,
+      "wait_time": 8,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "custom",
+      "perspective_fov": "custom",
+      "perspective_pitch": "custom",
+      "speed_preset": "custom",
+      "wait_preset": "custom",
+      "timeOfDay": 0,
+      "fractionalIndex": 338
+    },
+    {
+      "id": "evt_1781792965488",
+      "name": "自定义航点 7",
+      "lng": 81.305406,
+      "lat": 31.027525,
+      "ground_alt": 5675,
+      "relative_alt": 343,
+      "heading": 10.7,
+      "pitch": -9,
+      "roll": 360,
+      "duration": 2.5,
+      "wait_time": 8,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "custom",
+      "perspective_fov": "custom",
+      "perspective_pitch": "custom",
+      "speed_preset": "custom",
+      "wait_preset": "custom",
+      "timeOfDay": 24,
+      "fractionalIndex": 338
     },
     {
       "id": "evt_1781756921145_7",
@@ -28866,6 +28868,27 @@
       "fractionalIndex": 923.5992565035942
     },
     {
+      "id": "evt_1781756921145_25",
+      "name": "空间混合轨道 26",
+      "lng": 81.368467,
+      "lat": 31.096851,
+      "ground_alt": 5595,
+      "relative_alt": 263,
+      "heading": 135.9,
+      "pitch": -31.2,
+      "roll": 0,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "custom",
+      "perspective_fov": "custom",
+      "perspective_pitch": "custom",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "fractionalIndex": 1035
+    },
+    {
       "id": "evt_1781756921145_23",
       "name": "空间混合轨道 24",
       "lng": 81.368538,
@@ -28905,28 +28928,7 @@
       "perspective_pitch": "custom",
       "speed_preset": "normal",
       "wait_preset": "none",
-      "fractionalIndex": 1311.0323579328171
-    },
-    {
-      "id": "evt_1781756921145_25",
-      "name": "空间混合轨道 26",
-      "lng": 81.368467,
-      "lat": 31.096851,
-      "ground_alt": 5595,
-      "relative_alt": 263,
-      "heading": 135.9,
-      "pitch": -31.2,
-      "roll": 0,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "custom",
-      "perspective_fov": "custom",
-      "perspective_pitch": "custom",
-      "speed_preset": "normal",
-      "wait_preset": "none",
-      "fractionalIndex": 2132.987087136789
+      "fractionalIndex": 1684
     },
     {
       "id": "evt_1781756921145_26",
@@ -28947,7 +28949,7 @@
       "perspective_pitch": "custom",
       "speed_preset": "normal",
       "wait_preset": "none",
-      "fractionalIndex": 2493.0134500385857
+      "fractionalIndex": 2021.8183767154107
     },
     {
       "id": "evt_1781756921145_27",
@@ -28968,7 +28970,7 @@
       "perspective_pitch": "custom",
       "speed_preset": "normal",
       "wait_preset": "none",
-      "fractionalIndex": 2784.9969937237383
+      "fractionalIndex": 2478
     },
     {
       "id": "evt_1781756921145_28",
@@ -28989,7 +28991,7 @@
       "perspective_pitch": "custom",
       "speed_preset": "normal",
       "wait_preset": "none",
-      "fractionalIndex": 2952.9992000003303
+      "fractionalIndex": 3018.3064020153383
     },
     {
       "id": "evt_1781756921145_29",
@@ -29010,7 +29012,7 @@
       "perspective_pitch": "custom",
       "speed_preset": "normal",
       "wait_preset": "none",
-      "fractionalIndex": 3187
+      "fractionalIndex": 3811.5822004658085
     },
     {
       "id": "evt_1781756921145_30",
@@ -29031,7 +29033,7 @@
       "perspective_pitch": "custom",
       "speed_preset": "normal",
       "wait_preset": "none",
-      "fractionalIndex": 3435.9952030967233
+      "fractionalIndex": 4075
     },
     {
       "id": "evt_1781756921145_31",
@@ -29052,7 +29054,7 @@
       "perspective_pitch": "custom",
       "speed_preset": "normal",
       "wait_preset": "none",
-      "fractionalIndex": 3598.0043765910245
+      "fractionalIndex": 5680
     },
     {
       "id": "evt_1781756921145_32",
@@ -29073,7 +29075,7 @@
       "perspective_pitch": "custom",
       "speed_preset": "normal",
       "wait_preset": "none",
-      "fractionalIndex": 3742.9967324826002
+      "fractionalIndex": 6180
     },
     {
       "id": "evt_1781756921145_41",
@@ -29094,7 +29096,7 @@
       "perspective_pitch": "custom",
       "speed_preset": "normal",
       "wait_preset": "none",
-      "fractionalIndex": 6054.008136770507
+      "fractionalIndex": 6871
     },
     {
       "id": "evt_1781756921145_42",
@@ -29115,7 +29117,7 @@
       "perspective_pitch": "custom",
       "speed_preset": "normal",
       "wait_preset": "none",
-      "fractionalIndex": 6468.987508905122
+      "fractionalIndex": 7068.845911923856
     },
     {
       "id": "evt_1781756921145_43",
@@ -29136,7 +29138,7 @@
       "perspective_pitch": "custom",
       "speed_preset": "normal",
       "wait_preset": "none",
-      "fractionalIndex": 7044.007983686105
+      "fractionalIndex": 7110.848686152469
     },
     {
       "id": "evt_1781792859674",
@@ -29157,49 +29159,52 @@
       "perspective_pitch": "custom",
       "speed_preset": "normal",
       "wait_preset": "none",
-      "timeOfDay": 9.4
+      "timeOfDay": 9.4,
+      "fractionalIndex": 7117
     },
     {
-      "id": "evt_1781792930189",
+      "id": "evt_1781794236055",
       "name": "自定义航点 31",
-      "lng": 81.305406,
-      "lat": 31.027525,
-      "ground_alt": 5675,
-      "relative_alt": 343,
-      "heading": 10.7,
-      "pitch": -9,
-      "roll": 360,
-      "duration": 2995,
-      "wait_time": 8,
+      "lng": 81.284173,
+      "lat": 30.962305,
+      "ground_alt": 4598,
+      "relative_alt": 177,
+      "heading": 314.8,
+      "pitch": -17.8,
+      "roll": 0,
+      "duration": 2.5,
+      "wait_time": 0,
       "fov": 60,
       "shot_mode": "default",
       "look_at_intent": "custom",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
-      "speed_preset": "custom",
-      "wait_preset": "custom",
-      "timeOfDay": 0
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "timeOfDay": 10,
+      "fractionalIndex": 7118
     },
     {
-      "id": "evt_1781792965488",
+      "id": "evt_1781794291210",
       "name": "自定义航点 32",
-      "lng": 81.305406,
-      "lat": 31.027525,
-      "ground_alt": 5675,
-      "relative_alt": 343,
-      "heading": 10.7,
-      "pitch": -9,
+      "lng": 81.291011,
+      "lat": 30.974727,
+      "ground_alt": 4637,
+      "relative_alt": 224,
+      "heading": 314,
+      "pitch": -18.1,
       "roll": 360,
       "duration": 2.5,
-      "wait_time": 8,
+      "wait_time": 0,
       "fov": 60,
       "shot_mode": "default",
-      "look_at_intent": "custom",
-      "perspective_fov": "custom",
-      "perspective_pitch": "custom",
-      "speed_preset": "custom",
-      "wait_preset": "custom",
-      "timeOfDay": 24
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "timeOfDay": 10,
+      "fractionalIndex": 7121.368941326806
     }
   ]
 }
