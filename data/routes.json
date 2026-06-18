@@ -29094,6 +29094,26 @@
       "speed_preset": "normal",
       "wait_preset": "none",
       "fractionalIndex": 7044.007983686105
+    },
+    {
+      "id": "evt_1781792859674",
+      "name": "自定义航点 28",
+      "lng": 81.28235,
+      "lat": 30.955364,
+      "ground_alt": 4587,
+      "relative_alt": 297,
+      "heading": 21.8,
+      "pitch": -10.3,
+      "roll": 360,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "custom",
+      "perspective_fov": "custom",
+      "perspective_pitch": "custom",
+      "speed_preset": "normal",
+      "wait_preset": "none"
     }
   ]
 }
