@@ -28529,6 +28529,26 @@
   ],
   "main_flight": [
     {
+      "id": "evt_1781794483583",
+      "name": "自定义航点 1",
+      "lng": 81.276463,
+      "lat": 30.941006,
+      "ground_alt": 4578,
+      "relative_alt": 673,
+      "heading": 16.6,
+      "pitch": -15.2,
+      "roll": 360,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none"
+    },
+    {
       "id": "evt_1781756921145_2",
       "name": "空间混合轨道 3",
       "lng": 81.273791,
@@ -28549,26 +28569,6 @@
       "wait_preset": "none",
       "fractionalIndex": 48,
       "timeOfDay": 4.3
-    },
-    {
-      "id": "evt_1781794483583",
-      "name": "自定义航点 2",
-      "lng": 81.276463,
-      "lat": 30.941006,
-      "ground_alt": 4578,
-      "relative_alt": 673,
-      "heading": 16.6,
-      "pitch": -15.2,
-      "roll": 360,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "forward",
-      "perspective_fov": "natural",
-      "perspective_pitch": "oblique",
-      "speed_preset": "normal",
-      "wait_preset": "none"
     },
     {
       "id": "evt_1781794375529",
