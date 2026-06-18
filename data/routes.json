@@ -28610,7 +28610,8 @@
       "perspective_fov": "natural",
       "perspective_pitch": "oblique",
       "speed_preset": "normal",
-      "wait_preset": "none"
+      "wait_preset": "none",
+      "timeOfDay": 10
     },
     {
       "id": "evt_1781756921145_6",
