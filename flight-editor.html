@@ -26,25 +26,48 @@
     .app-container { display: flex; height: 100vh; width: 100vw; }
     
     .sidebar-left {
-      width: 320px; background: var(--bg-panel); border-right: 1px solid var(--border);
+      position: relative;
+      width: 250px; background: var(--bg-panel); border-right: 1px solid var(--border);
       display: flex; flex-direction: column; z-index: 10; box-shadow: 5px 0 25px rgba(0,0,0,0.5);
       transition: margin-left 0.3s ease;
     }
     .sidebar-left.collapsed {
-      margin-left: -320px;
+      margin-left: -250px;
     }
     .main-canvas { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
     
-    /* Sidebar Toggle Button floating in Main Canvas */
+    /* Sidebar Toggle Button nested inside sidebar at the middle of the right border */
     .sidebar-toggle-btn {
-      position: absolute; top: 15px; left: 15px; width: 28px; height: 28px;
-      background: rgba(18, 18, 22, 0.95); border: 1px solid var(--border); border-radius: 6px;
-      color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;
-      z-index: 1001; font-size: 11px; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      position: absolute; top: 50%; right: -20px; transform: translateY(-50%); width: 20px; height: 70px;
+      background: rgba(18, 18, 22, 0.85); border: 1px solid var(--border); border-left: none; border-radius: 0 10px 10px 0;
+      color: var(--accent-cyan); cursor: pointer; display: flex; align-items: center; justify-content: center;
+      z-index: 1001; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 4px 0 15px rgba(0,0,0,0.4);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 0; outline: none;
     }
     .sidebar-toggle-btn:hover {
-      background: var(--accent-cyan); color: #000; border-color: var(--accent-cyan);
+      background: rgba(255, 205, 85, 0.2); color: var(--accent); border-color: rgba(255, 205, 85, 0.4);
+      box-shadow: 0px 0px 12px rgba(255, 205, 85, 0.3);
     }
+    .sidebar-left.collapsed .sidebar-toggle-btn {
+      right: -24px; width: 24px; height: 70px;
+      background: rgba(255, 255, 255, 0.04) !important;
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      border-left: none !important;
+      border-radius: 0 12px 12px 0;
+      color: rgba(255, 255, 255, 0.6);
+      box-shadow: 2px 0 20px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    }
+    .sidebar-left.collapsed .sidebar-toggle-btn:hover {
+      background: rgba(0, 255, 170, 0.15) !important;
+      color: var(--accent-cyan) !important;
+      border-color: rgba(0, 255, 170, 0.4) !important;
+      box-shadow: 0px 0px 15px rgba(0, 255, 170, 0.4);
+    }
+    .sidebar-toggle-btn .icon-expand { display: none; }
+    .sidebar-toggle-btn .icon-collapse { display: block; }
+    .sidebar-left.collapsed .sidebar-toggle-btn .icon-expand { display: block; }
+    .sidebar-left.collapsed .sidebar-toggle-btn .icon-collapse { display: none; }
 
     /* Left Panel Headers */
     .panel-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
@@ -105,7 +128,12 @@
     .action-icon-btn.danger:hover { color: #ff8080; background: rgba(255,80,80,0.15); }
 
     /* Overlay Toolbar (Top Left) */
-    .map-overlay-tools { position: absolute; top: 20px; left: 55px; z-index: 1000; display: flex; gap: 8px; flex-wrap: wrap; }
+    .map-overlay-tools { position: absolute; top: 20px; left: 55px; z-index: 1000; display: flex; gap: 8px; align-items: center; }
+    .map-overlay-tools-right { position: absolute; top: 20px; right: 200px; z-index: 1000; display: flex; gap: 6px; align-items: center; }
+    .map-overlay-tools-right .tool-btn,
+    .map-overlay-tools-right .tool-select { background: rgba(15, 40, 70, 0.8); border-color: rgba(60, 140, 255, 0.18); }
+    .map-overlay-tools-right .tool-btn:hover,
+    .map-overlay-tools-right .tool-select:hover { background: rgba(25, 60, 100, 0.9); border-color: rgba(80, 170, 255, 0.4); color: #7dd3fc; }
     .tool-btn { 
       background: rgba(10,10,12,0.9); border: 1px solid var(--border); color: #fff; 
       padding: 8px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; backdrop-filter: blur(8px);
@@ -113,16 +141,33 @@
     }
     .tool-btn:hover { background: rgba(30,30,35,0.95); border-color: var(--accent-cyan); color: var(--accent-cyan); }
     .tool-btn.active { background: var(--accent-cyan); color: #000; font-weight: 600; border-color: var(--accent-cyan); }
-    .tool-btn.danger { background: rgba(255, 80, 80, 0.15); border-color: rgba(255, 80, 80, 0.3); color: #ff8080; }
     .tool-btn.danger:hover { background: rgba(255, 80, 80, 0.25); }
+
+    .tool-select {
+      background: rgba(10,10,12,0.9); border: 1px solid var(--border); color: #fff; 
+      padding: 8px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; backdrop-filter: blur(8px);
+      outline: none; transition: all 0.2s;
+    }
+    .tool-select:hover { background: rgba(30,30,35,0.95); border-color: var(--accent-cyan); color: var(--accent-cyan); }
+    .tool-select option { background: #18181c; color: #fff; }
 
     /* Bottom Elevation Chart Container */
     .elevation-chart-container {
-      position: absolute; bottom: 20px; left: 230px; right: 20px; height: 260px;
-      background: rgba(24, 24, 28, 0.95); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px;
-      padding: 12px 16px; z-index: 1000; backdrop-filter: blur(16px);
-      display: flex; flex-direction: column; gap: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.7);
-      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      height: 320px;
+      background: rgba(10, 20, 15, 0.46);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+      z-index: 9999 !important;
+      pointer-events: auto;
     }
     .chart-header { display: flex; justify-content: space-between; align-items: center; }
     .chart-title { font-size: 11px; font-weight: 600; color: var(--accent-cyan); letter-spacing: 0.5px; }
@@ -130,13 +175,96 @@
     .chart-selection { font-size: 10px; color: var(--text-dim); font-family: monospace; }
     .chart-adjust-box { display: none; gap: 4px; align-items: center; }
 
+    /* Custom Geocoder Search Box Styling */
+    .cesium-viewer-toolbar {
+      top: 20px !important;
+      left: 140px !important;
+      right: auto !important;
+    }
+    .cesium-geocoder-input {
+      background-color: rgba(15, 40, 70, 0.8) !important;
+      border: 1px solid rgba(60, 140, 255, 0.18) !important;
+      border-radius: 20px 0 0 20px !important;
+      color: #fff !important;
+      font-size: 12px !important;
+      padding-left: 10px !important;
+      height: 32px !important;
+      backdrop-filter: blur(8px) !important;
+      width: 140px !important;
+    }
+    .cesium-geocoder-input:focus {
+      border-color: rgba(80, 170, 255, 0.4) !important;
+    }
+    .cesium-geocoder-searchButton {
+      background-color: rgba(15, 40, 70, 0.8) !important;
+      border: 1px solid rgba(60, 140, 255, 0.18) !important;
+      border-left: none !important;
+      border-radius: 0 20px 20px 0 !important;
+      height: 32px !important;
+      fill: #7dd3fc !important;
+      backdrop-filter: blur(8px) !important;
+    }
+
+    /* Nested Dropdown Menu */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: rgba(15, 40, 70, 0.9);
+      border: 1px solid rgba(60, 140, 255, 0.18);
+      border-radius: 6px;
+      min-width: 140px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+      z-index: 1001;
+      backdrop-filter: blur(8px);
+    }
+    .dropdown:hover .dropdown-content { display: block; }
+    .dropdown-item {
+      position: relative;
+      padding: 8px 12px;
+      color: #fff;
+      font-size: 12px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: space-between;
+    }
+    .dropdown-item:hover { background: rgba(25, 60, 100, 0.9); color: #7dd3fc; }
+    
+    .dropdown-submenu-content {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 100%;
+      background: rgba(15, 40, 70, 0.9);
+      border: 1px solid rgba(60, 140, 255, 0.18);
+      border-radius: 6px;
+      min-width: 120px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+    }
+    .dropdown-item:hover .dropdown-submenu-content { display: block; }
+    .dropdown-sub-item {
+      padding: 8px 12px;
+      color: #fff;
+      font-size: 12px;
+      cursor: pointer;
+      display: block;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .dropdown-sub-item:hover { background: rgba(25, 60, 100, 0.9); color: #7dd3fc; }
+
     /* Left Side Mixer Panel (Speed, Wait & Playback) */
     .hud-left-mixer-panel {
-      position: absolute; bottom: 20px; left: 20px; width: 190px; height: 320px;
-      background: rgba(24, 24, 28, 0.95); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px;
+      position: absolute; bottom: 20px; left: 20px; width: 190px; height: 260px;
+      background: rgba(24, 24, 28, 0.6667); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px;
       padding: 14px 16px; z-index: 1000; backdrop-filter: blur(16px);
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
-      display: flex; flex-direction: column; justify-content: flex-start; gap: 14px;
+      display: flex; flex-direction: column; justify-content: space-between;
       border-top: 1px solid rgba(255, 255, 255, 0.12);
     }
     .mixer-panel-section {
@@ -199,7 +327,7 @@
       position: absolute;
       top: 30%;
       transform: translateY(-50%);
-      width: 76px;
+      width: 50px;
       height: 310px;
       background: rgba(10, 10, 14, 0.82);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -209,12 +337,15 @@
       align-items: center;
       justify-content: space-between;
       padding: 16px 0;
-      z-index: 999;
+      z-index: 9999 !important;
       backdrop-filter: blur(14px);
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.65);
+      pointer-events: auto;
+      opacity: 0.85 !important;
+      visibility: visible !important;
     }
-    .hud-zoom-ring { left: 20px; border-left: 2.5px solid var(--accent-cyan); }
-    .hud-pitch-ring { right: 20px; border-right: 2.5px solid var(--accent); }
+    .hud-zoom-ring { left: 20px; }
+    .hud-pitch-ring { left: 75px; right: auto; }
 
     .hud-ring-label {
       font-size: 8px;
@@ -257,7 +388,7 @@
     .hud-vertical-slider {
       -webkit-appearance: none;
       appearance: none;
-      width: 4px;
+      width: 2px;
       height: 120px;
       background: rgba(255, 255, 255, 0.12);
       border-radius: 2px;
@@ -268,12 +399,12 @@
     .hud-vertical-slider::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 14px;
-      height: 14px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
       background: #fff;
       cursor: pointer;
-      border: 2px solid #000;
+      border: 1px solid #000;
     }
     .hud-zoom-ring .hud-vertical-slider::-webkit-slider-thumb { background: var(--accent-cyan); box-shadow: 0 0 8px rgba(0, 255, 170, 0.5); }
     .hud-pitch-ring .hud-vertical-slider::-webkit-slider-thumb { background: var(--accent); box-shadow: 0 0 8px rgba(255, 205, 85, 0.5); }
@@ -357,26 +488,100 @@
     }
 
     /* Target Lock & Vibe Panel (Top Right) */
-    .hud-target-lock-panel {
+    /* Director Inspector Panel (Right side) */
+    .hud-director-inspector {
       position: absolute;
       top: 20px;
+      bottom: 290px;
       right: 20px;
-      background: rgba(10, 10, 14, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 12px 14px;
-      z-index: 999;
-      backdrop-filter: blur(14px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      width: 240px;
-      border-top: 2.5px solid var(--accent);
+      width: 300px;
+      z-index: 9999 !important;
       display: none; /* Shown dynamically on selection */
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      pointer-events: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.1) transparent;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+    .hud-director-inspector::-webkit-scrollbar {
+      width: 2px;
+    }
+    .hud-director-inspector::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+    }
+
+    /* Accordion styles */
+    .inspector-accordion {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: auto;
+    }
+    .accordion-group {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      background: rgba(24, 24, 28, 0.75);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: auto; /* Restore interactivity on the card itself */
+    }
+    .accordion-group.active {
+      border-color: var(--accent);
+      box-shadow: 0 8px 30px rgba(255, 205, 85, 0.15);
+    }
+    .accordion-header {
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.02);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-dim);
+      user-select: none;
+      transition: background 0.2s, color 0.2s;
+    }
+    .accordion-header:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: #fff;
+    }
+    .accordion-group.active .accordion-header {
+      background: rgba(255, 205, 85, 0.08);
+      color: var(--accent);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .accordion-header::after {
+      content: '▼';
+      font-size: 8px;
+      transition: transform 0.25s ease;
+      color: var(--text-dim);
+    }
+    .accordion-group.active .accordion-header::after {
+      transform: rotate(-180deg);
+      color: var(--accent);
+    }
+    .accordion-body {
+      padding: 0 12px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+    .accordion-group.active .accordion-body {
+      padding: 12px;
+      max-height: 1000px; /* arbitrary large value to allow content to show */
     }
     .target-status {
       font-size: 11px;
       margin-bottom: 8px;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
       gap: 6px;
     }
@@ -395,11 +600,12 @@
       padding: 6px 8px;
       border-radius: 4px;
       cursor: pointer;
-      text-align: left;
+      text-align: center;
       transition: all 0.15s;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
+      gap: 4px;
     }
     .hud-mini-btn:hover {
       background: rgba(255, 205, 85, 0.12);
@@ -422,17 +628,76 @@
       border-color: #ff8080;
     }
     
-    /* Stunt shake indicator */
-    .hud-shake-toggle {
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px solid rgba(255,255,255,0.06);
+    /* Camera Dual Panel (视线对焦 + 特技镜头) */
+    .camera-dual-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .camera-panel-col {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .camera-col-title {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--text-dim);
+      letter-spacing: 0.3px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding-bottom: 3px;
+      margin-bottom: 2px;
+    }
+    .shot-mode-btn.active {
+      background: rgba(168, 85, 247, 0.25) !important;
+      border-color: rgba(168, 85, 247, 0.5) !important;
+      color: #c084fc !important;
+    }
+    .shot-params {
+      margin-top: 4px;
+      padding: 5px 6px;
+      background: rgba(0,0,0,0.25);
+      border-radius: 4px;
+      border: 1px solid rgba(168, 85, 247, 0.12);
+    }
+    .shot-param-row {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 4px;
+      margin-bottom: 3px;
     }
-    .hud-shake-toggle label { font-size: 10px; color: var(--text-dim); cursor: pointer; }
-    .hud-shake-toggle input { cursor: pointer; }
+    .shot-param-row:last-child { margin-bottom: 0; }
+    .shot-param-row label {
+      font-size: 8px;
+      color: var(--text-dim);
+      min-width: 24px;
+    }
+    .shot-param-row input[type="range"] {
+      flex: 1;
+      height: 2px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: rgba(255,255,255,0.12);
+      border-radius: 2px;
+      outline: none;
+    }
+    .shot-param-row input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #c084fc;
+      cursor: pointer;
+      border: 1px solid #000;
+      box-shadow: 0 0 4px rgba(192,132,252,0.5);
+    }
+    .shot-param-val {
+      font-size: 8px;
+      color: #fff;
+      font-family: monospace;
+      min-width: 28px;
+      text-align: right;
+    }
 
     /* Vibe Preset Mixer (氛围混音 preset bank) */
     .hud-vibe-panel {
@@ -495,6 +760,7 @@
       display: flex;
       justify-content: space-between;
       margin-bottom: 4px;
+      font-size: 11px;
     }
     .diag-label {
       color: var(--text-dim);
@@ -503,58 +769,121 @@
       color: #fff;
       font-weight: bold;
     }
+
+    /* Responsive styling for small vertical screen sizes */
+    @media (max-height: 800px) {
+      .hud-zoom-ring, .hud-pitch-ring {
+        height: 240px;
+        top: 25%;
+        padding: 12px 0;
+      }
+      .hud-ring-scale {
+        gap: 6px;
+      }
+      .scale-mark {
+        font-size: 9px;
+        padding: 1px 4px;
+      }
+      .hud-vertical-slider {
+        height: 80px;
+      }
+      .hud-left-mixer-panel, .elevation-chart-container {
+        height: 200px;
+      }
+    }
+
+    @media (max-height: 650px) {
+      .hud-zoom-ring, .hud-pitch-ring {
+        height: 190px;
+        top: 22%;
+        padding: 8px 0;
+      }
+      .hud-ring-scale {
+        gap: 4px;
+      }
+      .scale-mark {
+        font-size: 8px;
+        padding: 1px 3px;
+      }
+      .hud-vertical-slider {
+        height: 60px;
+      }
+      .hud-left-mixer-panel, .elevation-chart-container {
+        height: 160px;
+        bottom: 10px;
+      }
+      .hud-left-mixer-panel {
+        left: 10px;
+        padding: 8px 10px;
+      }
+      .elevation-chart-container {
+        left: 210px;
+        right: 10px;
+        padding: 8px 12px;
+      }
+      .play-btn-circle {
+        width: 32px;
+        height: 32px;
+        font-size: 13px;
+        margin: 2px auto;
+      }
+      .mixer-panel-header {
+        font-size: 8px;
+        margin-bottom: 2px;
+      }
+      .preview-progress-text {
+        font-size: 10px;
+      }
+      .rhythm-value-display, .hud-wait-value {
+        font-size: 11px;
+      }
+      .chart-title {
+        font-size: 10px;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="app-container">
     <!-- Sidebar Left: Keyframe List & Global Actions -->
     <div class="sidebar-left">
-      <div class="panel-header">
-        <h2>🎚️ 空间轨混合单元 (Mixer)</h2>
-        <span style="font-size: 11px; color: var(--text-dim);" id="keyframeCount">0 轨</span>
+      <div class="sidebar-header" style="display: flex; align-items: center; justify-content: space-between; padding: 15px 20px;">
+        <div style="font-weight: bold; font-size: 15px; color: #fff; text-shadow: 0 0 6px rgba(255,255,255,0.4); display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+          <span>📍 航点列表</span>
+          <span style="font-size: 11px; font-weight: normal; color: rgba(255,255,255,0.5); font-style: italic; text-shadow: none;">(Shift多选)</span>
+        </div>
+        <span style="font-size: 14px; font-weight: bold; color: var(--accent-cyan); white-space: nowrap; text-shadow: 0 0 5px rgba(32,229,181,0.4);" id="keyframeCount">0 轨</span>
       </div>
-      <div class="keyframe-toolbar" style="padding: 10px 16px; border-bottom: 1px solid var(--border); display: flex; gap: 8px;">
-        <button class="tool-btn" id="btnAddWaypoint" style="flex: 1; font-size: 11px; justify-content: center; height: 32px;">➕ 捕获当前镜头为新航点</button>
-        <button class="tool-btn" id="btnDeleteSelected" style="font-size: 11px; justify-content: center; height: 32px; display: none; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #ff8080;">🗑️ 删除选中</button>
+      <div class="keyframe-toolbar" style="padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px;">
+        <button class="tool-btn" id="btnAddWaypoint" style="width: 100%; font-size: 13px; font-weight: bold; justify-content: center; height: 38px; background: rgba(32, 229, 181, 0.15); color: var(--accent-cyan); border: 1px solid rgba(32, 229, 181, 0.4); box-shadow: 0 2px 8px rgba(32, 229, 181, 0.1); transition: all 0.2s;">➕ 捕获当前镜头为新航点</button>
+        
       </div>
       <div class="keyframe-list" id="keyframeList">
         <!-- Keyframe items injected here -->
       </div>
 
-      <!-- Upgraded Diagnostics Dashboard Panel inside sidebar -->
-      <div class="diagnostics-overlay" id="diagnosticsOverlay">
-        <div class="diag-title">🛰️ 空间飞行诊断仪 (DIAGNOSTICS)</div>
-        <div id="diagnosticsContent">
-          <div class="diag-row"><span class="diag-label">当前位置</span><span class="diag-value" id="diagPos">--</span></div>
-          <div class="diag-row"><span class="diag-label">累计里程</span><span class="diag-value" id="diagDist">--</span></div>
-          <div class="diag-row"><span class="diag-label">地面海拔</span><span class="diag-value" id="diagGround">--</span></div>
-          <div class="diag-row"><span class="diag-label">机位海拔</span><span class="diag-value" id="diagFlight">--</span></div>
-          <div class="diag-row"><span class="diag-label">离地高度</span><span class="diag-value" id="diagRel">--</span></div>
-          <div class="diag-row"><span class="diag-label">视线目标</span><span class="diag-value" id="diagTarget">--</span></div>
-          <div class="diag-row"><span class="diag-label">当前航速</span><span class="diag-value" id="diagSpeed">--</span></div>
-          <div class="diag-row"><span class="diag-label">段飞行用时</span><span class="diag-value" id="diagDuration">--</span></div>
-        </div>
-        <!-- Vibe Preset Mixer Bank moved to Sidebar -->
-        <div class="hud-vibe-panel" id="hudVibePanel">
-          <div class="hud-ring-label" style="transform:none; height:auto; margin-bottom:8px; text-align:left; color: var(--accent-cyan);">🔮 氛围混音 (Vibe Preset Mixer)</div>
-          <div class="vibe-buttons" id="vibeButtonGroup">
-            <button class="vibe-btn" data-vibe="pilgrimage">📿 朝圣</button>
-            <button class="vibe-btn" data-vibe="solemn">🏔️ 庄严</button>
-            <button class="vibe-btn" data-vibe="exploratory">🚶 探索</button>
-            <button class="vibe-btn" data-vibe="solitude">🌌 孤独</button>
-          </div>
-        </div>
-      </div>
+
 
       <div class="action-bar">
         <button class="secondary-btn" style="flex:1" id="btnExport">导出 JSON</button>
-        <button class="primary-btn" style="flex:1" id="btnSave">💾 保存混音配置</button>
+        <button class="primary-btn" style="flex:1" id="btnSave">💾 保存航轨</button>
+      </div>
+      <div class="sidebar-edge-toolbar" style="position: absolute; right: -24px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 1000; width: 24px;">
+        <button class="sidebar-toggle-btn edge-btn" onclick="moveSelected(-1)" style="position: static; transform: none; height: 32px; width: 24px; border-bottom-right-radius: 0; padding:0; display: flex; justify-content: center; align-items: center;" title="上移选中项"><span style="font-size:12px">⬆</span></button>
+        <button class="sidebar-toggle-btn" id="btnToggleSidebar" aria-label="Toggle Sidebar" style="position: static; transform: none; height: 56px; width: 24px; border-radius: 0;">
+          <svg class="icon-collapse" width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 1L1 5L5 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <svg class="icon-expand" width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 1L5 5L1 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="sidebar-toggle-btn edge-btn" onclick="moveSelected(1)" style="position: static; transform: none; height: 32px; width: 24px; border-top-right-radius: 0; padding:0; display: flex; justify-content: center; align-items: center;" title="下移选中项"><span style="font-size:12px">⬇</span></button>
       </div>
     </div>
 
     <!-- Main Viewport Area -->
     <div class="main-canvas">
-      <button class="sidebar-toggle-btn" id="btnToggleSidebar">◀</button>
       <!-- 3D Globe Container -->
       <div id="map" style="width:100%; height:100%;"></div>
 
@@ -570,15 +899,40 @@
         <div style="border-right: 1px dashed rgba(255, 255, 255, 0.15);"></div>
         <div></div>
       </div>
-      
-      <!-- Top Left Overlay: Utilities Toolbar -->
+      <!-- Top Left Overlay: Utilities Toolbar & Search -->
       <div class="map-overlay-tools">
-        <button class="tool-btn" id="btnUndo">↩ 撤销</button>
-        <button class="tool-btn" id="btnClear">✕ 清空导演轨</button>
-        <button class="tool-btn" id="btnGenerateDraft" style="background: rgba(255, 205, 85, 0.1); border-color: var(--accent); color: var(--accent); display:none;">✨ 基于地理轨生成初稿</button>
-        <button class="tool-btn" id="btnImportGeoTrack" style="background: rgba(14, 165, 233, 0.15); border-color: #0ea5e9; color: #38bdf8;">📥 导入 KML</button>
-        <input type="file" id="geoTrackFileInput" accept=".kml,.xml,.gpx" style="display: none;" />
-        <button class="tool-btn" id="btnToggleRefLines" style="background: rgba(255, 205, 85, 0.2); border-color: var(--accent); color: var(--accent);">👁️ 物理轨</button>
+        <div class="dropdown">
+          <button class="tool-btn" style="background: rgba(15, 40, 70, 0.8); border-color: rgba(60, 140, 255, 0.18);">📥 导入 ▼</button>
+          <div class="dropdown-content">
+            <div class="dropdown-item">
+              <span>文件</span> <span>▶</span>
+              <div class="dropdown-submenu-content">
+                <a class="dropdown-sub-item" id="btnImportGeoTrack">Kml</a>
+                <input type="file" id="geoTrackFileInput" accept=".kml,.xml,.gpx" style="display: none;" />
+                <a class="dropdown-sub-item">Czml</a>
+                <a class="dropdown-sub-item">Gis</a>
+              </div>
+            </div>
+            <div class="dropdown-item">
+              <span>底图</span> <span>▶</span>
+              <div class="dropdown-submenu-content">
+                <a class="dropdown-sub-item" onclick="changeBaseMap('bing')">Bing 卫星(默认)</a>
+                <a class="dropdown-sub-item" onclick="changeBaseMap('google_satellite')">谷歌卫星图</a>
+                <a class="dropdown-sub-item" onclick="changeBaseMap('google_hybrid')">谷歌混合图</a>
+                <a class="dropdown-sub-item" onclick="changeBaseMap('google_roadmap')">谷歌街区图</a>
+                <a class="dropdown-sub-item" onclick="changeBaseMap('google_terrain')">谷歌地形图</a>
+                <a class="dropdown-sub-item" onclick="changeBaseMap('osm')">OSM 街区图</a>
+              </div>
+            </div>
+          </div> <!-- Close dropdown-content -->
+        </div> <!-- Close dropdown -->
+      </div> <!-- Close map-overlay-tools -->
+      
+      <!-- Hidden original inputs for compatibility -->
+      <select id="mapLayerSelector" style="display:none;"></select>
+      
+      <div class="map-overlay-tools-right">
+        <!-- Kept empty since all buttons moved to left dropdown -->
       </div>
 
       <!-- ========================================================== -->
@@ -587,105 +941,232 @@
 
       <!-- Left Overlay: Zoom (Focal Length / FOV) Ring -->
       <div class="hud-zoom-ring" id="hudZoomRing">
-        <div class="hud-ring-label">Lens Zoom</div>
         <div class="hud-ring-scale" id="fovScaleGroup">
+          <span class="scale-mark" data-val="ground">贴地</span>
           <span class="scale-mark" data-val="vast">辽阔</span>
           <span class="scale-mark" data-val="natural">自然</span>
           <span class="scale-mark" data-val="compressed">压缩</span>
-          <span class="scale-mark" data-val="custom" id="fovMarkCustom">手动</span>
+          <span class="scale-mark" data-val="custom" id="fovMarkCustom" style="display: none;">手动</span>
         </div>
         <input type="range" class="hud-vertical-slider" id="hudFovSlider" min="15" max="120" value="60">
         <div class="hud-ring-value" id="hudFovValue">60°</div>
+      
       </div>
 
       <!-- Right Overlay: Gimbal Pitch Ring -->
       <div class="hud-pitch-ring" id="hudPitchRing">
-        <div class="hud-ring-label">Gimbal Tilt</div>
         <div class="hud-ring-scale" id="pitchScaleGroup">
           <span class="scale-mark" data-val="lookup">仰视</span>
           <span class="scale-mark" data-val="eyelevel">平视</span>
           <span class="scale-mark" data-val="oblique">斜瞰</span>
           <span class="scale-mark" data-val="overlook">俯瞰</span>
-          <span class="scale-mark" data-val="custom" id="pitchMarkCustom">手动</span>
+          <span class="scale-mark" data-val="custom" id="pitchMarkCustom" style="display: none;">手动</span>
         </div>
         <input type="range" class="hud-vertical-slider" id="hudPitchSlider" min="-90" max="90" value="-25">
         <div class="hud-ring-value" id="hudPitchValue">-25°</div>
+      
       </div>
 
-      <!-- Top Right Overlay: Target Lock & Vibe Preset Mixer -->
-      <div class="hud-target-lock-panel" id="hudTargetLockPanel">
-        <div class="target-status">
-          <span>🎥 视线对焦:</span>
-          <strong id="hudTargetName">走向前方</strong>
-        </div>
-        <div class="target-actions">
-          <button class="hud-mini-btn" id="btnHudLockForward">➡️ 沿轨道对齐</button>
-          <button class="hud-mini-btn" id="btnHudLockSummit">🏔️ 锁定主体</button>
-          <button class="hud-mini-btn" id="btnHudLockSide">➡️ 航侧 90°</button>
-          <button class="hud-mini-btn" id="btnHudLockBack">⬅️ 倒飞视角</button>
-          <button class="hud-mini-btn" id="btnHudLockPoi">🎯 POI 对焦</button>
-          <button class="hud-mini-btn danger" id="btnHudUnlock" style="display:none;">🔓 解除锁定</button>
-          <button class="hud-mini-btn" id="btnHudCaptureCamera" style="border-color: var(--accent); color: var(--accent); margin-top: 6px; justify-content: center; font-weight: bold;">📸 捕获当前三维坐标</button>
-        </div>
+      <!-- Right Overlay: Director Inspector Accordion Panel -->
+      <div class="hud-director-inspector" id="hudDirectorInspector">
+        <div class="inspector-accordion">
+          
+          <!-- Group 1: Telemetry & Read-out -->
+          <div class="accordion-group active" id="accordionDiag">
+            <div class="accordion-header">📍 航点信息</div>
+            <div class="accordion-body">
+              <div id="diagnosticsContent">
+                <div class="diag-row"><span class="diag-label">当前位置</span><span class="diag-value" id="diagPos">--</span></div>
+                <div class="diag-row"><span class="diag-label">累计里程</span><span class="diag-value" id="diagDist">--</span></div>
+                <div class="diag-row"><span class="diag-label">地面海拔</span><span class="diag-value" id="diagGround">--</span></div>
+                <div class="diag-row"><span class="diag-label">机位海拔</span><span class="diag-value" id="diagFlight">--</span></div>
+                <div class="diag-row"><span class="diag-label">离地高度</span><span class="diag-value" id="diagRel">--</span></div>
+                <div class="diag-row"><span class="diag-label">视线目标</span><span class="diag-value" id="diagTarget">--</span></div>
+                <div class="diag-row"><span class="diag-label">当前航速</span><span class="diag-value" id="diagSpeed">--</span></div>
+                <div class="diag-row"><span class="diag-label">段飞行用时</span><span class="diag-value" id="diagDuration">--</span></div>
+              </div>
+            </div>
+          </div>
 
-        <div class="hud-shake-toggle">
-          <label for="hudChkHandheld">🎥 手持镜头</label>
-          <input type="checkbox" id="hudChkHandheld">
-        </div>
-        
-        <div style="font-size: 8px; color: var(--text-dim); margin-top: 8px; text-align: center; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 6px;">
-          提示：双击锁定对焦目标
+          <!-- Group 2: Target Lock -->
+          <div class="accordion-group active" id="accordionFocus">
+            <div class="accordion-header">🎯 视线对焦</div>
+            <div class="accordion-body">
+              <div class="target-status" style="display: none; margin-bottom: 6px;">
+                <strong id="hudTargetName">走向前方</strong>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 6px;">
+                <button class="hud-mini-btn" id="btnHudLockForward">➡️ 轨道对齐</button>
+                <button class="hud-mini-btn" id="btnHudLockSummit">🏔️ 锁定主体</button>
+                <button class="hud-mini-btn" id="btnHudLockSide">↗️ 航侧 90°</button>
+                <button class="hud-mini-btn" id="btnHudLockOrbit">🔄 环绕视角</button>
+                <button class="hud-mini-btn" id="btnHudLockPoi">🎯 POI 对焦</button>
+                <button class="hud-mini-btn" id="btnHudLockFree">👁️ 自由跟随</button>
+              </div>
+              <button class="hud-mini-btn danger" id="btnHudUnlock" style="display:none; width: 100%; margin-bottom: 4px;">🔓 解除视线锁定</button>
+              <button class="hud-mini-btn" id="btnHudCaptureCamera" style="width: 100%; border-color: var(--accent); color: var(--accent); justify-content: center; font-weight: bold; font-size: 9px; text-align: center; margin-bottom: 6px;">📸 捕获当前为三维坐标</button>
+            </div>
+          </div>
+
+          <!-- Group 3: Shot Effects -->
+          <div class="accordion-group active" id="accordionShot">
+            <div class="accordion-header">🎬 特技镜头</div>
+            <div class="accordion-body">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 6px; margin-top: 6px;">
+                <button class="hud-mini-btn shot-mode-btn" data-mode="handheld">🤳 手持跟随</button>
+                <button class="hud-mini-btn shot-mode-btn" data-mode="hitchcock">🌌 希区柯克</button>
+                <button class="hud-mini-btn shot-mode-btn" data-mode="via">🎞️ 维亚</button>
+                <button class="hud-mini-btn shot-mode-btn" data-mode="crane">🏗️ 摇臂</button>
+                <button class="hud-mini-btn shot-mode-btn" data-mode="tunnel">🚇 隧道</button>
+                <button class="hud-mini-btn shot-mode-btn" data-mode="fisheye">🐟 鱼眼</button>
+              </div>
+              <!-- Parameter macro panel -->
+              <div class="shot-params" id="shotParamsPanel" style="display: none; margin-top: 8px; margin-bottom: 6px;">
+                <div class="shot-param-row" id="paramRow1">
+                  <label id="paramLabel1"></label>
+                  <input type="range" id="paramSlider1">
+                  <span class="shot-param-val" id="paramValue1"></span>
+                </div>
+                <div class="shot-param-row" id="paramRow2" style="display: none;">
+                  <label id="paramLabel2"></label>
+                  <input type="range" id="paramSlider2">
+                  <span class="shot-param-val" id="paramValue2"></span>
+                </div>
+                <div class="shot-param-row" id="paramRow3" style="display: none;">
+                  <label id="paramLabel3"></label>
+                  <input type="range" id="paramSlider3">
+                  <span class="shot-param-val" id="paramValue3"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Group 2.5: Lighting -->
+          <div class="accordion-group active" id="accordionLighting">
+            <div class="accordion-header">🌅 环境与光照</div>
+            <div class="accordion-body">
+              <div class="shot-param-row">
+                <label>日照时间 (时)</label>
+                <input type="range" id="timeOfDayInput" min="0" max="24" step="0.1" value="10">
+                <span class="shot-param-val" id="timeOfDayVal" style="margin-top: 4px;">10:00</span>
+              </div>
+              <button class="hud-mini-btn" id="btnCaptureTime" style="width: 100%; border-color: var(--accent-cyan); color: var(--accent-cyan); justify-content: center; font-weight: bold; font-size: 9px; text-align: center; margin-top: 6px;">📸 捕获当前时间为本点光照</button>
+            </div>
+          </div>
+          <!-- Group 3: Camera Movement Style -->
+          <div class="accordion-group active" id="accordionVibe">
+            <div class="accordion-header">🔮 运镜风格预设</div>
+            <div class="accordion-body">
+              <div class="vibe-buttons" id="vibeButtonGroup">
+                <button class="vibe-btn" data-vibe="pilgrimage">📿 朝圣</button>
+                <button class="vibe-btn" data-vibe="solemn">🏔️ 庄严</button>
+                <button class="vibe-btn" data-vibe="exploratory">🚶 探索</button>
+                <button class="vibe-btn" data-vibe="solitude">🌌 孤独</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group 4: AI Voice Over & TTS Sync -->
+          <div class="accordion-group active" id="accordionTts">
+            <div class="accordion-header">🎙️ AI 语音解说与时轴对齐</div>
+            <div class="accordion-body">
+              <div class="hud-tts-panel" id="hudTtsPanel">
+                <div style="margin-bottom: 6px;">
+                  <textarea id="hudTtsText" style="font-size: 11px; min-height: 50px; padding: 6px 8px; width: 100%; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; color: #fff; resize: vertical; line-height: 1.4; outline: none;" placeholder="输入该航段的中文语音解说词..."></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 6px;">
+                  <select id="hudTtsVoice" style="flex: 1; font-size: 10px; height: 24px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; color: #fff; outline: none;">
+                    <option value="default">系统普通话 (Tingting)</option>
+                    <option value="local_clone">本地克隆声线 (GPT-SoVITS)</option>
+                    <option value="voxcpm">本地高清克隆 (VoxCPM)</option>
+                  </select>
+                  <button id="btnHudTtsGenerate" style="font-size: 10px; height: 24px; padding: 0 10px; background: rgba(0, 255, 170, 0.2); border: 1px solid rgba(0, 255, 170, 0.4); color: var(--accent-cyan); border-radius: 4px; cursor: pointer; font-weight: bold; transition: all 0.2s;">🔊 合成</button>
+                </div>
+
+                <!-- 🎙️ 声音克隆控制中心 -->
+                <div id="refVoiceUploadContainer" style="display: none; flex-direction: column; gap: 6px; margin-top: 6px; margin-bottom: 6px; padding: 8px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.08); border-radius: 6px;">
+                  <div style="font-size: 10px; color: var(--accent); font-weight: bold;">🎙️ 人声克隆配置 (Reference Audio)</div>
+                  
+                  <div style="display: flex; gap: 6px; align-items: center;">
+                    <button type="button" class="hud-mini-btn" id="btnUploadRefAudio" style="margin: 0; flex: 1; height: 24px; padding: 0 8px;">📤 上传克隆样本 (.wav/.mp3)</button>
+                    <input type="file" id="inputRefAudioFile" accept="audio/wav,audio/mp3,audio/mpeg" style="display: none;" />
+                    <span id="lblRefAudioName" style="font-size: 9px; color: var(--text-dim); text-overflow: ellipsis; white-space: nowrap; overflow: hidden; max-width: 120px;" title="使用系统缺省克隆样本">无样本 (默认音色)</span>
+                  </div>
+                  
+                  <div>
+                    <input type="text" id="txtRefAudioText" style="font-size: 10px; width: 100%; height: 24px; padding: 4px 6px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); color: #fff; border-radius: 4px; outline: none;" placeholder="输入克隆音频中说的话 (提示词原文)">
+                  </div>
+                </div>
+                
+                <!-- Audio Player & Duration Display -->
+                <div id="hudTtsAudioContainer" style="display: none; align-items: center; gap: 6px; background: rgba(0,0,0,0.2); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.04);">
+                  <button id="btnPlayTtsAudio" style="background: none; border: none; color: var(--accent-cyan); font-size: 12px; cursor: pointer; padding: 2px;">▶ 试听</button>
+                  <span id="hudTtsDurationLabel" style="font-size: 10px; color: var(--text-dim); font-family: monospace;">时长: 0.0s</span>
+                  <span style="font-size: 9px; color: #10b981; margin-left: auto;">已对齐 (+2s)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <!-- Left Panel: Playback & Speed -->
-      <!-- Left Panel: Playback, Speed & Wait -->
-      <div class="hud-left-mixer-panel" id="hudLeftMixerPanel">
-        <div class="mixer-panel-section">
-          <div class="mixer-panel-header">▶️ 预览播放</div>
-          <button class="play-btn-circle" id="btnPlay">▶</button>
-          <div class="preview-progress-text" id="previewStatus">就绪 (共 0 轨)</div>
-        </div>
-        
-        <div class="mixer-panel-section" id="hudSpeedGroup" style="opacity: 0.4; transition: opacity 0.2s;">
-          <div class="rhythm-header-row">
-            <label>飞行速度</label>
-            <div class="rhythm-value-display" id="hudSpeedValue">36 km/h</div>
-          </div>
-          <div class="rhythm-slider-container">
-            <span class="rhythm-preset-label">缓慢</span>
-            <input type="range" id="hudSpeedSlider" min="12" max="72" step="1" value="36" disabled>
-            <span class="rhythm-preset-label">快速</span>
-          </div>
-        </div>
 
-        <div class="mixer-panel-section" id="hudWaitGroup" style="opacity: 0.4; transition: opacity 0.2s;">
-          <div class="rhythm-header-row">
-            <label>到站悬停</label>
-            <div class="hud-wait-value" id="hudWaitValue">0s</div>
-          </div>
-          <div class="rhythm-slider-container">
-            <span class="rhythm-preset-label">通过</span>
-            <input type="range" id="hudWaitSlider" min="0" max="15" step="0.5" value="0" disabled>
-            <span class="rhythm-preset-label">凝望</span>
-          </div>
-        </div>
-      </div>
 
       <!-- Bottom Overlay: Canvas Elevation Chart Panel (Altitude Track) -->
       <div class="elevation-chart-container" id="elevationChartContainer">
         <div class="chart-header">
-          <span class="chart-title">🎛️ 空间轨道混合器 (Multi-Lane Space Mixer)</span>
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <span class="chart-title">🎛️ 航轨编辑</span>
+            
+            <!-- 撤销/重做/清空/批量 组 -->
+            <div style="display: flex; gap: 4px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; padding: 2px 4px; background: rgba(0,0,0,0.3); align-items: center;">
+              <button class="tool-btn" id="btnUndo" style="padding: 2px 10px; font-size: 12px; background: transparent; border: none; min-width: unset; box-shadow: none;" title="撤销">↩</button>
+              <button class="tool-btn" id="btnRedo" style="padding: 2px 10px; font-size: 12px; background: transparent; border: none; min-width: unset; box-shadow: none;" title="重做">↪</button>
+              <div style="width: 1px; height: 12px; background: rgba(255,255,255,0.2); margin: 0 2px;"></div>
+              <button class="tool-btn" id="btnDeleteSelected" style="padding: 2px 8px; font-size: 11px; background: transparent; border: none; min-width: unset; box-shadow: none; color: #ff4d4d;" title="删除选中航点">删除</button>
+              <button class="tool-btn" id="btnSelectAllWaypoints" style="display:none; padding: 2px 8px; font-size: 11px; background: transparent; border: none; min-width: unset; box-shadow: none;" title="选中全部">全选</button>
+              <button class="tool-btn" id="btnDeselectAllWaypoints" style="display:none; padding: 2px 8px; font-size: 11px; background: transparent; border: none; min-width: unset; box-shadow: none;" title="取消选中">取消选</button>
+              <div style="display:none; width: 1px; height: 12px; background: rgba(255,255,255,0.2); margin: 0 2px;"></div>
+              <button class="tool-btn" id="btnClear" style="padding: 2px 8px; font-size: 11px; background: transparent; border: none; min-width: unset; color: #ff4d4d; box-shadow: none;" title="清空航轨">清空航轨</button>
+              <button class="tool-btn" id="btnGenerateDraft" style="display:none; padding: 2px 8px; font-size: 11px; background: transparent; border: none; min-width: unset; box-shadow: none;">✨ 初稿</button>
+            </div>
+            
+            <div id="chartSelectionLabel" style="display:none; font-size: 11px; color: var(--accent-cyan); font-weight: bold; margin-left: 8px;">未选中轨道</div>
+          </div>
           <div class="chart-controls">
+            <!-- 播放与状态 组 -->
+            <div style="display: none; align-items: center; gap: 12px; margin-right: 20px;">
+              <button class="primary-btn" id="btnPlay" style="padding: 2px 12px; font-size: 12px; border-radius: 12px;">▶</button>
+              <span id="previewStatus" style="display:none; font-size: 11px; color: var(--accent-cyan); font-weight: bold;">点击开始完整航线预览</span>
+            </div>
+            
+            <!-- 速度与悬停 组 -->
+            <div style="display: flex; gap: 12px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; padding: 2px 12px; background: rgba(0,0,0,0.3); align-items: center; margin-right: 12px;">
+              <div id="hudSpeedGroup" style="display: flex; align-items: center; gap: 8px; opacity: 0.4; transition: opacity 0.2s;">
+                <label style="font-size: 11px; color: var(--text-dim); margin:0;">飞行速度</label>
+                <div class="rhythm-value-display" id="hudSpeedValue" style="font-size: 11px; width: 45px; text-align: right; opacity: 0; transition: opacity 0.3s;">36 km/h</div>
+                <input type="range" id="hudSpeedSlider" min="10" max="1800" step="5" value="100" disabled style="width: 70px; height: 2px;">
+              </div>
+              <div style="width: 1px; height: 16px; background: rgba(255,255,255,0.2);"></div>
+              <div id="hudWaitGroup" style="display: flex; align-items: center; gap: 8px; opacity: 0.4; transition: opacity 0.2s;">
+                <label style="font-size: 11px; color: var(--text-dim); margin:0;">航点悬停</label>
+                <div class="hud-wait-value" id="hudWaitValue" style="font-size: 11px; width: 25px; text-align: right; opacity: 0; transition: opacity 0.3s;">0s</div>
+                <input type="range" id="hudWaitSlider" min="0" max="15" step="0.5" value="0" disabled style="width: 70px; height: 2px;">
+              </div>
+            </div>
+
             <button class="tool-btn" id="btnResampleHeights" style="padding: 2px 8px; font-size:11px; margin-right: 8px;">🏔️ 重新校准真实海拔</button>
-            <span class="chart-selection" id="chartSelectionLabel">未选中航点</span>
-            <div class="chart-adjust-box" id="chartAdjustControls">
+            <span style="display:none; font-size: 10px; color: var(--text-dim);">双击编辑高度 · 拖拽调整形状</span>
+            <div class="chart-adjust-box" id="chartAdjustControls" style="display:none;">
               <button class="tool-btn" id="btnHeightDec" style="padding: 2px 8px; font-size:10px; font-weight:bold;">－ 10m</button>
               <button class="tool-btn" id="btnHeightInc" style="padding: 2px 8px; font-size:10px; font-weight:bold;">＋ 10m</button>
             </div>
           </div>
         </div>
-        <div style="flex:1; position:relative; width:100%;">
+        <div style="flex:1; position:relative; width:100%; overflow:hidden;">
           <canvas id="elevationCanvas" style="width:100%; height:100%; display:block; cursor:crosshair;"></canvas>
         </div>
       </div>
@@ -708,6 +1189,7 @@
     let selectedIds = []; // 批量选择的航点 ID 列表
     let selectionAnchorId = null; // 批量选择起点的航点 ID (Anchor)
     let historyStack = []; // 撤销历史栈
+    let redoStack = []; // 重做历史栈
     let viewer;
     let flightLineEntity = null;
     let refLineEntities = [];
@@ -748,6 +1230,54 @@
       el.textContent = msg;
       el.style.display = 'block';
       setTimeout(() => el.style.display = 'none', 2000);
+    }
+
+    function changeBaseMap(type) {
+      if (!viewer) return;
+      const layers = viewer.imageryLayers;
+      
+      if (layers.length > 0) {
+        layers.remove(layers.get(0));
+      }
+
+      let provider;
+      if (type === 'bing') {
+        provider = Cesium.createWorldImagery({
+          style: Cesium.IonWorldImageryStyle.AERIAL
+        });
+      } else if (type === 'google_satellite') {
+        provider = new Cesium.UrlTemplateImageryProvider({
+          url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+          minimumLevel: 0,
+          maximumLevel: 20
+        });
+      } else if (type === 'google_hybrid') {
+        provider = new Cesium.UrlTemplateImageryProvider({
+          url: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+          minimumLevel: 0,
+          maximumLevel: 20
+        });
+      } else if (type === 'google_roadmap') {
+        provider = new Cesium.UrlTemplateImageryProvider({
+          url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+          minimumLevel: 0,
+          maximumLevel: 20
+        });
+      } else if (type === 'google_terrain') {
+        provider = new Cesium.UrlTemplateImageryProvider({
+          url: 'https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',
+          minimumLevel: 0,
+          maximumLevel: 20
+        });
+      } else if (type === 'osm') {
+        provider = new Cesium.OpenStreetMapImageryProvider({
+          url: 'https://a.tile.openstreetmap.org/'
+        });
+      }
+
+      if (provider) {
+        layers.addImageryProvider(provider, 0);
+      }
     }
 
     function saveToServerDebounced() {
@@ -815,19 +1345,95 @@
       }
     }
 
+    // === Shot Mode Configuration & Handlers (Moved to Global) ===
+    const SHOT_MODE_CONFIG = {
+      hitchcock: {
+        label: '🌌 希区柯克',
+        params: [
+          { key: 'dolly_fov', label: '视场', min: 10, max: 120, step: 5, def: 90, unit: '°' },
+          { key: 'dolly_dist', label: '拉距', min: 10, max: 200, step: 10, def: 50, unit: 'm' }
+        ]
+      },
+      
+      handheld: { label: '🤳 手持', params: [] },
+      via: {
+        label: '🎞️ 维亚',
+        params: [
+          { key: 'via_offset', label: '偏移', min: 0, max: 100, step: 5, def: 20, unit: 'm' },
+          { key: 'via_smooth', label: '平滑', min: 1, max: 10, step: 1, def: 5, unit: '' }
+        ]
+      },
+      crane: {
+        label: '🏗️ 摇臂',
+        params: [
+          { key: 'crane_arm', label: '臂长', min: 5, max: 50, step: 1, def: 15, unit: 'm' },
+          { key: 'crane_start', label: '起仰', min: -45, max: 45, step: 5, def: -10, unit: '°' },
+          { key: 'crane_end', label: '终仰', min: -45, max: 45, step: 5, def: 20, unit: '°' }
+        ]
+      },
+      tunnel: {
+        label: '🚇 隧道',
+        params: [
+          { key: 'tunnel_fov', label: 'FOV', min: 10, max: 60, step: 5, def: 25, unit: '°' },
+          { key: 'tunnel_speed', label: '倍速', min: 1, max: 10, step: 1, def: 3, unit: 'x' }
+        ]
+      },
+      fisheye: {
+        label: '🐟 鱼眼',
+        params: [
+          { key: 'fisheye_fov', label: 'FOV', min: 100, max: 170, step: 5, def: 140, unit: '°' },
+          { key: 'fisheye_warp', label: '畸变', min: 1, max: 10, step: 1, def: 5, unit: '' }
+        ]
+      }
+    };
+
+    function updateShotParamsPanel(mode, pt) {
+      const panel = document.getElementById('shotParamsPanel');
+      const config = SHOT_MODE_CONFIG[mode];
+      if (!config || config.params.length === 0) {
+        panel.style.display = 'none';
+        return;
+      }
+      panel.style.display = 'block';
+      const shotParams = (pt && pt.shot_params) || {};
+      config.params.forEach((p, i) => {
+        const idx = i + 1;
+        const row = document.getElementById('paramRow' + idx);
+        row.style.display = 'flex';
+        document.getElementById('paramLabel' + idx).textContent = p.label;
+        const slider = document.getElementById('paramSlider' + idx);
+        slider.min = p.min;
+        slider.max = p.max;
+        slider.step = p.step;
+        slider.value = shotParams[p.key] !== undefined ? shotParams[p.key] : p.def;
+        slider.dataset.paramKey = p.key;
+        slider.dataset.unit = p.unit;
+        document.getElementById('paramValue' + idx).textContent = slider.value + p.unit;
+      });
+      // Hide unused rows
+      for (let i = config.params.length + 1; i <= 3; i++) {
+        document.getElementById('paramRow' + i).style.display = 'none';
+      }
+    }
+
     // ---- Initialization ----
     async function init() {
       // 1. Fetch JSON Data
       try {
-        const res = await fetch("data/routes.json?t=" + Date.now());
+        const urlParams = new URLSearchParams(window.location.search);
+        const routeType = urlParams.get('route') || 'outer';
+        const routeFile = routeType === 'inner' ? 'routes_inner.json' : 'routes.json';
+        const res = await fetch(`data/${routeFile}?t=` + Date.now());
         if (res.ok) {
           const raw = await res.json();
           data.main = raw.main || [];
           data.secondary = raw.secondary || [];
           data.main_flight = raw.main_flight || [];
+          sortWaypointsByTrackOrder();
+          renumberWaypoints();
         }
       } catch (e) {
-        console.error("加载 routes.json 失败:", e);
+        console.error("加载路线数据失败:", e);
       }
 
       // Check draft button visibility
@@ -842,18 +1448,28 @@
         timeline: false,
         baseLayerPicker: false,
         fullscreenButton: false,
-        geocoder: false,
+        geocoder: true,
         homeButton: false,
         infoBox: false,
         selectionIndicator: true,
         sceneModePicker: false,
         navigationHelpButton: false
       });
+      viewer.scene.globe.enableLighting = true;
+viewer.shadows = false;
+viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAtmosphereLighting = true;
+      viewer.clock.shouldAnimate = false;
+      viewer.clock.currentTime = Cesium.JulianDate.fromIso8601("2024-06-21T02:00:00Z"); // Default morning (10:00 Beijing time)
 
       viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
 
       viewer.scene.postProcessStages.fxaa.enabled = true;
       viewer.scene.globe.depthTestAgainstTerrain = true;
+
+      // Bind Map Layer Switcher
+      document.getElementById('mapLayerSelector').addEventListener('change', (e) => {
+        changeBaseMap(e.target.value);
+      });
 
       // Load Terrain
       try {
@@ -962,7 +1578,7 @@
       // 5. Setup screen interactions
       const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
 
-      // LEFT_CLICK: Add keyframe or select keyframe
+      // LEFT_CLICK: Select keyframe
       handler.setInputAction((click) => {
         const picked = viewer.scene.pick(click.position);
         if (Cesium.defined(picked) && Cesium.defined(picked.id)) {
@@ -972,59 +1588,6 @@
             selectKeyframe(entity._kIdx);
             return;
           }
-        }
-
-        // Clicked terrain: add keyframe at that location
-        const ray = viewer.camera.getPickRay(click.position);
-        const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
-        if (Cesium.defined(cartesian)) {
-          const carto = Cesium.Cartographic.fromCartesian(cartesian);
-          const lat = parseFloat(Cesium.Math.toDegrees(carto.latitude).toFixed(6));
-          const lng = parseFloat(Cesium.Math.toDegrees(carto.longitude).toFixed(6));
-
-          // Query terrain height synchronously
-          let groundAlt = viewer.scene.globe.getHeight(carto);
-          if (groundAlt === undefined || isNaN(groundAlt)) groundAlt = 5000;
-          groundAlt = Math.round(groundAlt);
-
-          // Get orientation from camera
-          const heading = parseFloat(Cesium.Math.toDegrees(viewer.camera.heading).toFixed(1));
-          const pitch = parseFloat(Cesium.Math.toDegrees(viewer.camera.pitch).toFixed(1));
-          const roll = parseFloat(Cesium.Math.toDegrees(viewer.camera.roll).toFixed(1));
-
-          const id = 'evt_' + Date.now();
-          const newPt = {
-            id,
-            name: "导演航点 " + (data.main_flight.length + 1),
-            lng,
-            lat,
-            ground_alt: groundAlt,
-            relative_alt: 500,
-            heading,
-            pitch,
-            roll,
-            duration: 2.5,
-            wait_time: 0.0,
-            fov: 60.0,
-            shot_mode: "default",
-            look_at_intent: "forward",
-            perspective_fov: "natural",
-            perspective_pitch: "oblique",
-            speed_preset: "normal",
-            wait_preset: "none"
-          };
-
-          pushHistoryState();
-          data.main_flight.push(newPt);
-          
-          document.getElementById('btnGenerateDraft').style.display = 'none';
-          
-          rebuildMarkers();
-          refreshKeyframeList();
-          rebuildElevationChart();
-          updateCount();
-          selectKeyframe(data.main_flight.length - 1);
-          saveToServer();
         }
       }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
@@ -1094,6 +1657,8 @@
           isDragging = false;
           dragEntity = null;
           viewer.scene.screenSpaceCameraController.enableInputs = true; // Restore map movement
+          sortWaypointsByTrackOrder();
+          renumberWaypoints();
           saveToServer();
           rebuildMarkers();
           refreshKeyframeList();
@@ -1101,31 +1666,73 @@
         }
       }, Cesium.ScreenSpaceEventType.LEFT_UP);
 
-      // MOUSE_MOVE: drag handle
+      // MOUSE_MOVE: drag handle (constrained to slide along the track line direction)
       handler.setInputAction((movement) => {
         if (isDragging && dragEntity) {
           const ray = viewer.camera.getPickRay(movement.endPosition);
           const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
           if (Cesium.defined(cartesian)) {
-            dragEntity.position = cartesian;
             const carto = Cesium.Cartographic.fromCartesian(cartesian);
-            const lat = parseFloat(Cesium.Math.toDegrees(carto.latitude).toFixed(6));
-            const lng = parseFloat(Cesium.Math.toDegrees(carto.longitude).toFixed(6));
-
-            let groundAlt = viewer.scene.globe.getHeight(carto);
-            if (groundAlt === undefined || isNaN(groundAlt)) groundAlt = 5000;
-            groundAlt = Math.round(groundAlt);
+            let lat = parseFloat(Cesium.Math.toDegrees(carto.latitude).toFixed(6));
+            let lng = parseFloat(Cesium.Math.toDegrees(carto.longitude).toFixed(6));
 
             const idx = dragEntity._kIdx;
-            if (data.main_flight[idx]) {
-              data.main_flight[idx].lng = lng;
-              data.main_flight[idx].lat = lat;
-              data.main_flight[idx].ground_alt = groundAlt;
+            const list = data.main_flight;
+            if (list[idx]) {
+              // Constrained dragging: slide along the flight track direction
+              if (data.main && data.main.length >= 2) {
+                const proj = projectToTrack(lng, lat);
+                lng = proj.lng;
+                lat = proj.lat;
+                list[idx].fractionalIndex = proj.fractionalIndex;
+              } else if (list.length > 1) {
+                let ptA, ptB;
+                if (idx > 0 && idx < list.length - 1) {
+                  // Middle nodes: project onto segment connecting previous and next nodes
+                  ptA = list[idx - 1];
+                  ptB = list[idx + 1];
+                } else if (idx === 0) {
+                  // First node: project onto segment to next node
+                  ptA = list[0];
+                  ptB = list[1];
+                } else {
+                  // Last node: project onto segment from previous node
+                  ptA = list[idx - 1];
+                  ptB = list[idx];
+                }
 
-              const activeIdx = data.main_flight.findIndex(f => f.id === activeId);
+                const xA = ptA.lng, yA = ptA.lat;
+                const xB = ptB.lng, yB = ptB.lat;
+                const dx = xB - xA;
+                const dy = yB - yA;
+                const denom = dx * dx + dy * dy;
+
+                if (denom > 1e-12) {
+                  let t = ((lng - xA) * dx + (lat - yA) * dy) / denom;
+                  t = Math.max(0, Math.min(1, t)); // Constrain to segment bounds
+                  lng = parseFloat((xA + t * dx).toFixed(6));
+                  lat = parseFloat((yA + t * dy).toFixed(6));
+                }
+              }
+
+              // Query terrain height at the projected coordinates
+              const projCarto = Cesium.Cartographic.fromDegrees(lng, lat);
+              let groundAlt = viewer.scene.globe.getHeight(projCarto);
+              if (groundAlt === undefined || isNaN(groundAlt)) groundAlt = 5000;
+              groundAlt = Math.round(groundAlt);
+
+              list[idx].lng = lng;
+              list[idx].lat = lat;
+              list[idx].ground_alt = groundAlt;
+
+              // Set entity position in 3D using relative altitude
+              const finalHeight = groundAlt + (list[idx].relative_alt || 500);
+              dragEntity.position = Cesium.Cartesian3.fromDegrees(lng, lat, finalHeight);
+
+              const activeIdx = list.findIndex(f => f.id === activeId);
               if (activeIdx === idx) {
                 updateFlightSpeedDisplay(idx);
-                drawTargetLockVisualLine(data.main_flight[idx]);
+                drawTargetLockVisualLine(list[idx]);
               }
               rebuildElevationChart();
             }
@@ -1135,6 +1742,7 @@
 
       // 6. Bind Toolbar Actions
       document.getElementById('btnUndo').addEventListener('click', undoLastAction);
+      document.getElementById('btnRedo').addEventListener('click', redoLastAction);
       updateUndoButtonState();
       document.getElementById('btnClear').addEventListener('click', clearAllKeyframes);
       document.getElementById('btnGenerateDraft').addEventListener('click', generateDraftFromGeoTrack);
@@ -1225,32 +1833,31 @@
         reader.readAsText(file);
       });
 
-      // Bind Toggle Reference Line button
-      document.getElementById('btnToggleRefLines').addEventListener('click', () => {
-        refVisible = !refVisible;
-        const btn = document.getElementById('btnToggleRefLines');
-        if (refVisible) {
-          btn.style.background = 'rgba(255, 205, 85, 0.2)';
-        } else {
-          btn.style.background = '';
-        }
-        drawRefLines();
-      });
 
       // Bind Sidebar Toggle
       document.getElementById('btnToggleSidebar').addEventListener('click', () => {
         const sidebar = document.querySelector('.sidebar-left');
-        const btn = document.getElementById('btnToggleSidebar');
         sidebar.classList.toggle('collapsed');
-        const isCollapsed = sidebar.classList.contains('collapsed');
-        btn.textContent = isCollapsed ? '▶' : '◀';
         
         if (viewer) {
           viewer.resize();
           setTimeout(() => {
             viewer.resize();
+            rebuildElevationChart();
+          }, 350);
+        } else {
+          setTimeout(() => {
+            rebuildElevationChart();
           }, 350);
         }
+      });
+
+      // Window Resize Listener for responsiveness
+      window.addEventListener('resize', () => {
+        if (viewer) {
+          viewer.resize();
+        }
+        rebuildElevationChart();
       });
 
       // 7. Bind Height micro adjustments near elevation chart
@@ -1262,6 +1869,169 @@
 
       // 9. Playback controls
       document.getElementById('btnPlay').addEventListener('click', togglePreviewPlayback);
+
+      // TTS Event Listeners
+      document.getElementById('hudTtsText').addEventListener('input', () => {
+        if (!activeId) return;
+        const idx = data.main_flight.findIndex(p => p.id === activeId);
+        if (idx !== -1) {
+          data.main_flight[idx].narration_text = document.getElementById('hudTtsText').value;
+        }
+      });
+
+      // Voice selection change listener (save to waypoint + toggle clone reference panel)
+      document.getElementById('hudTtsVoice').addEventListener('change', (e) => {
+        const val = e.target.value;
+        if (activeId) {
+          const idx = data.main_flight.findIndex(p => p.id === activeId);
+          if (idx !== -1) {
+            data.main_flight[idx].narration_voice = val;
+            saveToServerDebounced();
+          }
+        }
+        
+        const container = document.getElementById('refVoiceUploadContainer');
+        if (val === 'local_clone' || val === 'voxcpm') {
+          container.style.display = 'flex';
+        } else {
+          container.style.display = 'none';
+        }
+      });
+
+      // Reference voice upload event listeners
+      const refFileInput = document.getElementById('inputRefAudioFile');
+      document.getElementById('btnUploadRefAudio').addEventListener('click', () => {
+        refFileInput.click();
+      });
+      refFileInput.addEventListener('change', (e) => {
+        if (!activeId) return;
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const idx = data.main_flight.findIndex(p => p.id === activeId);
+        if (idx === -1) return;
+        const pt = data.main_flight[idx];
+        
+        const reader = new FileReader();
+        reader.onload = async function(evt) {
+          const base64Data = evt.target.result.split(',')[1];
+          const fileName = file.name;
+          
+          try {
+            document.getElementById('btnUploadRefAudio').disabled = true;
+            document.getElementById('btnUploadRefAudio').textContent = "⏳ 上传中...";
+            
+            const res = await fetch("api/upload-voice-ref", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                waypointId: pt.id,
+                fileName: fileName,
+                base64Data: base64Data
+              })
+            });
+            const resData = await res.json();
+            if (resData.ok) {
+              pt.narration_ref_audio = resData.audioUrl;
+              document.getElementById('lblRefAudioName').textContent = file.name;
+              document.getElementById('lblRefAudioName').title = file.name;
+              saveToServerDebounced();
+              showToast("📤 人声参考样本上传成功！");
+            } else {
+              throw new Error(resData.error || "上传失败");
+            }
+          } catch (err) {
+            console.error(err);
+            alert("参考音频上传失败，请检查服务日志！");
+          } finally {
+            document.getElementById('btnUploadRefAudio').disabled = false;
+            document.getElementById('btnUploadRefAudio').textContent = "📤 上传克隆样本 (.wav/.mp3)";
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // Reference text change sync listener
+      document.getElementById('txtRefAudioText').addEventListener('input', () => {
+        if (!activeId) return;
+        const idx = data.main_flight.findIndex(p => p.id === activeId);
+        if (idx !== -1) {
+          data.main_flight[idx].narration_ref_text = document.getElementById('txtRefAudioText').value.trim();
+          saveToServerDebounced();
+        }
+      });
+
+      document.getElementById('btnHudTtsGenerate').addEventListener('click', async () => {
+        if (!activeId) return;
+        const idx = data.main_flight.findIndex(p => p.id === activeId);
+        if (idx === -1) return;
+        const pt = data.main_flight[idx];
+        const text = document.getElementById('hudTtsText').value.trim();
+        const voice = document.getElementById('hudTtsVoice').value;
+        const btn = document.getElementById('btnHudTtsGenerate');
+
+        if (!text) {
+          alert("请输入要合成的语音解说词！");
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = "⏳ 合成中...";
+
+        try {
+          const res = await fetch("api/generate-tts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              waypointId: pt.id,
+              text: text,
+              voice: voice,
+              refAudio: pt.narration_ref_audio || "",
+              refText: pt.narration_ref_text || ""
+            })
+          });
+
+          const resData = await res.json();
+          if (resData.ok) {
+            pt.narration_text = text;
+            pt.narration_audio = resData.audioUrl;
+            pt.narration_duration = resData.duration;
+            
+            // 自动对齐飞行时长 = 语音时长 + 2.0s
+            pt.duration = parseFloat((resData.duration + 2.0).toFixed(1));
+            
+            // 播放生成的语音进行试听
+            const audio = new Audio(resData.audioUrl + "?t=" + Date.now());
+            audio.play();
+
+            // 重新刷新视图
+            refreshKeyframeList();
+            rebuildElevationChart();
+            updateDiagnosticsPanel(pt, idx);
+            
+            showToast("🎙️ 语音合成成功，已自动对齐飞行时长！");
+          } else {
+            throw new Error(resData.error || "合成失败");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("语音合成失败，请检查终端日志！");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "🔊 合成音频";
+        }
+      });
+
+      document.getElementById('btnPlayTtsAudio').addEventListener('click', () => {
+        if (!activeId) return;
+        const idx = data.main_flight.findIndex(p => p.id === activeId);
+        if (idx === -1) return;
+        const pt = data.main_flight[idx];
+        if (pt.narration_audio) {
+          const audio = new Audio(pt.narration_audio + "?t=" + Date.now());
+          audio.play();
+        }
+      });
 
       // 10. Real-time Camera Framing Change Listener
       setupCameraChangeListener();
@@ -1330,16 +2100,24 @@
       const activeIdx = list.findIndex(f => f.id === activeId);
 
       list.forEach((pt, idx) => {
-        if (rect) {
-          const radLng = Cesium.Math.toRadians(pt.lng);
-          const radLat = Cesium.Math.toRadians(pt.lat);
-          const inView = radLng >= rect.west && radLng <= rect.east && radLat >= rect.south && radLat <= rect.north;
-          if (!inView) return;
-        }
+        // Disabled culling because it hides points incorrectly in 3D views
+        // if (rect) {
+        //   const radLng = Cesium.Math.toRadians(pt.lng);
+        //   const radLat = Cesium.Math.toRadians(pt.lat);
+        //   const inView = radLng >= rect.west && radLng <= rect.east && radLat >= rect.south && radLat <= rect.north;
+        //   if (!inView) return;
+        // }
 
         const isActive = activeIdx === idx;
         const isSelected = selectedIds.includes(pt.id);
         const absoluteAlt = (pt.ground_alt || 5000) + (pt.relative_alt || 500);
+
+      // Apply Lighting
+      if (typeof pt.timeOfDay === 'number') {
+        let hrs = Math.floor(pt.timeOfDay);
+        let mins = Math.floor((pt.timeOfDay - hrs) * 60);
+        viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(`2024-06-21T${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00Z`);
+      }
         const camPos = Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, absoluteAlt);
 
         // 1. Draw vertical drop line to ground
@@ -1480,7 +2258,7 @@
         let directionLabel = "向前";
         if (pt.look_at_intent === 'summit') directionLabel = "凝望";
         else if (pt.look_at_intent === 'side') directionLabel = "横扫";
-        else if (pt.look_at_intent === 'back') directionLabel = "后掠";
+        else if (pt.look_at_intent === 'orbit') directionLabel = "环绕";
         else if (pt.look_at_intent === 'poi') directionLabel = "地标";
         else if (pt.look_at_intent === 'custom_target') directionLabel = "锁定";
         else if (pt.look_at_intent === 'custom') directionLabel = "自由";
@@ -1490,11 +2268,9 @@
           <div class="keyframe-info">
             <input type="text" class="keyframe-name-input" value="${pt.name || ('导演空间轨 ' + (idx + 1))}" 
               data-idx="${idx}">
-            <div class="keyframe-meta">高: ${pt.relative_alt}m · 视: ${directionLabel} · 约 ${pt.duration}s</div>
+            <div class="keyframe-meta">高: ${pt.relative_alt}m · 约 ${pt.duration}s</div>
           </div>
           <div class="keyframe-actions" onclick="event.stopPropagation()">
-            <button class="action-icon-btn" onclick="moveKeyframeIndex(${idx}, -1)" title="上移">⬆</button>
-            <button class="action-icon-btn" onclick="moveKeyframeIndex(${idx}, 1)" title="下移">⬇</button>
             <button class="action-icon-btn danger" onclick="confirmDeleteKeyframe(${idx})" title="删除">✕</button>
           </div>
         `;
@@ -1504,6 +2280,20 @@
         
         // Binding rename change listener
         const input = item.querySelector('.keyframe-name-input');
+        
+        // Prevent event propagation so clicking/typing inside input does not trigger parent card select
+        input.addEventListener('click', (e) => e.stopPropagation());
+        input.addEventListener('mousedown', (e) => e.stopPropagation());
+        input.addEventListener('mouseup', (e) => e.stopPropagation());
+        
+        // Save on Enter
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            e.target.blur();
+          }
+        });
+
         input.addEventListener('change', (e) => {
           const renameIdx = parseInt(e.target.getAttribute('data-idx'));
           data.main_flight[renameIdx].name = e.target.value.trim();
@@ -1626,11 +2416,27 @@
       rebuildMarkers();
       updateCount();
 
-      // Show HUD controls
-      document.getElementById('hudZoomRing').style.display = 'flex';
-      document.getElementById('hudPitchRing').style.display = 'flex';
-      document.getElementById('hudTargetLockPanel').style.display = 'block';
-      document.getElementById('btnDeleteSelected').style.display = 'inline-flex';
+      // Show HUD controls with explicit cssText to ensure they override everything
+      const zRing = document.getElementById('hudZoomRing');
+      const pRing = document.getElementById('hudPitchRing');
+      const dInsp = document.getElementById('hudDirectorInspector');
+      
+      if (zRing) { zRing.style.display = 'flex'; zRing.style.opacity = '1'; zRing.style.visibility = 'visible'; }
+      if (pRing) { pRing.style.display = 'flex'; pRing.style.opacity = '1'; pRing.style.visibility = 'visible'; }
+      if (dInsp) { dInsp.style.display = 'flex'; dInsp.style.opacity = '1'; dInsp.style.visibility = 'visible'; }
+      document.getElementById('btnDeleteSelected').addEventListener('click', () => {
+        if (!activeId && selectedIds.length === 0) return;
+        const idsToDelete = selectedIds.length > 0 ? selectedIds : [activeId];
+        saveState();
+        data.main_flight = data.main_flight.filter(pt => !idsToDelete.includes(pt.id));
+        activeId = null;
+        selectedIds = [];
+        renderFlightList();
+        rebuildMarkers();
+        drawFlightPath();
+        deselectKeyframe();
+        updateCount();
+      });
 
       // Load values into HUD inputs
       const fovVal = pt.fov || 60.0;
@@ -1651,9 +2457,22 @@
       }
       document.getElementById('hudSpeedSlider').value = speedKmh;
       document.getElementById('hudSpeedSlider').disabled = (idx === 0);
-      document.getElementById('hudSpeedValue').textContent = idx === 0 ? "起飞点 (首帧)" : `${speedKmh} km/h`;
+      document.getElementById('hudSpeedValue').textContent = `${speedKmh} km/h`;
       document.getElementById('hudSpeedGroup').style.opacity = (idx === 0) ? '0.4' : '1.0';
 
+
+      // Lighting
+      const todVal = typeof pt.timeOfDay === 'number' ? pt.timeOfDay : 10.0;
+      document.getElementById('timeOfDayInput').value = todVal;
+      
+      let hrs = Math.floor(todVal);
+      let mins = Math.floor((todVal - hrs) * 60);
+      document.getElementById('timeOfDayVal').textContent = `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+      
+      // Realtime preview of the lighting
+      if (viewer && viewer.clock) {
+        viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(`2024-06-21T${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00Z`);
+      }
       const waitVal = pt.wait_time || 0.0;
       document.getElementById('hudWaitSlider').value = waitVal;
       document.getElementById('hudWaitSlider').disabled = false;
@@ -1661,7 +2480,13 @@
       document.getElementById('hudWaitGroup').style.opacity = '1.0';
 
       // Handheld Shaking toggle
-      document.getElementById('hudChkHandheld').checked = (pt.shot_mode === 'handheld');
+      // Update shot mode buttons
+      document.querySelectorAll('.shot-mode-btn').forEach(b => b.classList.remove('active'));
+      if (pt.shot_mode && pt.shot_mode !== 'default') {
+        const smBtn = document.querySelector(`.shot-mode-btn[data-mode="${pt.shot_mode}"]`);
+        if (smBtn) smBtn.classList.add('active');
+      }
+      updateShotParamsPanel(pt.shot_mode || 'default', pt);
 
       // Update target status UI
       updateTargetLockUI(pt);
@@ -1679,7 +2504,7 @@
         activeVibe = 'solemn';
       } else if (pt.look_at_intent === 'forward' && pt.relative_alt === 180 && pt.fov === 90 && pt.pitch === -10 && pt.shot_mode === 'handheld') {
         activeVibe = 'exploratory';
-      } else if (pt.look_at_intent === 'back' && pt.relative_alt === 600 && pt.fov === 75 && pt.pitch === -25) {
+      } else if (pt.look_at_intent === 'orbit' && pt.relative_alt === 600 && pt.fov === 75 && pt.pitch === -25) {
         activeVibe = 'solitude';
       }
       if (activeVibe) {
@@ -1693,15 +2518,21 @@
       // Diagnostics readout update
       updateDiagnosticsPanel(pt, idx);
 
-      // Show Camera rule of thirds grid and sidebar diagnostics panel
+      // Show Camera rule of thirds grid
       document.getElementById('cameraGrid').style.display = 'grid';
-      document.getElementById('diagnosticsOverlay').style.display = 'block';
 
       // Move camera to this point
       if (viewer) {
         isUpdatingCameraFromState = true;
         
         const absoluteAlt = (pt.ground_alt || 5000) + (pt.relative_alt || 500);
+
+      // Apply Lighting
+      if (typeof pt.timeOfDay === 'number') {
+        let hrs = Math.floor(pt.timeOfDay);
+        let mins = Math.floor((pt.timeOfDay - hrs) * 60);
+        viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(`2024-06-21T${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00Z`);
+      }
         
         viewer.camera.setView({
           destination: Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, absoluteAlt),
@@ -1728,15 +2559,14 @@
       selectedIds = [];
       document.getElementById('hudZoomRing').style.display = 'none';
       document.getElementById('hudPitchRing').style.display = 'none';
-      document.getElementById('hudTargetLockPanel').style.display = 'none';
-      document.getElementById('btnDeleteSelected').style.display = 'none';
+      document.getElementById('hudDirectorInspector').style.display = 'none';
+      // btnDeleteSelected removed
       
       document.getElementById('chartSelectionLabel').textContent = `未选中轨道`;
       document.getElementById('chartAdjustControls').style.display = 'none';
       
-      // Hide Camera grid overlay and sidebar diagnostics panel
+      // Hide Camera grid overlay
       document.getElementById('cameraGrid').style.display = 'none';
-      document.getElementById('diagnosticsOverlay').style.display = 'none';
 
       clearTargetLockVisuals();
       rebuildMarkers();
@@ -1745,7 +2575,7 @@
     }
 
     function updateDiagnosticsPanel(pt, idx) {
-      const panel = document.getElementById('diagnosticsOverlay');
+      const panel = document.getElementById('hudDirectorInspector');
       if (!panel || !pt) return;
       if (typeof idx !== 'number') {
         idx = data.main_flight.findIndex(f => f.id === pt.id);
@@ -1782,8 +2612,11 @@
         targetStr = "冈仁波齐主峰";
       } else if (pt.look_at_intent === 'poi') {
         targetStr = "地标对焦";
-      } else if (pt.look_at_intent === 'back') {
-        targetStr = "余光倒掠 (后景)";
+      } else if (pt.look_at_intent === 'free') {
+        label = "自由跟随";
+        showUnlock = true;
+      } else if (pt.look_at_intent === 'orbit') {
+        targetStr = "环绕视角 (旋转)";
       } else if (pt.look_at_intent === 'side') {
         targetStr = "横向扫视 (90°)";
       } else if (pt.look_at_intent === 'custom') {
@@ -1798,6 +2631,38 @@
       document.getElementById('diagTarget').textContent = targetStr;
       document.getElementById('diagSpeed').textContent = speedStr;
       document.getElementById('diagDuration').textContent = durationStr;
+
+      // Load TTS fields
+      document.getElementById('hudTtsText').value = pt.narration_text || '';
+      if (pt.narration_audio) {
+        document.getElementById('hudTtsAudioContainer').style.display = 'flex';
+        document.getElementById('hudTtsDurationLabel').textContent = `时长: ${(pt.narration_duration || pt.duration || 0.0).toFixed(1)}s`;
+      } else {
+        document.getElementById('hudTtsAudioContainer').style.display = 'none';
+      }
+
+      // Load voice style dropdown and reference clone container
+      const voiceVal = pt.narration_voice || 'default';
+      document.getElementById('hudTtsVoice').value = voiceVal;
+      
+      const cloneContainer = document.getElementById('refVoiceUploadContainer');
+      if (voiceVal === 'local_clone' || voiceVal === 'voxcpm') {
+        cloneContainer.style.display = 'flex';
+      } else {
+        cloneContainer.style.display = 'none';
+      }
+
+      // Load custom reference audio labels & texts
+      if (pt.narration_ref_audio) {
+        const parts = pt.narration_ref_audio.split('/');
+        const filename = parts[parts.length - 1];
+        document.getElementById('lblRefAudioName').textContent = filename;
+        document.getElementById('lblRefAudioName').title = filename;
+      } else {
+        document.getElementById('lblRefAudioName').textContent = "无样本 (默认音色)";
+        document.getElementById('lblRefAudioName').title = "使用系统缺省克隆样本";
+      }
+      document.getElementById('txtRefAudioText').value = pt.narration_ref_text || '';
     }
 
     function updateTargetLockUI(pt) {
@@ -1816,8 +2681,12 @@
       } else if (pt.look_at_intent === 'poi') {
         label = "对焦地标";
         showUnlock = true;
-      } else if (pt.look_at_intent === 'back') {
-        label = "余光倒掠";
+      } else if (pt.look_at_intent === 'free') {
+        label = "自由跟随";
+        showUnlock = true;
+      } else if (pt.look_at_intent === 'orbit') {
+        label = "环绕视角";
+        showUnlock = true;
       } else if (pt.look_at_intent === 'side') {
         label = "横向扫视";
       } else if (pt.look_at_intent === 'custom') {
@@ -1832,8 +2701,9 @@
         'forward': 'btnHudLockForward',
         'summit': 'btnHudLockSummit',
         'side': 'btnHudLockSide',
-        'back': 'btnHudLockBack',
-        'poi': 'btnHudLockPoi'
+        'orbit': 'btnHudLockOrbit',
+        'poi': 'btnHudLockPoi',
+        'free': 'btnHudLockFree'
       };
       
       Object.keys(mapping).forEach(key => {
@@ -1856,9 +2726,7 @@
       const pt = data.main_flight[idx];
       const speedSlider = document.getElementById('hudSpeedSlider');
       const speedLabel = document.getElementById('hudSpeedValue');
-      if (idx === 0) {
-        speedLabel.textContent = "首帧 (起飞点)";
-      } else {
+      if (idx !== 0) {
         const prevPt = data.main_flight[idx - 1];
         const dist = haversine(prevPt.lat, prevPt.lng, pt.lat, pt.lng);
         const dur = pt.duration || 2.5;
@@ -1907,13 +2775,14 @@
       if (data.main_flight.length === 0) {
         document.getElementById('btnGenerateDraft').style.display = 'block';
       }
+      renumberWaypoints();
       deselectKeyframe();
       rebuildMarkers();
       refreshKeyframeList();
       rebuildElevationChart();
       updateCount();
       saveToServer();
-      showToast("已删除该混音单元");
+      showToast("已删除该航迹节点");
     }
 
     function pushHistoryState() {
@@ -1921,6 +2790,7 @@
       if (historyStack.length > 50) {
         historyStack.shift();
       }
+      redoStack = []; // Clear redo stack on new actions
       updateUndoButtonState();
     }
 
@@ -1929,7 +2799,22 @@
         showToast("无历史操作可撤销");
         return;
       }
+      redoStack.push(JSON.parse(JSON.stringify(data.main_flight)));
       data.main_flight = historyStack.pop();
+      restoreStateAfterHistoryChange("↩ 已撤销上一步操作");
+    }
+
+    function redoLastAction() {
+      if (redoStack.length === 0) {
+        showToast("无历史操作可重做");
+        return;
+      }
+      historyStack.push(JSON.parse(JSON.stringify(data.main_flight)));
+      data.main_flight = redoStack.pop();
+      restoreStateAfterHistoryChange("↪ 已重做操作");
+    }
+
+    function restoreStateAfterHistoryChange(toastMsg) {
       if (data.main_flight.length === 0) {
         document.getElementById('btnGenerateDraft').style.display = 'block';
       } else {
@@ -1953,7 +2838,7 @@
       rebuildElevationChart();
       updateCount();
       saveToServer();
-      showToast("↩ 已撤销上一步操作");
+      showToast(toastMsg);
       updateUndoButtonState();
     }
 
@@ -1966,6 +2851,16 @@
         } else {
           btnUndo.style.opacity = '1.0';
           btnUndo.title = `撤销上一步操作 (还有 ${historyStack.length} 步可撤销)`;
+        }
+      }
+      const btnRedo = document.getElementById('btnRedo');
+      if (btnRedo) {
+        if (redoStack.length === 0) {
+          btnRedo.style.opacity = '0.5';
+          btnRedo.title = "无历史操作可重做";
+        } else {
+          btnRedo.style.opacity = '1.0';
+          btnRedo.title = `重做操作 (还有 ${redoStack.length} 步可重做)`;
         }
       }
     }
@@ -1996,6 +2891,8 @@
       data.main_flight[idx] = data.main_flight[targetIdx];
       data.main_flight[targetIdx] = temp;
 
+      renumberWaypoints();
+
       refreshKeyframeList();
       rebuildMarkers();
       rebuildElevationChart();
@@ -2003,6 +2900,126 @@
       saveToServer();
       showToast(direction === -1 ? "空间单元上移" : "空间单元下移");
     }
+
+    function moveSelected(direction) {
+      if (!activeId) return;
+      const idx = data.main_flight.findIndex(f => f.id === activeId);
+      if (idx !== -1) {
+        moveKeyframeIndex(idx, direction);
+        setTimeout(() => {
+          const activeEl = document.querySelector('.keyframe-item.active');
+          if (activeEl) {
+            activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        }, 50);
+      }
+    }
+
+    function renumberWaypoints() {
+      if (!data || !data.main_flight) return;
+      const defaultNames = ["导演航点", "自定义航点", "导演空间轨"];
+      data.main_flight.forEach((pt, idx) => {
+        let isDefault = false;
+        let prefix = "导演航点";
+        if (!pt.name) {
+          isDefault = true;
+        } else {
+          for (const dName of defaultNames) {
+            if (pt.name.startsWith(dName)) {
+              isDefault = true;
+              prefix = dName;
+              break;
+            }
+          }
+        }
+        if (isDefault) {
+          pt.name = `${prefix} ${idx + 1}`;
+        }
+      });
+    }
+
+    function projectToTrack(lng, lat) {
+      if (!data.main || data.main.length < 2) {
+        return { lng: lng, lat: lat, fractionalIndex: 0 };
+      }
+      let minD2 = Infinity;
+      let closestLng = lng;
+      let closestLat = lat;
+      let closestSegmentIdx = 0;
+      let closestT = 0;
+
+      for (let i = 0; i < data.main.length - 1; i++) {
+        const pA = data.main[i];
+        const pB = data.main[i + 1];
+        const xA = pA[0], yA = pA[1];
+        const xB = pB[0], yB = pB[1];
+        const dx = xB - xA;
+        const dy = yB - yA;
+        const denom = dx * dx + dy * dy;
+
+        let t = 0;
+        if (denom > 1e-12) {
+          t = ((lng - xA) * dx + (lat - yA) * dy) / denom;
+          t = Math.max(0, Math.min(1, t));
+        }
+        const projX = xA + t * dx;
+        const projY = yA + t * dy;
+        const diffX = lng - projX;
+        const diffY = lat - projY;
+        const d2 = diffX * diffX + diffY * diffY;
+
+        if (d2 < minD2) {
+          minD2 = d2;
+          closestLng = projX;
+          closestLat = projY;
+          closestSegmentIdx = i;
+          closestT = t;
+        }
+      }
+
+      return {
+        lng: parseFloat(closestLng.toFixed(6)),
+        lat: parseFloat(closestLat.toFixed(6)),
+        fractionalIndex: closestSegmentIdx + closestT
+      };
+    }
+
+    function sortWaypointsByTrackOrder() {
+      if (!data.main || data.main.length < 2) return;
+      // Calculate fractionalIndex for every waypoint in main_flight
+      data.main_flight.forEach(pt => {
+        const proj = projectToTrack(pt.lng, pt.lat);
+        pt.fractionalIndex = proj.fractionalIndex;
+      });
+      // Sort main_flight array by fractionalIndex ascending
+      data.main_flight.sort((a, b) => a.fractionalIndex - b.fractionalIndex);
+    }
+
+    function getCoordsAtDistance(targetD) {
+      if (!data.main || data.main.length === 0) return null;
+      if (data.main.length === 1) return { lng: data.main[0][0], lat: data.main[0][1] };
+
+      let cumDist = 0.0;
+      if (targetD <= 0) return { lng: data.main[0][0], lat: data.main[0][1] };
+
+      for (let i = 0; i < data.main.length - 1; i++) {
+        const pA = data.main[i];
+        const pB = data.main[i + 1];
+        const dist = haversine(pA[1], pA[0], pB[1], pB[0]);
+        if (cumDist + dist >= targetD) {
+          const remaining = targetD - cumDist;
+          const t = dist > 0 ? (remaining / dist) : 0;
+          const lng = pA[0] + t * (pB[0] - pA[0]);
+          const lat = pA[1] + t * (pB[1] - pA[1]);
+          return { lng: parseFloat(lng.toFixed(6)), lat: parseFloat(lat.toFixed(6)) };
+        }
+        cumDist += dist;
+      }
+
+      const last = data.main[data.main.length - 1];
+      return { lng: last[0], lat: last[1] };
+    }
+
 
     // ---- Vibe Presets Application ----
     function applyVibePreset(vibe) {
@@ -2049,15 +3066,15 @@
           pt.wait_time = 0.0;
           pt.shot_mode = 'handheld';
         } else if (vibe === 'solitude') {
-          pt.look_at_intent = 'back';
+          pt.look_at_intent = 'orbit';
           pt.relative_alt = 600;
           pt.perspective_fov = 'custom';
           pt.fov = 75;
           pt.perspective_pitch = 'oblique';
           pt.pitch = -25;
           pt.speed_preset = 'slow';
-          pt.wait_preset = 'none';
-          pt.wait_time = 0.0;
+          pt.wait_preset = 'custom';
+          pt.wait_time = 4.0;
           pt.shot_mode = 'default';
         }
         recomputeKeyframeValues(idx);
@@ -2067,7 +3084,7 @@
         selectKeyframe(activeIdx, true);
       }
       saveToServer();
-      showToast(`🔮 已批量载入【${vibe === 'pilgrimage' ? '朝圣' : (vibe === 'solemn' ? '庄严' : (vibe === 'exploratory' ? '探索' : '孤独'))}】氛围空间混音！`);
+      showToast(`🔮 已批量载入【${vibe === 'pilgrimage' ? '朝圣' : (vibe === 'solemn' ? '庄严' : (vibe === 'exploratory' ? '探索' : '孤独'))}】运镜风格航迹配置！`);
     }
 
     // ---- Camera State Capture ----
@@ -2175,6 +3192,8 @@
         targetIdx = data.main_flight.length - 1;
       }
 
+      renumberWaypoints();
+
       document.getElementById('btnGenerateDraft').style.display = 'none';
 
       rebuildMarkers();
@@ -2191,6 +3210,7 @@
       const count = selectedIds.length;
       if (confirm(`确定要删除选中的 ${count} 个航点吗？`)) {
         data.main_flight = data.main_flight.filter(f => !selectedIds.includes(f.id));
+        renumberWaypoints();
         if (data.main_flight.length === 0) {
           document.getElementById('btnGenerateDraft').style.display = 'block';
         }
@@ -2201,7 +3221,7 @@
         rebuildElevationChart();
         updateCount();
         saveToServer();
-        showToast(`🗑️ ${count} 个空间混音单元已批量删除`);
+        showToast(`🗑️ ${count} 个航迹节点已批量删除`);
       }
     }
 
@@ -2365,7 +3385,9 @@
       };
 
       try {
-        const res = await fetch("api/save-routes", {
+        const urlParams = new URLSearchParams(window.location.search);
+        const routeType = urlParams.get('route') || 'outer';
+        const res = await fetch("api/save-routes?route=" + routeType, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(out, null, 2)
@@ -2419,7 +3441,7 @@
     const paddingL = 60;
     const paddingR = 25;
     const paddingT = 15;
-    const paddingB = 55;
+    const paddingB = 25;
 
     function getInterpolatedPoint(d) {
       if (chartPoints.length === 0) return null;
@@ -2488,6 +3510,7 @@
     function rebuildElevationChart() {
       const canvas = document.getElementById('elevationCanvas');
       if (!canvas) return;
+      const container = canvas.parentElement;
 
       const ctx = canvas.getContext('2d');
       const list = data.main_flight;
@@ -2544,29 +3567,20 @@
       const getX = d => paddingL + (d / dMax) * (w - paddingL - paddingR);
 
       const availH = h - paddingT - paddingB;
-      const gap = 12;
-      const usableH = availH - 2 * gap;
-      
-      const h1 = usableH * 0.55;
-      const h2 = usableH * 0.20;
-      const h3 = usableH * 0.20;
-
+      const h1 = availH;
       const y1 = paddingT;
       const y2 = y1 + h1;
-      const y3 = y2 + gap;
-      const y4 = y3 + h2;
-      const y5 = y4 + gap;
-      const y6 = y5 + h3;
 
-      const gVals = chartPoints.map(p => p.ground);
-      const fVals = chartPoints.map(p => p.flight);
-      chartMinE = Math.min(...gVals) - 150;
-      chartMaxE = Math.max(Math.max(...gVals) + 1800, Math.max(...fVals) + 200);
+      const gVals = chartPoints.map(p => p.ground || 0).filter(v => !isNaN(v));
+      const fVals = chartPoints.map(p => p.flight || 0).filter(v => !isNaN(v));
+      const minElev = Math.min(...gVals, ...fVals);
+      const maxElev = Math.max(...gVals, ...fVals);
+      const rangeElev = Math.max(100, maxElev - minElev);
+      chartMinE = minElev - rangeElev * 0.3;
+      chartMaxE = maxElev + rangeElev * 0.3;
 
       const getY_elev = e => y2 - ((e - chartMinE) / (chartMaxE - chartMinE)) * h1;
-      const getY_speed = s => y4 - (s / 80) * h2;
-      const getY_wait = wt => y6 - (wt / 15) * h3;
-
+            
       const activeIdx = list.findIndex(f => f.id === activeId);
 
       // --- LANE 1: Elevation Lane ---
@@ -2668,124 +3682,12 @@
         }
       });
 
-      // --- LANE 2: Speed Lane ---
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
-      [0, 40, 80].forEach(spd => {
-        const y = getY_speed(spd);
-        ctx.beginPath();
-        ctx.moveTo(paddingL, y);
-        ctx.lineTo(w - paddingR, y);
-        ctx.stroke();
-
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '8px monospace';
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(spd + 'km/h', paddingL - 8, y);
-      });
-
-      ctx.fillStyle = 'rgba(148, 163, 184, 0.45)';
-      ctx.font = '9px "PingFang SC", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      ctx.fillText('航段速度轨 (SPD)', paddingL + 8, y3 + 2);
-
-      ctx.strokeStyle = '#2dd4bf';
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      chartPoints.forEach((p, i) => {
-        const x = getX(p.d);
-        const y = getY_speed(p.speed);
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      });
-      ctx.stroke();
-
-      chartPoints.forEach((p, i) => {
-        const x = getX(p.d);
-        const y = getY_speed(p.speed);
-        const isActive = i === activeIdx;
-        const isSelected = selectedIds.includes(p.pt.id);
-
-        ctx.fillStyle = isActive ? '#fbbf24' : (isSelected ? '#fcd34d' : '#2dd4bf');
-        ctx.strokeStyle = '#18181c';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.arc(x, y, isActive ? 5 : (isSelected ? 4.2 : 3.2), 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        if (isActive && i > 0) {
-          ctx.fillStyle = '#fbbf24';
-          ctx.font = 'bold 9px monospace';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'bottom';
-          ctx.fillText(`${p.speed}km/h`, x, y - 5);
-        }
-      });
-
-      // --- LANE 3: Wait Lane ---
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
-      [0, 7.5, 15].forEach(wt => {
-        const y = getY_wait(wt);
-        ctx.beginPath();
-        ctx.moveTo(paddingL, y);
-        ctx.lineTo(w - paddingR, y);
-        ctx.stroke();
-
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '8px monospace';
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(wt + 's', paddingL - 8, y);
-      });
-
-      ctx.fillStyle = 'rgba(148, 163, 184, 0.45)';
-      ctx.font = '9px "PingFang SC", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      ctx.fillText('到站停驻轨 (WAIT)', paddingL + 8, y5 + 2);
-
-      ctx.strokeStyle = '#c084fc';
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      chartPoints.forEach((p, i) => {
-        const x = getX(p.d);
-        const y = getY_wait(p.wait);
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      });
-      ctx.stroke();
-
-      chartPoints.forEach((p, i) => {
-        const x = getX(p.d);
-        const y = getY_wait(p.wait);
-        const isActive = i === activeIdx;
-        const isSelected = selectedIds.includes(p.pt.id);
-
-        ctx.fillStyle = isActive ? '#fbbf24' : (isSelected ? '#fcd34d' : '#c084fc');
-        ctx.strokeStyle = '#18181c';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.arc(x, y, isActive ? 5 : (isSelected ? 4.2 : 3.2), 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        if (isActive && p.wait > 0) {
-          ctx.fillStyle = '#fbbf24';
-          ctx.font = 'bold 9px monospace';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'bottom';
-          ctx.fillText(`${p.wait}s`, x, y - 5);
-        }
-      });
-
       // --- BOTTOM X-AXIS ---
       ctx.strokeStyle = 'rgba(255,255,255,0.08)';
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(paddingL, y6);
-      ctx.lineTo(w - paddingR, y6);
+      ctx.moveTo(paddingL, (h - paddingB));
+      ctx.lineTo(w - paddingR, (h - paddingB));
       ctx.stroke();
 
       chartPoints.forEach((p, i) => {
@@ -2794,12 +3696,12 @@
 
         ctx.strokeStyle = 'rgba(255,255,255,0.15)';
         ctx.beginPath();
-        ctx.moveTo(x, y6);
-        ctx.lineTo(x, y6 + 4);
+        ctx.moveTo(x, (h - paddingB));
+        ctx.lineTo(x, (h - paddingB) + 4);
         ctx.stroke();
 
         ctx.save();
-        ctx.translate(x, y6 + 12);
+        ctx.translate(x, (h - paddingB) + 12);
         ctx.rotate(Math.PI / 6);
         ctx.fillStyle = isActive ? '#fbbf24' : '#94a3b8';
         ctx.font = '9px "PingFang SC", sans-serif';
@@ -2839,20 +3741,26 @@
 
       if (playheadD !== null) {
         const px = getX(playheadD);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
-        ctx.lineWidth = 1.2;
+        ctx.strokeStyle = '#00e5ff'; // Cyan for high visibility
+        ctx.lineWidth = 2.0;
         ctx.beginPath();
         ctx.moveTo(px, y1);
-        ctx.lineTo(px, y6);
+        ctx.lineTo(px, h - paddingB);
         ctx.stroke();
 
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = '#00e5ff';
         ctx.beginPath();
-        ctx.moveTo(px - 5, y1);
-        ctx.lineTo(px + 5, y1);
-        ctx.lineTo(px, y1 + 5);
+        ctx.moveTo(px - 6, y1);
+        ctx.lineTo(px + 6, y1);
+        ctx.lineTo(px, y1 + 8);
         ctx.closePath();
         ctx.fill();
+        
+        // Add a pulsing effect or glow could be done here
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#00e5ff';
+        ctx.fill();
+        ctx.shadowBlur = 0;
       }
     }
 
@@ -2876,16 +3784,14 @@
 
       function getY_elev(elev, h) {
         const availH = h - paddingT - paddingB;
-        const usableH = availH - 24;
-        const h1 = usableH * 0.55;
+        const h1 = availH;
         const y2 = paddingT + h1;
         return y2 - ((elev - chartMinE) / (chartMaxE - chartMinE)) * h1;
       }
 
       function getElev_Y(pixelY, h) {
         const availH = h - paddingT - paddingB;
-        const usableH = availH - 24;
-        const h1 = usableH * 0.55;
+        const h1 = availH;
         const y2 = paddingT + h1;
         const ratio = (y2 - pixelY) / h1;
         return chartMinE + ratio * (chartMaxE - chartMinE);
@@ -2897,7 +3803,7 @@
         const h1 = usableH * 0.55;
         const h2 = usableH * 0.20;
         const y4 = paddingT + h1 + 12 + h2;
-        return y4 - (s / 80) * h2;
+        return y4 - (s / 1800) * h2;
       }
 
       function getSpeed_Y(pixelY, h) {
@@ -2906,7 +3812,7 @@
         const h1 = usableH * 0.55;
         const h2 = usableH * 0.20;
         const y4 = paddingT + h1 + 12 + h2;
-        return ((y4 - pixelY) / h2) * 80;
+        return ((y4 - pixelY) / h2) * 1800;
       }
 
       function getY_wait(wt, h) {
@@ -2980,18 +3886,9 @@
         let foundDragType = null;
 
         const availH = h - paddingT - paddingB;
-        const gap = 12;
-        const usableH = availH - 2 * gap;
-        const h1 = usableH * 0.55;
-        const h2 = usableH * 0.20;
-        const h3 = usableH * 0.20;
-
-        const y1 = paddingT;
-        const y2 = y1 + h1;
-        const y3 = y2 + gap;
-        const y4 = y3 + h2;
-        const y5 = y4 + gap;
-        const y6 = y5 + h3;
+      const h1 = availH;
+      const y1 = paddingT;
+      const y2 = y1 + h1;
 
         // 1. Elevation check
         if (y >= y1 - 10 && y <= y2 + 10) {
@@ -3003,33 +3900,6 @@
               minDist = dist;
               closestIdx = idx;
               foundDragType = 'elevation';
-            }
-          });
-        }
-        // 2. Speed check
-        else if (y >= y3 - 10 && y <= y4 + 10) {
-          chartPoints.forEach((p, idx) => {
-            if (idx === 0) return;
-            const px = getX(p.d, w);
-            const py = getY_speed(p.speed, h);
-            const dist = Math.hypot(x - px, y - py);
-            if (dist < minDist) {
-              minDist = dist;
-              closestIdx = idx;
-              foundDragType = 'speed';
-            }
-          });
-        }
-        // 3. Wait check
-        else if (y >= y5 - 10 && y <= y6 + 10) {
-          chartPoints.forEach((p, idx) => {
-            const px = getX(p.d, w);
-            const py = getY_wait(p.wait, h);
-            const dist = Math.hypot(x - px, y - py);
-            if (dist < minDist) {
-              minDist = dist;
-              closestIdx = idx;
-              foundDragType = 'wait';
             }
           });
         }
@@ -3045,10 +3915,6 @@
               closestIdx = idx;
               if (y >= y1 - 10 && y <= y2 + 10) {
                 foundDragType = 'elevation';
-              } else if (y >= y3 - 10 && y <= y4 + 10 && idx > 0) {
-                foundDragType = 'speed';
-              } else if (y >= y5 - 10 && y <= y6 + 10) {
-                foundDragType = 'wait';
               }
             }
           });
@@ -3061,6 +3927,10 @@
           selectKeyframe(closestIdx);
           e.preventDefault();
         } else {
+          if (isPreviewPlaying) {
+            isPreviewPlaying = false;
+            if (previewTimeout) clearTimeout(previewTimeout);
+          }
           isScrubbing = true;
           handleScrub(x, w);
           e.preventDefault();
@@ -3074,17 +3944,50 @@
         const { x, y } = getMousePos(e);
 
         if (isDraggingChartNode && draggedNodeIdx !== -1) {
+          // Horizontal drag-to-swap / reordering logic
+          const dMax = chartPoints[chartPoints.length - 1].d || 1.0;
+          const targetD = ((x - paddingL) / (w - paddingL - paddingR)) * dMax;
+
+          // Check if dragged past the previous node
+          if (draggedNodeIdx > 0 && targetD < chartPoints[draggedNodeIdx - 1].d) {
+            // Swap in data array
+            const temp = data.main_flight[draggedNodeIdx];
+            data.main_flight[draggedNodeIdx] = data.main_flight[draggedNodeIdx - 1];
+            data.main_flight[draggedNodeIdx - 1] = temp;
+            
+            draggedNodeIdx = draggedNodeIdx - 1;
+            renumberWaypoints();
+            rebuildMarkers();
+            rebuildElevationChart();
+            saveToServerDebounced();
+          }
+          // Check if dragged past the next node
+          else if (draggedNodeIdx < data.main_flight.length - 1 && targetD > chartPoints[draggedNodeIdx + 1].d) {
+            // Swap in data array
+            const temp = data.main_flight[draggedNodeIdx];
+            data.main_flight[draggedNodeIdx] = data.main_flight[draggedNodeIdx + 1];
+            data.main_flight[draggedNodeIdx + 1] = temp;
+            
+            draggedNodeIdx = draggedNodeIdx + 1;
+            renumberWaypoints();
+            rebuildMarkers();
+            rebuildElevationChart();
+            saveToServerDebounced();
+          }
+
           const pt = data.main_flight[draggedNodeIdx];
           const ground = pt.ground_alt || 5000;
 
           if (dragType === 'elevation') {
             let targetElev = getElev_Y(y, h);
-            let relativeAlt = Math.max(0, Math.min(2000, Math.round(targetElev - ground)));
+
+            const currentGround = pt.ground_alt || 5000;
+            let relativeAlt = Math.max(0, Math.min(2000, Math.round(targetElev - currentGround)));
             pt.relative_alt = relativeAlt;
           } 
           else if (dragType === 'speed' && draggedNodeIdx > 0) {
             let targetSpeed = getSpeed_Y(y, h);
-            targetSpeed = Math.max(5, Math.min(80, Math.round(targetSpeed)));
+            targetSpeed = Math.max(10, Math.min(1800, Math.round(targetSpeed)));
             
             const prevPt = data.main_flight[draggedNodeIdx - 1];
             const dist = haversine(prevPt.lat, prevPt.lng, pt.lat, pt.lng);
@@ -3200,6 +4103,7 @@
         if (preset === 'vast') targetFov = 90.0;
         else if (preset === 'natural') targetFov = 60.0;
         else if (preset === 'compressed') targetFov = 28.0;
+        else if (preset === 'ground') targetFov = 120.0;
         else return;
 
         selectedIds.forEach(id => {
@@ -3301,11 +4205,21 @@
 
       // 3. Rhythm Console Speed Slider
       const speedSlider = document.getElementById('hudSpeedSlider');
+      const speedLabel = document.getElementById('hudSpeedValue');
+      
+      const showSpeedLabel = () => speedLabel.style.opacity = 1;
+      const hideSpeedLabel = () => speedLabel.style.opacity = 0;
+      speedSlider.addEventListener('mousedown', showSpeedLabel);
+      speedSlider.addEventListener('touchstart', showSpeedLabel, {passive: true});
+      speedSlider.addEventListener('mouseup', hideSpeedLabel);
+      speedSlider.addEventListener('mouseleave', hideSpeedLabel);
+      speedSlider.addEventListener('touchend', hideSpeedLabel);
+
       speedSlider.addEventListener('input', e => {
         if (selectedIds.length === 0) return;
         const speedKmh = parseFloat(e.target.value);
         
-        document.getElementById('hudSpeedValue').textContent = `${speedKmh} km/h`;
+        speedLabel.textContent = `${speedKmh} km/h`;
         
         selectedIds.forEach(id => {
           const idx = data.main_flight.findIndex(f => f.id === id);
@@ -3327,9 +4241,20 @@
 
       // 4. Rhythm Console Wait (Dwell) Slider
       const waitSlider = document.getElementById('hudWaitSlider');
+      const waitLabel = document.getElementById('hudWaitValue');
+
+      const showWaitLabel = () => waitLabel.style.opacity = 1;
+      const hideWaitLabel = () => waitLabel.style.opacity = 0;
+      waitSlider.addEventListener('mousedown', showWaitLabel);
+      waitSlider.addEventListener('touchstart', showWaitLabel, {passive: true});
+      waitSlider.addEventListener('mouseup', hideWaitLabel);
+      waitSlider.addEventListener('mouseleave', hideWaitLabel);
+      waitSlider.addEventListener('touchend', hideWaitLabel);
+
       waitSlider.addEventListener('input', e => {
         if (selectedIds.length === 0) return;
         const waitTime = parseFloat(e.target.value);
+        waitLabel.textContent = `${waitTime}s`;
         
         selectedIds.forEach(id => {
           const idx = data.main_flight.findIndex(f => f.id === id);
@@ -3351,8 +4276,9 @@
         'btnHudLockForward': 'forward',
         'btnHudLockSummit': 'summit',
         'btnHudLockSide': 'side',
-        'btnHudLockBack': 'back',
-        'btnHudLockPoi': 'poi'
+        'btnHudLockOrbit': 'orbit',
+        'btnHudLockPoi': 'poi',
+        'btnHudLockFree': 'free'
       };
 
       Object.keys(lockActions).forEach(btnId => {
@@ -3412,9 +4338,59 @@
       // Capture Camera button
       document.getElementById('btnHudCaptureCamera').addEventListener('click', captureCurrentCamera);
 
+      // Lighting Event Listeners
+      document.getElementById('timeOfDayInput').addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        let hrs = Math.floor(val);
+        let mins = Math.floor((val - hrs) * 60);
+        document.getElementById('timeOfDayVal').textContent = `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+        if (viewer && viewer.clock) {
+          viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(`2024-06-21T${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00Z`);
+        }
+      });
+
+      document.getElementById('btnCaptureTime').addEventListener('click', () => {
+        if (!activeId) {
+          showToast("请先在左侧选择一个航点", true);
+          return;
+        }
+        const pt = data.main_flight.find(p => p.id === activeId);
+        if (pt) {
+          pt.timeOfDay = parseFloat(document.getElementById('timeOfDayInput').value);
+          saveToServer();
+          showToast("🌅 光照时间已捕获: " + document.getElementById('timeOfDayVal').textContent);
+        }
+      });
+
       // Add/Delete waypoints buttons
       document.getElementById('btnAddWaypoint').addEventListener('click', addWaypointAtCurrentCamera);
-      document.getElementById('btnDeleteSelected').addEventListener('click', deleteSelectedWaypoint);
+      // btnDeleteSelected removed
+
+      // Batch selection actions
+      document.getElementById('btnSelectAllWaypoints').addEventListener('click', () => {
+        if (data.main_flight.length === 0) {
+          showToast("无可选择的航点");
+          return;
+        }
+        selectedIds = data.main_flight.map(f => f.id);
+        activeId = selectedIds[selectedIds.length - 1]; // Set active to last
+        
+        document.querySelectorAll('.keyframe-item').forEach(item => {
+          item.classList.add('selected');
+        });
+        
+        const lastIdx = data.main_flight.length - 1;
+        selectKeyframe(lastIdx, true);
+        showToast(`已全选所有 ${selectedIds.length} 个航点，可一键应用氛围预设！`);
+      });
+
+      document.getElementById('btnDeselectAllWaypoints').addEventListener('click', () => {
+        deselectKeyframe();
+        document.querySelectorAll('.keyframe-item').forEach(item => {
+          item.classList.remove('selected', 'active');
+        });
+        showToast("已清除所有选中状态");
+      });
 
       // Resample Heights button
       document.getElementById('btnResampleHeights').addEventListener('click', async () => {
@@ -3423,18 +4399,125 @@
         showToast("🏔️ 真实海拔校准同步成功！");
       });
 
-      // Checkbox for Handheld camera shake
-      document.getElementById('hudChkHandheld').addEventListener('change', e => {
-        if (selectedIds.length === 0) return;
-        const checked = e.target.checked;
-        
-        selectedIds.forEach(id => {
-          const idx = data.main_flight.findIndex(f => f.id === id);
-          if (idx === -1) return;
-          const pt = data.main_flight[idx];
-          pt.shot_mode = checked ? 'handheld' : 'default';
+      // === Shot Mode Configuration & Handlers ===
+      const SHOT_MODE_CONFIG = {
+      hitchcock: {
+        label: '🌌 希区柯克',
+        params: [
+          { key: 'dolly_fov', label: '视场', min: 10, max: 120, step: 5, def: 90, unit: '°' },
+          { key: 'dolly_dist', label: '拉距', min: 10, max: 200, step: 10, def: 50, unit: 'm' }
+        ]
+      },
+      
+        handheld: { label: '🤳 手持', params: [] },
+        via: {
+          label: '🎞️ 维亚',
+          params: [
+            { key: 'via_offset', label: '偏移', min: 0, max: 100, step: 5, def: 20, unit: 'm' },
+            { key: 'via_smooth', label: '平滑', min: 1, max: 10, step: 1, def: 5, unit: '' }
+          ]
+        },
+        crane: {
+          label: '🏗️ 摇臂',
+          params: [
+            { key: 'crane_arm', label: '臂长', min: 5, max: 50, step: 1, def: 15, unit: 'm' },
+            { key: 'crane_start', label: '起仰', min: -45, max: 45, step: 5, def: -10, unit: '°' },
+            { key: 'crane_end', label: '终仰', min: -45, max: 45, step: 5, def: 20, unit: '°' }
+          ]
+        },
+        tunnel: {
+          label: '🚇 隧道',
+          params: [
+            { key: 'tunnel_fov', label: 'FOV', min: 10, max: 60, step: 5, def: 25, unit: '°' },
+            { key: 'tunnel_speed', label: '倍速', min: 1, max: 10, step: 1, def: 3, unit: 'x' }
+          ]
+        },
+        fisheye: {
+          label: '🐟 鱼眼',
+          params: [
+            { key: 'fisheye_fov', label: 'FOV', min: 100, max: 170, step: 5, def: 140, unit: '°' },
+            { key: 'fisheye_warp', label: '畸变', min: 1, max: 10, step: 1, def: 5, unit: '' }
+          ]
+        }
+      };
+
+      function updateShotParamsPanel(mode, pt) {
+        const panel = document.getElementById('shotParamsPanel');
+        const config = SHOT_MODE_CONFIG[mode];
+        if (!config || config.params.length === 0) {
+          panel.style.display = 'none';
+          return;
+        }
+        panel.style.display = 'block';
+        const shotParams = (pt && pt.shot_params) || {};
+        config.params.forEach((p, i) => {
+          const idx = i + 1;
+          const row = document.getElementById('paramRow' + idx);
+          row.style.display = 'flex';
+          document.getElementById('paramLabel' + idx).textContent = p.label;
+          const slider = document.getElementById('paramSlider' + idx);
+          slider.min = p.min;
+          slider.max = p.max;
+          slider.step = p.step;
+          slider.value = shotParams[p.key] !== undefined ? shotParams[p.key] : p.def;
+          slider.dataset.paramKey = p.key;
+          slider.dataset.unit = p.unit;
+          document.getElementById('paramValue' + idx).textContent = slider.value + p.unit;
         });
-        saveToServer();
+        // Hide unused rows
+        for (let j = config.params.length + 1; j <= 3; j++) {
+          document.getElementById('paramRow' + j).style.display = 'none';
+        }
+      }
+
+      // Shot mode button click handler
+      document.querySelectorAll('.shot-mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (selectedIds.length === 0) return;
+          const mode = btn.getAttribute('data-mode');
+          const isActive = btn.classList.contains('active');
+          const newMode = isActive ? 'default' : mode;
+
+          document.querySelectorAll('.shot-mode-btn').forEach(b => b.classList.remove('active'));
+          if (!isActive) btn.classList.add('active');
+
+          selectedIds.forEach(id => {
+            const idx = data.main_flight.findIndex(f => f.id === id);
+            if (idx === -1) return;
+            const pt = data.main_flight[idx];
+            pt.shot_mode = newMode;
+            if (newMode !== 'default' && SHOT_MODE_CONFIG[newMode]) {
+              if (!pt.shot_params) pt.shot_params = {};
+              SHOT_MODE_CONFIG[newMode].params.forEach(p => {
+                if (pt.shot_params[p.key] === undefined) pt.shot_params[p.key] = p.def;
+              });
+            }
+          });
+
+          // Show params for the first selected point
+          const firstPt = data.main_flight.find(f => f.id === selectedIds[0]);
+          updateShotParamsPanel(newMode, firstPt);
+          saveToServer();
+        });
+      });
+
+      // Shot param slider change handlers
+      [1, 2, 3].forEach(i => {
+        const slider = document.getElementById('paramSlider' + i);
+        if (!slider) return;
+        slider.addEventListener('input', () => {
+          document.getElementById('paramValue' + i).textContent = slider.value + (slider.dataset.unit || '');
+          const paramKey = slider.dataset.paramKey;
+          if (!paramKey) return;
+          selectedIds.forEach(id => {
+            const idx = data.main_flight.findIndex(f => f.id === id);
+            if (idx === -1) return;
+            const pt = data.main_flight[idx];
+            if (!pt.shot_params) pt.shot_params = {};
+            pt.shot_params[paramKey] = parseFloat(slider.value);
+          });
+          saveToServer();
+        });
       });
 
       // Vibe Presets Mix bank click listener
@@ -3444,6 +4527,20 @@
         const vibe = btn.getAttribute('data-vibe');
         applyVibePreset(vibe);
       });
+
+      // Accordion headers toggle listener (using Event Delegation)
+      if (!window.accordionListenerBound) {
+        document.addEventListener('click', (e) => {
+          const header = e.target.closest('.accordion-header');
+          if (header) {
+            const group = header.closest('.accordion-group');
+            if (group) {
+              group.classList.toggle('active');
+            }
+          }
+        });
+        window.accordionListenerBound = true;
+      }
     }
 
     // ---- Visual lines showing lock direction ----
@@ -3610,8 +4707,29 @@
       
       if (intent === 'forward') {
         return parseFloat(forwardBearing.toFixed(2));
-      } else if (intent === 'back') {
-        return parseFloat(((forwardBearing + 180) % 360).toFixed(2));
+      } else if (intent === 'orbit') {
+        let targetLat = 31.066;
+        let targetLng = 81.312;
+        if (pt.look_at_intent === 'custom_target' && pt.look_at_target) {
+          targetLat = pt.look_at_target.lat;
+          targetLng = pt.look_at_target.lng;
+        } else if (pt.look_at_intent === 'poi' && poisData.length > 0) {
+          let closestPoi = null;
+          let minDist = Infinity;
+          poisData.forEach(p => {
+            const dist = haversine(pt.lat, pt.lng, p.lat, p.lng);
+            if (dist < minDist) {
+              minDist = dist;
+              closestPoi = p;
+            }
+          });
+          if (closestPoi) {
+            targetLat = closestPoi.lat;
+            targetLng = closestPoi.lng;
+          }
+        }
+        const bearing = calculateBearing(pt.lat, pt.lng, targetLat, targetLng);
+        return parseFloat(bearing.toFixed(2));
       } else if (intent === 'side') {
         return parseFloat(((forwardBearing + 90) % 360).toFixed(2));
       } else if (intent === 'summit') {
@@ -3672,7 +4790,7 @@
       }
 
       // 4. Target look locks
-      if (pt.look_at_intent === 'custom_target' || pt.look_at_intent === 'summit' || pt.look_at_intent === 'poi') {
+      if (pt.look_at_intent === 'custom_target' || pt.look_at_intent === 'summit' || pt.look_at_intent === 'poi' || pt.look_at_intent === 'orbit') {
         let targetLat = null;
         let targetLng = null;
         let targetAlt = 0;
@@ -3681,7 +4799,7 @@
           targetLat = pt.look_at_target.lat;
           targetLng = pt.look_at_target.lng;
           targetAlt = pt.look_at_target.alt || 5000;
-        } else if (pt.look_at_intent === 'summit') {
+        } else if (pt.look_at_intent === 'summit' || pt.look_at_intent === 'orbit') {
           targetLat = 31.066;
           targetLng = 81.312;
           targetAlt = 6656;
@@ -3783,6 +4901,7 @@
       } else {
         if (previewTimeout) clearTimeout(previewTimeout);
         updatePreviewHandheldShake(false);
+        if (window.previewNarrationAudio) window.previewNarrationAudio.pause();
         if (viewer) viewer.camera.cancelFlight();
         updateCount();
       }
@@ -3793,6 +4912,7 @@
         isPreviewPlaying = false;
         document.getElementById('btnPlay').textContent = '▶';
         updatePreviewHandheldShake(false);
+        if (window.previewNarrationAudio) window.previewNarrationAudio.pause();
         updateCount();
         showToast("预览播放结束");
         return;
@@ -3801,6 +4921,23 @@
       updateCount();
       const pt = data.main_flight[previewIndex];
       const absoluteAlt = (pt.ground_alt || 5000) + (pt.relative_alt || 500);
+
+      // Apply Lighting
+      if (typeof pt.timeOfDay === 'number') {
+        let hrs = Math.floor(pt.timeOfDay);
+        let mins = Math.floor((pt.timeOfDay - hrs) * 60);
+        viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(`2024-06-21T${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00Z`);
+      }
+
+      // Play narration audio if configured
+      if (pt.narration_audio) {
+        if (!window.previewNarrationAudio) {
+          window.previewNarrationAudio = new Audio();
+        }
+        window.previewNarrationAudio.pause();
+        window.previewNarrationAudio.src = pt.narration_audio.startsWith('/') ? pt.narration_audio + "?t=" + Date.now() : pt.narration_audio + "?t=" + Date.now();
+        window.previewNarrationAudio.play().catch(err => console.warn("播放解说失败:", err));
+      }
 
       selectKeyframe(previewIndex, true); // Keep selection highlights
       rebuildElevationChart();
@@ -3834,13 +4971,61 @@
           if (!isPreviewPlaying) return;
           const waitTime = typeof pt.wait_time === 'number' ? pt.wait_time : 0.0;
           if (waitTime > 0) {
-            document.getElementById('previewStatus').textContent = `暂停等待中 (${pt.wait_time}s)...`;
-            previewTimeout = setTimeout(() => {
-              if (isPreviewPlaying) {
-                previewIndex++;
-                runPreviewStep();
+            if (pt.look_at_intent === 'orbit') {
+              // Orbit view: circular camera rotation around focus target
+              let targetPos = Cesium.Cartesian3.fromDegrees(81.312, 31.066, 6656); // Default: summit
+              if (pt.look_at_target) {
+                targetPos = Cesium.Cartesian3.fromDegrees(pt.look_at_target.lng, pt.look_at_target.lat, pt.look_at_target.alt || 5000);
+              } else if (poisData.length > 0) {
+                let closestPoi = null;
+                let minDist = Infinity;
+                poisData.forEach(p => {
+                  const d = haversine(pt.lat, pt.lng, p.lat, p.lng);
+                  if (d < minDist) {
+                    minDist = d;
+                    closestPoi = p;
+                  }
+                });
+                if (closestPoi) {
+                  targetPos = Cesium.Cartesian3.fromDegrees(closestPoi.lng, closestPoi.lat, closestPoi.elevation || 5000);
+                }
               }
-            }, waitTime * 1000);
+
+              const startTime = performance.now();
+              const range = Cesium.Cartesian3.distance(viewer.camera.position, targetPos);
+              const startHeading = viewer.camera.heading;
+              const pitch = viewer.camera.pitch;
+
+              function animateOrbit(now) {
+                if (!isPreviewPlaying) {
+                  viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+                  return;
+                }
+                const elapsed = (now - startTime) / 1000;
+                if (elapsed >= waitTime) {
+                  viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+                  previewIndex++;
+                  runPreviewStep();
+                  return;
+                }
+
+                const progress = elapsed / waitTime;
+                const currentHeading = startHeading + progress * Math.PI * 2; // 360 rotation
+
+                viewer.camera.lookAt(targetPos, new Cesium.HeadingPitchRange(currentHeading, pitch, range));
+                document.getElementById('previewStatus').textContent = `环绕视角推演中 (${(waitTime - elapsed).toFixed(1)}s)...`;
+                previewTimeout = requestAnimationFrame(animateOrbit);
+              }
+              previewTimeout = requestAnimationFrame(animateOrbit);
+            } else {
+              document.getElementById('previewStatus').textContent = `暂停等待中 (${pt.wait_time}s)...`;
+              previewTimeout = setTimeout(() => {
+                if (isPreviewPlaying) {
+                  previewIndex++;
+                  runPreviewStep();
+                }
+              }, waitTime * 1000);
+            }
           } else {
             previewIndex++;
             runPreviewStep();

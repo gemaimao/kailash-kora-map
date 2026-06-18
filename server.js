@@ -120,6 +120,9 @@ function scheduleGitPush(changedFile) {
 
 function handleAPI(req, res) {
   let urlPath = req.url.split("?")[0];
+  const queryStr = req.url.split("?")[1] || "";
+  const params = new URLSearchParams(queryStr);
+  const isInner = params.get("route") === "inner";
   let project = "";
   let apiType = ""; // "pois" or "routes"
   
@@ -144,9 +147,10 @@ function handleAPI(req, res) {
     return;
   }
 
+  const fileName = apiType === "pois" ? "pois.json" : (isInner ? "routes_inner.json" : "routes.json");
   const target = project
-    ? path.join(ROOT, project, "data", apiType === "pois" ? "pois.json" : "routes.json")
-    : path.join(ROOT, "data", apiType === "pois" ? "pois.json" : "routes.json");
+    ? path.join(ROOT, project, "data", fileName)
+    : path.join(ROOT, "data", fileName);
 
   let body = "";
   req.on("data", (chunk) => (body += chunk));
