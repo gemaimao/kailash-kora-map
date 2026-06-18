@@ -29115,6 +29115,26 @@
       "speed_preset": "normal",
       "wait_preset": "none",
       "timeOfDay": 9.4
+    },
+    {
+      "id": "evt_1781792930189",
+      "name": "自定义航点 29",
+      "lng": 81.305406,
+      "lat": 31.027525,
+      "ground_alt": 5675,
+      "relative_alt": 343,
+      "heading": 10.7,
+      "pitch": -9.8,
+      "roll": 360,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none"
     }
   ]
 }
