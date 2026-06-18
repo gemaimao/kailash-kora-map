@@ -29033,27 +29033,6 @@
       "fractionalIndex": 3742.9967324826002
     },
     {
-      "id": "evt_1781756921145_36",
-      "name": "空间混合轨道 37",
-      "lng": 81.366927,
-      "lat": 31.003433,
-      "ground_alt": 4785,
-      "relative_alt": 500,
-      "heading": 221.67,
-      "pitch": -25,
-      "roll": 0,
-      "duration": 2.5,
-      "wait_time": 0,
-      "fov": 60,
-      "shot_mode": "default",
-      "look_at_intent": "forward",
-      "perspective_fov": "natural",
-      "perspective_pitch": "oblique",
-      "speed_preset": "normal",
-      "wait_preset": "none",
-      "fractionalIndex": 4823.0151974066985
-    },
-    {
       "id": "evt_1781756921145_37",
       "name": "空间混合轨道 38",
       "lng": 81.360219,
