@@ -29163,9 +29163,9 @@
     {
       "id": "evt_1781794291210",
       "name": "自定义航点 31",
-      "lng": 81.288829,
-      "lat": 30.977221,
-      "ground_alt": 4657,
+      "lng": 81.290318,
+      "lat": 30.976374,
+      "ground_alt": 4647,
       "relative_alt": 224,
       "heading": 314,
       "pitch": -18.1,
@@ -29180,7 +29180,7 @@
       "speed_preset": "normal",
       "wait_preset": "none",
       "timeOfDay": 10,
-      "fractionalIndex": 7124.0007840387
+      "fractionalIndex": 7122.6252489802955
     }
   ]
 }
