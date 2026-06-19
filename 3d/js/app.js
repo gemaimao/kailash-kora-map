@@ -42,9 +42,14 @@ viewer.scene.preRender.addEventListener(function() {
         const currentVal = sunlightTransition.startVal + (sunlightTransition.endVal - sunlightTransition.startVal) * progress;
         let hrs = Math.floor(currentVal);
         let mins = Math.floor((currentVal - hrs) * 60);
-        // Ensure hrs and mins are within bounds
-        hrs = Math.max(0, Math.min(23, hrs));
-        mins = Math.max(0, Math.min(59, mins));
+        
+        if (currentVal >= 23.99) {
+            hrs = 23;
+            mins = 59;
+        } else {
+            hrs = Math.max(0, Math.min(23, hrs));
+            mins = Math.max(0, Math.min(59, mins));
+        }
         
         viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(`2024-06-21T${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00Z`);
         
@@ -87,11 +92,13 @@ viewer.selectedEntityChanged.addEventListener(function(selectedEntity) {
         const poi = allPoisData.find(p => p.id === id);
         
         stopPoiOrbit();
-        // 如果正在巡航，暂停
+        // 记录点击前是否正在巡航
+        let wasPlaying = false;
         if (typeof isPlaying !== 'undefined' && isPlaying) {
-            isPlaying = false;
-            if (typeof stopNarrationAndUnduck === 'function') stopNarrationAndUnduck();
+            wasPlaying = true;
+            // 临时打断巡航（不设 isPlaying = false，以保持 UI 状态，但取消当前飞行段）
             viewer.camera.cancelFlight();
+            currentFlightSegment = null; 
         }
 
         const targetPos = selectedEntity.position.getValue(viewer.clock.currentTime);
@@ -99,9 +106,9 @@ viewer.selectedEntityChanged.addEventListener(function(selectedEntity) {
 
         // 计算距离与角度
         const h = typeof poi.heading === 'number' ? poi.heading : 0;
-        const p = typeof poi.pitch === 'number' ? poi.pitch : -35;
-        // 默认环绕距离：如果指定了 camHeight 则用其作为半径，否则根据地形给一个默认的 2500 米
-        const distance = typeof poi.camHeight === 'number' ? poi.camHeight : 2500; 
+        const p = typeof poi.pitch === 'number' ? poi.pitch : -20; // 稍微抬起视角，适合低空飞掠
+        // 飞掠模式：拉低高度，更贴近 POI
+        const distance = typeof poi.camHeight === 'number' ? poi.camHeight : 800; 
         
         const offset = new Cesium.HeadingPitchRange(
             Cesium.Math.toRadians(h),
@@ -109,30 +116,27 @@ viewer.selectedEntityChanged.addEventListener(function(selectedEntity) {
             distance
         );
 
-        // 飞向 POI
+        // 飞向 POI (C 点)
         viewer.camera.flyToBoundingSphere(new Cesium.BoundingSphere(targetPos, 0), {
             offset: offset,
             duration: 2.0,
+            easingFunction: Cesium.EasingFunction.QUADRATIC_IN_OUT,
             complete: function() {
-                isOrbitingPoi = true;
-                let currentHeading = Cesium.Math.toRadians(h);
-                
-                // 开启每帧自动旋转，每帧强制 lookAt 锁定，避免镜头飘移或直冲过去
-                orbitRemoveCallback = viewer.scene.preUpdate.addEventListener(function(scene, time) {
-                    if (isOrbitingPoi) {
-                        currentHeading += 0.002; // 每帧旋转速度
-                        const newOffset = new Cesium.HeadingPitchRange(
-                            currentHeading,
-                            Cesium.Math.toRadians(p),
-                            distance
-                        );
-                        viewer.camera.lookAt(targetPos, newOffset);
-                    }
-                });
+                // 如果之前是在巡航中，则短暂飞掠（停留 1.5 秒）后立即返回原航线 (B 点)
+                if (wasPlaying) {
+                    setTimeout(() => {
+                        if (isPlaying && typeof flyNext === 'function') {
+                            flyNext(); // 重新向 B 点进发
+                        }
+                    }, 1500);
+                } else {
+                    // 如果不是巡航状态，只是普通浏览，则解除锁定，让用户自由看
+                    viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+                }
             }
         });
     } else {
-        // 取消选择 POI，停止环绕并解除相机锁定
+        // 取消选择 POI，解除相机锁定
         stopPoiOrbit();
         viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
     }
@@ -225,8 +229,45 @@ fetch(`../data/${routeFile}?t=` + Date.now()).then(r => {
     }
     return r.json();
 }).then(data => {
-    flightPath = data.main_flight || [];
+    window.allFlights = data.flights || [];
+    if (window.allFlights.length === 0) {
+        window.allFlights.push({ id: 'legacy', name: '默认航线', path: data.main_flight || [] });
+    }
+    flightPath = window.allFlights[0].path;
     fullRoute = data.main || []; 
+    
+    // Dynamic Multi-Track Buttons Generation
+    const startButtonsContainer = document.getElementById('start-buttons');
+    if (startButtonsContainer && window.allFlights.length > 1) {
+        startButtonsContainer.innerHTML = ''; // Clear default buttons
+        window.allFlights.forEach((trk, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'btn primary';
+            if (idx > 0) {
+                btn.style.background = 'rgba(0,255,170,0.2)';
+                btn.style.borderColor = 'rgba(0,255,170,0.5)';
+                btn.style.color = '#00ffaa';
+            }
+            btn.style.fontSize = '16px';
+            btn.style.padding = '12px 24px';
+            btn.innerHTML = `▶️ ${trk.name}`;
+            btn.onclick = () => {
+                flightPath = trk.path;
+                document.getElementById('fullscreen-overlay').classList.add('hidden');
+                currentWaypoint = 0;
+                
+                // Clear existing progress variables
+                currentProgressMileage = 0.0;
+                currentProgressTime = 0.0;
+                progressPositions = [];
+                currentSegmentStartIdx = 0;
+                currentSegmentEndIdx = 0;
+                
+                startBgm();
+            };
+            startButtonsContainer.appendChild(btn);
+        });
+    }
     
     // 直接使用原始的真实地理坐标（新版数据为 [lng, lat] 格式）
     const rawPositions = fullRoute.map(pt => {
@@ -326,30 +367,7 @@ fetch(`../data/${routeFile}?t=` + Date.now()).then(r => {
         return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     }
 
-    viewer.entities.add({
-        name: 'Kora Route Progress Head Info',
-        position: new Cesium.CallbackProperty(() => {
-            if (!isPlaying || progressPositions.length === 0) return undefined;
-            return progressPositions[progressPositions.length - 1];
-        }, false),
-        label: {
-            text: new Cesium.CallbackProperty(() => {
-                return `🏁 ${currentProgressMileage.toFixed(1)} km\n⏱️ ${formatProgressTime(currentProgressTime)}`;
-            }, false),
-            font: 'bold 11px monospace, "PingFang SC", sans-serif',
-            fillColor: Cesium.Color.fromCssColorString('#ffcd55'),
-            outlineColor: Cesium.Color.fromCssColorString('#090d16'),
-            outlineWidth: 3,
-            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-            showBackground: true,
-            backgroundColor: Cesium.Color.fromCssColorString('#0f172a').withAlpha(0.85),
-            backgroundPadding: new Cesium.Cartesian2(8, 6),
-            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-            pixelOffset: new Cesium.Cartesian2(0, -15),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY,
-            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
-        }
-    });
+    // "小黑旗" entity removed per request
 });
 
 // =========================================================
@@ -600,7 +618,9 @@ function loadPoisAndStart(terrainProvider) {
     }).catch(e => console.error("加载 POI 数据失败:", e));
 }
 
-Cesium.createWorldTerrainAsync().then(terrainProvider => {
+Cesium.createWorldTerrainAsync({
+    requestVertexNormals: true
+}).then(terrainProvider => {
     loadPoisAndStart(terrainProvider);
 }).catch(e => {
     console.error("地形引擎初始化失败，正在以默认模式启动：", e);
@@ -717,15 +737,26 @@ function flyNext() {
         // 漫游结束，显示全屏谢幕
         const overlay = document.getElementById('fullscreen-overlay');
         if (overlay && currentWaypoint >= flightPath.length) {
-            document.getElementById('overlay-title').innerText = '愿转山者吉祥';
-            document.getElementById('overlay-desc').innerHTML = '感谢长久以来<br>为神山圣湖在地文化贡献信仰之力与纪录的所有人！';
-                        const btnStart = document.getElementById('btn-overlay-start');
+            document.getElementById('overlay-title').innerText = '航段飞行结束';
+            document.getElementById('overlay-desc').innerHTML = '您可以选择继续探索其他路线，或再次回味本段旅程。';
+            
+            const btnStart = document.getElementById('btn-overlay-start');
             if (btnStart) btnStart.style.display = 'none';
-            const btnStartOuter = document.getElementById('btn-overlay-start-outer');
-            if (btnStartOuter) btnStartOuter.style.display = 'none';
-            const btnStartInner = document.getElementById('btn-overlay-start-inner');
-            if (btnStartInner) btnStartInner.style.display = 'none';
-            document.getElementById('btn-overlay-replay').style.display = 'inline-block';
+            
+            // Do NOT hide the inner/outer buttons, allowing the user to switch routes
+            const startButtons = document.getElementById('start-buttons');
+            if (startButtons) startButtons.style.display = 'flex';
+            
+            // Show replay if it's single track, hide if multi-track (since we have start buttons)
+            const replayBtn = document.getElementById('btn-overlay-replay');
+            if (replayBtn) {
+                if (window.allFlights && window.allFlights.length > 1) {
+                    replayBtn.style.display = 'none';
+                } else {
+                    replayBtn.style.display = 'inline-block';
+                }
+            }
+            
             overlay.classList.remove('hidden');
         }
         
@@ -786,10 +817,12 @@ function flyNext() {
         currentSegmentStartIdx = findClosestIndex(fullRoute, lastPt.lat, lastPt.lng);
         currentSegmentEndIdx = findClosestIndex(fullRoute, pt.lat, pt.lng);
         
-        // 计算两点之间的物理距离
+        const lastAlt = (typeof lastPt.ground_alt === 'number' ? lastPt.ground_alt : (typeof lastPt.elevation === 'number' ? lastPt.elevation : 5000)) + (typeof lastPt.relative_alt === 'number' ? lastPt.relative_alt : (typeof lastPt.range === 'number' ? lastPt.range : 500));
+        const ptAlt = (typeof pt.ground_alt === 'number' ? pt.ground_alt : (typeof pt.elevation === 'number' ? pt.elevation : 5000)) + (typeof pt.relative_alt === 'number' ? pt.relative_alt : (typeof pt.range === 'number' ? pt.range : 500));
+        // 计算两点之间的真实物理 3D 距离
         const distMeters = Cesium.Cartesian3.distance(
-            Cesium.Cartesian3.fromDegrees(lastPt.lng, lastPt.lat),
-            Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat)
+            Cesium.Cartesian3.fromDegrees(lastPt.lng, lastPt.lat, lastAlt),
+            Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, ptAlt)
         );
         
         // 平滑速度控制：设定舒适观看速度为 40米/秒，点位密集时最少给 2.5 秒缓冲
@@ -821,12 +854,13 @@ function flyNext() {
         if (pt.shot_mode === 'side') {
             finalHeading += 90.0;
         } else if (pt.shot_mode === 'back') {
+        } else if (pt.shot_mode === 'back') {
             finalHeading += 180.0;
         }
     }
 
-    // 启用/禁用手震呼吸感
-    updateHandheldShake(pt.shot_mode === 'handheld');
+    // 启用/禁用手震呼吸感 (飞鸟视角也共用此类细微晃动)
+    updateHandheldShake(pt.shot_mode === 'handheld' || pt.look_at_intent === 'bird');
     
     const flyDur = pt._actualDuration || (pt.duration * 1.5) || 2.5;
     
@@ -858,14 +892,77 @@ function flyNext() {
         duration: flyDur,
         easingFunction: Cesium.EasingFunction.LINEAR_NONE, // 匀速平滑过渡，不卡顿
         complete: () => {
-            const waitTime = typeof pt.wait_time === 'number' ? pt.wait_time : 0.0;
+            const explicitWait = typeof pt.wait_time === 'number' ? pt.wait_time : 0.0;
+            const isLastPoint = (currentWaypoint === flightPath.length - 1);
+            const waitTime = isLastPoint ? Math.max(explicitWait, 3.0) : explicitWait;
+            
             if (waitTime > 0 && isPlaying) {
-                setTimeout(() => {
-                    if (isPlaying) {
-                        currentWaypoint++;
-                        flyNext();
+                if (pt.shot_mode === 'pan_spin' || pt.shot_mode === 'orbit') {
+                    const startTime = performance.now();
+                    const startHeading = viewer.camera.heading;
+                    const startPitch = viewer.camera.pitch;
+                    
+                    let targetPos = null;
+                    let orbitRange = 1000;
+                    
+                    if (pt.shot_mode === 'orbit') {
+                        const params = pt.shot_params || {};
+                        orbitRange = params.orbit_radius || 1000;
+                        
+                        targetPos = Cesium.Cartesian3.fromDegrees(81.312, 31.066, 6656); // 默认主峰
+                        if (pt.look_at_target) {
+                            targetPos = Cesium.Cartesian3.fromDegrees(pt.look_at_target.lng, pt.look_at_target.lat, pt.look_at_target.alt || 5000);
+                        } else if (typeof nearbyPois !== 'undefined' && nearbyPois && nearbyPois.length > 0) {
+                            let closestPoi = nearbyPois[0];
+                            targetPos = Cesium.Cartesian3.fromDegrees(closestPoi.lng + (typeof OFFSET_LNG !== 'undefined' ? OFFSET_LNG : 0), closestPoi.lat + (typeof OFFSET_LAT !== 'undefined' ? OFFSET_LAT : 0), closestPoi.elevation || 5000);
+                        }
                     }
-                }, waitTime * 1000);
+
+                    function animateWaitEffect(now) {
+                        if (!isPlaying) {
+                            if (pt.shot_mode === 'orbit') viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+                            return;
+                        }
+                        const elapsed = (now - startTime) / 1000;
+                        if (elapsed >= waitTime) {
+                            if (pt.shot_mode === 'orbit') viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+                            currentWaypoint++;
+                            flyNext();
+                            return;
+                        }
+
+                        const progress = elapsed / waitTime;
+                        const params = pt.shot_params || {};
+                        
+                        if (pt.shot_mode === 'pan_spin') {
+                            const totalAngle = Cesium.Math.toRadians(params.pan_angle !== undefined ? params.pan_angle : 360);
+                            const currentHeading = startHeading + progress * totalAngle;
+                            viewer.camera.setView({
+                                orientation: {
+                                    heading: currentHeading,
+                                    pitch: startPitch,
+                                    roll: viewer.camera.roll
+                                }
+                            });
+                        } else if (pt.shot_mode === 'orbit') {
+                            // 绕圈环飞 (Orbit)
+                            const totalAngle = Math.PI * 2; // 默认 360度
+                            const currentHeading = startHeading + progress * totalAngle;
+                            const orbitPitch = Cesium.Math.toRadians(params.orbit_pitch !== undefined ? params.orbit_pitch : -35);
+                            viewer.camera.lookAt(targetPos, new Cesium.HeadingPitchRange(currentHeading, orbitPitch, orbitRange));
+                        }
+                        
+                        requestAnimationFrame(animateWaitEffect);
+                    }
+                    requestAnimationFrame(animateWaitEffect);
+                } else {
+                    setTimeout(() => {
+                        if (isPlaying) {
+                            currentWaypoint++;
+                            flyNext();
+                        }
+                    }, waitTime * 1000);
+                }
             } else {
                 currentWaypoint++;
                 flyNext();
@@ -1083,11 +1180,9 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
     // 动态计算过渡飞行时间与最大飞行高度，避免长距离瞬间拉扯与大尺度旋转带来的眩晕感
     let flyDuration = 3.5;
     
-    currentFlightSegment = {
-        startTime: Date.now(),
-        duration: flyDuration,
-        progress: 0.0
-    };
+    // Do NOT set currentFlightSegment here! 
+    // We want the progress bar to stay at 0% during the initial swoop-in (俯冲).
+    currentFlightSegment = null;
 
     // 初始化时段过渡 (Swoop-in transition)
     if (typeof pt.timeOfDay === 'number') {
@@ -1130,7 +1225,10 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
                     playNarration(pt.narration_audio);
                 }
 
-                const waitTime = typeof pt.wait_time === 'number' ? pt.wait_time : 0.0;
+                const explicitWait = typeof pt.wait_time === 'number' ? pt.wait_time : 0.0;
+                // 强制要求首个航点默认悬停至少 3.5 秒
+                const waitTime = Math.max(explicitWait, 3.5);
+                
                 if (waitTime > 0) {
                     setTimeout(() => {
                         if (isPlaying) {
@@ -1905,7 +2003,19 @@ setInterval(() => {
                 document.getElementById('timeline-current-time').textContent = window.formatProgressTime(currentProgressTime);
             }
             document.getElementById('timeline-total-time').textContent = `${currentWaypoint + 1} / ${flightPath.length} 航点`;
+            
+            // Update mileage label to follow thumb
+            const mileageLabel = document.getElementById('timeline-mileage-label');
+            if (mileageLabel && slider.max > 0) {
+                const pct = slider.value / slider.max;
+                mileageLabel.style.left = `${pct * 100}%`;
+                mileageLabel.textContent = `${currentProgressMileage.toFixed(1)}km`;
+                mileageLabel.style.display = 'block';
+            }
         }
+    } else {
+        const mileageLabel = document.getElementById('timeline-mileage-label');
+        if (mileageLabel) mileageLabel.style.display = 'none';
     }
 }, 100); // 提高刷新频率到 100ms
 // ========================================================

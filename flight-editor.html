@@ -303,6 +303,17 @@
       box-shadow: 0 4px 15px rgba(255, 205, 85, 0.4);
     }
     .preview-progress-text { font-size: 11px; font-family: monospace; color: var(--text-dim); }
+/* Progress dot for mileage */
+#progressContainer { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 300px; height: 30px; pointer-events: none; z-index: 10000; }
+.progress-dot {
+  position: absolute; top: 0; width: 30px; height: 30px; border-radius: 50%; background: var(--accent-cyan); box-shadow: 0 0 8px var(--accent-cyan);
+  transform: translateX(-50%);
+}
+#mileageLabel {
+  position: absolute; top: 8px; transform: translateX(calc(-100% - 20px));
+  font-size: 13px; font-family: monospace; color: var(--accent-cyan);
+  white-space: nowrap; font-weight: bold; text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
 
     /* Sidebar Footer Button Container */
     .action-bar { padding: 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
@@ -855,8 +866,8 @@
         <span style="font-size: 14px; font-weight: bold; color: var(--accent-cyan); white-space: nowrap; text-shadow: 0 0 5px rgba(32,229,181,0.4);" id="keyframeCount">0 轨</span>
       </div>
       <div class="keyframe-toolbar" style="padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px;">
-        <button class="tool-btn" id="btnAddWaypoint" style="width: 100%; font-size: 13px; font-weight: bold; justify-content: center; height: 38px; background: rgba(32, 229, 181, 0.15); color: var(--accent-cyan); border: 1px solid rgba(32, 229, 181, 0.4); box-shadow: 0 2px 8px rgba(32, 229, 181, 0.1); transition: all 0.2s;">➕ 捕获当前镜头为新航点</button>
-        
+        <button class="tool-btn" id="btnAddWaypoint" style="width: 100%; font-size: 13px; font-weight: bold; justify-content: center; height: 38px; background: rgba(32, 229, 181, 0.15); color: var(--accent-cyan); border: 1px solid rgba(32, 229, 181, 0.4); box-shadow: 0 2px 8px rgba(32, 229, 181, 0.1); transition: all 0.2s;" title="新增航点（若当前已选中某航点，新点将自动插入其后）">➕ 捕获当前镜头为新航点</button>
+        <button class="tool-btn" id="btnUpdateWaypoint" style="display: none; width: 100%; font-size: 13px; font-weight: bold; justify-content: center; height: 38px; background: rgba(255, 171, 64, 0.15); color: var(--accent); border: 1px solid rgba(255, 171, 64, 0.4); box-shadow: 0 2px 8px rgba(255, 171, 64, 0.1); transition: all 0.2s;" title="请选中需要调整的航点后使用（此操作将覆盖该点的原坐标）">📍 重新捕获本航点三维坐标</button>
       </div>
       <div class="keyframe-list" id="keyframeList">
         <!-- Keyframe items injected here -->
@@ -994,17 +1005,20 @@
             <div class="accordion-body">
               <div class="target-status" style="display: none; margin-bottom: 6px;">
                 <strong id="hudTargetName">走向前方</strong>
+                <button class="hud-mini-btn danger" id="btnHudUnlock" style="display:none; width: 100%; margin-bottom: 4px;">🔓 解除视线锁定</button>
               </div>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 6px;">
                 <button class="hud-mini-btn" id="btnHudLockForward">➡️ 轨道对齐</button>
                 <button class="hud-mini-btn" id="btnHudLockSummit">🏔️ 锁定主体</button>
                 <button class="hud-mini-btn" id="btnHudLockSide">↗️ 航侧 90°</button>
-                <button class="hud-mini-btn" id="btnHudLockOrbit">🔄 环绕视角</button>
+                <button class="hud-mini-btn" id="btnHudLockBird">🦅 飞鸟视角</button>
                 <button class="hud-mini-btn" id="btnHudLockPoi">🎯 POI 对焦</button>
                 <button class="hud-mini-btn" id="btnHudLockFree">👁️ 自由跟随</button>
               </div>
-              <button class="hud-mini-btn danger" id="btnHudUnlock" style="display:none; width: 100%; margin-bottom: 4px;">🔓 解除视线锁定</button>
-              <button class="hud-mini-btn" id="btnHudCaptureCamera" style="width: 100%; border-color: var(--accent); color: var(--accent); justify-content: center; font-weight: bold; font-size: 9px; text-align: center; margin-bottom: 6px;">📸 捕获当前为三维坐标</button>
+              <label style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 9px; color: var(--accent-cyan); margin-bottom: 6px; cursor: pointer; user-select: none;">
+                <input type="checkbox" id="chkLockCameraPreview" style="cursor: pointer; transform: scale(0.85); margin: 0;" />
+                🔒 锁定镜头视角（切换列表时不跳转）
+              </label>
             </div>
           </div>
 
@@ -1013,6 +1027,8 @@
             <div class="accordion-header">🎬 特技镜头</div>
             <div class="accordion-body">
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 6px; margin-top: 6px;">
+                <button class="hud-mini-btn shot-mode-btn" data-mode="pan_spin">🌀 自转环视</button>
+                <button class="hud-mini-btn shot-mode-btn" data-mode="orbit">🪐 绕圈环飞</button>
                 <button class="hud-mini-btn shot-mode-btn" data-mode="handheld">🤳 手持跟随</button>
                 <button class="hud-mini-btn shot-mode-btn" data-mode="hitchcock">🌌 希区柯克</button>
                 <button class="hud-mini-btn shot-mode-btn" data-mode="via">🎞️ 维亚</button>
@@ -1122,16 +1138,20 @@
             <span class="chart-title">🎛️ 航轨编辑</span>
             
             <!-- 撤销/重做/清空/批量 组 -->
-            <div style="display: flex; gap: 4px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; padding: 2px 4px; background: rgba(0,0,0,0.3); align-items: center;">
-              <button class="tool-btn" id="btnUndo" style="padding: 2px 10px; font-size: 12px; background: transparent; border: none; min-width: unset; box-shadow: none;" title="撤销">↩</button>
-              <button class="tool-btn" id="btnRedo" style="padding: 2px 10px; font-size: 12px; background: transparent; border: none; min-width: unset; box-shadow: none;" title="重做">↪</button>
-              <div style="width: 1px; height: 12px; background: rgba(255,255,255,0.2); margin: 0 2px;"></div>
-              <button class="tool-btn" id="btnDeleteSelected" style="padding: 2px 8px; font-size: 11px; background: transparent; border: none; min-width: unset; box-shadow: none; color: #ff4d4d;" title="删除选中航点">删除</button>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 11px; font-weight: bold; color: rgba(255,255,255,0.7); display: flex; align-items: center; gap: 4px;">🎬 航轨选择</span>
+              
+              <select id="trackSelector" class="tool-btn" style="padding: 2px 18px 2px 8px; font-size: 11px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 4px; appearance: none; cursor: pointer;"></select>
+              <button class="tool-btn" id="btnAddTrack" style="padding: 2px 8px; font-size: 11px; background: transparent; border: none; min-width: unset; color: #ffcd55; box-shadow: none; font-weight: bold;" title="新建独立航轨">+ 新建航轨</button>
+              <button class="tool-btn" id="btnDeleteTrack" style="padding: 2px 8px; font-size: 11px; background: transparent; border: none; min-width: unset; color: rgba(255,77,77,0.7); box-shadow: none;" title="删除当前航轨">删除航轨</button>
+              
+              <div style="width: 1px; height: 12px; background: rgba(255,255,255,0.2); margin: 0 6px;"></div>
+              
+              <button class="tool-btn" id="btnUndo" disabled>↩</button>
+              <button class="tool-btn" id="btnRedo" disabled>↪</button>
+              
               <button class="tool-btn" id="btnSelectAllWaypoints" style="display:none; padding: 2px 8px; font-size: 11px; background: transparent; border: none; min-width: unset; box-shadow: none;" title="选中全部">全选</button>
               <button class="tool-btn" id="btnDeselectAllWaypoints" style="display:none; padding: 2px 8px; font-size: 11px; background: transparent; border: none; min-width: unset; box-shadow: none;" title="取消选中">取消选</button>
-              <div style="display:none; width: 1px; height: 12px; background: rgba(255,255,255,0.2); margin: 0 2px;"></div>
-              <button class="tool-btn" id="btnClear" style="padding: 2px 8px; font-size: 11px; background: transparent; border: none; min-width: unset; color: #ff4d4d; box-shadow: none;" title="清空航轨">清空航轨</button>
-              <button class="tool-btn" id="btnGenerateDraft" style="display:none; padding: 2px 8px; font-size: 11px; background: transparent; border: none; min-width: unset; box-shadow: none;">✨ 初稿</button>
             </div>
             
             <div id="chartSelectionLabel" style="display:none; font-size: 11px; color: var(--accent-cyan); font-weight: bold; margin-left: 8px;">未选中轨道</div>
@@ -1145,10 +1165,16 @@
             
             <!-- 速度与悬停 组 -->
             <div style="display: flex; gap: 12px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; padding: 2px 12px; background: rgba(0,0,0,0.3); align-items: center; margin-right: 12px;">
-              <div id="hudSpeedGroup" style="display: flex; align-items: center; gap: 8px; opacity: 0.4; transition: opacity 0.2s;">
+              <div id="hudSpeedGroup" style="display: flex; align-items: center; gap: 8px; opacity: 0.4; transition: opacity 0.2s;" title="改变速度将自动重算时间">
                 <label style="font-size: 11px; color: var(--text-dim); margin:0;">飞行速度</label>
                 <div class="rhythm-value-display" id="hudSpeedValue" style="font-size: 11px; width: 45px; text-align: right; opacity: 0; transition: opacity 0.3s;">36 km/h</div>
-                <input type="range" id="hudSpeedSlider" min="10" max="1800" step="5" value="100" disabled style="width: 70px; height: 2px;">
+                <input type="range" id="hudSpeedSlider" min="0" max="1800" step="1" value="100" disabled style="width: 70px; height: 2px;">
+              </div>
+              <div style="width: 1px; height: 16px; background: rgba(255,255,255,0.2);"></div>
+              <div id="hudDurationGroup" style="display: flex; align-items: center; gap: 8px; opacity: 0.4; transition: opacity 0.2s;" title="直接锁定航段耗时，不受两点距离影响">
+                <label style="font-size: 11px; color: var(--text-dim); margin:0;">航段耗时</label>
+                <div class="hud-wait-value" id="hudDurationValue" style="font-size: 11px; width: 35px; text-align: right; opacity: 0; transition: opacity 0.3s;">2.5s</div>
+                <input type="range" id="hudDurationSlider" min="0.5" max="180" step="0.5" value="2.5" disabled style="width: 70px; height: 2px;">
               </div>
               <div style="width: 1px; height: 16px; background: rgba(255,255,255,0.2);"></div>
               <div id="hudWaitGroup" style="display: flex; align-items: center; gap: 8px; opacity: 0.4; transition: opacity 0.2s;">
@@ -1182,8 +1208,11 @@
     let data = {
       main: [],           // 地理轨 (物理主线坐标列表)
       secondary: [],      // 地理轨支线
-      main_flight: []     // 导演轨关键帧列表 (编辑对象)
+      main_flight: [],    // 当前选中编辑的导演轨关键帧列表引用
+      flights: []         // 所有独立航线数组 [{id, name, path}]
     };
+    
+    let activeTrackIndex = 0;
     
     let activeId = null;
     let selectedIds = []; // 批量选择的航点 ID 列表
@@ -1287,15 +1316,17 @@
       }, 800);
     }
 
-    // Distance Calculation (Haversine)
-    function haversine(lat1, lon1, lat2, lon2) {
+    // Distance Calculation (3D)
+    function haversine(lat1, lon1, alt1, lat2, lon2, alt2) {
       const R = 6371000.0;
       const phi1 = lat1 * Math.PI / 180;
       const phi2 = lat2 * Math.PI / 180;
       const dphi = (lat2 - lat1) * Math.PI / 180;
       const dlambda = (lon2 - lon1) * Math.PI / 180;
       const a = Math.sin(dphi/2)**2 + Math.cos(phi1)*Math.cos(phi2)*Math.sin(dlambda/2)**2;
-      return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const dist2d = 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const altDiff = alt2 - alt1;
+      return Math.sqrt(dist2d * dist2d + altDiff * altDiff);
     }
 
     // Initial Bearing
@@ -1355,6 +1386,20 @@
         ]
       },
       
+      pan_spin: {
+        label: '🌀 自转环视',
+        params: [
+          { key: 'pan_fov', label: '视野', min: 10, max: 120, step: 5, def: 60, unit: '°' },
+          { key: 'pan_angle', label: '角度', min: -360, max: 360, step: 10, def: 360, unit: '°' }
+        ]
+      },
+      orbit: {
+        label: '🪐 绕圈环飞',
+        params: [
+          { key: 'orbit_radius', label: '半径', min: 100, max: 5000, step: 100, def: 1000, unit: 'm' },
+          { key: 'orbit_pitch', label: '云台', min: -90, max: 0, step: 5, def: -35, unit: '°' }
+        ]
+      },
       handheld: { label: '🤳 手持', params: [] },
       via: {
         label: '🎞️ 维亚',
@@ -1419,16 +1464,34 @@
     // ---- Initialization ----
     async function init() {
       // 1. Fetch JSON Data
+// Determine project prefix for data fetching
+const pathSegments = location.pathname.split('/').filter(Boolean);
+const knownProjects = ['kailash-debug', 'laohutiao', 'mangkang'];
+const projectPrefix = (pathSegments.length > 0 && knownProjects.includes(pathSegments[0])) ? `${pathSegments[0]}/` : '';
       try {
         const urlParams = new URLSearchParams(window.location.search);
         const routeType = urlParams.get('route') || 'outer';
         const routeFile = routeType === 'inner' ? 'routes_inner.json' : 'routes.json';
-        const res = await fetch(`data/${routeFile}?t=` + Date.now());
+        const res = await fetch(`${projectPrefix}data/${routeFile}?t=` + Date.now());
         if (res.ok) {
           const raw = await res.json();
           data.main = raw.main || [];
           data.secondary = raw.secondary || [];
-          data.main_flight = raw.main_flight || [];
+          
+          if (raw.flights && raw.flights.length > 0) {
+            data.flights = raw.flights;
+          } else {
+            // Backward compatibility
+            data.flights = [{
+              id: generateUUID(),
+              name: '航轨 1',
+              path: raw.main_flight || []
+            }];
+          }
+          activeTrackIndex = 0;
+          data.main_flight = data.flights[activeTrackIndex].path;
+          
+          updateTrackSelectorUI();
           sortWaypointsByTrackOrder();
           renumberWaypoints();
         }
@@ -1438,7 +1501,6 @@
 
       // Check draft button visibility
       if (data.main_flight.length === 0) {
-        document.getElementById('btnGenerateDraft').style.display = 'block';
       }
 
       // 2. Initialize Cesium
@@ -1473,7 +1535,9 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
 
       // Load Terrain
       try {
-        const tp = await Cesium.createWorldTerrainAsync();
+        const tp = await Cesium.createWorldTerrainAsync({
+          requestVertexNormals: true
+        });
         viewer.terrainProvider = tp;
         // Automatically sample real terrain heights for all waypoints once terrain provider is loaded
         sampleAllWaypointHeights();
@@ -1516,7 +1580,7 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
 
       // 3. Load reference POIs & Save globally
       try {
-        const poisRes = await fetch("data/pois.json");
+        const poisRes = await fetch(`${projectPrefix}data/pois.json`);
         if (poisRes.ok) {
           poisData = await poisRes.json();
           poisData.forEach(poi => {
@@ -1569,7 +1633,6 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       rebuildMarkers();
       refreshKeyframeList();
       rebuildElevationChart();
-      initElevationChartInteraction();
       updateCount();
 
       // Hook view changes to rebuild markers inside viewport dynamically
@@ -1744,9 +1807,6 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       document.getElementById('btnUndo').addEventListener('click', undoLastAction);
       document.getElementById('btnRedo').addEventListener('click', redoLastAction);
       updateUndoButtonState();
-      document.getElementById('btnClear').addEventListener('click', clearAllKeyframes);
-      document.getElementById('btnGenerateDraft').addEventListener('click', generateDraftFromGeoTrack);
-      document.getElementById('btnExport').addEventListener('click', exportFlightData);
       document.getElementById('btnSave').addEventListener('click', () => {
         saveToServer(true);
       });
@@ -1817,11 +1877,6 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
               });
             }
             
-            // If data.main_flight is empty, show Generate Draft button
-            if (data.main_flight.length === 0) {
-              document.getElementById('btnGenerateDraft').style.display = 'block';
-            }
-            
             saveToServer();
             showToast(`成功导入地理轨 (${points.length} 个轨迹点)`);
           } catch (err) {
@@ -1870,8 +1925,91 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       // 9. Playback controls
       document.getElementById('btnPlay').addEventListener('click', togglePreviewPlayback);
 
-      // TTS Event Listeners
-      document.getElementById('hudTtsText').addEventListener('input', () => {
+      // ---- Multi-Track Methods ----
+    function updateTrackSelectorUI() {
+      const selector = document.getElementById('trackSelector');
+      if (!selector) return;
+      selector.innerHTML = '';
+      data.flights.forEach((trk, idx) => {
+        const option = document.createElement('option');
+        option.value = idx;
+        option.textContent = trk.name;
+        if (idx === activeTrackIndex) option.selected = true;
+        selector.appendChild(option);
+      });
+      
+      document.getElementById('btnDeleteTrack').style.display = data.flights.length > 1 ? 'inline-block' : 'none';
+    }
+    
+    function switchTrack(idx) {
+      if (idx < 0 || idx >= data.flights.length) return;
+      
+      // Sync current
+      data.flights[activeTrackIndex].path = data.main_flight;
+      
+      // Switch
+      activeTrackIndex = idx;
+      data.main_flight = data.flights[activeTrackIndex].path;
+      
+      // Reset state
+      historyStack = [];
+      redoStack = [];
+      updateUndoButtonState();
+      activeId = null;
+      selectedIds = [];
+      selectionAnchorId = null;
+      
+      // Full UI Refresh
+      deselectKeyframe();
+      rebuildMarkers();
+      refreshKeyframeList();
+      rebuildElevationChart();
+      updateCount();
+    }
+    
+    function createNewTrack() {
+      const defaultName = `航轨 ${data.flights.length + 1}`;
+      const userInput = prompt("请输入新航轨的名称（建议以地理或线路特征命名）：", defaultName);
+      if (userInput === null) return;
+      const finalName = userInput.trim() || defaultName;
+      
+      const newTrack = {
+        id: generateUUID(),
+        name: finalName,
+        path: []
+      };
+      
+      data.flights[activeTrackIndex].path = data.main_flight;
+      data.flights.push(newTrack);
+      activeTrackIndex = data.flights.length - 1;
+      data.main_flight = data.flights[activeTrackIndex].path;
+      
+      updateTrackSelectorUI();
+      switchTrack(activeTrackIndex);
+      saveToServer();
+      showToast(`已创建新航轨: ${finalName}`);
+    }
+    
+    function deleteCurrentTrack() {
+      if (data.flights.length <= 1) {
+        showToast("至少需要保留一条航轨");
+        return;
+      }
+      const trackName = data.flights[activeTrackIndex].name;
+      if (!confirm(`⚠️ 确定要永久删除 ${trackName} 吗？`)) return;
+      
+      data.flights.splice(activeTrackIndex, 1);
+      activeTrackIndex = Math.max(0, activeTrackIndex - 1);
+      data.main_flight = data.flights[activeTrackIndex].path;
+      
+      updateTrackSelectorUI();
+      switchTrack(activeTrackIndex);
+      saveToServer();
+      showToast(`已删除 ${trackName}`);
+    }
+
+    // ---- Event Listeners (Export / Save) ----
+    document.getElementById('hudTtsText').addEventListener('input', () => {
         if (!activeId) return;
         const idx = data.main_flight.findIndex(p => p.id === activeId);
         if (idx !== -1) {
@@ -2303,6 +2441,20 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         
         container.appendChild(item);
       });
+
+      // Update selection UI buttons in toolbar
+      const btnSelectAll = document.getElementById('btnSelectAllWaypoints');
+      const btnDeselectAll = document.getElementById('btnDeselectAllWaypoints');
+      if (selectedIds.length > 1) {
+        if (btnSelectAll) btnSelectAll.style.display = 'inline-block';
+        if (btnDeselectAll) btnDeselectAll.style.display = 'inline-block';
+      } else if (activeId) {
+        if (btnSelectAll) btnSelectAll.style.display = 'inline-block';
+        if (btnDeselectAll) btnDeselectAll.style.display = 'inline-block';
+      } else {
+        if (btnSelectAll) btnSelectAll.style.display = 'none';
+        if (btnDeselectAll) btnDeselectAll.style.display = 'none';
+      }
     }
 
     function handleKeyframeClick(idx, event) {
@@ -2365,7 +2517,7 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
 
     function updateCount() {
       const len = data.main_flight.length;
-      document.getElementById('keyframeCount').textContent = len + " 轨";
+      document.getElementById('keyframeCount').textContent = len + " 点";
       
       let statusText = "";
       if (isPreviewPlaying) {
@@ -2424,19 +2576,8 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       if (zRing) { zRing.style.display = 'flex'; zRing.style.opacity = '1'; zRing.style.visibility = 'visible'; }
       if (pRing) { pRing.style.display = 'flex'; pRing.style.opacity = '1'; pRing.style.visibility = 'visible'; }
       if (dInsp) { dInsp.style.display = 'flex'; dInsp.style.opacity = '1'; dInsp.style.visibility = 'visible'; }
-      document.getElementById('btnDeleteSelected').addEventListener('click', () => {
-        if (!activeId && selectedIds.length === 0) return;
-        const idsToDelete = selectedIds.length > 0 ? selectedIds : [activeId];
-        saveState();
-        data.main_flight = data.main_flight.filter(pt => !idsToDelete.includes(pt.id));
-        activeId = null;
-        selectedIds = [];
-        renderFlightList();
-        rebuildMarkers();
-        drawFlightPath();
-        deselectKeyframe();
-        updateCount();
-      });
+
+      document.getElementById('btnUpdateWaypoint').style.display = 'flex';
 
       // Load values into HUD inputs
       const fovVal = pt.fov || 60.0;
@@ -2447,18 +2588,31 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       document.getElementById('hudPitchSlider').value = pitchVal;
       document.getElementById('hudPitchValue').textContent = `${Math.round(pitchVal)}°`;
 
-      // Speed slider
+      // Speed & Duration sliders
       let speedKmh = 36;
+      let dur = pt.duration || 2.5;
       if (idx > 0) {
         const prevPt = data.main_flight[idx - 1];
-        const dist = haversine(prevPt.lat, prevPt.lng, pt.lat, pt.lng);
-        const dur = pt.duration || 2.5;
-        speedKmh = Math.round((dist / dur) * 3.6);
+        const prevAlt = (prevPt.ground_alt || 5000) + (prevPt.relative_alt || 500);
+        const curAlt = (pt.ground_alt || 5000) + (pt.relative_alt || 500);
+        const dist = haversine(prevPt.lat, prevPt.lng, prevAlt, pt.lat, pt.lng, curAlt);
+        
+        // If duration was manually set and distance is very small, we allow speed to be 0
+        if (dist > 0.1) {
+            speedKmh = Math.round((dist / dur) * 3.6);
+        } else {
+            speedKmh = 0;
+        }
       }
       document.getElementById('hudSpeedSlider').value = speedKmh;
       document.getElementById('hudSpeedSlider').disabled = (idx === 0);
       document.getElementById('hudSpeedValue').textContent = `${speedKmh} km/h`;
       document.getElementById('hudSpeedGroup').style.opacity = (idx === 0) ? '0.4' : '1.0';
+
+      document.getElementById('hudDurationSlider').value = dur;
+      document.getElementById('hudDurationSlider').disabled = (idx === 0);
+      document.getElementById('hudDurationValue').textContent = `${dur}s`;
+      document.getElementById('hudDurationGroup').style.opacity = (idx === 0) ? '0.4' : '1.0';
 
 
       // Lighting
@@ -2527,22 +2681,25 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         
         const absoluteAlt = (pt.ground_alt || 5000) + (pt.relative_alt || 500);
 
-      // Apply Lighting
-      if (typeof pt.timeOfDay === 'number') {
-        let hrs = Math.floor(pt.timeOfDay);
-        let mins = Math.floor((pt.timeOfDay - hrs) * 60);
-        viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(`2024-06-21T${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00Z`);
-      }
+        // Apply Lighting
+        if (typeof pt.timeOfDay === 'number') {
+          let hrs = Math.floor(pt.timeOfDay);
+          let mins = Math.floor((pt.timeOfDay - hrs) * 60);
+          viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(`2024-06-21T${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00Z`);
+        }
         
-        viewer.camera.setView({
-          destination: Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, absoluteAlt),
-          orientation: {
-            heading: Cesium.Math.toRadians(pt.heading || 0.0),
-            pitch: Cesium.Math.toRadians(pt.pitch || -25.0),
-            roll: Cesium.Math.toRadians(pt.roll || 0.0)
-          }
-        });
-        viewer.camera.frustum.fov = Cesium.Math.toRadians(fovVal);
+        const isCameraLocked = document.getElementById('chkLockCameraPreview')?.checked;
+        if (!isCameraLocked) {
+          viewer.camera.setView({
+            destination: Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, absoluteAlt),
+            orientation: {
+              heading: Cesium.Math.toRadians(pt.heading || 0.0),
+              pitch: Cesium.Math.toRadians(pt.pitch || -25.0),
+              roll: Cesium.Math.toRadians(pt.roll || 0.0)
+            }
+          });
+          viewer.camera.frustum.fov = Cesium.Math.toRadians(fovVal);
+        }
         
         isUpdatingCameraFromState = false;
       }
@@ -2560,7 +2717,7 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       document.getElementById('hudZoomRing').style.display = 'none';
       document.getElementById('hudPitchRing').style.display = 'none';
       document.getElementById('hudDirectorInspector').style.display = 'none';
-      // btnDeleteSelected removed
+      document.getElementById('btnUpdateWaypoint').style.display = 'none';
       
       document.getElementById('chartSelectionLabel').textContent = `未选中轨道`;
       document.getElementById('chartAdjustControls').style.display = 'none';
@@ -2615,8 +2772,8 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       } else if (pt.look_at_intent === 'free') {
         label = "自由跟随";
         showUnlock = true;
-      } else if (pt.look_at_intent === 'orbit') {
-        targetStr = "环绕视角 (旋转)";
+      } else if (pt.look_at_intent === 'bird') {
+        targetStr = "飞鸟视角 (跟随)";
       } else if (pt.look_at_intent === 'side') {
         targetStr = "横向扫视 (90°)";
       } else if (pt.look_at_intent === 'custom') {
@@ -2684,8 +2841,8 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       } else if (pt.look_at_intent === 'free') {
         label = "自由跟随";
         showUnlock = true;
-      } else if (pt.look_at_intent === 'orbit') {
-        label = "环绕视角";
+      } else if (pt.look_at_intent === 'bird') {
+        label = "飞鸟视角";
         showUnlock = true;
       } else if (pt.look_at_intent === 'side') {
         label = "横向扫视";
@@ -2701,7 +2858,7 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         'forward': 'btnHudLockForward',
         'summit': 'btnHudLockSummit',
         'side': 'btnHudLockSide',
-        'orbit': 'btnHudLockOrbit',
+        'bird': 'btnHudLockBird',
         'poi': 'btnHudLockPoi',
         'free': 'btnHudLockFree'
       };
@@ -2764,17 +2921,24 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
     }
 
     function confirmDeleteKeyframe(idx) {
-      if (confirm(`是否删除第 ${idx + 1} 个空间混合单元？`)) {
-        deleteKeyframe(idx);
+      const ptId = data.main_flight[idx].id;
+      const idsToDelete = selectedIds.includes(ptId) ? selectedIds : [ptId];
+      if (confirm(`是否删除选中的 ${idsToDelete.length} 个航点？`)) {
+        pushHistoryState();
+        data.main_flight = data.main_flight.filter(p => !idsToDelete.includes(p.id));
+        selectedIds = selectedIds.filter(id => !idsToDelete.includes(id));
+        if (idsToDelete.includes(activeId)) activeId = null;
+        saveToServerDebounced();
+        rebuildMarkers();
+        refreshKeyframeList();
+        rebuildElevationChart();
+        updateCount();
       }
     }
 
     function deleteKeyframe(idx) {
       pushHistoryState();
       data.main_flight.splice(idx, 1);
-      if (data.main_flight.length === 0) {
-        document.getElementById('btnGenerateDraft').style.display = 'block';
-      }
       renumberWaypoints();
       deselectKeyframe();
       rebuildMarkers();
@@ -2815,12 +2979,6 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
     }
 
     function restoreStateAfterHistoryChange(toastMsg) {
-      if (data.main_flight.length === 0) {
-        document.getElementById('btnGenerateDraft').style.display = 'block';
-      } else {
-        document.getElementById('btnGenerateDraft').style.display = 'none';
-      }
-      
       // If the current activeId is no longer in data.main_flight, deselect
       if (activeId && !data.main_flight.some(f => f.id === activeId)) {
         deselectKeyframe();
@@ -2846,94 +3004,30 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       const btnUndo = document.getElementById('btnUndo');
       if (btnUndo) {
         if (historyStack.length === 0) {
+          btnUndo.disabled = true;
           btnUndo.style.opacity = '0.5';
-          btnUndo.title = "无历史操作可撤销";
         } else {
+          btnUndo.disabled = false;
           btnUndo.style.opacity = '1.0';
-          btnUndo.title = `撤销上一步操作 (还有 ${historyStack.length} 步可撤销)`;
         }
       }
       const btnRedo = document.getElementById('btnRedo');
       if (btnRedo) {
         if (redoStack.length === 0) {
+          btnRedo.disabled = true;
           btnRedo.style.opacity = '0.5';
-          btnRedo.title = "无历史操作可重做";
         } else {
+          btnRedo.disabled = false;
           btnRedo.style.opacity = '1.0';
-          btnRedo.title = `重做操作 (还有 ${redoStack.length} 步可重做)`;
         }
-      }
-    }
-
-    function clearAllKeyframes() {
-      if (!confirm("⚠️ 警告：确定要清空全部的导演运镜轨配置吗？这会抹去所有已设计的航点。\n\n（清空后若后悔，仍可通过点击左上角的【↩ 撤销】按钮恢复整个轨道）")) return;
-      pushHistoryState();
-      data.main_flight = [];
-      document.getElementById('btnGenerateDraft').style.display = 'block';
-      deselectKeyframe();
-      rebuildMarkers();
-      refreshKeyframeList();
-      rebuildElevationChart();
-      updateCount();
-      saveToServer();
-      showToast("🧹 导演轨配置已成功清空");
-    }
-
-    function moveKeyframeIndex(idx, direction) {
-      const targetIdx = idx + direction;
-      if (targetIdx < 0 || targetIdx >= data.main_flight.length) {
-        showToast("已到达队列边界");
-        return;
-      }
-
-      pushHistoryState();
-      const temp = data.main_flight[idx];
-      data.main_flight[idx] = data.main_flight[targetIdx];
-      data.main_flight[targetIdx] = temp;
-
-      renumberWaypoints();
-
-      refreshKeyframeList();
-      rebuildMarkers();
-      rebuildElevationChart();
-      selectKeyframe(targetIdx);
-      saveToServer();
-      showToast(direction === -1 ? "空间单元上移" : "空间单元下移");
-    }
-
-    function moveSelected(direction) {
-      if (!activeId) return;
-      const idx = data.main_flight.findIndex(f => f.id === activeId);
-      if (idx !== -1) {
-        moveKeyframeIndex(idx, direction);
-        setTimeout(() => {
-          const activeEl = document.querySelector('.keyframe-item.active');
-          if (activeEl) {
-            activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }
-        }, 50);
       }
     }
 
     function renumberWaypoints() {
       if (!data || !data.main_flight) return;
-      const defaultNames = ["导演航点", "自定义航点", "导演空间轨"];
       data.main_flight.forEach((pt, idx) => {
-        let isDefault = false;
-        let prefix = "导演航点";
-        if (!pt.name) {
-          isDefault = true;
-        } else {
-          for (const dName of defaultNames) {
-            if (pt.name.startsWith(dName)) {
-              isDefault = true;
-              prefix = dName;
-              break;
-            }
-          }
-        }
-        if (isDefault) {
-          pt.name = `${prefix} ${idx + 1}`;
+        if (!pt.name || pt.name.startsWith("空间混合轨道")) {
+          pt.name = `空间混合轨道 ${idx + 1}`;
         }
       });
     }
@@ -2995,32 +3089,6 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       data.main_flight.sort((a, b) => a.fractionalIndex - b.fractionalIndex);
     }
 
-    function getCoordsAtDistance(targetD) {
-      if (!data.main || data.main.length === 0) return null;
-      if (data.main.length === 1) return { lng: data.main[0][0], lat: data.main[0][1] };
-
-      let cumDist = 0.0;
-      if (targetD <= 0) return { lng: data.main[0][0], lat: data.main[0][1] };
-
-      for (let i = 0; i < data.main.length - 1; i++) {
-        const pA = data.main[i];
-        const pB = data.main[i + 1];
-        const dist = haversine(pA[1], pA[0], pB[1], pB[0]);
-        if (cumDist + dist >= targetD) {
-          const remaining = targetD - cumDist;
-          const t = dist > 0 ? (remaining / dist) : 0;
-          const lng = pA[0] + t * (pB[0] - pA[0]);
-          const lat = pA[1] + t * (pB[1] - pA[1]);
-          return { lng: parseFloat(lng.toFixed(6)), lat: parseFloat(lat.toFixed(6)) };
-        }
-        cumDist += dist;
-      }
-
-      const last = data.main[data.main.length - 1];
-      return { lng: last[0], lat: last[1] };
-    }
-
-
     // ---- Vibe Presets Application ----
     function applyVibePreset(vibe) {
       if (selectedIds.length === 0) return;
@@ -3067,11 +3135,12 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
           pt.shot_mode = 'handheld';
         } else if (vibe === 'solitude') {
           pt.look_at_intent = 'orbit';
-          pt.relative_alt = 600;
+          // Lower orbit for closer target detail
+          pt.relative_alt = 250; // reduced altitude for low‑fly orbit
           pt.perspective_fov = 'custom';
-          pt.fov = 75;
+          pt.fov = 45; // narrower field to focus on target
           pt.perspective_pitch = 'oblique';
-          pt.pitch = -25;
+          pt.pitch = -15; // slight upward tilt
           pt.speed_preset = 'slow';
           pt.wait_preset = 'custom';
           pt.wait_time = 4.0;
@@ -3092,6 +3161,9 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       if (!activeId) return;
       const idx = data.main_flight.findIndex(f => f.id === activeId);
       if (idx === -1) return;
+      
+      const ptName = data.main_flight[idx].name || ('航点 ' + (idx + 1));
+      if (!confirm(`⚠️ 确定要将当前镜头的 3D 坐标覆盖到【${ptName}】吗？`)) return;
 
       const cameraCarto = Cesium.Cartographic.fromCartesian(viewer.camera.position);
       const camLng = Cesium.Math.toDegrees(cameraCarto.longitude);
@@ -3160,10 +3232,15 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       groundAlt = Math.round(groundAlt);
       const relativeAlt = Math.max(0, Math.round(camHeight - groundAlt));
 
+      const defaultName = "自定义航点 " + (data.main_flight.length + 1);
+      const userInput = prompt("请输入新航点的名称（建议以地理空间/地标命名）：", defaultName);
+      if (userInput === null) return; // User cancelled
+      const finalName = userInput.trim() || defaultName;
+
       const id = 'evt_' + Date.now();
       const newPt = {
         id,
-        name: "自定义航点 " + (data.main_flight.length + 1),
+        name: finalName,
         lng: parseFloat(camLng.toFixed(6)),
         lat: parseFloat(camLat.toFixed(6)),
         ground_alt: groundAlt,
@@ -3191,10 +3268,12 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         data.main_flight.push(newPt);
         targetIdx = data.main_flight.length - 1;
       }
+      
+      if (targetIdx === 0) {
+        newPt.wait_time = 3.0; // Ensure first frame has 3s wait
+      }
 
       renumberWaypoints();
-
-      document.getElementById('btnGenerateDraft').style.display = 'none';
 
       rebuildMarkers();
       refreshKeyframeList();
@@ -3203,26 +3282,6 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       selectKeyframe(targetIdx);
       saveToServer();
       showToast("➕ 成功添加当前镜头为新航点！");
-    }
-
-    function deleteSelectedWaypoint() {
-      if (selectedIds.length === 0) return;
-      const count = selectedIds.length;
-      if (confirm(`确定要删除选中的 ${count} 个航点吗？`)) {
-        data.main_flight = data.main_flight.filter(f => !selectedIds.includes(f.id));
-        renumberWaypoints();
-        if (data.main_flight.length === 0) {
-          document.getElementById('btnGenerateDraft').style.display = 'block';
-        }
-        selectedIds = [];
-        deselectKeyframe();
-        rebuildMarkers();
-        refreshKeyframeList();
-        rebuildElevationChart();
-        updateCount();
-        saveToServer();
-        showToast(`🗑️ ${count} 个航迹节点已批量删除`);
-      }
     }
 
     // ---- Background Terrain Height Sampler ----
@@ -3265,123 +3324,18 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       }
     }
 
-    // ---- Draft Generator ----
-    async function generateDraftFromGeoTrack() {
-      const geo = data.main;
-      if (!geo || geo.length === 0) {
-        alert("地理轨主线坐标列表为空，请确认 routes.json 的数据完整性！");
-        return;
-      }
-
-      if (!confirm("是否基于现有地理轨的 12,000 个节点生成空间混合初稿？")) return;
-
-      const FLIGHT_STEP = 1000.0;
-      const sampled = [];
-      let accumulated = 0.0;
-      let lastPt = geo[0];
-      sampled.push(lastPt);
-
-      for (let i = 1; i < geo.length; i++) {
-        const pt = geo[i];
-        const dist = haversine(lastPt[1], lastPt[0], pt[1], pt[0]);
-        accumulated += dist;
-        lastPt = pt;
-        if (accumulated >= FLIGHT_STEP) {
-          sampled.push(pt);
-          accumulated = 0.0;
-        }
-      }
-
-      if (sampled[sampled.length - 1] !== geo[geo.length - 1]) {
-        sampled.push(geo[geo.length - 1]);
-      }
-
-      const N = sampled.length;
-      
-      // Calculate headings
-      const rawHeadings = [];
-      for (let i = 0; i < N - 1; i++) {
-        const h = calculateBearing(sampled[i][1], sampled[i][0], sampled[i+1][1], sampled[i+1][0]);
-        rawHeadings.push(h);
-      }
-      rawHeadings.push(rawHeadings[rawHeadings.length - 1] || 0.0);
-
-      // Heading Smooth
-      const smoothedHeadings = [];
-      for (let i = 0; i < N; i++) {
-        const start = Math.max(0, i - 2);
-        const end = Math.min(N, i + 3);
-        let sumCos = 0.0;
-        let sumSin = 0.0;
-        for (let idx = start; idx < end; idx++) {
-          const rad = rawHeadings[idx] * Math.PI / 180;
-          sumCos += Math.cos(rad);
-          sumSin += Math.sin(rad);
-        }
-        const avgRad = Math.atan2(sumSin, sumCos);
-        const avgDeg = (avgRad * 180 / Math.PI + 360) % 360;
-        smoothedHeadings.push(avgDeg);
-      }
-
-      // Sample terrain heights
-      const terrainPositions = sampled.map(pt => Cesium.Cartographic.fromDegrees(pt[0], pt[1]));
-      let sampledHeights = [];
-      
-      showToast("正在对三维地形进行高程采样，请稍候...");
-      try {
-        if (viewer.terrainProvider && !(viewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider)) {
-           const res = await Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, terrainPositions);
-          sampledHeights = res.map(pos => (pos.height !== undefined && pos.height > 3000) ? pos.height : 5000);
-        } else {
-          sampledHeights = terrainPositions.map(() => 5000);
-        }
-      } catch (err) {
-        console.warn("Terrain sampling failed, using 5000m base:", err);
-        sampledHeights = terrainPositions.map(() => 5000);
-      }
-
-      const draft = [];
-      const timestamp = Date.now();
-      for (let i = 0; i < N; i++) {
-        draft.push({
-          id: `evt_${timestamp}_${i}`,
-          name: `空间混合轨道 ${i + 1}`,
-          lng: parseFloat(sampled[i][0].toFixed(6)),
-          lat: parseFloat(sampled[i][1].toFixed(6)),
-          ground_alt: Math.round(sampledHeights[i]),
-          relative_alt: 500,
-          heading: parseFloat(smoothedHeadings[i].toFixed(2)),
-          pitch: -25.0,
-          roll: 0.0,
-          duration: 2.5,
-          wait_time: 0.0,
-          fov: 60.0,
-          shot_mode: "default",
-          look_at_intent: "forward",
-          perspective_fov: "natural",
-          perspective_pitch: "oblique",
-          speed_preset: "normal",
-          wait_preset: "none"
-        });
-      }
-
-      data.main_flight = draft;
-      document.getElementById('btnGenerateDraft').style.display = 'none';
-
-      rebuildMarkers();
-      refreshKeyframeList();
-      rebuildElevationChart();
-      updateCount();
-      saveToServer();
-      showToast(`成功生成 ${N} 个空间混合初稿轨道！`);
-    }
-
     // ---- Save & Export API integration ----
     async function saveToServer(manual = false) {
+      // Sync current main_flight back to flights
+      if (data.flights[activeTrackIndex]) {
+        data.flights[activeTrackIndex].path = data.main_flight;
+      }
+      
       const out = {
         main: data.main,
         secondary: data.secondary,
-        main_flight: data.main_flight
+        main_flight: data.flights[0] ? data.flights[0].path : [], // Fallback for systems that don't read flights array
+        flights: data.flights
       };
 
       try {
@@ -3424,17 +3378,6 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         } catch(e) {}
         if (attempts > 30) clearInterval(gitPollTimer);
       }, 1500);
-    }
-
-    function exportFlightData() {
-      const blob = new Blob([JSON.stringify(data.main_flight, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "main_flight.json";
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast("已成功导出配置 JSON");
     }
 
     // ---- Elevation Chart Drawing Engine ----
@@ -3530,7 +3473,7 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         ctx.font = '11px "PingFang SC", sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('暂无导演轨数据，请在 3D 地图上点击创建航点，或点击“生成初稿”', w / 2, h / 2);
+        ctx.fillText('暂无导演轨数据，请在 3D 地图上点击创建航点', w / 2, h / 2);
         return;
       }
 
@@ -3797,44 +3740,6 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         return chartMinE + ratio * (chartMaxE - chartMinE);
       }
 
-      function getY_speed(s, h) {
-        const availH = h - paddingT - paddingB;
-        const usableH = availH - 24;
-        const h1 = usableH * 0.55;
-        const h2 = usableH * 0.20;
-        const y4 = paddingT + h1 + 12 + h2;
-        return y4 - (s / 1800) * h2;
-      }
-
-      function getSpeed_Y(pixelY, h) {
-        const availH = h - paddingT - paddingB;
-        const usableH = availH - 24;
-        const h1 = usableH * 0.55;
-        const h2 = usableH * 0.20;
-        const y4 = paddingT + h1 + 12 + h2;
-        return ((y4 - pixelY) / h2) * 1800;
-      }
-
-      function getY_wait(wt, h) {
-        const availH = h - paddingT - paddingB;
-        const usableH = availH - 24;
-        const h1 = usableH * 0.55;
-        const h2 = usableH * 0.20;
-        const h3 = usableH * 0.20;
-        const y6 = paddingT + h1 + 12 + h2 + 12 + h3;
-        return y6 - (wt / 15) * h3;
-      }
-
-      function getWait_Y(pixelY, h) {
-        const availH = h - paddingT - paddingB;
-        const usableH = availH - 24;
-        const h1 = usableH * 0.55;
-        const h2 = usableH * 0.20;
-        const h3 = usableH * 0.20;
-        const y6 = paddingT + h1 + 12 + h2 + 12 + h3;
-        return ((y6 - pixelY) / h3) * 15;
-      }
-
       function handleScrub(pixelX, w) {
         if (chartPoints.length === 0) return;
         const dMax = chartPoints[chartPoints.length - 1].d || 1.0;
@@ -3985,27 +3890,6 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
             let relativeAlt = Math.max(0, Math.min(2000, Math.round(targetElev - currentGround)));
             pt.relative_alt = relativeAlt;
           } 
-          else if (dragType === 'speed' && draggedNodeIdx > 0) {
-            let targetSpeed = getSpeed_Y(y, h);
-            targetSpeed = Math.max(10, Math.min(1800, Math.round(targetSpeed)));
-            
-            const prevPt = data.main_flight[draggedNodeIdx - 1];
-            const dist = haversine(prevPt.lat, prevPt.lng, pt.lat, pt.lng);
-            pt.duration = parseFloat((dist / (targetSpeed / 3.6)).toFixed(1));
-            pt.speed_preset = 'custom';
-            
-            document.getElementById('hudSpeedSlider').value = targetSpeed;
-            document.getElementById('hudSpeedValue').textContent = `${targetSpeed} km/h`;
-          } 
-          else if (dragType === 'wait') {
-            let targetWait = getWait_Y(y, h);
-            targetWait = Math.max(0, Math.min(15, Math.round(targetWait * 2) / 2));
-            pt.wait_time = targetWait;
-            pt.wait_preset = targetWait === 0 ? 'none' : 'custom';
-            
-            document.getElementById('hudWaitSlider').value = targetWait;
-            document.getElementById('hudWaitValue').textContent = `${targetWait}s`;
-          }
 
           rebuildMarkers();
           rebuildElevationChart();
@@ -4203,80 +4087,12 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         saveToServer();
       });
 
-      // 3. Rhythm Console Speed Slider
-      const speedSlider = document.getElementById('hudSpeedSlider');
-      const speedLabel = document.getElementById('hudSpeedValue');
-      
-      const showSpeedLabel = () => speedLabel.style.opacity = 1;
-      const hideSpeedLabel = () => speedLabel.style.opacity = 0;
-      speedSlider.addEventListener('mousedown', showSpeedLabel);
-      speedSlider.addEventListener('touchstart', showSpeedLabel, {passive: true});
-      speedSlider.addEventListener('mouseup', hideSpeedLabel);
-      speedSlider.addEventListener('mouseleave', hideSpeedLabel);
-      speedSlider.addEventListener('touchend', hideSpeedLabel);
-
-      speedSlider.addEventListener('input', e => {
-        if (selectedIds.length === 0) return;
-        const speedKmh = parseFloat(e.target.value);
-        
-        speedLabel.textContent = `${speedKmh} km/h`;
-        
-        selectedIds.forEach(id => {
-          const idx = data.main_flight.findIndex(f => f.id === id);
-          if (idx === -1) return;
-          const pt = data.main_flight[idx];
-          if (idx > 0) {
-            const prevPt = data.main_flight[idx - 1];
-            const dist = haversine(prevPt.lat, prevPt.lng, pt.lat, pt.lng);
-            pt.duration = parseFloat((dist / (speedKmh / 3.6)).toFixed(1));
-            if (pt.duration <= 0) pt.duration = 2.5;
-          }
-          pt.speed_preset = 'custom';
-        });
-        
-        refreshKeyframeList();
-        rebuildElevationChart();
-        saveToServerDebounced();
-      });
-
-      // 4. Rhythm Console Wait (Dwell) Slider
-      const waitSlider = document.getElementById('hudWaitSlider');
-      const waitLabel = document.getElementById('hudWaitValue');
-
-      const showWaitLabel = () => waitLabel.style.opacity = 1;
-      const hideWaitLabel = () => waitLabel.style.opacity = 0;
-      waitSlider.addEventListener('mousedown', showWaitLabel);
-      waitSlider.addEventListener('touchstart', showWaitLabel, {passive: true});
-      waitSlider.addEventListener('mouseup', hideWaitLabel);
-      waitSlider.addEventListener('mouseleave', hideWaitLabel);
-      waitSlider.addEventListener('touchend', hideWaitLabel);
-
-      waitSlider.addEventListener('input', e => {
-        if (selectedIds.length === 0) return;
-        const waitTime = parseFloat(e.target.value);
-        waitLabel.textContent = `${waitTime}s`;
-        
-        selectedIds.forEach(id => {
-          const idx = data.main_flight.findIndex(f => f.id === id);
-          if (idx === -1) return;
-          const pt = data.main_flight[idx];
-          pt.wait_time = waitTime;
-          pt.wait_preset = waitTime === 0 ? 'none' : (waitTime === 5 ? 'brief' : (waitTime === 12 ? 'deep' : 'custom'));
-        });
-        
-        document.getElementById('hudWaitValue').textContent = `${waitTime}s`;
-        
-        refreshKeyframeList();
-        rebuildElevationChart();
-        saveToServerDebounced();
-      });
-
       // 5. Look-at Target Locking Options
       const lockActions = {
         'btnHudLockForward': 'forward',
         'btnHudLockSummit': 'summit',
         'btnHudLockSide': 'side',
-        'btnHudLockOrbit': 'orbit',
+        'btnHudLockBird': 'bird',
         'btnHudLockPoi': 'poi',
         'btnHudLockFree': 'free'
       };
@@ -4291,7 +4107,6 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
             const pt = data.main_flight[idx];
             pt.look_at_intent = lockActions[btnId];
             pt.look_at_target = null;
-            recomputeKeyframeValues(idx);
           });
           
           saveToServer();
@@ -4318,7 +4133,6 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
           const pt = data.main_flight[idx];
           pt.look_at_intent = 'forward';
           pt.look_at_target = null;
-          recomputeKeyframeValues(idx);
         });
         
         saveToServer();
@@ -4336,7 +4150,7 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       });
 
       // Capture Camera button
-      document.getElementById('btnHudCaptureCamera').addEventListener('click', captureCurrentCamera);
+      document.getElementById('btnUpdateWaypoint').addEventListener('click', captureCurrentCamera);
 
       // Lighting Event Listeners
       document.getElementById('timeOfDayInput').addEventListener('input', (e) => {
@@ -4362,8 +4176,39 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         }
       });
 
-      // Add/Delete waypoints buttons
+      // Document handlers for track switching
+      document.getElementById('trackSelector').addEventListener('change', (e) => {
+        switchTrack(parseInt(e.target.value));
+      });
+      document.getElementById('btnAddTrack').addEventListener('click', () => {
+        createNewTrack();
+      });
+      document.getElementById('btnDeleteTrack').addEventListener('click', () => {
+        deleteCurrentTrack();
+      });
+
+      // Add waypoints button (left panel)
       document.getElementById('btnAddWaypoint').addEventListener('click', addWaypointAtCurrentCamera);
+
+      // Keyboard handler for batch deletion
+      document.addEventListener('keydown', (e) => {
+          if ((e.key === 'Delete' || e.key === 'Backspace') && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+              if (selectedIds.length > 0) {
+                  if (confirm(`是否批量删除选中的 ${selectedIds.length} 个航点？`)) {
+                      pushHistoryState();
+                      data.main_flight = data.main_flight.filter(p => !selectedIds.includes(p.id));
+                      selectedIds = [];
+                      saveToServerDebounced();
+                      rebuildMarkers();
+                      refreshKeyframeList();
+                      updateCount();
+                  }
+              } else if (activeId) {
+                  const idx = data.main_flight.findIndex(p => p.id === activeId);
+                  if (idx !== -1) confirmDeleteKeyframe(idx);
+              }
+          }
+      });
       // btnDeleteSelected removed
 
       // Batch selection actions
@@ -4409,6 +4254,20 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         ]
       },
       
+        pan_spin: {
+          label: '🌀 自转环视',
+          params: [
+            { key: 'pan_fov', label: '视野', min: 10, max: 120, step: 5, def: 60, unit: '°' },
+            { key: 'pan_angle', label: '角度', min: -360, max: 360, step: 10, def: 360, unit: '°' }
+          ]
+        },
+        orbit: {
+          label: '🪐 绕圈环飞',
+          params: [
+            { key: 'orbit_radius', label: '半径', min: 100, max: 5000, step: 100, def: 1000, unit: 'm' },
+            { key: 'orbit_pitch', label: '云台', min: -90, max: 0, step: 5, def: -35, unit: '°' }
+          ]
+        },
         handheld: { label: '🤳 手持', params: [] },
         via: {
           label: '🎞️ 维亚',
@@ -4774,20 +4633,17 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       else if (pt.perspective_pitch === 'eyelevel') pt.pitch = -10.0;
       else if (pt.perspective_pitch === 'lookup') pt.pitch = 5.0;
 
-      // 3. Speed rhythm calculations
+      // Note: haversine in calculateSegmentParams now uses 3D alt, but calculateSegmentParams itself is deprecated
+      // because duration is updated directly via slider events.
+      // We will keep calculateSegmentParams around for backwards compat but it's largely superseded by direct pt.duration bindings.
       let dist = 0;
       if (idx > 0) {
         const prevPt = data.main_flight[idx - 1];
-        dist = haversine(prevPt.lat, prevPt.lng, pt.lat, pt.lng);
+        const prevAlt = (prevPt.ground_alt || 5000) + (prevPt.relative_alt || 500);
+        const curAlt = (pt.ground_alt || 5000) + (pt.relative_alt || 500);
+        dist = haversine(prevPt.lat, prevPt.lng, prevAlt, pt.lat, pt.lng, curAlt);
       }
-      
-      const speedKmh = parseFloat(document.getElementById('hudSpeedSlider').value);
-      if (idx === 0) {
-        pt.duration = 2.5;
-      } else {
-        pt.duration = parseFloat((dist / (speedKmh / 3.6)).toFixed(1));
-        if (pt.duration <= 0) pt.duration = 2.5;
-      }
+      // removed automatic duration calculation from speed to allow manual duration control
 
       // 4. Target look locks
       if (pt.look_at_intent === 'custom_target' || pt.look_at_intent === 'summit' || pt.look_at_intent === 'poi' || pt.look_at_intent === 'orbit') {
@@ -4877,19 +4733,7 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
           previewEndIndex = Math.max(...indices);
           showToast(`正在播放选中区间 (#${previewStartIndex + 1} - #${previewEndIndex + 1})`);
         } 
-        // Case 2: One item selected -> play from that item to the end of the flight
-        else if (activeId) {
-          const activeIdx = list.findIndex(f => f.id === activeId);
-          if (activeIdx !== -1) {
-            previewStartIndex = activeIdx;
-            previewEndIndex = list.length - 1;
-            showToast(`从当前航点 #${previewStartIndex + 1} 开始播放至终点`);
-          } else {
-            previewStartIndex = 0;
-            previewEndIndex = list.length - 1;
-          }
-        } 
-        // Case 3: No items selected -> play entire flight from 0 to N
+        // Case 2: One item selected -> Play entire flight. (Only range select starts from specific point)
         else {
           previewStartIndex = 0;
           previewEndIndex = list.length - 1;
@@ -4920,6 +4764,20 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
 
       updateCount();
       const pt = data.main_flight[previewIndex];
+      // Update mileage on progress dot and label
+      const totalDist = data.main_flight.slice(0, previewIndex + 1).reduce((sum, p) => sum + (p.segment_dist || 0), 0);
+      const mileageKm = (totalDist / 1000).toFixed(1);
+      const pct = previewIndex / (data.main_flight.length - 1);
+      const dot = document.getElementById('progressDot');
+      const label = document.getElementById('mileageLabel');
+      if (dot) {
+        dot.style.left = `${pct * 100}%`;
+      }
+      if (label) {
+        label.style.left = `${pct * 100}%`;
+        label.textContent = `${mileageKm}km`;
+      }
+      // Redundant mileage block removed
       const absoluteAlt = (pt.ground_alt || 5000) + (pt.relative_alt || 500);
 
       // Apply Lighting
@@ -4964,7 +4822,7 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
           pitch: Cesium.Math.toRadians(pt.pitch || -25.0),
           roll: Cesium.Math.toRadians(pt.roll || 0.0)
         },
-        duration: pt.duration || 2.5,
+        duration: (previewIndex === previewStartIndex) ? 0.0 : (pt.duration || 2.5),
         easingFunction: Cesium.EasingFunction.LINEAR_NONE,
         complete: () => {
           isUpdatingCameraFromState = false;
@@ -5013,7 +4871,7 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
                 const currentHeading = startHeading + progress * Math.PI * 2; // 360 rotation
 
                 viewer.camera.lookAt(targetPos, new Cesium.HeadingPitchRange(currentHeading, pitch, range));
-                document.getElementById('previewStatus').textContent = `环绕视角推演中 (${(waitTime - elapsed).toFixed(1)}s)...`;
+                document.getElementById('previewStatus').textContent = `自转推演中 (${(waitTime - elapsed).toFixed(1)}s)...`;
                 previewTimeout = requestAnimationFrame(animateOrbit);
               }
               previewTimeout = requestAnimationFrame(animateOrbit);
@@ -5038,5 +4896,10 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       init();
     });
   </script>
+  <!-- Progress Dot Container -->
+  <div id="progressContainer">
+    <div id="progressDot" class="progress-dot"></div>
+    <div id="mileageLabel"></div>
+  </div>
 </body>
 </html>

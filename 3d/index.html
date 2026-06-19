@@ -162,6 +162,7 @@
         <div style="position: relative; width: 100%; flex: 1; display: flex; align-items: center;">
             <div id="timeline-ticks" style="position: absolute; top: 50%; transform: translateY(-50%); left: 0; right: 0; height: 4px; pointer-events: none; display: flex; justify-content: space-between;"></div>
             <input type="range" id="flight-timeline-slider" min="0" max="1" step="0.001" value="0" style="width: 100%; cursor: pointer; accent-color: #20e5b5; position: relative; z-index: 2; margin: 0; background: transparent;">
+            <div id="timeline-mileage-label" style="position: absolute; top: 50%; left: 0%; transform: translate(calc(-100% - 8px), -50%); color: #20e5b5; font-size: 11px; font-family: monospace; font-weight: bold; pointer-events: none; text-shadow: 0 1px 3px rgba(0,0,0,0.8); display: none;">0.0km</div>
         </div>
         <span id="timeline-total-time" style="font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap;">00:00</span>
         <span id="timeline-status" style="font-size: 11px; color: #20e5b5; font-weight: 500; white-space: nowrap; min-width: 50px; text-align: right;">巡航中</span>
