@@ -119,7 +119,7 @@
       "wait_time": 1,
       "fov": 109,
       "shot_mode": "default",
-      "look_at_intent": "custom",
+      "look_at_intent": "side",
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
       "speed_preset": "custom",
@@ -131,7 +131,8 @@
       "env_mode": "time",
       "env_param": 10,
       "timeOfDay": 10,
-      "weather": "none"
+      "weather": "none",
+      "look_at_target": null
     },
     {
       "id": "evt_1781688502844",
@@ -451,7 +452,7 @@
           "wait_time": 1,
           "fov": 109,
           "shot_mode": "default",
-          "look_at_intent": "custom",
+          "look_at_intent": "side",
           "perspective_fov": "custom",
           "perspective_pitch": "custom",
           "speed_preset": "custom",
@@ -463,7 +464,8 @@
           "env_mode": "time",
           "env_param": 10,
           "timeOfDay": 10,
-          "weather": "none"
+          "weather": "none",
+          "look_at_target": null
         },
         {
           "id": "evt_1781688502844",
