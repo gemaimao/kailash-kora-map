@@ -915,6 +915,23 @@
       <div class="keyframe-list" id="keyframeList">
         <!-- Keyframe items injected here -->
       </div>
+      
+      <!-- Group 1: Telemetry & Read-out (Basic) - Collapsible by default -->
+      <div class="accordion-group group-basic" id="accordionDiag" style="margin: 0 16px 12px 16px; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; overflow: hidden; background: rgba(0,0,0,0.15);">
+        <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')" style="padding: 8px 12px; background: rgba(255,255,255,0.02); color: #cbd5e1; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 600; user-select: none;">📍 航点信息</div>
+        <div class="accordion-body">
+          <div id="diagnosticsContent" style="padding: 4px 0;">
+            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02);"><span class="diag-label" style="color: var(--text-dim);">当前位置</span><span class="diag-value" id="diagPos" style="color: #fff; font-weight: 500;">--</span></div>
+            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02);"><span class="diag-label" style="color: var(--text-dim);">累计里程</span><span class="diag-value" id="diagDist" style="color: #fff; font-weight: 500;">--</span></div>
+            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02);"><span class="diag-label" style="color: var(--text-dim);">地面海拔</span><span class="diag-value" id="diagGround" style="color: #fff; font-weight: 500;">--</span></div>
+            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02);"><span class="diag-label" style="color: var(--text-dim);">机位海拔</span><span class="diag-value" id="diagFlight" style="color: #fff; font-weight: 500;">--</span></div>
+            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02);"><span class="diag-label" style="color: var(--text-dim);">离地高度</span><span class="diag-value" id="diagRel" style="color: #fff; font-weight: 500;">--</span></div>
+            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02);"><span class="diag-label" style="color: var(--text-dim);">视线目标</span><span class="diag-value" id="diagTarget" style="color: #fff; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; max-width: 130px;">--</span></div>
+            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02);"><span class="diag-label" style="color: var(--text-dim);">当前航速</span><span class="diag-value" id="diagSpeed" style="color: #fff; font-weight: 500;">--</span></div>
+            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0;"><span class="diag-label" style="color: var(--text-dim);">段飞行用时</span><span class="diag-value" id="diagDuration" style="color: #fff; font-weight: 500;">--</span></div>
+          </div>
+        </div>
+      </div>
 
 
 
@@ -1025,22 +1042,6 @@
       <div class="hud-director-inspector" id="hudDirectorInspector">
         <div class="inspector-accordion">
           
-          <!-- Group 1: Telemetry & Read-out (Basic) -->
-          <div class="accordion-group active group-basic" id="accordionDiag">
-            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">📍 航点信息</div>
-            <div class="accordion-body">
-              <div id="diagnosticsContent">
-                <div class="diag-row"><span class="diag-label">当前位置</span><span class="diag-value" id="diagPos">--</span></div>
-                <div class="diag-row"><span class="diag-label">累计里程</span><span class="diag-value" id="diagDist">--</span></div>
-                <div class="diag-row"><span class="diag-label">地面海拔</span><span class="diag-value" id="diagGround">--</span></div>
-                <div class="diag-row"><span class="diag-label">机位海拔</span><span class="diag-value" id="diagFlight">--</span></div>
-                <div class="diag-row"><span class="diag-label">离地高度</span><span class="diag-value" id="diagRel">--</span></div>
-                <div class="diag-row"><span class="diag-label">视线目标</span><span class="diag-value" id="diagTarget">--</span></div>
-                <div class="diag-row"><span class="diag-label">当前航速</span><span class="diag-value" id="diagSpeed">--</span></div>
-                <div class="diag-row"><span class="diag-label">段飞行用时</span><span class="diag-value" id="diagDuration">--</span></div>
-              </div>
-            </div>
-          </div>
 
           <!-- Group 2: Target Lock (Camera Language) -->
           <div class="accordion-group active group-camera" id="accordionFocus">
