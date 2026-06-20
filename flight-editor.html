@@ -1100,20 +1100,7 @@
             </div>
           </div>
 
-          <!-- Group 4: Lighting (Camera Language) -->
-          <div class="accordion-group active group-camera" id="accordionLighting">
-            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🌅 环境增效</div>
-            <div class="accordion-body">
-              <div class="shot-param-row">
-                <label>日照时间 (时)</label>
-                <input type="range" id="timeOfDayInput" min="0" max="24" step="0.1" value="10">
-                <span class="shot-param-val" id="timeOfDayVal" style="margin-top: 4px;">10:00</span>
-              </div>
-              <button class="hud-mini-btn" id="btnCaptureTime" style="width: 100%; border-color: var(--accent-cyan); color: var(--accent-cyan); justify-content: center; font-weight: bold; font-size: 9px; text-align: center; margin-top: 6px;">📸 捕获当前时间为本点光照</button>
-            </div>
-          </div>
-
-          <!-- Group 5: Camera Movement Style (Camera Language) -->
+          <!-- Group 4: Camera Movement Style (Camera Language) -->
           <div class="accordion-group active group-camera" id="accordionVibe">
             <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🔮 运镜风格</div>
             <div class="accordion-body">
@@ -1123,6 +1110,19 @@
                 <button class="vibe-btn" data-vibe="exploratory">🚶 探索</button>
                 <button class="vibe-btn" data-vibe="solitude">🌌 孤独</button>
               </div>
+            </div>
+          </div>
+
+          <!-- Group 5: Environmental Enhancements (Environmental) -->
+          <div class="accordion-group active group-environment" id="accordionLighting">
+            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🌅 环境增效</div>
+            <div class="accordion-body">
+              <div class="shot-param-row">
+                <label>日照时间 (时)</label>
+                <input type="range" id="timeOfDayInput" min="0" max="24" step="0.1" value="10">
+                <span class="shot-param-val" id="timeOfDayVal" style="margin-top: 4px;">10:00</span>
+              </div>
+              <button class="hud-mini-btn" id="btnCaptureTime" style="width: 100%; border-color: var(--accent-cyan); color: var(--accent-cyan); justify-content: center; font-weight: bold; font-size: 9px; text-align: center; margin-top: 6px;">📸 捕获当前时间为本点光照</button>
             </div>
           </div>
 
