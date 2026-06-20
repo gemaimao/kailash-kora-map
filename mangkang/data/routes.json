@@ -50,9 +50,9 @@
       "narration_audio": "",
       "narration_duration": 0,
       "narration_voice": "default",
-      "env_mode": "rain",
-      "weather": "rain",
-      "weather_param": 3,
+      "env_mode": "snow",
+      "weather": "snow",
+      "weather_param": 2.5,
       "env_param": 2
     },
     {
@@ -390,9 +390,9 @@
           "narration_audio": "",
           "narration_duration": 0,
           "narration_voice": "default",
-          "env_mode": "rain",
-          "weather": "rain",
-          "weather_param": 3,
+          "env_mode": "snow",
+          "weather": "snow",
+          "weather_param": 2.5,
           "env_param": 2
         },
         {
