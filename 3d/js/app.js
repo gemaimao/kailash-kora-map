@@ -1094,6 +1094,8 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
     const ticksContainer = document.getElementById('timeline-ticks');
     if (slider && ticksContainer && flightPath.length > 0) {
         slider.max = flightPath.length - 1;
+        slider.value = 0;
+        slider.style.background = 'linear-gradient(to right, #20e5b5 0%, rgba(255,255,255,0.15) 0%)';
         ticksContainer.innerHTML = '';
         for (let i = 0; i < flightPath.length; i++) {
             const tick = document.createElement('div');
@@ -1946,6 +1948,22 @@ document.getElementById('flight-timeline-slider').addEventListener('input', (e) 
     const progress = parseFloat(e.target.value);
     const targetIdx = Math.max(0, Math.min(flightPath.length - 1, Math.round(progress)));
     
+    // 实时更新进度条填充颜色和里程浮动框位置
+    const maxVal = parseFloat(e.target.max || 1);
+    const pct = progress / maxVal;
+    e.target.style.background = `linear-gradient(to right, #20e5b5 ${pct * 100}%, rgba(255,255,255,0.15) ${pct * 100}%)`;
+    
+    const mileageLabel = document.getElementById('timeline-mileage-label');
+    if (mileageLabel) {
+        mileageLabel.style.left = `${pct * 100}%`;
+        const exactIdx = Math.floor((fullRouteDistances.length - 1) * pct);
+        if (fullRouteDistances && fullRouteDistances.length > exactIdx) {
+            currentProgressMileage = fullRouteDistances[exactIdx];
+        }
+        mileageLabel.textContent = `${currentProgressMileage.toFixed(1)}km`;
+        mileageLabel.style.display = 'block';
+    }
+    
     // 如果想要在拖拽时具备吸附感，可以取消下一行的注释，但保留平滑滑动可能体验更好
     // e.target.value = targetIdx; 
     
@@ -1994,7 +2012,7 @@ document.getElementById('flight-timeline-slider').addEventListener('change', (e)
     
     // 重新校准游览时间，防止时间突变
     // 假设当前时间的比例
-    const progressPercent = parseFloat(e.target.value) / 100.0;
+    const progressPercent = parseFloat(e.target.value) / parseFloat(e.target.max || 1);
     const estimatedTotalTime = currentProgressTime > 0 ? (currentProgressTime / (currentWaypoint === 0 ? 0.01 : (currentWaypoint / flightPath.length))) : 120;
     currentProgressTime = estimatedTotalTime * progressPercent;
     tourStartTime = Date.now() - (currentProgressTime * 1000);
@@ -2037,6 +2055,9 @@ setInterval(() => {
                 mileageLabel.style.left = `${pct * 100}%`;
                 mileageLabel.textContent = `${currentProgressMileage.toFixed(1)}km`;
                 mileageLabel.style.display = 'block';
+                
+                // 动态更新进度条轨道左侧填充样式，保持与滑块位置精准对齐
+                slider.style.background = `linear-gradient(to right, #20e5b5 ${pct * 100}%, rgba(255,255,255,0.15) ${pct * 100}%)`;
             }
         }
     } else {
