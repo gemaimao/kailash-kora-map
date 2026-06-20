@@ -12,18 +12,102 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; width: 100%; font-family: -apple-system, "PingFang SC", sans-serif; background: #0d0d0f; color: #eee; overflow: hidden; }
 
-    .map-area { position: absolute; top: 0; left: 0; bottom: 0; right: 320px; }
+    .map-area {
+      position: absolute; top: 0; left: 0; bottom: 0; right: 320px;
+      transition: right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    .map-area.full-width {
+      right: 0;
+    }
+    .map-area.full-width .cesium-viewer-toolbar {
+      right: 20px !important;
+    }
     #map { position: absolute; inset: 0; background: #0d0d0f; z-index: 1; }
 
     /* Override Cesium default styles for a clean dark look */
     .cesium-viewer-bottom { display: none !important; }
 
+    /* Custom Geocoder Search Box Styling */
+    .cesium-viewer-toolbar {
+      top: 20px !important;
+      right: 340px !important; /* Avoid right editor panel which is 320px wide + 20px gap */
+      left: auto !important;
+      transition: right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    .cesium-geocoder-input {
+      background-color: rgba(20, 20, 25, 0.8) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      border-radius: 20px 0 0 20px !important;
+      color: #fff !important;
+      font-size: 12px !important;
+      padding-left: 10px !important;
+      height: 32px !important;
+      backdrop-filter: blur(8px) !important;
+      width: 140px !important;
+      transition: width 0.2s ease-in-out !important;
+    }
+    .cesium-geocoder-input:focus {
+      width: 200px !important;
+    }
+    .cesium-geocoder-searchButton {
+      background-color: rgba(20, 20, 25, 0.8) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      border-left: none !important;
+      border-radius: 0 20px 20px 0 !important;
+      height: 32px !important;
+      fill: #ffcd55 !important;
+      backdrop-filter: blur(8px) !important;
+    }
+
     .editor-panel {
       position: absolute; top: 0; right: 0; bottom: 0; width: 320px;
       display: flex; flex-direction: column;
       background: rgba(14,14,18,0.98); border-left: 1px solid rgba(255,255,255,0.1);
-      overflow: hidden; z-index: 10;
+      z-index: 10;
+      transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
+    .editor-panel.collapsed {
+      transform: translateX(320px);
+    }
+
+    /* Collapse Handle for POI Editor */
+    .editor-toggle-btn {
+      position: absolute;
+      top: 50%;
+      left: -20px;
+      width: 20px;
+      height: 70px;
+      transform: translateY(-50%);
+      background: rgba(14, 14, 18, 0.98);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-right: none;
+      border-radius: 8px 0 0 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.5);
+      z-index: 11;
+      transition: background 0.2s, color 0.2s, left 0.3s;
+      backdrop-filter: blur(8px);
+      outline: none;
+    }
+    .editor-toggle-btn:hover {
+      color: #ffcd55;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .editor-panel.collapsed .editor-toggle-btn {
+      left: -24px;
+      width: 24px;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      color: #10b981;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+    }
+    .editor-toggle-btn .icon-expand { display: none; }
+    .editor-panel.collapsed .editor-toggle-btn .icon-collapse { display: none; }
+    .editor-panel.collapsed .editor-toggle-btn .icon-expand { display: block; }
 
     .panel-toolbar {
       padding: 10px 14px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
@@ -31,7 +115,7 @@
     }
     .panel-toolbar button {
       background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.15);
-      padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; white-space: nowrap;
+      padding: 6px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; white-space: nowrap;
       transition: background-color 0.2s;
     }
     .panel-toolbar button:hover { background: rgba(255,255,255,0.2); }
@@ -51,7 +135,7 @@
     }
     .poi-item:hover { background: rgba(255,255,255,0.05); }
     .poi-item.selected { background: rgba(255,205,85,0.12); border-left: 3px solid #ffcd55; }
-    .poi-item .poi-item-name { font-size: 13px; font-weight: 500; }
+    .poi-item .poi-item-name { font-size: 12px; font-weight: 500; }
     .poi-item .poi-item-type { font-size: 11px; color: rgba(255,255,255,0.4); }
 
     .edit-form {
@@ -65,19 +149,19 @@
     .form-row input, .form-row textarea, .form-row select {
       width: 100%; background: rgba(255,255,255,0.06); color: #eee;
       border: 1px solid rgba(255,255,255,0.12); border-radius: 6px;
-      padding: 7px 10px; font-size: 12px; font-family: inherit;
+      padding: 7px 10px; font-size: 11px; font-family: inherit;
     }
     .form-row textarea { min-height: 60px; resize: vertical; line-height: 1.5; }
     .form-row input:focus, .form-row textarea:focus, .form-row select:focus { border-color: rgba(255,205,85,0.5); outline: none; }
     
-    .form-row .checkbox-label { display: flex; align-items: center; gap: 8px; color: #eee; font-size: 12px; cursor: pointer; user-select: none; }
+    .form-row .checkbox-label { display: flex; align-items: center; gap: 8px; color: #eee; font-size: 11px; cursor: pointer; user-select: none; }
     .form-row .checkbox-label input { width: auto; margin: 0; }
 
     .form-row.camera-box { background: rgba(255,205,85,0.04); padding: 8px; border-radius: 6px; border: 1px dashed rgba(255,205,85,0.2); }
 
     .form-actions { display: flex; gap: 8px; margin-top: 8px; }
     .form-actions button {
-      flex: 1; padding: 8px; border-radius: 6px; font-size: 12px; cursor: pointer;
+      flex: 1; padding: 8px; border-radius: 6px; font-size: 11px; cursor: pointer;
       border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.1); color: #fff;
       transition: background-color 0.2s;
     }
@@ -102,6 +186,14 @@
   </div>
 
   <div class="editor-panel">
+    <button class="editor-toggle-btn" id="btnTogglePanel" aria-label="Toggle Panel">
+      <svg class="icon-collapse" width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 1L5 5L1 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <svg class="icon-expand" width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M5 1L1 5L5 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
     <div class="panel-toolbar">
       <button id="addModeBtn" class="primary active">＋ 添加模式</button>
       <button id="exportBtn">导出 JSON</button>
@@ -160,14 +252,14 @@
         <input type="number" id="fZoom" step="1" placeholder="视线距离/范围 (米)" style="margin-bottom: 4px;" />
         
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; margin-top: 6px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 6px;">
-          <input type="number" id="fCamLng" readonly style="background: rgba(255,255,255,0.02); color: #ccc; font-size: 11px;" placeholder="相机经度" />
-          <input type="number" id="fCamLat" readonly style="background: rgba(255,255,255,0.02); color: #ccc; font-size: 11px;" placeholder="相机纬度" />
-          <input type="number" id="fCamHeight" readonly style="background: rgba(255,255,255,0.02); color: #ccc; font-size: 11px;" placeholder="相机高度" />
+          <input type="number" id="fCamLng" readonly style="background: rgba(255,255,255,0.02); color: #ccc;" placeholder="相机经度" />
+          <input type="number" id="fCamLat" readonly style="background: rgba(255,255,255,0.02); color: #ccc;" placeholder="相机纬度" />
+          <input type="number" id="fCamHeight" readonly style="background: rgba(255,255,255,0.02); color: #ccc;" placeholder="相机高度" />
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; margin-top: 4px;">
-          <input type="number" id="fHeading" step="0.1" style="font-size: 11px;" placeholder="偏航角 Heading" />
-          <input type="number" id="fPitch" step="0.1" style="font-size: 11px;" placeholder="俯仰角 Pitch" />
-          <input type="number" id="fRoll" step="0.1" style="font-size: 11px;" placeholder="翻滚角 Roll" />
+          <input type="number" id="fHeading" step="0.1" placeholder="偏航角 Heading" />
+          <input type="number" id="fPitch" step="0.1" placeholder="俯仰角 Pitch" />
+          <input type="number" id="fRoll" step="0.1" placeholder="翻滚角 Roll" />
         </div>
       </div>
 
@@ -191,7 +283,43 @@
         <label style="color: #ffcd55;">720yun 全景嵌入链接 (720yun Embed Link)</label>
         <input type="text" id="f720yunUrl" placeholder="粘贴 720yun 全景外链 (例如: https://720yun.com/t/...)" />
       </div>
-      <div class="form-actions">
+      <div class="form-row">
+        <label>自定义立体图标路径 (Custom Icon Path)</label>
+        <input type="text" id="fIcon" placeholder="AI 生成后自动填入，如: /assets/icons/msn_001.png" />
+      </div>
+      
+      <!-- AI Icon Generation Accordion -->
+      <div class="form-row" style="background: rgba(255,205,85,0.04); padding: 12px; border-radius: 6px; border: 1px dashed rgba(255,205,85,0.25); margin-top: 10px;">
+        <label style="color: #ffcd55; font-weight: bold; margin-bottom: 6px; display: block;">🔮 AI 3D 立体图标生成 (Stable Diffusion)</label>
+        
+        <div style="margin-bottom: 8px;">
+          <label style="font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 2px; display: block;">画面描述提示词 (Prompt)</label>
+          <textarea id="aiIconPrompt" style="min-height: 44px; padding: 4px 8px; width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #fff;" placeholder="例如: a glowing golden temple, tibetan style, game asset"></textarea>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+          <div>
+            <label style="font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 2px; display: block;">背景色抠图 (Keying)</label>
+            <select id="aiIconBgMode" style="padding: 4px; width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #fff;">
+              <option value="black">抠除黑色背景 (推荐)</option>
+              <option value="white">抠除白色背景</option>
+              <option value="none">不抠图 (保留底色)</option>
+            </select>
+          </div>
+          <div style="display: flex; align-items: flex-end;">
+            <button type="button" id="generateIconBtn" style="width: 100%; padding: 6px; background: rgba(255,205,85,0.25); border: 1px solid rgba(255,205,85,0.5); color: #ffcd55; border-radius: 4px; cursor: pointer; font-weight: bold; transition: all 0.2s;">✨ AI 生成图标</button>
+          </div>
+        </div>
+        
+        <div id="aiIconPreviewBox" style="display: none; align-items: center; gap: 10px; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.06);">
+          <img id="aiIconPreviewImg" src="" style="width: 44px; height: 44px; border-radius: 4px; background: #222; border: 1px solid rgba(255,255,255,0.15); object-fit: contain;" />
+          <div style="flex: 1; font-size: 10px; color: #10b981; font-weight: 500;">
+            生成成功！已自动填入上方路径，保存后生效。
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions" style="margin-top: 15px;">
         <button id="savePoiBtn" class="primary">保存修改</button>
         <button id="deletePoiBtn" class="danger">删除</button>
         <button id="cancelEditBtn">取消</button>
@@ -222,7 +350,7 @@
         timeline: false,
         baseLayerPicker: false,
         fullscreenButton: false,
-        geocoder: false,
+        geocoder: true,
         homeButton: false,
         infoBox: false, // Turn off Cesium standard infobox
         selectionIndicator: true,
@@ -434,7 +562,28 @@
         const isSelected = poi.id === selectedId;
         const colorHex = isSelected ? '#ffcd55' : '#ffcd55';
 
-        if (isFlat && poiId === 'wht-blank') {
+        if (poi.icon) {
+          // Normal custom billboard icon
+          entityConfig.billboard = {
+            image: poi.icon.startsWith('/') ? poi.icon : '../' + poi.icon, // Fix path relative to app subfolder if needed
+            scale: isSelected ? 0.75 : 0.6,
+            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+            disableDepthTestDistance: 10000000.0
+          };
+          entityConfig.label = {
+            text: poi.name,
+            font: 'bold 12px "PingFang SC", "Microsoft YaHei", sans-serif',
+            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+            fillColor: isSelected ? Cesium.Color.fromCssColorString('#f59e0b') : Cesium.Color.fromCssColorString('#e5e7eb'),
+            outlineColor: Cesium.Color.BLACK,
+            outlineWidth: 3.0,
+            pixelOffset: new Cesium.Cartesian2(0, -18), // offset slightly higher for billboard
+            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+            disableDepthTestDistance: 10000000.0,
+            scaleByDistance: new Cesium.NearFarScalar(100, 1.0, 15000, 0.5)
+          };
+        } else if (isFlat && poiId === 'wht-blank') {
           // Yellow label, no billboard icon, clamped to ground. Black outline to stand out against white snow terrain
           entityConfig.label = {
             text: poi.name + (isSelected ? " (已选中)" : ""),
@@ -513,6 +662,13 @@
       document.getElementById("fImageUrl").value = poi.imageUrl || "";
       document.getElementById("fVideoUrl").value = poi.videoUrl || "";
       document.getElementById("fNote").value = poi.note || "";
+      document.getElementById("f720yunUrl").value = poi.url720 || "";
+      document.getElementById("fIcon").value = poi.icon || "";
+
+      // 重置 AI 图标生成预览和输入框
+      document.getElementById("aiIconPrompt").value = "a glossy 3D golden crest emblem icon of " + poi.name + ", tibetan style, game asset";
+      document.getElementById("aiIconPreviewBox").style.display = "none";
+      document.getElementById("aiIconPreviewImg").src = "";
 
       document.getElementById("fCamLng").value = typeof poi.camLng === "number" ? poi.camLng.toFixed(6) : "";
       document.getElementById("fCamLat").value = typeof poi.camLat === "number" ? poi.camLat.toFixed(6) : "";
@@ -572,6 +728,18 @@
       poi.videoUrl = document.getElementById("fVideoUrl").value.trim();
       if (!poi.videoUrl) delete poi.videoUrl;
       poi.note = document.getElementById("fNote").value.trim();
+      poi.url720 = document.getElementById("f720yunUrl").value.trim();
+      if (!poi.url720) delete poi.url720;
+      poi.icon = document.getElementById("fIcon").value.trim();
+      if (!poi.icon) delete poi.icon;
+
+      // 保存捕获的 3D 镜头视角
+      poi.camLng = document.getElementById("fCamLng").value ? parseFloat(document.getElementById("fCamLng").value) : undefined;
+      poi.camLat = document.getElementById("fCamLat").value ? parseFloat(document.getElementById("fCamLat").value) : undefined;
+      poi.camHeight = document.getElementById("fCamHeight").value ? parseFloat(document.getElementById("fCamHeight").value) : undefined;
+      poi.heading = document.getElementById("fHeading").value ? parseFloat(document.getElementById("fHeading").value) : undefined;
+      poi.pitch = document.getElementById("fPitch").value ? parseFloat(document.getElementById("fPitch").value) : undefined;
+      poi.roll = document.getElementById("fRoll").value ? parseFloat(document.getElementById("fRoll").value) : undefined;
 
       renderList();
       refreshMarkers();
@@ -733,6 +901,97 @@
       document.getElementById("fRoll").value = roll.toFixed(1);
 
       document.getElementById("status").textContent = "📡 已成功捕获当前 3D 相机视角 (倾斜对焦高度: " + Math.round(range) + " 米)";
+    });
+
+    // AI Icon Generation Handler
+    document.getElementById("generateIconBtn").addEventListener("click", async () => {
+      const btn = document.getElementById("generateIconBtn");
+      const pId = document.getElementById("fId").value.trim();
+      const promptText = document.getElementById("aiIconPrompt").value.trim();
+      const bgMode = document.getElementById("aiIconBgMode").value;
+      const statusEl = document.getElementById("status");
+
+      if (!selectedId) {
+        alert("请先选择或创建一个地标点！");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "⏳ 正在生成...";
+      statusEl.textContent = "🤖 正在调用本地算力生成立体图标，请稍候...";
+
+      try {
+        const res = await fetch("api/generate-icon", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            poiId: selectedId,
+            prompt: promptText,
+            bgMode: bgMode
+          })
+        });
+
+        const data = await res.json();
+        if (data.ok) {
+          document.getElementById("fIcon").value = data.iconUrl;
+          document.getElementById("aiIconPreviewImg").src = data.iconUrl + "?t=" + Date.now();
+          document.getElementById("aiIconPreviewBox").style.display = "flex";
+          statusEl.textContent = "✅ 立体图标本地生成成功！请点击下方 [保存修改] 保存项目数据。";
+          
+          // 立即更新当前选中 POI 在内存中的 icon 字段，以便刷新 marker 渲染
+          const activePoi = pois.find(p => p.id === selectedId);
+          if (activePoi) {
+            activePoi.icon = data.iconUrl;
+            refreshMarkers();
+          }
+        } else {
+          throw new Error(data.error || "生成失败");
+        }
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = "❌ 图标生成失败: " + err.message;
+        alert("图标生成失败，请检查终端日志或确认本地 SD 服务已启动！");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "✨ AI 生成图标";
+      }
+    });
+
+    // Collapsible Panel toggle
+    const togglePanel = () => {
+      const panel = document.querySelector(".editor-panel");
+      const mapArea = document.querySelector(".map-area");
+      
+      panel.classList.toggle("collapsed");
+      mapArea.classList.toggle("full-width");
+      
+      if (viewer) {
+        viewer.resize();
+        // Also call viewer.resize() after transition ends for smooth pixel alignment
+        setTimeout(() => {
+          viewer.resize();
+        }, 350);
+      }
+    };
+
+    document.getElementById("btnTogglePanel").addEventListener("click", togglePanel);
+
+    const panelToolbar = document.querySelector(".panel-toolbar");
+    if (panelToolbar) {
+      panelToolbar.style.cursor = 'pointer';
+      panelToolbar.title = '点击工具栏空白处折叠/展开面板';
+      panelToolbar.addEventListener('click', (e) => {
+        // Ignore clicks on buttons/inputs/spans
+        if (e.target.closest('button') || e.target.closest('input') || e.target.closest('span')) return;
+        togglePanel();
+      });
+    }
+
+    // Window Resize Listener for responsiveness
+    window.addEventListener('resize', () => {
+      if (viewer) {
+        viewer.resize();
+      }
     });
 
     init();

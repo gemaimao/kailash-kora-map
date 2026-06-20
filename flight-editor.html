@@ -1058,6 +1058,31 @@
           </div>
 
 
+                    <!-- Group 3.5: Track Visual Style -->
+          <div class="accordion-group active" id="accordionTrackStyle">
+            <div class="accordion-header">🎨 航轨视觉效果</div>
+            <div class="accordion-body">
+              <div class="shot-param-row" style="margin-bottom: 8px;">
+                <label style="width: 60px;">线体风格:</label>
+                <select id="selTrackLineType" style="flex:1; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:2px 4px; border-radius:3px; font-size:11px;">
+                  <option value="dashed">虚线段 (默认)</option>
+                  <option value="dotted">虚点线</option>
+                  <option value="solid">实线</option>
+                  <option value="double">双边实线</option>
+                </select>
+              </div>
+              <div class="shot-param-row" style="margin-bottom: 4px;">
+                <label style="width: 60px;">动态特效:</label>
+                <select id="selTrackAnimation" style="flex:1; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:2px 4px; border-radius:3px; font-size:11px;">
+                  <option value="none">无特效</option>
+                  <option value="flash_yellow">黄光闪烁</option>
+                  <option value="flash_red">红光闪烁</option>
+                  <option value="flash_color">五彩闪烁</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
           <!-- Group 2.5: Lighting -->
           <div class="accordion-group active" id="accordionLighting">
             <div class="accordion-header">🌅 环境与光照</div>
@@ -1120,6 +1145,18 @@
                 <div id="hudTtsAudioContainer" style="display: none; align-items: center; gap: 6px; background: rgba(0,0,0,0.2); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.04);">
                   <button id="btnPlayTtsAudio" style="background: none; border: none; color: var(--accent-cyan); font-size: 12px; cursor: pointer; padding: 2px;">▶ 试听</button>
                   <span id="hudTtsDurationLabel" style="font-size: 10px; color: var(--text-dim); font-family: monospace;">时长: 0.0s</span>
+                  
+                  <button class="tool-btn" id="btnExit" style="background: rgba(255, 60, 60, 0.2); border-color: rgba(255, 60, 60, 0.3); color: #ff6b6b; padding: 6px 16px;">
+            <span style="font-size: 14px;">🚪</span> 退出
+          </button>
+          
+          <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.2); margin: 0 4px; align-self: center;"></div>
+          
+          <!-- 新增大盘顶部的新建航轨入口 -->
+          <button class="tool-btn" id="btnAddTrackTop" onclick="if(window.createNewTrack) window.createNewTrack();" style="background: rgba(255, 205, 85, 0.15); border-color: rgba(255, 205, 85, 0.3); color: #ffcd55; padding: 6px 16px; font-weight: bold;">
+            <span style="font-size: 14px;">➕</span> 新建航轨
+          </button>
+          
                   <span style="font-size: 9px; color: #10b981; margin-left: auto;">已对齐 (+2s)</span>
                 </div>
               </div>
@@ -1135,14 +1172,15 @@
       <div class="elevation-chart-container" id="elevationChartContainer">
         <div class="chart-header">
           <div style="display: flex; align-items: center; gap: 16px;">
-            <span class="chart-title">🎛️ 航轨编辑</span>
+            <!-- Removed 🎛️ 航轨编辑 as per user request -->
             
             <!-- 撤销/重做/清空/批量 组 -->
             <div style="display: flex; align-items: center; gap: 8px;">
               <span style="font-size: 11px; font-weight: bold; color: rgba(255,255,255,0.7); display: flex; align-items: center; gap: 4px;">🎬 航轨选择</span>
               
-              <select id="trackSelector" class="tool-btn" style="padding: 2px 18px 2px 8px; font-size: 11px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 4px; appearance: none; cursor: pointer;"></select>
-              <button class="tool-btn" id="btnAddTrack" style="padding: 2px 8px; font-size: 11px; background: transparent; border: none; min-width: unset; color: #ffcd55; box-shadow: none; font-weight: bold;" title="新建独立航轨">+ 新建航轨</button>
+              <select id="trackSelector" class="tool-btn" style="padding: 2px 8px; font-size: 11px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 4px; cursor: pointer;"></select>
+              <button class="tool-btn" id="btnEditTrack" style="padding: 2px 8px; font-size: 11px; background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); color: #60a5fa; border-radius: 4px; box-shadow: none;" title="编辑当前航轨">⚙️ 航轨设置</button>
+              
               <button class="tool-btn" id="btnDeleteTrack" style="padding: 2px 8px; font-size: 11px; background: transparent; border: none; min-width: unset; color: rgba(255,77,77,0.7); box-shadow: none;" title="删除当前航轨">删除航轨</button>
               
               <div style="width: 1px; height: 12px; background: rgba(255,255,255,0.2); margin: 0 6px;"></div>
@@ -1317,7 +1355,20 @@
     }
 
     // Distance Calculation (3D)
-    function haversine(lat1, lon1, alt1, lat2, lon2, alt2) {
+    function haversine(lat1, lon1, arg3, arg4, arg5, arg6) {
+      let alt1 = 0, lat2 = 0, lon2 = 0, alt2 = 0;
+      if (typeof arg5 === 'undefined') {
+        // 4 arguments passed: lat1, lon1, lat2, lon2
+        lat2 = arg3;
+        lon2 = arg4;
+      } else {
+        // 6 arguments passed: lat1, lon1, alt1, lat2, lon2, alt2
+        alt1 = arg3 || 0;
+        lat2 = arg4;
+        lon2 = arg5;
+        alt2 = arg6 || 0;
+      }
+      
       const R = 6371000.0;
       const phi1 = lat1 * Math.PI / 180;
       const phi2 = lat2 * Math.PI / 180;
@@ -1483,7 +1534,7 @@ const projectPrefix = (pathSegments.length > 0 && knownProjects.includes(pathSeg
           } else {
             // Backward compatibility
             data.flights = [{
-              id: generateUUID(),
+              id: 'trk_' + Date.now(),
               name: '航轨 1',
               path: raw.main_flight || []
             }];
@@ -1528,6 +1579,77 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       viewer.scene.postProcessStages.fxaa.enabled = true;
       viewer.scene.globe.depthTestAgainstTerrain = true;
 
+      // --- Spotlight Effect Setup ---
+      let spotlightEntity = null;
+      let spotlightActive = false;
+      
+      const spotlightCanvas = document.createElement('canvas');
+      spotlightCanvas.width = 512;
+      spotlightCanvas.height = 512;
+      const ctx = spotlightCanvas.getContext('2d');
+      const gradient = ctx.createRadialGradient(256, 256, 0, 256, 256, 256);
+      gradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+      gradient.addColorStop(0.2, 'rgba(255, 255, 200, 0.6)');
+      gradient.addColorStop(0.5, 'rgba(255, 255, 100, 0.15)');
+      gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 512, 512);
+
+      function updateSpotlightState() {
+        if (!data.flights || activeTrackIndex < 0) {
+          spotlightActive = false;
+          return;
+        }
+        const curTrack = data.flights[activeTrackIndex];
+        // Night mode standard equipment
+        spotlightActive = (curTrack.category === '夜间航轨');
+      }
+
+      function initSpotlight() {
+        if (!viewer) return;
+        spotlightEntity = viewer.entities.add({
+          id: 'drone_spotlight',
+          ellipse: {
+            semiMinorAxis: 200.0,
+            semiMajorAxis: 200.0,
+            material: new Cesium.ImageMaterialProperty({
+              image: spotlightCanvas,
+              transparent: true
+            }),
+            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
+          },
+          show: false
+        });
+
+        viewer.scene.preUpdate.addEventListener(function(scene, time) {
+          if (!spotlightActive || !spotlightEntity) {
+            if (spotlightEntity && spotlightEntity.show) spotlightEntity.show = false;
+            return;
+          }
+          
+          const center = new Cesium.Cartesian2(viewer.canvas.width / 2, viewer.canvas.height / 2);
+          const ray = viewer.camera.getPickRay(center);
+          if (!ray) return;
+          
+          const hit = scene.globe.pick(ray, scene);
+          if (Cesium.defined(hit)) {
+            spotlightEntity.position = hit;
+            spotlightEntity.show = true;
+            const dist = Cesium.Cartesian3.distance(viewer.camera.position, hit);
+            const radius = Math.max(50, dist * Math.tan(Cesium.Math.toRadians(12)));
+            spotlightEntity.ellipse.semiMinorAxis = radius;
+            spotlightEntity.ellipse.semiMajorAxis = radius;
+          } else {
+            spotlightEntity.show = false;
+          }
+        });
+      }
+      
+      // Call initSpotlight after viewer is ready.
+
+      initSpotlight();
+
+
       // Bind Map Layer Switcher
       document.getElementById('mapLayerSelector').addEventListener('change', (e) => {
         changeBaseMap(e.target.value);
@@ -1543,39 +1665,6 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         sampleAllWaypointHeights();
       } catch (err) {
         console.error("Terrain provider load failed:", err);
-      }
-
-      // Camera view default focusing based on project location data
-      if (data.main_flight && data.main_flight.length > 0) {
-        const firstPt = data.main_flight[0];
-        const absoluteAlt = (firstPt.ground_alt || 5000) + (firstPt.relative_alt || 500);
-        viewer.camera.setView({
-          destination: Cesium.Cartesian3.fromDegrees(firstPt.lng, firstPt.lat, absoluteAlt),
-          orientation: {
-            heading: Cesium.Math.toRadians(firstPt.heading || 0.0),
-            pitch: Cesium.Math.toRadians(firstPt.pitch || -25.0),
-            roll: Cesium.Math.toRadians(firstPt.roll || 0.0)
-          }
-        });
-      } else if (data.main && data.main.length > 0) {
-        viewer.camera.setView({
-          destination: Cesium.Cartesian3.fromDegrees(data.main[0][0], data.main[0][1], 9500),
-          orientation: {
-            heading: Cesium.Math.toRadians(0.0),
-            pitch: Cesium.Math.toRadians(-35.0),
-            roll: 0.0
-          }
-        });
-      } else {
-        // Completely empty project starting from scratch: focus on a global high view centered on China
-        viewer.camera.setView({
-          destination: Cesium.Cartesian3.fromDegrees(104.1954, 35.8617, 10000000.0),
-          orientation: {
-            heading: Cesium.Math.toRadians(0.0),
-            pitch: Cesium.Math.toRadians(-90.0),
-            roll: 0.0
-          }
-        });
       }
 
       // 3. Load reference POIs & Save globally
@@ -1611,6 +1700,48 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         }
       } catch(e) {
         console.error("加载参考 POI 失败:", e);
+      }
+
+      // Camera view default focusing based on project location data
+      if (data.main_flight && data.main_flight.length > 0) {
+        const firstPt = data.main_flight[0];
+        const absoluteAlt = (firstPt.ground_alt || 5000) + (firstPt.relative_alt || 500);
+        viewer.camera.setView({
+          destination: Cesium.Cartesian3.fromDegrees(firstPt.lng, firstPt.lat, absoluteAlt),
+          orientation: {
+            heading: Cesium.Math.toRadians(firstPt.heading || 0.0),
+            pitch: Cesium.Math.toRadians(firstPt.pitch || -25.0),
+            roll: Cesium.Math.toRadians(firstPt.roll || 0.0)
+          }
+        });
+      } else if (poisData && poisData.length > 0) {
+        viewer.camera.setView({
+          destination: Cesium.Cartesian3.fromDegrees(poisData[0].lng, poisData[0].lat, 15000),
+          orientation: {
+            heading: Cesium.Math.toRadians(0.0),
+            pitch: Cesium.Math.toRadians(-45.0),
+            roll: 0.0
+          }
+        });
+      } else if (data.main && data.main.length > 0) {
+        viewer.camera.setView({
+          destination: Cesium.Cartesian3.fromDegrees(data.main[0][0], data.main[0][1], 9500),
+          orientation: {
+            heading: Cesium.Math.toRadians(0.0),
+            pitch: Cesium.Math.toRadians(-35.0),
+            roll: 0.0
+          }
+        });
+      } else {
+        // Completely empty project starting from scratch: focus on China with a safe altitude
+        viewer.camera.setView({
+          destination: Cesium.Cartesian3.fromDegrees(104.1954, 35.8617, 15000.0),
+          orientation: {
+            heading: Cesium.Math.toRadians(0.0),
+            pitch: Cesium.Math.toRadians(-45.0),
+            roll: 0.0
+          }
+        });
       }
 
       // 4. Render lines and nodes
@@ -1890,7 +2021,7 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
 
 
       // Bind Sidebar Toggle
-      document.getElementById('btnToggleSidebar').addEventListener('click', () => {
+      const toggleSidebar = () => {
         const sidebar = document.querySelector('.sidebar-left');
         sidebar.classList.toggle('collapsed');
         
@@ -1905,7 +2036,19 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
             rebuildElevationChart();
           }, 350);
         }
-      });
+      };
+
+      document.getElementById('btnToggleSidebar').addEventListener('click', toggleSidebar);
+
+      const sidebarHeader = document.querySelector('.sidebar-header');
+      if (sidebarHeader) {
+        sidebarHeader.style.cursor = 'pointer';
+        sidebarHeader.title = '点击折叠/展开侧边栏';
+        sidebarHeader.addEventListener('click', (e) => {
+          if (e.target.closest('button') || e.target.closest('input') || e.target.closest('select')) return;
+          toggleSidebar();
+        });
+      }
 
       // Window Resize Listener for responsiveness
       window.addEventListener('resize', () => {
@@ -1933,10 +2076,12 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       data.flights.forEach((trk, idx) => {
         const option = document.createElement('option');
         option.value = idx;
-        option.textContent = trk.name;
+        option.textContent = `${trk.name || ('航轨 ' + (idx+1))}`;
         if (idx === activeTrackIndex) option.selected = true;
         selector.appendChild(option);
       });
+      
+      selector.value = activeTrackIndex;
       
       document.getElementById('btnDeleteTrack').style.display = data.flights.length > 1 ? 'inline-block' : 'none';
     }
@@ -1945,11 +2090,21 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       if (idx < 0 || idx >= data.flights.length) return;
       
       // Sync current
-      data.flights[activeTrackIndex].path = data.main_flight;
+      if (data.flights[activeTrackIndex]) {
+        data.flights[activeTrackIndex].path = data.main_flight;
+      }
       
       // Switch
       activeTrackIndex = idx;
       data.main_flight = data.flights[activeTrackIndex].path;
+      
+      // Load track style into UI
+      const curStyle = data.flights[activeTrackIndex].style || {};
+      const ltSel = document.getElementById('selTrackLineType');
+      const anSel = document.getElementById('selTrackAnimation');
+      if (ltSel) ltSel.value = curStyle.lineType || 'dashed';
+      if (anSel) anSel.value = curStyle.animation || 'none';
+      
       
       // Reset state
       historyStack = [];
@@ -1967,27 +2122,43 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       updateCount();
     }
     
-    function createNewTrack() {
-      const defaultName = `航轨 ${data.flights.length + 1}`;
-      const userInput = prompt("请输入新航轨的名称（建议以地理或线路特征命名）：", defaultName);
-      if (userInput === null) return;
-      const finalName = userInput.trim() || defaultName;
-      
-      const newTrack = {
-        id: generateUUID(),
-        name: finalName,
-        path: []
-      };
-      
-      data.flights[activeTrackIndex].path = data.main_flight;
-      data.flights.push(newTrack);
-      activeTrackIndex = data.flights.length - 1;
-      data.main_flight = data.flights[activeTrackIndex].path;
-      
-      updateTrackSelectorUI();
-      switchTrack(activeTrackIndex);
-      saveToServer();
-      showToast(`已创建新航轨: ${finalName}`);
+    async function createNewTrack() {
+      showToast("正在准备新建航轨...");
+      console.log("createNewTrack called");
+      try {
+        const defaultName = `航轨 ${data.flights.length + 1}`;
+        const result = await showCustomDialog("新建独立航轨", [
+          { key: 'name', label: '航轨名称', default: defaultName },
+          { key: 'category', label: '航轨分类 (导演意图/环境)', type: 'select', options: ['主线剧情航轨', '倒序航轨', '氛围航轨', '深度探索航轨', '知识串讲航轨', '日出航轨', '正午航轨', '日落航轨', '夜间航轨', '自由探索航轨', '自定义'] },
+          { key: 'desc', label: '航轨说明 (选填, 为AI编辑做准备)', type: 'textarea', placeholder: '例如：该航段主要展示山峰全貌...' }
+        ]);
+        if (!result || !result.name) return;
+        const finalName = result.name;
+        
+        const newTrack = {
+          id: 'trk_' + Date.now() + Math.floor(Math.random()*1000),
+          name: finalName,
+          category: result.category !== '默认无' ? result.category : '',
+          desc: result.desc || '',
+          path: []
+        };
+        
+        if (data.flights[activeTrackIndex]) {
+          data.flights[activeTrackIndex].path = data.main_flight;
+        }
+        data.flights.push(newTrack);
+        activeTrackIndex = data.flights.length - 1;
+        updateSpotlightState();
+
+        data.main_flight = data.flights[activeTrackIndex].path;
+        
+        updateTrackSelectorUI();
+        switchTrack(activeTrackIndex);
+        saveToServer();
+        showToast(`已创建新航轨: ${finalName}`);
+      } catch (e) {
+        showToast("新建航轨出错: " + e.message);
+      }
     }
     
     function deleteCurrentTrack() {
@@ -2258,7 +2429,65 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       }
         const camPos = Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, absoluteAlt);
 
+
+        const curStyle = (data.flights[activeTrackIndex] && data.flights[activeTrackIndex].style) || {};
+        const lt = curStyle.lineType || 'dashed';
+        const an = curStyle.animation || 'none';
+        
+        let polyMaterial;
+        
+        // 1. Base Line Type
+        if (lt === 'dashed') {
+          polyMaterial = new Cesium.PolylineDashMaterialProperty({
+            color: isActive ? Cesium.Color.GOLD.withAlpha(0.7) : (isSelected ? Cesium.Color.GOLD.withAlpha(0.4) : Cesium.Color.WHITE.withAlpha(0.25)),
+            dashLength: 16.0
+          });
+        } else if (lt === 'dotted') {
+          polyMaterial = new Cesium.PolylineDashMaterialProperty({
+            color: isActive ? Cesium.Color.GOLD.withAlpha(0.8) : (isSelected ? Cesium.Color.GOLD.withAlpha(0.5) : Cesium.Color.WHITE.withAlpha(0.3)),
+            dashLength: 4.0,
+            dashPattern: 255 // Make gaps bigger
+          });
+        } else if (lt === 'solid') {
+          polyMaterial = new Cesium.ColorMaterialProperty(isActive ? Cesium.Color.GOLD.withAlpha(0.8) : (isSelected ? Cesium.Color.GOLD.withAlpha(0.5) : Cesium.Color.WHITE.withAlpha(0.3)));
+        } else if (lt === 'double') {
+          polyMaterial = new Cesium.PolylineOutlineMaterialProperty({
+            color: Cesium.Color.TRANSPARENT,
+            outlineWidth: 2,
+            outlineColor: isActive ? Cesium.Color.GOLD.withAlpha(0.8) : (isSelected ? Cesium.Color.GOLD.withAlpha(0.5) : Cesium.Color.WHITE.withAlpha(0.3))
+          });
+        } else {
+          polyMaterial = new Cesium.PolylineDashMaterialProperty({
+            color: isActive ? Cesium.Color.GOLD.withAlpha(0.7) : (isSelected ? Cesium.Color.GOLD.withAlpha(0.4) : Cesium.Color.WHITE.withAlpha(0.25)),
+            dashLength: 16.0
+          });
+        }
+
+        // 2. Animation (CallbackProperty override)
+        if (an !== 'none') {
+            const baseColor = (lt === 'solid') ? 
+                (isActive ? Cesium.Color.GOLD : (isSelected ? Cesium.Color.GOLD : Cesium.Color.WHITE)) :
+                (isActive ? Cesium.Color.GOLD : (isSelected ? Cesium.Color.GOLD : Cesium.Color.WHITE));
+                
+            polyMaterial = new Cesium.ColorMaterialProperty(new Cesium.CallbackProperty((time, result) => {
+                const now = Date.now();
+                if (an === 'flash_yellow') {
+                    const alpha = 0.3 + 0.7 * Math.abs(Math.sin(now / 300));
+                    return Cesium.Color.GOLD.withAlpha(alpha, result);
+                } else if (an === 'flash_red') {
+                    const alpha = 0.3 + 0.7 * Math.abs(Math.sin(now / 300));
+                    return Cesium.Color.RED.withAlpha(alpha, result);
+                } else if (an === 'flash_color') {
+                    const hue = (now / 2000) % 1.0;
+                    const c = Cesium.Color.fromHsl(hue, 1.0, 0.5, 0.8);
+                    return c.clone(result);
+                }
+                return baseColor.withAlpha(0.8, result);
+            }, false));
+        }
+        
         // 1. Draw vertical drop line to ground
+
         const anchorEnt = viewer.entities.add({
           polyline: {
             positions: [
@@ -2266,10 +2495,7 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
               camPos
             ],
             width: 1.0,
-            material: new Cesium.PolylineDashMaterialProperty({
-              color: isActive ? Cesium.Color.GOLD.withAlpha(0.7) : (isSelected ? Cesium.Color.GOLD.withAlpha(0.4) : Cesium.Color.WHITE.withAlpha(0.25)),
-              dashLength: 4.0
-            })
+            material: polyMaterial
           }
         });
         keyframeMarkers.push(anchorEnt);
@@ -2543,15 +2769,16 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
 
     // ---- Selected Keyframe State Update ----
     function selectKeyframe(idx, keepSelection = false) {
-      const pt = data.main_flight[idx];
-      if (!pt) {
-        deselectKeyframe();
-        return;
-      }
-      activeId = pt.id;
+      try {
+        const pt = data.main_flight[idx];
+        if (!pt) {
+          deselectKeyframe();
+          return;
+        }
+        activeId = pt.id;
 
-      // Update list items active and selected states
-      if (!keepSelection) {
+        // Update list items active and selected states
+        if (!keepSelection) {
         selectedIds = [pt.id];
       } else {
         if (selectedIds.length === 0 || !selectedIds.includes(pt.id)) {
@@ -2708,7 +2935,10 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       document.getElementById('chartSelectionLabel').textContent = `选中空间轨 #${idx + 1} (${pt.name || ('轨道' + (idx+1))})`;
       document.getElementById('chartAdjustControls').style.display = 'flex';
 
-      rebuildElevationChart();
+        rebuildElevationChart();
+      } catch (err) {
+        alert("selectKeyframe error: " + err.message + "\n" + err.stack);
+      }
     }
 
     function deselectKeyframe() {
@@ -3233,14 +3463,23 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       const relativeAlt = Math.max(0, Math.round(camHeight - groundAlt));
 
       const defaultName = "自定义航点 " + (data.main_flight.length + 1);
-      const userInput = prompt("请输入新航点的名称（建议以地理空间/地标命名）：", defaultName);
-      if (userInput === null) return; // User cancelled
-      const finalName = userInput.trim() || defaultName;
+      const result = await showCustomDialog("捕获当前镜头为新航点", [
+        { key: 'name', label: '航点名称', default: defaultName },
+        { key: 'desc', label: '航点说明 (选填)', type: 'textarea', placeholder: '为什么要在这个位置打点？该视角能看清什么地标？' },
+        { key: 'camera_lang', label: '镜头语言', type: 'select', options: ['默认无', '大景别展示', '长镜头推进', '自转式环绕', '低空跟随', '俯瞰全局', '游历第一视角', '平移过渡'] },
+        { key: 'effect', label: '效果描述 (选填)', type: 'textarea', placeholder: '期望的镜头运动或视觉效果，如：缓慢推向主峰' }
+      ]);
+      
+      if (!result || !result.name) return; // User cancelled
+      const finalName = result.name;
 
       const id = 'evt_' + Date.now();
       const newPt = {
         id,
         name: finalName,
+        desc: result.desc || '',
+        camera_lang: result.camera_lang !== '默认无' ? result.camera_lang : '',
+        effect: result.effect || '',
         lng: parseFloat(camLng.toFixed(6)),
         lat: parseFloat(camLat.toFixed(6)),
         ground_alt: groundAlt,
@@ -3663,10 +3902,15 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
             }
           });
         }
-        if (closestPoi) {
-          labelText = `${closestPoi.name} (${(p.d / 1000).toFixed(1)}km)`;
+        
+        const distStr = `${(p.d / 1000).toFixed(1)}km`;
+        
+        if (p.pt.name && p.pt.name.trim() !== '') {
+            labelText = `${p.pt.name} (${distStr})`;
+        } else if (closestPoi) {
+          labelText = `${closestPoi.name} (${distStr})`;
         } else {
-          labelText = `${(p.d / 1000).toFixed(1)}km`;
+          labelText = distStr;
         }
         ctx.fillText(labelText, 0, 0);
         ctx.restore();
@@ -4178,10 +4422,90 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
 
       // Document handlers for track switching
       document.getElementById('trackSelector').addEventListener('change', (e) => {
+        if (e.target.value === 'NEW') {
+          // Revert visual selection to the current track
+          e.target.value = activeTrackIndex;
+          if (window.createNewTrack) window.createNewTrack();
+          return;
+        }
         switchTrack(parseInt(e.target.value));
       });
+      document.getElementById('btnEditTrack').addEventListener('click', async () => {
+        try {
+          const curTrack = data.flights[activeTrackIndex] || {};
+          const result = await showCustomDialog("航轨设置", [
+            { key: 'name', label: '航轨名称', default: curTrack.name || `航轨 ${data.flights.length + 1}`, showAddBtn: true },
+            { key: 'category', label: '航轨分类 (导演意图/环境)', type: 'select', options: ['主线剧情航轨', '倒序航轨', '氛围航轨', '深度探索航轨', '知识串讲航轨', '日出航轨', '正午航轨', '日落航轨', '夜间航轨', '自由探索航轨', '自定义'], default: curTrack.category || '主线剧情航轨' },
+            { key: 'desc', label: '航轨说明 (选填, 为AI编辑做准备)', type: 'textarea', default: curTrack.desc || '', placeholder: '例如：该航段主要展示山峰全貌...' }
+          ]);
+          if (!result || !result.name) return;
+          
+          if (result.action === 'new') {
+            const newTrack = {
+              id: 'trk_' + Date.now() + Math.floor(Math.random()*1000),
+              name: result.name,
+              category: result.category !== '默认无' ? result.category : '',
+              desc: result.desc || '',
+              path: []
+            };
+            if (data.flights[activeTrackIndex]) {
+              data.flights[activeTrackIndex].path = data.main_flight;
+            }
+            data.flights.push(newTrack);
+            activeTrackIndex = data.flights.length - 1;
+            data.main_flight = data.flights[activeTrackIndex].path;
+            updateSpotlightState();
+            updateTrackSelectorUI();
+            switchTrack(activeTrackIndex);
+            saveToServer();
+            showToast(`已创建全新航轨: ${result.name}`);
+          } else {
+            if (data.flights[activeTrackIndex]) {
+              data.flights[activeTrackIndex].name = result.name;
+              data.flights[activeTrackIndex].category = result.category;
+              data.flights[activeTrackIndex].desc = result.desc || '';
+            } else {
+              // Should not happen if edit but empty, push as new track
+              data.flights.push({
+                id: 'trk_' + Date.now(),
+                name: result.name,
+                category: result.category !== '默认无' ? result.category : '',
+                desc: result.desc || '',
+                path: data.main_flight || []
+              });
+              activeTrackIndex = 0;
+            }
+            updateSpotlightState();
+            updateTrackSelectorUI();
+            saveToServerDebounced();
+            showToast("当前航轨信息已更新");
+          }
+        } catch (err) {
+          alert("新建/编辑航轨发生系统级错误: " + err.message + "\n" + err.stack);
+        }
+      });
+
+      window.createNewTrack = createNewTrack; // Expose globally
       document.getElementById('btnAddTrack').addEventListener('click', () => {
-        createNewTrack();
+        console.log("btnAddTrack event listener fired!");
+        if (window.createNewTrack) window.createNewTrack();
+      });
+      document.getElementById('btnAddTrackTop').addEventListener('click', () => {
+        console.log("btnAddTrackTop event listener fired!");
+        if (window.createNewTrack) window.createNewTrack();
+      });
+      
+      // 添加快捷键绑定：按下 Shift + N 也可以新建航轨
+      document.addEventListener('keydown', (e) => {
+        if (e.shiftKey && (e.key === 'N' || e.key === 'n')) {
+          e.preventDefault();
+          console.log("Shift+N fired!");
+          if (window.createNewTrack) window.createNewTrack();
+        }
+      });
+      document.getElementById('btnAddTrack').addEventListener('click', () => {
+        console.log("btnAddTrack event listener fired!");
+        if (window.createNewTrack) window.createNewTrack();
       });
       document.getElementById('btnDeleteTrack').addEventListener('click', () => {
         deleteCurrentTrack();
@@ -4385,6 +4709,19 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         if (!btn) return;
         const vibe = btn.getAttribute('data-vibe');
         applyVibePreset(vibe);
+      });
+
+            document.getElementById('selTrackLineType').addEventListener('change', (e) => {
+        if (!data.flights[activeTrackIndex].style) data.flights[activeTrackIndex].style = {};
+        data.flights[activeTrackIndex].style.lineType = e.target.value;
+        saveToServerDebounced();
+        rebuildMarkers();
+      });
+      document.getElementById('selTrackAnimation').addEventListener('change', (e) => {
+        if (!data.flights[activeTrackIndex].style) data.flights[activeTrackIndex].style = {};
+        data.flights[activeTrackIndex].style.animation = e.target.value;
+        saveToServerDebounced();
+        rebuildMarkers();
       });
 
       // Accordion headers toggle listener (using Event Delegation)
@@ -4891,9 +5228,133 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         }
       });
     }
+    function showCustomDialog(title, fields) {
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;';
+        
+        const dialog = document.createElement('div');
+        dialog.style.cssText = 'background:#1e293b;border:1px solid #334155;border-radius:8px;padding:20px;width:320px;box-shadow:0 10px 25px rgba(0,0,0,0.5);display:flex;flex-direction:column;gap:12px;';
+        
+        const titleEl = document.createElement('div');
+        titleEl.style.cssText = 'font-weight:bold;color:#f8fafc;font-size:14px;margin-bottom:4px;';
+        titleEl.textContent = title;
+        dialog.appendChild(titleEl);
+        
+        const inputs = {};
+        fields.forEach(f => {
+          const wrapper = document.createElement('div');
+          wrapper.style.cssText = 'display:flex;flex-direction:column;gap:4px;';
+          const label = document.createElement('label');
+          label.style.cssText = 'color:#94a3b8;font-size:11px;';
+          label.textContent = f.label;
+          wrapper.appendChild(label);
+          
+          let input;
+          if (f.type === 'textarea') {
+            input = document.createElement('textarea');
+            input.style.cssText = 'background:#0f172a;border:1px solid #334155;color:#f8fafc;padding:6px 8px;border-radius:4px;font-size:12px;resize:vertical;min-height:60px;font-family:inherit;';
+          } else if (f.type === 'select') {
+            input = document.createElement('select');
+            input.style.cssText = 'background:#0f172a;border:1px solid #334155;color:#f8fafc;padding:6px 8px;border-radius:4px;font-size:12px;font-family:inherit;cursor:pointer;';
+            f.options.forEach(opt => {
+              const option = document.createElement('option');
+              option.value = opt;
+              option.textContent = opt;
+              input.appendChild(option);
+            });
+          } else {
+            input = document.createElement('input');
+            input.type = 'text';
+            input.style.cssText = 'background:#0f172a;border:1px solid #334155;color:#f8fafc;padding:6px 8px;border-radius:4px;font-size:12px;font-family:inherit;';
+          }
+          
+          if (f.default && f.type !== 'select') input.value = f.default;
+          else if (f.type === 'select' && f.default) input.value = f.default;
+          
+          if (f.placeholder) input.placeholder = f.placeholder;
+          inputs[f.key] = input;
+          
+          if (f.showAddBtn) {
+            const inputGroup = document.createElement('div');
+            inputGroup.style.cssText = 'display:flex;gap:6px;align-items:center;';
+            input.style.flex = '1';
+            inputGroup.appendChild(input);
+            const addBtn = document.createElement('button');
+            addBtn.textContent = '➕';
+            addBtn.style.cssText = 'background:#10b981;border:none;border-radius:4px;color:#fff;width:28px;height:28px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;';
+            addBtn.title = '切换到新建模式';
+            addBtn.onclick = () => {
+                // Change to new mode
+                if (inputs['name'].value === (f.default || '')) {
+                    inputs['name'].value = '';
+                }
+                if (inputs['desc'] && fields.find(x => x.key === 'desc') && inputs['desc'].value === (fields.find(x => x.key === 'desc').default || '')) {
+                    inputs['desc'].value = '';
+                }
+                inputs['name'].focus();
+                inputs['name'].placeholder = '请填写新航轨名称...';
+                
+                const btn = document.getElementById('dialogConfirmBtn');
+                if (btn) {
+                    btn.dataset.mode = 'new';
+                    btn.textContent = '✓ 确认新建航轨';
+                    btn.style.background = '#10b981';
+                }
+            };
+            inputGroup.appendChild(addBtn);
+            wrapper.appendChild(inputGroup);
+          } else {
+            wrapper.appendChild(input);
+          }
+          dialog.appendChild(wrapper);
+        });
+        
+        const btnRow = document.createElement('div');
+        btnRow.style.cssText = 'display:flex;justify-content:flex-end;gap:8px;margin-top:8px;';
+        
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = '取消';
+        cancelBtn.style.cssText = 'background:transparent;border:1px solid #475569;color:#cbd5e1;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:12px;';
+        cancelBtn.onclick = () => { document.body.removeChild(overlay); resolve(null); };
+        
+        const confirmBtn = document.createElement('button');
+        confirmBtn.id = 'dialogConfirmBtn';
+        confirmBtn.textContent = '保存修改';
+        confirmBtn.style.cssText = 'background:#3b82f6;border:none;color:white;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:bold;transition:all 0.2s;';
+        confirmBtn.onclick = () => {
+          const result = {};
+          fields.forEach(f => result[f.key] = inputs[f.key].value.trim());
+          if (!result.name) {
+              alert("名称不能为空！");
+              inputs['name'].focus();
+              return;
+          }
+          result.action = confirmBtn.dataset.mode || 'edit';
+          document.body.removeChild(overlay);
+          resolve(result);
+        };
+        
+        btnRow.appendChild(cancelBtn);
+        btnRow.appendChild(confirmBtn);
+        dialog.appendChild(btnRow);
+        overlay.appendChild(dialog);
+        document.body.appendChild(overlay);
+        
+        if (fields.length > 0) {
+          inputs[fields[0].key].focus();
+          if (inputs[fields[0].key].select) inputs[fields[0].key].select();
+        }
+      });
+    }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      init();
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        init();
+      } catch (err) {
+        alert("CRITICAL ERROR: " + err.message + "\n" + err.stack);
+        console.error(err);
+      }
     });
   </script>
   <!-- Progress Dot Container -->
