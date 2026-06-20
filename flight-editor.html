@@ -1152,12 +1152,23 @@
           
           <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.2); margin: 0 4px; align-self: center;"></div>
           
-          <!-- 新增大盘顶部的新建航轨入口 -->
-          <button class="tool-btn" id="btnAddTrackTop" onclick="if(window.createNewTrack) window.createNewTrack();" style="background: rgba(255, 205, 85, 0.15); border-color: rgba(255, 205, 85, 0.3); color: #ffcd55; padding: 6px 16px; font-weight: bold;">
-            <span style="font-size: 14px;">➕</span> 新建航轨
+          <!-- 改为新建音轨 [+] 按钮 -->
+          <button class="tool-btn" id="btnAddAudioTrack" title="新建音轨" style="background: rgba(255, 205, 85, 0.15); border-color: rgba(255, 205, 85, 0.3); color: #ffcd55; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; padding: 0; font-weight: bold; border-radius: 4px; cursor: pointer;">
+            <span style="font-size: 14px;">➕</span>
           </button>
           
                   <span style="font-size: 9px; color: #10b981; margin-left: auto;">已对齐 (+2s)</span>
+                </div>
+                
+                <!-- 已存音轨列表 -->
+                <div id="savedAudioTracksContainer" style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; display: none;">
+                  <div style="font-size: 11px; font-weight: bold; color: rgba(255,255,255,0.7); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>📁 已存音轨</span>
+                    <span id="savedAudioTracksCount" style="font-size: 10px; color: var(--text-dim);">0 个</span>
+                  </div>
+                  <div id="savedAudioTracksList" style="display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto; padding-right: 4px;">
+                    <!-- 动态生成 -->
+                  </div>
                 </div>
               </div>
             </div>
@@ -2120,6 +2131,7 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       refreshKeyframeList();
       rebuildElevationChart();
       updateCount();
+      if (window.updateAudioTracksListUI) window.updateAudioTracksListUI();
     }
     
     async function createNewTrack() {
@@ -2159,6 +2171,194 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       } catch (e) {
         showToast("新建航轨出错: " + e.message);
       }
+    }
+
+    async function createNewAudioTrack() {
+      const activeFlight = data.flights[activeTrackIndex];
+      if (!activeFlight) {
+        showToast("当前没有选中的航轨", true);
+        return;
+      }
+      
+      if (!activeFlight.audio_tracks) {
+        activeFlight.audio_tracks = [];
+      }
+      
+      const defaultName = `音轨 ${activeFlight.audio_tracks.length + 1}`;
+      const currentText = document.getElementById('hudTtsText').value.trim();
+      const activePt = data.main_flight.find(p => p.id === activeId);
+      
+      if (!activePt) {
+        showToast("请先选择要添加音轨的航点", true);
+        return;
+      }
+      
+      try {
+        const result = await showCustomDialog("新建独立音轨", [
+          { key: 'name', label: '音轨名称', default: defaultName },
+          { key: 'musicStyle', label: '背景音乐风格', type: 'select', options: ['朝圣', '庄严', '探索', '孤独', '自定义'], default: '朝圣' },
+          { key: 'desc', label: '音轨说明/意图 (选填)', type: 'textarea', placeholder: '请输入音轨的描述或创作者意图...' },
+          { key: 'text', label: '解说词文本 (可编辑)', type: 'textarea', default: currentText || activePt.narration_text || '' }
+        ], '🔊 合成并保存');
+        
+        if (!result || !result.name) return;
+        
+        let audioUrl = activePt.narration_audio;
+        let duration = activePt.narration_duration || activePt.duration || 0;
+        const voiceVal = document.getElementById('hudTtsVoice').value || 'default';
+        
+        // 如果文本被修改或者还没合成过，就重新合成
+        if (result.text !== activePt.narration_text || !audioUrl) {
+          showToast("正在合成音频，请稍候...", false);
+          const res = await fetch("api/generate-tts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              waypointId: activePt.id,
+              text: result.text,
+              voice: voiceVal,
+              refAudio: activePt.narration_ref_audio || "",
+              refText: activePt.narration_ref_text || ""
+            })
+          });
+          
+          const resData = await res.json();
+          if (resData.ok) {
+            audioUrl = resData.audioUrl;
+            duration = resData.duration;
+            activePt.narration_text = result.text;
+            activePt.narration_audio = audioUrl;
+            activePt.narration_duration = duration;
+            activePt.duration = parseFloat((duration + 2.0).toFixed(1));
+            
+            refreshKeyframeList();
+            rebuildElevationChart();
+            const idx = data.main_flight.findIndex(p => p.id === activeId);
+            updateDiagnosticsPanel(activePt, idx);
+          } else {
+            throw new Error(resData.error || "合成失败");
+          }
+        }
+        
+        const newTrack = {
+          id: 'aud_' + Date.now() + Math.floor(Math.random()*1000),
+          name: result.name,
+          musicStyle: result.musicStyle,
+          desc: result.desc || '',
+          segments: [
+            {
+              waypointIds: selectedIds.length > 0 ? [...selectedIds] : [activeId],
+              text: result.text,
+              audioUrl: audioUrl,
+              duration: duration,
+              voice: voiceVal
+            }
+          ]
+        };
+        
+        activeFlight.audio_tracks.push(newTrack);
+        await saveToServer();
+        updateAudioTracksListUI();
+        showToast(`🎙️ 已保存新音轨: ${result.name}`);
+      } catch (err) {
+        console.error(err);
+        alert("新建音轨失败: " + err.message);
+      }
+    }
+    
+    function updateAudioTracksListUI() {
+      const container = document.getElementById('savedAudioTracksContainer');
+      const listEl = document.getElementById('savedAudioTracksList');
+      const countEl = document.getElementById('savedAudioTracksCount');
+      
+      if (!container || !listEl) return;
+      
+      const activeFlight = data.flights[activeTrackIndex];
+      if (!activeFlight || !activeFlight.audio_tracks || activeFlight.audio_tracks.length === 0) {
+        container.style.display = 'none';
+        return;
+      }
+      
+      container.style.display = 'block';
+      countEl.textContent = `${activeFlight.audio_tracks.length} 个`;
+      listEl.innerHTML = '';
+      
+      activeFlight.audio_tracks.forEach((track, index) => {
+        const item = document.createElement('div');
+        item.style.cssText = 'display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:4px;padding:6px 8px;gap:8px;font-size:10px;color:#f8fafc;margin-bottom:4px;';
+        
+        const infoCol = document.createElement('div');
+        infoCol.style.cssText = 'flex:1;display:flex;flex-direction:column;gap:2px;overflow:hidden;';
+        
+        const titleRow = document.createElement('div');
+        titleRow.style.cssText = 'display:flex;align-items:center;gap:6px;font-weight:bold;';
+        titleRow.textContent = track.name;
+        
+        const styleBadge = document.createElement('span');
+        styleBadge.style.cssText = 'background:rgba(255,205,85,0.15);border:1px solid rgba(255,205,85,0.3);color:#ffcd55;font-size:9px;padding:0px 4px;border-radius:2px;font-weight:normal;line-height:1.2;';
+        styleBadge.textContent = track.musicStyle || '朝圣';
+        titleRow.appendChild(styleBadge);
+        
+        const descText = document.createElement('div');
+        descText.style.cssText = 'color:#94a3b8;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;';
+        descText.textContent = track.desc || '暂无说明';
+        descText.title = track.desc || '';
+        
+        infoCol.appendChild(titleRow);
+        infoCol.appendChild(descText);
+        
+        const actions = document.createElement('div');
+        actions.style.cssText = 'display:flex;align-items:center;gap:8px;flex-shrink:0;';
+        
+        const playBtn = document.createElement('button');
+        playBtn.textContent = '▶ 播放';
+        playBtn.style.cssText = 'background:none;border:none;color:#10b981;cursor:pointer;font-size:10px;padding:2px 4px;font-weight:bold;';
+        playBtn.onclick = (e) => {
+          e.stopPropagation();
+          playAudioTrack(track);
+        };
+        
+        const delBtn = document.createElement('button');
+        delBtn.textContent = '🗑️';
+        delBtn.style.cssText = 'background:none;border:none;color:#ef4444;cursor:pointer;font-size:11px;padding:2px;';
+        delBtn.onclick = async (e) => {
+          e.stopPropagation();
+          if (confirm(`确定要永久删除音轨 "${track.name}" 吗？`)) {
+            activeFlight.audio_tracks.splice(index, 1);
+            await saveToServer();
+            updateAudioTracksListUI();
+            showToast("音轨已删除");
+          }
+        };
+        
+        actions.appendChild(playBtn);
+        actions.appendChild(delBtn);
+        
+        item.appendChild(infoCol);
+        item.appendChild(actions);
+        listEl.appendChild(item);
+      });
+    }
+    
+    function playAudioTrack(track) {
+      if (!track.segments || track.segments.length === 0) return;
+      let currentSegIdx = 0;
+      function playNextSegment() {
+        if (currentSegIdx >= track.segments.length) return;
+        const seg = track.segments[currentSegIdx];
+        if (seg.audioUrl) {
+          const audio = new Audio(seg.audioUrl + "?t=" + Date.now());
+          audio.onended = () => {
+            currentSegIdx++;
+            playNextSegment();
+          };
+          audio.play();
+        } else {
+          currentSegIdx++;
+          playNextSegment();
+        }
+      }
+      playNextSegment();
     }
     
     function deleteCurrentTrack() {
@@ -2344,6 +2544,7 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
 
       // 10. Real-time Camera Framing Change Listener
       setupCameraChangeListener();
+      if (window.updateAudioTracksListUI) window.updateAudioTracksListUI();
     }
 
     // ---- Render Reference Geo Lines ----
@@ -4486,13 +4687,16 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       });
 
       window.createNewTrack = createNewTrack; // Expose globally
+      window.createNewAudioTrack = createNewAudioTrack; // Expose globally
+      window.updateAudioTracksListUI = updateAudioTracksListUI; // Expose globally
+      
       document.getElementById('btnAddTrack').addEventListener('click', () => {
         console.log("btnAddTrack event listener fired!");
         if (window.createNewTrack) window.createNewTrack();
       });
-      document.getElementById('btnAddTrackTop').addEventListener('click', () => {
-        console.log("btnAddTrackTop event listener fired!");
-        if (window.createNewTrack) window.createNewTrack();
+      document.getElementById('btnAddAudioTrack').addEventListener('click', () => {
+        console.log("btnAddAudioTrack event listener fired!");
+        if (window.createNewAudioTrack) window.createNewAudioTrack();
       });
       
       // 添加快捷键绑定：按下 Shift + N 也可以新建航轨
@@ -5216,7 +5420,7 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         }
       });
     }
-    function showCustomDialog(title, fields) {
+    function showCustomDialog(title, fields, confirmLabel = '保存修改') {
       return new Promise((resolve) => {
         const overlay = document.createElement('div');
         overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;';
@@ -5308,7 +5512,7 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         
         const confirmBtn = document.createElement('button');
         confirmBtn.id = 'dialogConfirmBtn';
-        confirmBtn.textContent = '保存修改';
+        confirmBtn.textContent = confirmLabel;
         confirmBtn.style.cssText = 'background:#3b82f6;border:none;color:white;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:bold;transition:all 0.2s;';
         confirmBtn.onclick = () => {
           const result = {};
