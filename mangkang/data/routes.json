@@ -27,8 +27,8 @@
       "narration_voice": "default",
       "env_mode": "fog",
       "weather": "fog",
-      "weather_param": 0.002,
-      "env_param": 2
+      "weather_param": 0.004,
+      "env_param": 3
     },
     {
       "id": "evt_1781688410195",
@@ -378,8 +378,8 @@
           "narration_voice": "default",
           "env_mode": "fog",
           "weather": "fog",
-          "weather_param": 0.002,
-          "env_param": 2
+          "weather_param": 0.004,
+          "env_param": 3
         },
         {
           "id": "evt_1781688410195",
