@@ -25,7 +25,9 @@
       "narration_audio": "/mangkang/media/narratives/evt_1781688379062.mp3",
       "narration_duration": 38.10933333333333,
       "timeOfDay": 7,
-      "narration_voice": "default"
+      "narration_voice": "default",
+      "env_mode": "time",
+      "weather": "none"
     },
     {
       "id": "evt_1781688410195",
@@ -159,7 +161,9 @@
       "narration_text": "",
       "narration_audio": "",
       "narration_duration": 0,
-      "narration_voice": "default"
+      "narration_voice": "default",
+      "env_mode": "none",
+      "weather": "none"
     },
     {
       "id": "evt_1781688522542",
@@ -171,7 +175,7 @@
       "heading": 62.2,
       "pitch": -30,
       "roll": 360,
-      "duration": 11.8,
+      "duration": 32,
       "wait_time": 0,
       "fov": 90,
       "shot_mode": "default",
@@ -183,7 +187,9 @@
       "narration_text": "",
       "narration_audio": "",
       "narration_duration": 0,
-      "narration_voice": "default"
+      "narration_voice": "default",
+      "env_mode": "none",
+      "weather": "none"
     },
     {
       "id": "evt_1781688540763",
@@ -365,7 +371,9 @@
           "narration_audio": "/mangkang/media/narratives/evt_1781688379062.mp3",
           "narration_duration": 38.10933333333333,
           "timeOfDay": 7,
-          "narration_voice": "default"
+          "narration_voice": "default",
+          "env_mode": "time",
+          "weather": "none"
         },
         {
           "id": "evt_1781688410195",
@@ -499,7 +507,9 @@
           "narration_text": "",
           "narration_audio": "",
           "narration_duration": 0,
-          "narration_voice": "default"
+          "narration_voice": "default",
+          "env_mode": "none",
+          "weather": "none"
         },
         {
           "id": "evt_1781688522542",
@@ -511,7 +521,7 @@
           "heading": 62.2,
           "pitch": -30,
           "roll": 360,
-          "duration": 11.8,
+          "duration": 32,
           "wait_time": 0,
           "fov": 90,
           "shot_mode": "default",
@@ -523,7 +533,9 @@
           "narration_text": "",
           "narration_audio": "",
           "narration_duration": 0,
-          "narration_voice": "default"
+          "narration_voice": "default",
+          "env_mode": "none",
+          "weather": "none"
         },
         {
           "id": "evt_1781688540763",
