@@ -77,7 +77,7 @@
       "narration_voice": "default",
       "env_mode": "time",
       "env_param": 10,
-      "timeOfDay": 7.5,
+      "timeOfDay": 5.7,
       "weather": "none"
     },
     {
@@ -414,7 +414,7 @@
           "narration_voice": "default",
           "env_mode": "time",
           "env_param": 10,
-          "timeOfDay": 7.5,
+          "timeOfDay": 5.7,
           "weather": "none"
         },
         {
