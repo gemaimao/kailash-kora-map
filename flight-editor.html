@@ -542,9 +542,52 @@
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       pointer-events: auto; /* Restore interactivity on the card itself */
     }
-    .accordion-group.active {
-      border-color: var(--accent);
-      box-shadow: 0 8px 30px rgba(255, 205, 85, 0.15);
+    .accordion-group.group-basic.active {
+      border-color: #94a3b8;
+      box-shadow: 0 8px 30px rgba(148, 163, 184, 0.15);
+    }
+    .accordion-group.group-basic.active .accordion-header {
+      background: rgba(148, 163, 184, 0.08);
+      color: #cbd5e1;
+    }
+    .accordion-group.group-basic.active .accordion-header::after {
+      color: #cbd5e1;
+    }
+
+    .accordion-group.group-camera.active {
+      border-color: #38bdf8;
+      box-shadow: 0 8px 30px rgba(56, 189, 248, 0.15);
+    }
+    .accordion-group.group-camera.active .accordion-header {
+      background: rgba(56, 189, 248, 0.08);
+      color: #38bdf8;
+    }
+    .accordion-group.group-camera.active .accordion-header::after {
+      color: #38bdf8;
+    }
+
+    .accordion-group.group-narration.active {
+      border-color: #c084fc;
+      box-shadow: 0 8px 30px rgba(192, 132, 252, 0.15);
+    }
+    .accordion-group.group-narration.active .accordion-header {
+      background: rgba(192, 132, 252, 0.08);
+      color: #c084fc;
+    }
+    .accordion-group.group-narration.active .accordion-header::after {
+      color: #c084fc;
+    }
+
+    .accordion-group.group-assist.active {
+      border-color: #34d399;
+      box-shadow: 0 8px 30px rgba(52, 211, 153, 0.15);
+    }
+    .accordion-group.group-assist.active .accordion-header {
+      background: rgba(52, 211, 153, 0.08);
+      color: #34d399;
+    }
+    .accordion-group.group-assist.active .accordion-header::after {
+      color: #34d399;
     }
     .accordion-header {
       padding: 10px 12px;
@@ -982,8 +1025,8 @@
       <div class="hud-director-inspector" id="hudDirectorInspector">
         <div class="inspector-accordion">
           
-          <!-- Group 1: Telemetry & Read-out -->
-          <div class="accordion-group active" id="accordionDiag">
+          <!-- Group 1: Telemetry & Read-out (Basic) -->
+          <div class="accordion-group active group-basic" id="accordionDiag">
             <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">📍 航点信息</div>
             <div class="accordion-body">
               <div id="diagnosticsContent">
@@ -999,8 +1042,8 @@
             </div>
           </div>
 
-          <!-- Group 2: Target Lock -->
-          <div class="accordion-group active" id="accordionFocus">
+          <!-- Group 2: Target Lock (Camera Language) -->
+          <div class="accordion-group active group-camera" id="accordionFocus">
             <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🎯 视线对焦</div>
             <div class="accordion-body">
               <div class="target-status" style="display: none; margin-bottom: 6px;">
@@ -1022,8 +1065,8 @@
             </div>
           </div>
 
-          <!-- Group 3: Shot Effects -->
-          <div class="accordion-group active" id="accordionShot">
+          <!-- Group 3: Shot Effects (Camera Language) -->
+          <div class="accordion-group active group-camera" id="accordionShot">
             <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🎬 特技镜头</div>
             <div class="accordion-body">
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 6px; margin-top: 6px;">
@@ -1057,35 +1100,9 @@
             </div>
           </div>
 
-
-                    <!-- Group 3.5: Track Visual Style -->
-          <div class="accordion-group active" id="accordionTrackStyle">
-            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🎨 航轨视觉效果</div>
-            <div class="accordion-body">
-              <div class="shot-param-row" style="margin-bottom: 8px;">
-                <label style="width: 60px;">线体风格:</label>
-                <select id="selTrackLineType" style="flex:1; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:2px 4px; border-radius:3px; font-size:11px;">
-                  <option value="dashed">虚线段 (默认)</option>
-                  <option value="dotted">虚点线</option>
-                  <option value="solid">实线</option>
-                  <option value="double">双边实线</option>
-                </select>
-              </div>
-              <div class="shot-param-row" style="margin-bottom: 4px;">
-                <label style="width: 60px;">动态特效:</label>
-                <select id="selTrackAnimation" style="flex:1; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:2px 4px; border-radius:3px; font-size:11px;">
-                  <option value="none">无特效</option>
-                  <option value="flash_yellow">黄光闪烁</option>
-                  <option value="flash_red">红光闪烁</option>
-                  <option value="flash_color">五彩闪烁</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <!-- Group 2.5: Lighting -->
-          <div class="accordion-group active" id="accordionLighting">
-            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🌅 环境与光照</div>
+          <!-- Group 4: Lighting (Camera Language) -->
+          <div class="accordion-group active group-camera" id="accordionLighting">
+            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🌅 环境光照</div>
             <div class="accordion-body">
               <div class="shot-param-row">
                 <label>日照时间 (时)</label>
@@ -1095,9 +1112,10 @@
               <button class="hud-mini-btn" id="btnCaptureTime" style="width: 100%; border-color: var(--accent-cyan); color: var(--accent-cyan); justify-content: center; font-weight: bold; font-size: 9px; text-align: center; margin-top: 6px;">📸 捕获当前时间为本点光照</button>
             </div>
           </div>
-          <!-- Group 3: Camera Movement Style -->
-          <div class="accordion-group active" id="accordionVibe">
-            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🔮 运镜风格预设</div>
+
+          <!-- Group 5: Camera Movement Style (Camera Language) -->
+          <div class="accordion-group active group-camera" id="accordionVibe">
+            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🔮 运镜风格</div>
             <div class="accordion-body">
               <div class="vibe-buttons" id="vibeButtonGroup">
                 <button class="vibe-btn" data-vibe="pilgrimage">📿 朝圣</button>
@@ -1108,9 +1126,9 @@
             </div>
           </div>
 
-          <!-- Group 4: AI Voice Over & TTS Sync -->
-          <div class="accordion-group active" id="accordionTts">
-            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🎙️ AI 语音解说与时轴对齐</div>
+          <!-- Group 6: AI Voice Over & TTS Sync (Narration System) -->
+          <div class="accordion-group active group-narration" id="accordionTts">
+            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🎙️ 解说生成</div>
             <div class="accordion-body">
               <div class="hud-tts-panel" id="hudTtsPanel">
                 <div style="margin-bottom: 6px;">
@@ -1170,6 +1188,31 @@
                     <!-- 动态生成 -->
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group 7: Track Visual Style (Dynamic Assist) -->
+          <div class="accordion-group active group-assist" id="accordionTrackStyle">
+            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🎨 地轨视觉</div>
+            <div class="accordion-body">
+              <div class="shot-param-row" style="margin-bottom: 8px;">
+                <label style="width: 60px;">线体风格:</label>
+                <select id="selTrackLineType" style="flex:1; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:2px 4px; border-radius:3px; font-size:11px;">
+                  <option value="dashed">虚线段 (默认)</option>
+                  <option value="dotted">虚点线</option>
+                  <option value="solid">实线</option>
+                  <option value="double">双边实线</option>
+                </select>
+              </div>
+              <div class="shot-param-row" style="margin-bottom: 4px;">
+                <label style="width: 60px;">动态特效:</label>
+                <select id="selTrackAnimation" style="flex:1; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:2px 4px; border-radius:3px; font-size:11px;">
+                  <option value="none">无特效</option>
+                  <option value="flash_yellow">黄光闪烁</option>
+                  <option value="flash_red">红光闪烁</option>
+                  <option value="flash_color">五彩闪烁</option>
+                </select>
               </div>
             </div>
           </div>
