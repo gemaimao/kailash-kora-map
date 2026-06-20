@@ -50,7 +50,9 @@
       "narration_text": "",
       "narration_audio": "",
       "narration_duration": 0,
-      "narration_voice": "default"
+      "narration_voice": "default",
+      "env_mode": "time",
+      "weather": "none"
     },
     {
       "id": "evt_1781688429563",
@@ -387,7 +389,9 @@
           "narration_text": "",
           "narration_audio": "",
           "narration_duration": 0,
-          "narration_voice": "default"
+          "narration_voice": "default",
+          "env_mode": "time",
+          "weather": "none"
         },
         {
           "id": "evt_1781688429563",
