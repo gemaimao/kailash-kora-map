@@ -984,7 +984,7 @@
           
           <!-- Group 1: Telemetry & Read-out -->
           <div class="accordion-group active" id="accordionDiag">
-            <div class="accordion-header">📍 航点信息</div>
+            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">📍 航点信息</div>
             <div class="accordion-body">
               <div id="diagnosticsContent">
                 <div class="diag-row"><span class="diag-label">当前位置</span><span class="diag-value" id="diagPos">--</span></div>
@@ -1001,7 +1001,7 @@
 
           <!-- Group 2: Target Lock -->
           <div class="accordion-group active" id="accordionFocus">
-            <div class="accordion-header">🎯 视线对焦</div>
+            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🎯 视线对焦</div>
             <div class="accordion-body">
               <div class="target-status" style="display: none; margin-bottom: 6px;">
                 <strong id="hudTargetName">走向前方</strong>
@@ -1024,7 +1024,7 @@
 
           <!-- Group 3: Shot Effects -->
           <div class="accordion-group active" id="accordionShot">
-            <div class="accordion-header">🎬 特技镜头</div>
+            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🎬 特技镜头</div>
             <div class="accordion-body">
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 6px; margin-top: 6px;">
                 <button class="hud-mini-btn shot-mode-btn" data-mode="pan_spin">🌀 自转环视</button>
@@ -1060,7 +1060,7 @@
 
                     <!-- Group 3.5: Track Visual Style -->
           <div class="accordion-group active" id="accordionTrackStyle">
-            <div class="accordion-header">🎨 航轨视觉效果</div>
+            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🎨 航轨视觉效果</div>
             <div class="accordion-body">
               <div class="shot-param-row" style="margin-bottom: 8px;">
                 <label style="width: 60px;">线体风格:</label>
@@ -1085,7 +1085,7 @@
 
           <!-- Group 2.5: Lighting -->
           <div class="accordion-group active" id="accordionLighting">
-            <div class="accordion-header">🌅 环境与光照</div>
+            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🌅 环境与光照</div>
             <div class="accordion-body">
               <div class="shot-param-row">
                 <label>日照时间 (时)</label>
@@ -1097,7 +1097,7 @@
           </div>
           <!-- Group 3: Camera Movement Style -->
           <div class="accordion-group active" id="accordionVibe">
-            <div class="accordion-header">🔮 运镜风格预设</div>
+            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🔮 运镜风格预设</div>
             <div class="accordion-body">
               <div class="vibe-buttons" id="vibeButtonGroup">
                 <button class="vibe-btn" data-vibe="pilgrimage">📿 朝圣</button>
@@ -1110,7 +1110,7 @@
 
           <!-- Group 4: AI Voice Over & TTS Sync -->
           <div class="accordion-group active" id="accordionTts">
-            <div class="accordion-header">🎙️ AI 语音解说与时轴对齐</div>
+            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🎙️ AI 语音解说与时轴对齐</div>
             <div class="accordion-body">
               <div class="hud-tts-panel" id="hudTtsPanel">
                 <div style="margin-bottom: 6px;">
@@ -4724,19 +4724,7 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         rebuildMarkers();
       });
 
-      // Accordion headers toggle listener (using Event Delegation)
-      if (!window.accordionListenerBound) {
-        document.addEventListener('click', (e) => {
-          const header = e.target.closest('.accordion-header');
-          if (header) {
-            const group = header.closest('.accordion-group');
-            if (group) {
-              group.classList.toggle('active');
-            }
-          }
-        });
-        window.accordionListenerBound = true;
-      }
+      // Accordion headers toggling is now handled directly by inline onclick event handlers to prevent Cesium click conflicts.
     }
 
     // ---- Visual lines showing lock direction ----
