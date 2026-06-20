@@ -24,7 +24,8 @@
       "narration_text": "这里是澜沧江河谷318国道上的大竹卡段。竹卡在藏语中是渡口。现在这里却因为如美大型水电站的建设而成为了新型的能源小镇，我们选择这里做为横断山脉核心区三江并流区域的飞行第一站。",
       "narration_audio": "/mangkang/media/narratives/evt_1781688379062.mp3",
       "narration_duration": 38.10933333333333,
-      "timeOfDay": 7
+      "timeOfDay": 7,
+      "narration_voice": "default"
     },
     {
       "id": "evt_1781688410195",
@@ -45,7 +46,11 @@
       "perspective_pitch": "custom",
       "speed_preset": "custom",
       "wait_preset": "none",
-      "timeOfDay": 10
+      "timeOfDay": 10,
+      "narration_text": "",
+      "narration_audio": "",
+      "narration_duration": 0,
+      "narration_voice": "default"
     },
     {
       "id": "evt_1781688429563",
@@ -65,7 +70,15 @@
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
       "speed_preset": "custom",
-      "wait_preset": "none"
+      "wait_preset": "none",
+      "narration_text": "",
+      "narration_audio": "",
+      "narration_duration": 0,
+      "narration_voice": "default",
+      "env_mode": "time",
+      "env_param": 10,
+      "timeOfDay": 10,
+      "weather": "none"
     },
     {
       "id": "evt_1781688472182",
@@ -86,7 +99,11 @@
       "perspective_pitch": "custom",
       "speed_preset": "custom",
       "wait_preset": "none",
-      "timeOfDay": 9.7
+      "timeOfDay": 9.7,
+      "narration_text": "",
+      "narration_audio": "",
+      "narration_duration": 0,
+      "narration_voice": "default"
     },
     {
       "id": "evt_1781688487461",
@@ -96,7 +113,7 @@
       "ground_alt": 2686,
       "relative_alt": 204,
       "heading": 34.5,
-      "pitch": -22.2,
+      "pitch": -13,
       "roll": 360,
       "duration": 7.2,
       "wait_time": 1,
@@ -106,7 +123,15 @@
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
       "speed_preset": "custom",
-      "wait_preset": "custom"
+      "wait_preset": "custom",
+      "narration_text": "",
+      "narration_audio": "",
+      "narration_duration": 0,
+      "narration_voice": "default",
+      "env_mode": "time",
+      "env_param": 10,
+      "timeOfDay": 10,
+      "weather": "none"
     },
     {
       "id": "evt_1781688502844",
@@ -126,7 +151,11 @@
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
       "speed_preset": "custom",
-      "wait_preset": "none"
+      "wait_preset": "none",
+      "narration_text": "",
+      "narration_audio": "",
+      "narration_duration": 0,
+      "narration_voice": "default"
     },
     {
       "id": "evt_1781688522542",
@@ -146,7 +175,11 @@
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
       "speed_preset": "custom",
-      "wait_preset": "none"
+      "wait_preset": "none",
+      "narration_text": "",
+      "narration_audio": "",
+      "narration_duration": 0,
+      "narration_voice": "default"
     },
     {
       "id": "evt_1781688540763",
@@ -166,7 +199,11 @@
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
       "speed_preset": "custom",
-      "wait_preset": "none"
+      "wait_preset": "none",
+      "narration_text": "",
+      "narration_audio": "",
+      "narration_duration": 0,
+      "narration_voice": "default"
     },
     {
       "id": "evt_1781688556008",
@@ -186,7 +223,11 @@
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
       "speed_preset": "custom",
-      "wait_preset": "none"
+      "wait_preset": "none",
+      "narration_text": "",
+      "narration_audio": "",
+      "narration_duration": 0,
+      "narration_voice": "default"
     },
     {
       "id": "evt_1781688574195",
@@ -208,7 +249,11 @@
       "speed_preset": "custom",
       "wait_preset": "custom",
       "look_at_target": null,
-      "timeOfDay": 8.9
+      "timeOfDay": 8.9,
+      "narration_text": "",
+      "narration_audio": "",
+      "narration_duration": 0,
+      "narration_voice": "default"
     },
     {
       "id": "evt_1781688591682",
@@ -228,7 +273,11 @@
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
       "speed_preset": "custom",
-      "wait_preset": "none"
+      "wait_preset": "none",
+      "narration_text": "",
+      "narration_audio": "",
+      "narration_duration": 0,
+      "narration_voice": "default"
     },
     {
       "id": "evt_1781688608171",
@@ -248,7 +297,11 @@
       "perspective_fov": "custom",
       "perspective_pitch": "custom",
       "speed_preset": "normal",
-      "wait_preset": "none"
+      "wait_preset": "none",
+      "narration_text": "",
+      "narration_audio": "",
+      "narration_duration": 0,
+      "narration_voice": "default"
     },
     {
       "id": "evt_1781688631513",
@@ -269,7 +322,11 @@
       "perspective_pitch": "custom",
       "speed_preset": "normal",
       "wait_preset": "none",
-      "timeOfDay": 22.8
+      "timeOfDay": 22.8,
+      "narration_text": "",
+      "narration_audio": "",
+      "narration_duration": 0,
+      "narration_voice": "default"
     }
   ],
   "flights": [
@@ -299,7 +356,8 @@
           "narration_text": "这里是澜沧江河谷318国道上的大竹卡段。竹卡在藏语中是渡口。现在这里却因为如美大型水电站的建设而成为了新型的能源小镇，我们选择这里做为横断山脉核心区三江并流区域的飞行第一站。",
           "narration_audio": "/mangkang/media/narratives/evt_1781688379062.mp3",
           "narration_duration": 38.10933333333333,
-          "timeOfDay": 7
+          "timeOfDay": 7,
+          "narration_voice": "default"
         },
         {
           "id": "evt_1781688410195",
@@ -320,7 +378,11 @@
           "perspective_pitch": "custom",
           "speed_preset": "custom",
           "wait_preset": "none",
-          "timeOfDay": 10
+          "timeOfDay": 10,
+          "narration_text": "",
+          "narration_audio": "",
+          "narration_duration": 0,
+          "narration_voice": "default"
         },
         {
           "id": "evt_1781688429563",
@@ -340,7 +402,15 @@
           "perspective_fov": "custom",
           "perspective_pitch": "custom",
           "speed_preset": "custom",
-          "wait_preset": "none"
+          "wait_preset": "none",
+          "narration_text": "",
+          "narration_audio": "",
+          "narration_duration": 0,
+          "narration_voice": "default",
+          "env_mode": "time",
+          "env_param": 10,
+          "timeOfDay": 10,
+          "weather": "none"
         },
         {
           "id": "evt_1781688472182",
@@ -361,7 +431,11 @@
           "perspective_pitch": "custom",
           "speed_preset": "custom",
           "wait_preset": "none",
-          "timeOfDay": 9.7
+          "timeOfDay": 9.7,
+          "narration_text": "",
+          "narration_audio": "",
+          "narration_duration": 0,
+          "narration_voice": "default"
         },
         {
           "id": "evt_1781688487461",
@@ -371,7 +445,7 @@
           "ground_alt": 2686,
           "relative_alt": 204,
           "heading": 34.5,
-          "pitch": -22.2,
+          "pitch": -13,
           "roll": 360,
           "duration": 7.2,
           "wait_time": 1,
@@ -381,7 +455,15 @@
           "perspective_fov": "custom",
           "perspective_pitch": "custom",
           "speed_preset": "custom",
-          "wait_preset": "custom"
+          "wait_preset": "custom",
+          "narration_text": "",
+          "narration_audio": "",
+          "narration_duration": 0,
+          "narration_voice": "default",
+          "env_mode": "time",
+          "env_param": 10,
+          "timeOfDay": 10,
+          "weather": "none"
         },
         {
           "id": "evt_1781688502844",
@@ -401,7 +483,11 @@
           "perspective_fov": "custom",
           "perspective_pitch": "custom",
           "speed_preset": "custom",
-          "wait_preset": "none"
+          "wait_preset": "none",
+          "narration_text": "",
+          "narration_audio": "",
+          "narration_duration": 0,
+          "narration_voice": "default"
         },
         {
           "id": "evt_1781688522542",
@@ -421,7 +507,11 @@
           "perspective_fov": "custom",
           "perspective_pitch": "custom",
           "speed_preset": "custom",
-          "wait_preset": "none"
+          "wait_preset": "none",
+          "narration_text": "",
+          "narration_audio": "",
+          "narration_duration": 0,
+          "narration_voice": "default"
         },
         {
           "id": "evt_1781688540763",
@@ -441,7 +531,11 @@
           "perspective_fov": "custom",
           "perspective_pitch": "custom",
           "speed_preset": "custom",
-          "wait_preset": "none"
+          "wait_preset": "none",
+          "narration_text": "",
+          "narration_audio": "",
+          "narration_duration": 0,
+          "narration_voice": "default"
         },
         {
           "id": "evt_1781688556008",
@@ -461,7 +555,11 @@
           "perspective_fov": "custom",
           "perspective_pitch": "custom",
           "speed_preset": "custom",
-          "wait_preset": "none"
+          "wait_preset": "none",
+          "narration_text": "",
+          "narration_audio": "",
+          "narration_duration": 0,
+          "narration_voice": "default"
         },
         {
           "id": "evt_1781688574195",
@@ -483,7 +581,11 @@
           "speed_preset": "custom",
           "wait_preset": "custom",
           "look_at_target": null,
-          "timeOfDay": 8.9
+          "timeOfDay": 8.9,
+          "narration_text": "",
+          "narration_audio": "",
+          "narration_duration": 0,
+          "narration_voice": "default"
         },
         {
           "id": "evt_1781688591682",
@@ -503,7 +605,11 @@
           "perspective_fov": "custom",
           "perspective_pitch": "custom",
           "speed_preset": "custom",
-          "wait_preset": "none"
+          "wait_preset": "none",
+          "narration_text": "",
+          "narration_audio": "",
+          "narration_duration": 0,
+          "narration_voice": "default"
         },
         {
           "id": "evt_1781688608171",
@@ -523,7 +629,11 @@
           "perspective_fov": "custom",
           "perspective_pitch": "custom",
           "speed_preset": "normal",
-          "wait_preset": "none"
+          "wait_preset": "none",
+          "narration_text": "",
+          "narration_audio": "",
+          "narration_duration": 0,
+          "narration_voice": "default"
         },
         {
           "id": "evt_1781688631513",
@@ -544,11 +654,34 @@
           "perspective_pitch": "custom",
           "speed_preset": "normal",
           "wait_preset": "none",
-          "timeOfDay": 22.8
+          "timeOfDay": 22.8,
+          "narration_text": "",
+          "narration_audio": "",
+          "narration_duration": 0,
+          "narration_voice": "default"
         }
       ],
       "category": "主线剧情航轨",
-      "desc": "从V字型窄谷到宽阔山谷农业区，再到芒康山脊森林牧场，一路美景，堪称藏东明珠"
+      "desc": "从V字型窄谷到宽阔山谷农业区，再到芒康山脊森林牧场，一路美景，堪称藏东明珠",
+      "audio_tracks": [
+        {
+          "id": "aud_default_1781926273022",
+          "name": "默认解说轨",
+          "musicStyle": "朝圣",
+          "desc": "系统自动迁移的默认解说轨",
+          "segments": [
+            {
+              "waypointIds": [
+                "evt_1781688379062"
+              ],
+              "text": "这里是澜沧江河谷318国道上的大竹卡段。竹卡在藏语中是渡口。现在这里却因为如美大型水电站的建设而成为了新型的能源小镇，我们选择这里做为横断山脉核心区三江并流区域的飞行第一站。",
+              "audioUrl": "/mangkang/media/narratives/evt_1781688379062.mp3",
+              "duration": 38.10933333333333,
+              "voice": "default"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
