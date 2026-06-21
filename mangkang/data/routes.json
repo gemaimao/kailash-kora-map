@@ -230,8 +230,8 @@
       "lat": 29.694438,
       "ground_alt": 3210,
       "relative_alt": 296,
-      "heading": 155.1,
-      "pitch": -57.2,
+      "heading": 141.5,
+      "pitch": -57.9,
       "roll": 360,
       "duration": 12.7,
       "wait_time": 0,
@@ -246,8 +246,9 @@
       "narration_audio": "",
       "narration_duration": 0,
       "narration_voice": "default",
-      "env_mode": "none",
-      "weather": "none"
+      "env_mode": "time",
+      "weather": "none",
+      "timeOfDay": 10.1
     },
     {
       "id": "evt_1781688574195",
@@ -588,8 +589,8 @@
           "lat": 29.694438,
           "ground_alt": 3210,
           "relative_alt": 296,
-          "heading": 155.1,
-          "pitch": -57.2,
+          "heading": 141.5,
+          "pitch": -57.9,
           "roll": 360,
           "duration": 12.7,
           "wait_time": 0,
@@ -604,8 +605,9 @@
           "narration_audio": "",
           "narration_duration": 0,
           "narration_voice": "default",
-          "env_mode": "none",
-          "weather": "none"
+          "env_mode": "time",
+          "weather": "none",
+          "timeOfDay": 10.1
         },
         {
           "id": "evt_1781688574195",
