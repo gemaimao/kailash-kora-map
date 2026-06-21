@@ -51,10 +51,8 @@
       "narration_audio": "",
       "narration_duration": 0,
       "narration_voice": "default",
-      "env_mode": "lightning",
-      "weather": "lightning",
-      "weather_param": 1,
-      "env_param": 1,
+      "env_mode": "none",
+      "weather": "none",
       "look_at_target": null
     },
     {
@@ -438,10 +436,8 @@
           "narration_audio": "",
           "narration_duration": 0,
           "narration_voice": "default",
-          "env_mode": "lightning",
-          "weather": "lightning",
-          "weather_param": 1,
-          "env_param": 1,
+          "env_mode": "none",
+          "weather": "none",
           "look_at_target": null
         },
         {
