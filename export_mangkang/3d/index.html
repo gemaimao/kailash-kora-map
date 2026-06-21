@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>飞越318最美国道 - 3D 漫游</title>
+    <!-- CesiumJS -->
+    <script src="https://unpkg.com/cesium@1.107.0/Build/Cesium/Cesium.js"></script>
+    <link href="https://unpkg.com/cesium@1.107.0/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 全屏定格遮罩 (开场/谢幕) -->
+    <div id="fullscreen-overlay" class="fullscreen-overlay">
+        <div class="overlay-content">
+            <img src="../assets/logo-lungta-trans.png" class="overlay-logo" alt="风马旗">
+            <h1 id="overlay-title">2026大横断探秘飞行</h1>
+            <p id="overlay-desc">横断山脉，塑造中国地形的地理秘境</p>
+            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;" id="start-buttons">
+                <button id="btn-overlay-start-outer" class="btn primary" style="font-size: 16px; padding: 12px 24px;">▶️ 外环启程</button>
+                <button id="btn-overlay-start-inner" class="btn primary" style="font-size: 16px; padding: 12px 24px; background: rgba(0,255,170,0.2); border-color: rgba(0,255,170,0.5); color: #00ffaa;">▶️ 内环启程</button>
+            </div>
+            <button id="btn-overlay-replay" class="btn secondary" style="font-size: 16px; padding: 12px 30px; margin-top: 20px; display: none;">🔄 再次巡航</button>
+        </div>
+    </div>
+
+    <div id="cesiumContainer"></div>
+    
+    <!-- 顶部右上角绝对定位：访问人数统计及Logo标题 (已废弃，功能移到底部) -->
+
+    <!-- 顶部左侧区域 (标题 + 独立发布条) -->
+    <div id="top-left-container" class="top-left-panel">
+        <div class="map-title-header collapsed" id="btn-toggle-publish" style="pointer-events: auto; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+            <span>飞越318最美国道</span>
+            <span id="toggle-publish-arrow" style="font-size: 10px; color: #ffd700; transition: transform 0.3s ease; display: inline-block; transform: rotate(180deg);">▲</span>
+            <button id="btn-bgm" class="btn-music" title="播放/暂停音乐" onclick="event.stopPropagation()" style="background: none; border: none; cursor: pointer; padding: 0; margin-left: 4px; display: flex; align-items: center;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="display: block; color: #ffd700; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));">
+                    <path d="M19 3H9c-1.1 0-2 .9-2 2v11.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h10v7.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V5c0-1.1.9-2 2-2z"/>
+                </svg>
+            </button>
+        </div>
+        <div id="publish-bar" class="publish-bar-panel collapsed">
+            <button id="btn-publish-msg" class="bar-btn-publish">发布</button>
+            <div class="ad-banner">
+                <marquee class="ad-text-slider" scrollamount="4" scrolldelay="100">
+                    <span class="ad-slide">欢迎使用神山转山平台，敬请期待新功能！</span>
+                </marquee>
+            </div>
+            <button class="bar-btn-donate">打赏</button>
+        </div>
+    </div>
+
+    <!-- 底部控制与信息面板 (左下方绝对定位) -->
+    <div id="ui-panel" class="glass-panel">
+        <!-- iOS 风格拖拽/点击缩放手柄 -->
+        <div id="drag-handle" class="drag-handle"></div>
+
+        <!-- 顶部的三个功能键 -->
+        <div class="controls-compact">
+            <button id="btn-start-tour" class="btn-tour">
+                <span>巡航</span>
+            </button>
+            <button id="btn-free-explore" class="btn-explore">
+                <span>探索</span>
+            </button>
+            <button id="btn-my-location" class="btn-explore" title="在地图上标记我当前的位置">
+                <span>定位</span>
+            </button>
+            <select id="map-layer-selector" class="btn-select" title="切换底图">
+                <option value="bing">basic map</option>
+                <option value="google_satellite">google map</option>
+                <option value="osm">OSM</option>
+                <option value="mapbox">mapbox</option>
+            </select>
+        </div>
+
+        <!-- 功能面板下方：浮动解说窗口 (当进入雷达范围时显示) -->
+        <div id="poi-info-panel" class="poi-info-content hidden">
+            <div class="poi-header">
+                <span id="poi-tag" class="poi-tag">地标</span>
+                <h2 id="poi-title" class="poi-title">加载中</h2>
+                <!-- 轮播控制器 -->
+                <div id="poi-carousel-controls" class="carousel-controls hidden">
+                    <button id="btn-poi-prev" class="carousel-btn">◀</button>
+                    <span id="poi-page-indicator" class="carousel-indicator">1 / 1</span>
+                    <button id="btn-poi-next" class="carousel-btn">▶</button>
+                </div>
+            </div>
+            <div class="poi-body">
+                <p id="poi-desc" class="poi-desc">暂无描述</p>
+            </div>
+            <div id="poi-resizer" class="poi-resizer" title="拖拽调整高度"></div>
+        </div>
+    </div>
+
+    <!-- 打赏模态框 (从上版地图移植) -->
+    <div id="tipModal" class="modal hidden">
+        <div class="modal-content" style="text-align: center;">
+            <span class="close-btn" id="closeTipModal">&times;</span>
+            <h3 style="color:#111; margin-top:0;">打赏作者</h3>
+            <p style="color:#444; font-size:13px;">如果您喜欢这个 3D 沉浸式神山地图，<br>欢迎打赏！☕️</p>
+            <div class="qr-code-box" style="margin-top:15px;">
+                <img src="../assets/tip-qr.png" alt="微信打赏码" style="width:200px; max-width:100%; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1); margin: 0 auto;" />
+            </div>
+        </div>
+    </div>
+
+    <!-- 赞助商联系方式模态框 -->
+    <div id="sponsorsModal" class="modal hidden">
+        <div class="modal-content" style="width: 320px; text-align: center;">
+            <span class="close-btn" id="closeSponsorsModal">&times;</span>
+            <h3 style="color:#111; margin-top:0;">联系与交流</h3>
+            <div style="color:#444; font-size:13px; line-height: 1.6; margin-top: 15px;">
+                <ul class="sponsor-list">
+                    <li>丁丁：户外大神级向导。微信：tinti_seu</li>
+                    <li>多啦：一手好菜的豪爽姐。微信：lolo67</li>
+                    <li>墨小妖：古道热肠的跑者。微信：moxiaoyao1111</li>
+                    <li>龙虎林：独立研究和开发者。微信：gemaimao</li>
+                    <li>颜伟：高原环保供氧保障。微信：Sparkyanwei</li>
+                </ul>
+                <h4 style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">最新实时发布</h4>
+                <ul class="sponsor-list" id="modal-message-list">
+                    <!-- 动态加载的新留言 -->
+                </ul>
+                <p><strong>龙虎林</strong><br>独立研究开发者 (微信: gemaimao)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 发布留言模态框 -->
+    <div id="publishModal" class="modal hidden">
+        <div class="modal-content" style="width: 320px; text-align: left;">
+            <span class="close-btn" id="closePublishModal">&times;</span>
+            <h3 style="color:#111; margin-top:0; text-align: center;">发布互动信息</h3>
+            <div class="publish-form">
+                <input type="text" id="pub-nickname" placeholder="您的称呼/昵称 (必填)" maxlength="20" class="pub-input">
+                <input type="text" id="pub-contact" placeholder="联系方式 (选填，如微信号)" maxlength="50" class="pub-input">
+                <select id="pub-type" class="pub-input">
+                    <option value="留言">一句话留言</option>
+                    <option value="约伴">约伴</option>
+                    <option value="约饭">约饭</option>
+                    <option value="约车">约车</option>
+                    <option value="找背夫">找背夫</option>
+                    <option value="租装备">租装备</option>
+                    <option value="紧急求助" style="color: #ef4444; font-weight: bold;">🚨 紧急求助 (自动附带GPS定位)</option>
+                </select>
+                <div id="gps-info-container" style="display:none; font-size: 11px; color: #ef4444; margin: 4px 0 8px 0; background: rgba(239,68,68,0.08); padding: 8px; border-radius: 6px; border: 1px solid rgba(239,68,68,0.15); line-height: 1.4;">
+                    <span id="gps-status-text">⏳ 正在尝试获取您当前的精确GPS位置...</span>
+                </div>
+                <textarea id="pub-content" placeholder="填写内容详情，方便大家了解 (限50字)" maxlength="50" rows="3" class="pub-input" style="resize:none;"></textarea>
+                <input type="text" id="pub-captcha" placeholder="防刷验证：转山核心神山名称是？(四个字)" class="pub-input" required>
+                <button id="btn-submit-msg" class="btn primary" style="width:100%; margin-top:10px; padding: 10px;">提 交 发 布</button>
+            </div>
+            <p id="pub-status" style="color: green; font-size: 12px; text-align: center; margin-top: 10px; display: none;"></p>
+        </div>
+    </div>
+
+
+    <!-- 全局飞行进度时间轴 -->
+    <div id="flight-timeline-container" style="display: none; position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 60%; max-width: 800px; background: rgba(10, 14, 23, 0.38); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 10px 20px; z-index: 1000; flex-direction: row; align-items: center; gap: 15px; font-family: sans-serif;">
+        <span id="timeline-current-time" style="font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap;">00:00</span>
+        <div style="position: relative; width: 100%; flex: 1; display: flex; align-items: center; padding: 10px 0;">
+            <div id="timeline-ticks" style="position: absolute; top: 50%; transform: translateY(-50%); left: 0; right: 0; height: 4px; pointer-events: none; display: flex; justify-content: space-between;"></div>
+            <input type="range" id="flight-timeline-slider" min="0" max="1" step="0.001" value="0" style="width: 100%; cursor: pointer; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; outline: none; accent-color: #20e5b5; position: relative; z-index: 2; margin: 0; background: rgba(255,255,255,0.15);">
+            <div id="timeline-mileage-label" style="position: absolute; bottom: 20px; left: 0%; transform: translateX(-50%); color: #20e5b5; font-size: 11px; font-family: monospace; font-weight: bold; pointer-events: none; text-shadow: 0 1px 3px rgba(0,0,0,0.8); display: none; background: rgba(10, 14, 23, 0.85); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(32, 229, 181, 0.45); white-space: nowrap; z-index: 10;">0.0km</div>
+        </div>
+        <span id="timeline-total-time" style="font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap;">00:00</span>
+        <span id="timeline-status" style="font-size: 11px; color: #20e5b5; font-weight: 500; white-space: nowrap; min-width: 50px; text-align: right;">巡航中</span>
+    </div>
+
+    <!-- 背景音乐 -->
+    <audio id="bgmAudio" src="../assets/blue-sky-pilgrim.mp3?v=2" loop></audio>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

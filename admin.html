@@ -40,16 +40,22 @@
 </head>
 <body>
   <nav class="admin-nav">
-    <span class="brand">后台管理</span>
+    <span class="brand" id="brandText">后台管理</span>
     <select id="projectSelect" style="margin-left:12px; background:#222; color:#eee; border:none; padding:4px 8px;">
     </select>
     <button id="btnNewProject" style="margin-left:8px; margin-right:4px; background:#444; color:#eee; border:none; padding:4px 10px; cursor:pointer; border-radius:4px; font-size:12px;">➕ 新建项目</button>
-    <button id="btnPreviewFront" style="margin-left:4px; margin-right:12px; background:#444; color:#eee; border:none; padding:4px 10px; cursor:pointer; border-radius:4px; font-size:12px;">👁️ 预览前台成果</button>
-    <button class="tab active" data-src="flight-editor.html">导演轨编辑</button>
-    <button class="tab" data-src="poi-editor.html">POI 基础编辑</button>
-    <button class="tab" data-src="moderation.html">留言审核</button>
+    <button id="btnDeleteProject" style="margin-right:8px; background:rgba(255, 77, 77, 0.2); color:#ff4d4d; border:1px solid rgba(255, 77, 77, 0.4); padding:4px 10px; cursor:pointer; border-radius:4px; font-size:12px;">🗑️ 删除当前项目</button>
+    <button id="btnRollback" style="margin-right:16px; background:rgba(255, 179, 0, 0.15); color:#ffb300; border:1px solid rgba(255, 179, 0, 0.4); padding:4px 10px; cursor:pointer; border-radius:4px; font-size:12px;">⏪ 撤销上次保存</button>
+    <button class="tab active" data-src="flight-editor.html" id="tabFlight">导演轨漫游</button>
+    <button class="tab" data-src="narrative-editor.html" id="tabNarrative">沙盘叙事推演</button>
+    <button class="tab" data-src="poi-editor.html" id="tabPoi">POI 基础编辑</button>
+    <button class="tab" data-src="moderation.html" id="tabModeration">留言审核</button>
     <span class="spacer"></span>
-    <a class="link" href="index.html" target="_blank">← 返回前台</a>
+    <span id="ctrlDragHint" style="font-size: 13px; color: #ffeb3b; font-weight: bold; margin-right: 15px; text-shadow: 0 0 5px rgba(255,235,59,0.3);">🖱️ 按住 Ctrl + 鼠标拖拽以环绕视角</span>
+    <button id="btnLangToggle" style="margin-right: 12px; background:rgba(255,255,255,0.08); color:#eee; border:1px solid rgba(255,255,255,0.15); padding:6px 12px; cursor:pointer; border-radius:4px; font-size:13px; display:flex; align-items:center; gap:4px; transition: all 0.2s;">🌐 EN</button>
+    <button id="btnPreviewFront" style="background:rgba(32,229,181,0.15); color:#20e5b5; border:1px solid rgba(32,229,181,0.5); padding:6px 14px; cursor:pointer; border-radius:4px; font-size:13px; font-weight: bold; transition: all 0.3s; display: flex; align-items: center; gap: 6px;">
+      <span style="color:#20e5b5; font-size: 14px;">▶</span> <span id="previewText">巡航预览</span>
+    </button>
   </nav>
   <iframe class="editor-frame" id="editorFrame" src="flight-editor.html"></iframe>
 
@@ -57,31 +63,175 @@
     const tabs = document.querySelectorAll('.tab');
     const frame = document.getElementById('editorFrame');
     const projectSelect = document.getElementById('projectSelect');
+    let currentProject = '';
 
-    document.getElementById('btnNewProject').addEventListener('click', () => {
-      const name = prompt("请输入新项目的英文名目录名称 (如 kailash-2 ):");
-      if (!name) return;
-      const cleanName = name.trim().toLowerCase();
+    // Bilingual Translation Dictionary for admin.html
+    let currentLang = localStorage.getItem('admin_lang') || 'zh';
+
+    const i18nAdmin = {
+      zh: {
+        brand: "后台管理",
+        newProject: "➕ 新建项目",
+        deleteProject: "🗑️ 删除当前项目",
+        tabFlight: "导演轨漫游",
+        tabNarrative: "沙盘叙事推演",
+        tabPoi: "POI 基础编辑",
+        tabModeration: "留言审核",
+        ctrlDragHint: "🖱️ 按住 Ctrl + 鼠标拖拽以环绕视角",
+        previewBtn: "巡航预览",
+        langToggleBtn: "🌐 EN",
+        deleteConfirm: "确定要彻底删除子项目 【{project}】 吗？此操作将物理删除该项目的数据文件夹，且无法撤销！",
+        deleteDefaultErr: "默认项目禁止删除。",
+        deleteSuccess: "项目 【{project}】 已成功删除。",
+        deleteFail: "删除失败: {error}",
+        requestFail: "请求失败: {error}",
+        newProjectTitle: "新建项目",
+        newProjNameLabel: "项目标识名 (必须为英文/拼音字母或数字组合)",
+        newProjNamePlaceholder: "例如: my-new-project",
+        newProjCategoryLabel: "项目分类",
+        newProjCustomCatLabel: "自定义分类 / 项目简述 (选填)",
+        newProjCustomCatPlaceholder: "如果选择自定义，或需要简述项目意图，请在此填写...",
+        newProjTemplateLabel: "初始数据模板",
+        newProjInvalidName: "项目标识名无效！只能包含小写字母、数字、连字符和下划线。",
+        newProjSuccess: "项目 【{project}】 创建成功！已自动切换为当前项目。",
+        newProjFail: "创建失败: {error}",
+        dialogCancel: "取消",
+        dialogConfirm: "确定",
+        defaultProjectName: "冈仁波齐转山 (根目录)",
+        rollbackBtn: "⏪ 撤销上次保存",
+        rollbackConfirm: "确定要撤销对项目 【{project}】 的上一次保存吗？这会恢复到该项目的前一个备份版本。",
+        rollbackSuccess: "项目 【{project}】 数据已回退至上一版本，请刷新编辑面板查看最新数据！",
+        rollbackFail: "回滚失败: {error}"
+      },
+      en: {
+        brand: "Admin Dashboard",
+        newProject: "➕ New Project",
+        deleteProject: "🗑️ Delete Current Project",
+        tabFlight: "Director Flight Path",
+        tabNarrative: "Tactical Sandbox",
+        tabPoi: "POI Editor",
+        tabModeration: "Comments Audit",
+        ctrlDragHint: "🖱️ Hold Ctrl + Drag Mouse to Orbit View",
+        previewBtn: "Cruise Preview",
+        langToggleBtn: "🌐 CN",
+        deleteConfirm: "Are you sure you want to completely delete the subproject [{project}]? This will physically delete the data folder and cannot be undone!",
+        deleteDefaultErr: "The default project cannot be deleted.",
+        deleteSuccess: "Project [{project}] has been deleted successfully.",
+        deleteFail: "Failed to delete: {error}",
+        requestFail: "Request failed: {error}",
+        newProjectTitle: "Create New Project",
+        newProjNameLabel: "Project ID (lowercase letters, numbers, hyphens, underscores only)",
+        newProjNamePlaceholder: "e.g., my-new-project",
+        newProjCategoryLabel: "Project Category",
+        newProjCustomCatLabel: "Custom Category / Project Description (Optional)",
+        newProjCustomCatPlaceholder: "If you chose Custom, or want to describe the project, write here...",
+        newProjTemplateLabel: "Initial Data Template",
+        newProjInvalidName: "Invalid Project ID! It must contain only lowercase letters, numbers, hyphens, and underscores.",
+        newProjSuccess: "Project [{project}] created successfully! Switched to current project.",
+        newProjFail: "Failed to create: {error}",
+        dialogCancel: "Cancel",
+        dialogConfirm: "Confirm",
+        defaultProjectName: "Kailash Kora (Root Directory)",
+        rollbackBtn: "⏪ Rollback Last Save",
+        rollbackConfirm: "Are you sure you want to rollback the last save for project [{project}]? This will restore the previous backup version.",
+        rollbackSuccess: "Project [{project}] has been rolled back successfully! Please reload the editor panel.",
+        rollbackFail: "Rollback failed: {error}"
+      }
+    };
+
+    function applyLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('admin_lang', lang);
+      const dict = i18nAdmin[lang];
+      
+      // Update DOM texts
+      document.getElementById('brandText').textContent = dict.brand;
+      document.getElementById('btnNewProject').textContent = dict.newProject;
+      document.getElementById('btnDeleteProject').textContent = dict.deleteProject;
+      document.getElementById('btnRollback').textContent = dict.rollbackBtn;
+      document.getElementById('tabFlight').textContent = dict.tabFlight;
+      document.getElementById('tabNarrative').textContent = dict.tabNarrative;
+      document.getElementById('tabPoi').textContent = dict.tabPoi;
+      document.getElementById('tabModeration').textContent = dict.tabModeration;
+      document.getElementById('ctrlDragHint').textContent = dict.ctrlDragHint;
+      document.getElementById('previewText').textContent = dict.previewBtn;
+      document.getElementById('btnLangToggle').textContent = dict.langToggleBtn;
+
+      // Update project selection default option
+      const firstOpt = projectSelect.options[0];
+      if (firstOpt) {
+        firstOpt.textContent = dict.defaultProjectName;
+      }
+      
+      // Propagate language choice to the internal iframe editor
+      sendLangToIframe();
+    }
+
+    function sendLangToIframe() {
+      if (frame && frame.contentWindow) {
+        frame.contentWindow.postMessage({ type: 'setLanguage', lang: currentLang }, '*');
+      }
+    }
+
+    // Toggle button handler
+    document.getElementById('btnLangToggle').addEventListener('click', () => {
+      const targetLang = currentLang === 'zh' ? 'en' : 'zh';
+      applyLanguage(targetLang);
+    });
+
+    // Notify iframe on load
+    frame.addEventListener('load', () => {
+      sendLangToIframe();
+    });
+
+    document.getElementById('btnNewProject').addEventListener('click', async () => {
+      const dict = i18nAdmin[currentLang];
+      const categories = currentLang === 'zh' ? [
+        '旅游目的地介绍', '旅游线路介绍', '户外线路介绍', '景区园区房区介绍',
+        '史地结合类课件制作', '城市特色单元介绍', '在地人文探索', '在地科学探索', '3D风光大片', '自定义'
+      ] : [
+        'Tourism Destination Guide', 'Tourism Route Guide', 'Outdoor Route Guide', 'Scenic Area / Park Guide',
+        'History-Geography Courseware', 'Urban Feature Highlights', 'Local Human Exploration', 'Local Scientific Exploration', '3D Scenery Film', 'Custom'
+      ];
+      
+      const templates = currentLang === 'zh' ? 
+        ['完全空白 (从零开始)', '拷贝冈仁波齐默认数据'] :
+        ['Blank Slate (From Scratch)', 'Copy Kailash Default Data'];
+
+      const result = await showCustomDialog(dict.newProjectTitle, [
+        { key: 'name', label: dict.newProjNameLabel, placeholder: dict.newProjNamePlaceholder },
+        { key: 'category', label: dict.newProjCategoryLabel, type: 'select', options: categories },
+        { key: 'custom_category', label: dict.newProjCustomCatLabel, type: 'textarea', placeholder: dict.newProjCustomCatPlaceholder },
+        { key: 'template', label: dict.newProjTemplateLabel, type: 'select', options: templates }
+      ]);
+      
+      if (!result || !result.name) return;
+      const cleanName = result.name.trim().toLowerCase();
       if (!cleanName) return;
       
       if (!/^[a-z0-9-_]+$/.test(cleanName)) {
-        alert("项目标识名无效！只能包含小写字母、数字、连字符和下划线。");
+        alert(dict.newProjInvalidName);
         return;
       }
 
-      const empty = confirm("是否从【完全空白】的数据开始设计新项目？\n\n- 点击【确定】：创建完全空白的项目（从零数据点位和零导演航点开始自绘）\n- 点击【取消】：拷贝默认的冈仁波齐转山数据模板（带参考路线）");
+      const empty = result.template === templates[0];
 
       fetch('api/create-project', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectName: cleanName, empty: empty })
+        body: JSON.stringify({ 
+          projectName: cleanName, 
+          empty: empty, 
+          category: result.category,
+          desc: result.custom_category || ''
+        })
       })
       .then(r => r.json())
       .then(res => {
         if (res.error) {
-          alert("创建失败: " + res.error);
+          alert(dict.newProjFail.replace('{error}', res.error));
         } else {
-          alert(`项目 【${cleanName}】 创建成功！已自动切换为当前项目。`);
+          alert(dict.newProjSuccess.replace('{project}', cleanName));
           const opt = document.createElement('option');
           opt.value = cleanName;
           opt.textContent = cleanName;
@@ -95,7 +245,7 @@
         }
       })
       .catch(err => {
-        alert("请求失败: " + err.message);
+        alert(dict.requestFail.replace('{error}', err.message));
       });
     });
 
@@ -104,35 +254,124 @@
       window.open(url, '_blank');
     });
 
-    let currentProject = projectSelect.value || '';
-    // Load project list and populate select
+    // Initialize default project immediately to prevent blank page on offline / loading
+    const defaultOpt = document.createElement('option');
+    defaultOpt.value = '';
+    defaultOpt.textContent = '冈仁波齐转山 (根目录)';
+    projectSelect.appendChild(defaultOpt);
+    
+    // Check localStorage
+    currentProject = localStorage.getItem('lastEditedProject') || '';
+    projectSelect.value = currentProject;
+    loadTabContent(tabs[0]);
+
+    // Load additional subprojects from projects.json
     fetch('projects.json')
       .then(r => r.json())
       .then(list => {
-        // Add an empty option representing the default project (root)
-        const defaultOpt = document.createElement('option');
-        defaultOpt.value = '';
-        defaultOpt.textContent = '默认项目';
-        projectSelect.appendChild(defaultOpt);
-        // Populate other projects
+        // Clear options except the first one
+        while (projectSelect.options.length > 1) {
+          projectSelect.remove(1);
+        }
+        // Populate other projects, filtering out root folder name
+        let hasLastProject = false;
         list.forEach(p => {
-          const opt = document.createElement('option');
-          opt.value = p;
-          opt.textContent = p;
-          projectSelect.appendChild(opt);
+          if (p !== 'kailash-kora-map') {
+            const opt = document.createElement('option');
+            opt.value = p;
+            opt.textContent = p;
+            if (p === currentProject) hasLastProject = true;
+            projectSelect.appendChild(opt);
+          }
         });
-        // Set initial selection to default (empty)
-        currentProject = '';
-        projectSelect.value = '';
-        // Load default tab content for the default project
-        loadTabContent(tabs[0]);
+        
+        // Restore value after options are loaded
+        if (currentProject !== '' && !hasLastProject) {
+            currentProject = ''; // Fallback if last edited was deleted
+            localStorage.setItem('lastEditedProject', '');
+        }
+        projectSelect.value = currentProject;
       })
       .catch(err => console.error('Failed to load projects.json', err));
+
+    // Delete project handler
+    document.getElementById('btnDeleteProject').addEventListener('click', () => {
+      const dict = i18nAdmin[currentLang];
+      if (!currentProject) {
+        alert(dict.deleteDefaultErr);
+        return;
+      }
+      if (!confirm(dict.deleteConfirm.replace('{project}', currentProject))) {
+        return;
+      }
+      fetch('api/delete-project', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectName: currentProject })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.error) {
+          alert(dict.deleteFail.replace('{error}', res.error));
+        } else {
+          alert(dict.deleteSuccess.replace('{project}', currentProject));
+          const idx = Array.from(projectSelect.options).findIndex(opt => opt.value === currentProject);
+          if (idx !== -1) {
+            projectSelect.remove(idx);
+          }
+          projectSelect.value = '';
+          currentProject = '';
+          const activeTab = document.querySelector('.tab.active') || tabs[0];
+          loadTabContent(activeTab);
+        }
+      })
+      .catch(err => {
+        alert(dict.requestFail.replace('{error}', err.message));
+      });
+    });
+
+    // Rollback project handler
+    document.getElementById('btnRollback').addEventListener('click', () => {
+      const dict = i18nAdmin[currentLang];
+      
+      // Determine active tab to know if we are in outer or inner route
+      const activeTab = document.querySelector('.tab.active') || tabs[0];
+      const isInner = frame.src.includes('route=inner');
+      const fileType = activeTab.id === 'tabPoi' ? 'pois' : 'routes';
+
+      if (!confirm(dict.rollbackConfirm.replace('{project}', currentProject || dict.defaultProjectName))) {
+        return;
+      }
+      
+      fetch('api/rollback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectName: currentProject,
+          fileType: fileType,
+          isInner: isInner
+        })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.error) {
+          alert(dict.rollbackFail.replace('{error}', res.error));
+        } else {
+          alert(dict.rollbackSuccess.replace('{project}', currentProject || dict.defaultProjectName));
+          // Reload iframe
+          loadTabContent(activeTab);
+        }
+      })
+      .catch(err => {
+        alert(dict.requestFail.replace('{error}', err.message));
+      });
+    });
+
     // Update frame when tab clicked
     function loadTabContent(tab) {
       const src = tab.dataset.src;
       const path = (currentProject && currentProject !== '') ? `${currentProject}/${src}` : src;
-      frame.src = path;
+      frame.src = path + "?t=" + Date.now();
     }
     // Tab click handler
     Array.from(tabs).forEach(tab => {
@@ -145,10 +384,91 @@
     // Project change handler
     projectSelect.addEventListener('change', () => {
       currentProject = projectSelect.value;
-      // Reload current active tab
+      localStorage.setItem('lastEditedProject', currentProject);
       const activeTab = document.querySelector('.tab.active') || tabs[0];
       loadTabContent(activeTab);
     });
+
+    // Run lang initialization after DOM elements and handlers are declared
+    applyLanguage(currentLang);
+
+    function showCustomDialog(title, fields) {
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;';
+        
+        const dialog = document.createElement('div');
+        dialog.style.cssText = 'background:#1e293b;border:1px solid #334155;border-radius:8px;padding:20px;width:340px;box-shadow:0 10px 25px rgba(0,0,0,0.5);display:flex;flex-direction:column;gap:12px;font-family:sans-serif;';
+        
+        const titleEl = document.createElement('div');
+        titleEl.style.cssText = 'font-weight:bold;color:#f8fafc;font-size:16px;margin-bottom:8px;';
+        titleEl.textContent = title;
+        dialog.appendChild(titleEl);
+        
+        const inputs = {};
+        fields.forEach(f => {
+          const wrapper = document.createElement('div');
+          wrapper.style.cssText = 'display:flex;flex-direction:column;gap:6px;';
+          const label = document.createElement('label');
+          label.style.cssText = 'color:#94a3b8;font-size:12px;';
+          label.textContent = f.label;
+          wrapper.appendChild(label);
+          
+          let input;
+          if (f.type === 'textarea') {
+            input = document.createElement('textarea');
+            input.style.cssText = 'background:#0f172a;border:1px solid #334155;color:#f8fafc;padding:8px;border-radius:4px;font-size:13px;resize:vertical;min-height:60px;font-family:inherit;';
+          } else if (f.type === 'select') {
+            input = document.createElement('select');
+            input.style.cssText = 'background:#0f172a;border:1px solid #334155;color:#f8fafc;padding:8px;border-radius:4px;font-size:13px;font-family:inherit;cursor:pointer;';
+            f.options.forEach(opt => {
+              const option = document.createElement('option');
+              option.value = opt;
+              option.textContent = opt;
+              input.appendChild(option);
+            });
+          } else {
+            input = document.createElement('input');
+            input.type = 'text';
+            input.style.cssText = 'background:#0f172a;border:1px solid #334155;color:#f8fafc;padding:8px;border-radius:4px;font-size:13px;font-family:inherit;';
+          }
+          
+          if (f.default && f.type !== 'select') input.value = f.default;
+          if (f.placeholder) input.placeholder = f.placeholder;
+          inputs[f.key] = input;
+          wrapper.appendChild(input);
+          dialog.appendChild(wrapper);
+        });
+        
+        const btnRow = document.createElement('div');
+        btnRow.style.cssText = 'display:flex;justify-content:flex-end;gap:10px;margin-top:12px;';
+        
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = currentLang === 'zh' ? '取消' : 'Cancel';
+        cancelBtn.style.cssText = 'background:transparent;border:1px solid #475569;color:#cbd5e1;padding:8px 16px;border-radius:4px;cursor:pointer;font-size:13px;';
+        cancelBtn.onclick = () => { document.body.removeChild(overlay); resolve(null); };
+        
+        const confirmBtn = document.createElement('button');
+        confirmBtn.textContent = currentLang === 'zh' ? '确定' : 'Confirm';
+        confirmBtn.style.cssText = 'background:#3b82f6;border:none;color:white;padding:8px 16px;border-radius:4px;cursor:pointer;font-size:13px;font-weight:bold;';
+        confirmBtn.onclick = () => {
+          const result = {};
+          fields.forEach(f => result[f.key] = inputs[f.key].value.trim());
+          document.body.removeChild(overlay);
+          resolve(result);
+        };
+        
+        btnRow.appendChild(cancelBtn);
+        btnRow.appendChild(confirmBtn);
+        dialog.appendChild(btnRow);
+        overlay.appendChild(dialog);
+        document.body.appendChild(overlay);
+        
+        if (fields.length > 0 && inputs[fields[0].key].focus) {
+          inputs[fields[0].key].focus();
+        }
+      });
+    }
   </script>
 </body>
 </html>

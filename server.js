@@ -34,9 +34,16 @@ function servStatic(req, res) {
   const decodedUrl = decodeURIComponent(url);
   let filePath = path.join(ROOT, decodedUrl);
 
+  // If filePath is a directory, append index.html
+  try {
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+      filePath = path.join(filePath, "index.html");
+    }
+  } catch (e) {}
+
   // Strip project folder prefix if it's a registered project and the file doesn't exist locally
   const parts = decodedUrl.split("/").filter(Boolean);
-  if (parts.length > 1) {
+  if (parts.length > 0) {
     const firstSegment = parts[0];
     const projPath = path.join(ROOT, "projects.json");
     let projects = [];
@@ -49,6 +56,12 @@ function servStatic(req, res) {
       if (!fs.existsSync(filePath)) {
         const rewrittenUrl = "/" + parts.slice(1).join("/");
         filePath = path.join(ROOT, rewrittenUrl);
+        // If the rewritten path is a directory, append index.html
+        try {
+          if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+            filePath = path.join(filePath, "index.html");
+          }
+        } catch (e) {}
       }
     }
   }
@@ -118,6 +131,27 @@ function scheduleGitPush(changedFile) {
   }, 3000); // 3 秒防抖
 }
 
+function rotateBackups(filePath) {
+  if (!fs.existsSync(filePath)) return;
+  const maxBackups = 5;
+  for (let i = maxBackups - 1; i >= 1; i--) {
+    const src = filePath + `.bak.${i}`;
+    const dst = filePath + `.bak.${i + 1}`;
+    if (fs.existsSync(src)) {
+      try {
+        fs.copyFileSync(src, dst);
+      } catch (e) {
+        console.error(`Backup rotation failed: ${src} -> ${dst}`, e);
+      }
+    }
+  }
+  try {
+    fs.copyFileSync(filePath, filePath + ".bak.1");
+  } catch (e) {
+    console.error(`Failed to create backup .bak.1 for ${filePath}`, e);
+  }
+}
+
 function handleAPI(req, res) {
   let urlPath = req.url.split("?")[0];
   const queryStr = req.url.split("?")[1] || "";
@@ -166,13 +200,20 @@ function handleAPI(req, res) {
         fs.mkdirSync(parentDir, { recursive: true });
       }
 
-      // 备份旧文件
+      // 备份旧文件并进行版本轮转
       if (fs.existsSync(target)) {
-        const backup = target + ".bak";
-        fs.copyFileSync(target, backup);
+        const legacyBackup = target + ".bak";
+        try {
+          fs.copyFileSync(target, legacyBackup);
+        } catch (e) {}
+        rotateBackups(target);
       }
 
-      fs.writeFileSync(target, pretty, "utf-8");
+      // 原子性安全写入：先写入临时文件，再重命名覆盖
+      const tempPath = target + ".tmp";
+      fs.writeFileSync(tempPath, pretty, "utf-8");
+      fs.renameSync(tempPath, target);
+
       console.log(`✅ 已保存 ${path.basename(target)} to ${target} (${pretty.length} bytes)`);
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ ok: true, size: pretty.length }));
@@ -380,6 +421,71 @@ const server = http.createServer((req, res) => {
         res.end(JSON.stringify({ ok: true, name: projectName }));
 
         scheduleGitPush(projPath);
+      } catch (err) {
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: err.message }));
+      }
+    });
+    return;
+  }
+
+  // POST /api/rollback → 回退项目数据至上一保存版本
+  if (req.method === "POST" && (urlPath === "/api/rollback" || urlPath.endsWith("/api/rollback"))) {
+    let body = "";
+    req.on("data", (chunk) => (body += chunk));
+    req.on("end", () => {
+      try {
+        const payload = JSON.parse(body);
+        const projectName = payload.projectName ? payload.projectName.trim().toLowerCase() : "";
+        const fileType = payload.fileType || "routes"; // "routes" or "pois"
+        const isInner = payload.isInner === true;
+        
+        const fileName = fileType === "pois" ? "pois.json" : (isInner ? "routes_inner.json" : "routes.json");
+        const target = projectName
+          ? path.join(ROOT, projectName, "data", fileName)
+          : path.join(ROOT, "data", fileName);
+
+        const bakPath = target + ".bak.1";
+        if (fs.existsSync(bakPath)) {
+          // atomic restore from backup
+          const tempPath = target + ".tmp";
+          fs.copyFileSync(bakPath, tempPath);
+          fs.renameSync(tempPath, target);
+          
+          // Rotate backups backward (e.g. bak.2 becomes bak.1 etc)
+          for (let i = 1; i < 5; i++) {
+            const nextBak = target + `.bak.${i + 1}`;
+            const curBak = target + `.bak.${i}`;
+            if (fs.existsSync(nextBak)) {
+              fs.copyFileSync(nextBak, curBak);
+            }
+          }
+          // delete bak.5 if exists
+          try { if (fs.existsSync(target + ".bak.5")) fs.rmSync(target + ".bak.5"); } catch (e) {}
+          
+          console.log(`✅ 已成功回退 ${path.basename(target)} 至本地备份版本`);
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: true, source: "backup" }));
+          
+          scheduleGitPush(target);
+          return;
+        }
+        
+        // Git Fallback
+        const relFile = path.relative(ROOT, target);
+        exec(`git -C "${ROOT}" checkout HEAD~1 -- "${relFile}"`, (gitErr) => {
+          if (gitErr) {
+            console.error("❌ Git回退失败:", gitErr.message);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "回退失败：既没有本地备份，Git回退也失败。" }));
+          } else {
+            console.log(`✅ 已成功通过 Git 回退 ${relFile} 至上一版本`);
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ ok: true, source: "git" }));
+            
+            scheduleGitPush(target);
+          }
+        });
       } catch (err) {
         res.writeHead(500, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: err.message }));

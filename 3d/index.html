@@ -30,16 +30,16 @@
 
     <!-- 顶部左侧区域 (标题 + 独立发布条) -->
     <div id="top-left-container" class="top-left-panel">
-        <div class="map-title-header" id="btn-toggle-publish" style="pointer-events: auto; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+        <div class="map-title-header collapsed" id="btn-toggle-publish" style="pointer-events: auto; cursor: pointer; display: flex; align-items: center; gap: 8px;">
             <span>2026马年大转山</span>
-            <span id="toggle-publish-arrow" style="font-size: 10px; color: #ffd700; transition: transform 0.3s ease; display: inline-block;">▲</span>
+            <span id="toggle-publish-arrow" style="font-size: 10px; color: #ffd700; transition: transform 0.3s ease; display: inline-block; transform: rotate(180deg);">▲</span>
             <button id="btn-bgm" class="btn-music" title="播放/暂停音乐" onclick="event.stopPropagation()" style="background: none; border: none; cursor: pointer; padding: 0; margin-left: 4px; display: flex; align-items: center;">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="display: block; color: #ffd700; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));">
                     <path d="M19 3H9c-1.1 0-2 .9-2 2v11.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h10v7.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V5c0-1.1.9-2 2-2z"/>
                 </svg>
             </button>
         </div>
-        <div id="publish-bar" class="publish-bar-panel">
+        <div id="publish-bar" class="publish-bar-panel collapsed">
             <button id="btn-publish-msg" class="bar-btn-publish">发布</button>
             <div class="ad-banner">
                 <marquee class="ad-text-slider" scrollamount="4" scrolldelay="100">

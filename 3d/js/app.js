@@ -21,9 +21,324 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
 viewer.clock.shouldAnimate = false;
 viewer.clock.currentTime = Cesium.JulianDate.fromIso8601("2024-06-21T02:00:00Z"); // Default morning (10:00 Beijing time)
 
+// Polyfill for rain and snow post-process stages
+if (typeof Cesium.PostProcessStageLibrary.createRainStage !== 'function') {
+  Cesium.PostProcessStageLibrary.createRainStage = function() {
+    const isWebGL2 = viewer.scene.context.webgl2;
+    const shader = isWebGL2 ? `
+      uniform sampler2D colorTexture;
+      in vec2 v_textureCoordinates;
+      uniform float speed;
+      out vec4 fragColor;
+      
+      float hash(float x) {
+        return fract(sin(x * 133.3) * 13.13);
+      }
+      
+      void main(void) {
+        float time = czm_frameNumber * speed * 0.005;
+        vec2 resolution = czm_viewport.zw;
+        vec2 uv = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);
+        
+        float a = -0.2;
+        float si = sin(a), co = cos(a);
+        uv *= mat2(co, -si, si, co);
+        uv *= length(uv + vec2(0.0, 4.9)) * 0.3 + 1.0;
+        
+        float v = 1.0 - sin(hash(floor(uv.x * 100.0)) * 2.0);
+        float b = clamp(abs(sin(20.0 * time * v + uv.y * (5.0 / (2.0 + v)))) - 0.95, 0.0, 1.0) * 20.0;
+        
+        vec3 rainColor = vec3(0.6, 0.7, 0.8) * v * b;
+        vec4 sceneColor = texture(colorTexture, v_textureCoordinates);
+        fragColor = mix(sceneColor, vec4(rainColor, 1.0), 0.3);
+      }
+    ` : `
+      uniform sampler2D colorTexture;
+      varying vec2 v_textureCoordinates;
+      uniform float speed;
+      
+      float hash(float x) {
+        return fract(sin(x * 133.3) * 13.13);
+      }
+      
+      void main(void) {
+        float time = czm_frameNumber * speed * 0.005;
+        vec2 resolution = czm_viewport.zw;
+        vec2 uv = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);
+        
+        float a = -0.2;
+        float si = sin(a), co = cos(a);
+        uv *= mat2(co, -si, si, co);
+        uv *= length(uv + vec2(0.0, 4.9)) * 0.3 + 1.0;
+        
+        float v = 1.0 - sin(hash(floor(uv.x * 100.0)) * 2.0);
+        float b = clamp(abs(sin(20.0 * time * v + uv.y * (5.0 / (2.0 + v)))) - 0.95, 0.0, 1.0) * 20.0;
+        
+        vec3 rainColor = vec3(0.6, 0.7, 0.8) * v * b;
+        vec4 sceneColor = texture2D(colorTexture, v_textureCoordinates);
+        gl_FragColor = mix(sceneColor, vec4(rainColor, 1.0), 0.3);
+      }
+    `;
+    return new Cesium.PostProcessStage({
+      name: 'czm_rain',
+      fragmentShader: shader,
+      uniforms: {
+        speed: 3.0
+      }
+    });
+  };
+}
+
+if (typeof Cesium.PostProcessStageLibrary.createSnowStage !== 'function') {
+  Cesium.PostProcessStageLibrary.createSnowStage = function() {
+    const isWebGL2 = viewer.scene.context.webgl2;
+    const shader = isWebGL2 ? `
+      uniform sampler2D colorTexture;
+      in vec2 v_textureCoordinates;
+      uniform float speed;
+      out vec4 fragColor;
+      
+      float hash(vec2 p) {
+        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+      }
+      
+      void main(void) {
+        float time = czm_frameNumber * speed * 0.003;
+        vec2 resolution = czm_viewport.zw;
+        vec2 uv = gl_FragCoord.xy / resolution.xy;
+        
+        vec4 sceneColor = texture(colorTexture, v_textureCoordinates);
+        
+        float snow = 0.0;
+        for (int i = 0; i < 6; i++) {
+          float fi = float(i);
+          vec2 offset = vec2(fi * 1.5, fi * 3.0);
+          vec2 uv2 = uv * (3.0 + fi) + vec2(0.1 * sin(time + fi), time * (1.0 + fi * 0.2)) + offset;
+          vec2 ip = floor(uv2);
+          vec2 fp = fract(uv2);
+          float h = hash(ip);
+          if (h > 0.92) {
+            float dist = length(fp - 0.5);
+            snow += smoothstep(0.18, 0.0, dist) * (h - 0.92) * 12.0;
+          }
+        }
+        
+        vec3 snowColor = vec3(0.9, 0.9, 0.95);
+        fragColor = mix(sceneColor, vec4(snowColor, 1.0), clamp(snow, 0.0, 0.5));
+      }
+    ` : `
+      uniform sampler2D colorTexture;
+      varying vec2 v_textureCoordinates;
+      uniform float speed;
+      
+      float hash(vec2 p) {
+        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+      }
+      
+      void main(void) {
+        float time = czm_frameNumber * speed * 0.003;
+        vec2 resolution = czm_viewport.zw;
+        vec2 uv = gl_FragCoord.xy / resolution.xy;
+        
+        vec4 sceneColor = texture2D(colorTexture, v_textureCoordinates);
+        
+        float snow = 0.0;
+        for (int i = 0; i < 6; i++) {
+          float fi = float(i);
+          vec2 offset = vec2(fi * 1.5, fi * 3.0);
+          vec2 uv2 = uv * (3.0 + fi) + vec2(0.1 * sin(time + fi), time * (1.0 + fi * 0.2)) + offset;
+          vec2 ip = floor(uv2);
+          vec2 fp = fract(uv2);
+          float h = hash(ip);
+          if (h > 0.92) {
+            float dist = length(fp - 0.5);
+            snow += smoothstep(0.18, 0.0, dist) * (h - 0.92) * 12.0;
+          }
+        }
+        
+        vec3 snowColor = vec3(0.9, 0.9, 0.95);
+        gl_FragColor = mix(sceneColor, vec4(snowColor, 1.0), clamp(snow, 0.0, 0.5));
+      }
+    `;
+    return new Cesium.PostProcessStage({
+      name: 'czm_snow',
+      fragmentShader: shader,
+      uniforms: {
+        speed: 2.5
+      }
+    });
+  };
+}
+
+// Environment & Weather global variables
+let activeWeatherStage = null;
+let lightningTimeout = null;
+
 // 光照时间推移（延时摄影）引擎全局变量
 let sunlightTransition = null;
 let currentFlightSegment = null;
+
+function applyEnvEffectToCesium(pt) {
+  if (!viewer) return;
+  if (!pt) return;
+  
+  const mode = pt.env_mode || 'none';
+  
+  // Remove active stage if any
+  if (activeWeatherStage) {
+    viewer.scene.postProcessStages.remove(activeWeatherStage);
+    activeWeatherStage = null;
+  }
+  
+  // Clear lightning timeout if any
+  if (lightningTimeout) {
+    clearTimeout(lightningTimeout);
+    lightningTimeout = null;
+  }
+  
+  // Reset Light Intensity
+  if (viewer.scene.light) {
+    viewer.scene.light.intensity = 1.0;
+  }
+  
+  // Clear/Reset Fog
+  viewer.scene.fog.enabled = true;
+  viewer.scene.fog.density = 0.0002;
+  
+  // Always apply time of day first
+  const timeVal = typeof pt.timeOfDay === 'number' ? pt.timeOfDay : 12.0;
+  let hrs = Math.floor(timeVal);
+  let mins = Math.floor((timeVal - hrs) * 60);
+  viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(`2024-06-21T${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00Z`);
+  
+  if (mode === 'none' || mode === 'time') {
+    pt.weather = 'none';
+    pt.weather_param = undefined;
+    return;
+  }
+  
+  const val = typeof pt.env_param === 'number' ? pt.env_param : 2;
+  
+  if (mode === 'rain') {
+    pt.weather = 'rain';
+    const speeds = { 1: 1.5, 2: 3.0, 3: 5.0, 4: 8.0 };
+    const speed = speeds[Math.round(val)] || 3.0;
+    pt.weather_param = speed;
+    
+    activeWeatherStage = Cesium.PostProcessStageLibrary.createRainStage();
+    activeWeatherStage.uniforms.speed = speed;
+    viewer.scene.postProcessStages.add(activeWeatherStage);
+    viewer.scene.fog.density = 0.0005 + (Math.round(val) * 0.0005);
+  } else if (mode === 'snow') {
+    pt.weather = 'snow';
+    const speeds = { 1: 1.0, 2: 2.5, 3: 4.5, 4: 7.0 };
+    const speed = speeds[Math.round(val)] || 2.5;
+    pt.weather_param = speed;
+    
+    activeWeatherStage = Cesium.PostProcessStageLibrary.createSnowStage();
+    activeWeatherStage.uniforms.speed = speed;
+    viewer.scene.postProcessStages.add(activeWeatherStage);
+    viewer.scene.fog.density = 0.0004 + (Math.round(val) * 0.0004);
+  } else if (mode === 'fog') {
+    pt.weather = 'fog';
+    const densities = { 1: 0.0008, 2: 0.002, 3: 0.004, 4: 0.008 };
+    const density = densities[Math.round(val)] || 0.002;
+    pt.weather_param = density;
+    
+    viewer.scene.fog.density = density;
+  } else if (mode === 'lightning') {
+    pt.weather = 'lightning';
+    const speeds = { 1: 1.0, 2: 2.0, 3: 3.5, 4: 5.0 };
+    const speed = speeds[Math.round(val)] || 2.0;
+    pt.weather_param = speed;
+    
+    viewer.scene.fog.density = 0.003;
+    
+    activeWeatherStage = Cesium.PostProcessStageLibrary.createRainStage();
+    activeWeatherStage.uniforms.speed = 3.0;
+    viewer.scene.postProcessStages.add(activeWeatherStage);
+    
+    if (!viewer.scene.light) {
+      try {
+        viewer.scene.light = new Cesium.SunLight();
+      } catch (e) {
+        try {
+          viewer.scene.light = new Cesium.DirectionalLight({
+            direction: new Cesium.Cartesian3(-0.5, -0.5, -0.5),
+            color: Cesium.Color.WHITE,
+            intensity: 1.0
+          });
+        } catch (err) {
+          console.warn("Could not create Cesium light:", err);
+        }
+      }
+    }
+    
+    if (viewer.scene.light) {
+      viewer.scene.light.intensity = 0.25;
+    }
+    
+    const isLightningActive = () => {
+      if (!viewer || !viewer.scene) return false;
+      const currentPt = (typeof flightPath !== 'undefined') ? flightPath[currentWaypoint] : null;
+      return currentPt && currentPt.env_mode === 'lightning';
+    };
+
+    const scheduleFlash = () => {
+      if (!isLightningActive()) {
+        if (viewer.scene.light) viewer.scene.light.intensity = 1.0;
+        return;
+      }
+      
+      let minDelay, maxDelay;
+      const v = Math.round(val);
+      if (v === 1) {
+        minDelay = 8000; maxDelay = 14000;
+      } else if (v === 3) {
+        minDelay = 2500; maxDelay = 5000;
+      } else if (v === 4) {
+        minDelay = 1000; maxDelay = 2500;
+      } else {
+        minDelay = 4500; maxDelay = 8500;
+      }
+      const delay = minDelay + Math.random() * (maxDelay - minDelay);
+      
+      lightningTimeout = setTimeout(() => {
+        if (!isLightningActive()) return;
+        if (viewer.scene.light) {
+          viewer.scene.light.intensity = 12.0;
+        }
+        
+        lightningTimeout = setTimeout(() => {
+          if (!isLightningActive()) return;
+          if (viewer.scene.light) {
+            viewer.scene.light.intensity = 0.25;
+          }
+          
+          if (Math.random() < 0.65) {
+            lightningTimeout = setTimeout(() => {
+              if (!isLightningActive()) return;
+              if (viewer.scene.light) {
+                viewer.scene.light.intensity = 7.0;
+              }
+              lightningTimeout = setTimeout(() => {
+                if (!isLightningActive()) return;
+                if (viewer.scene.light) {
+                  viewer.scene.light.intensity = 0.25;
+                }
+                scheduleFlash();
+              }, 50);
+            }, 60 + Math.random() * 40);
+          } else {
+            scheduleFlash();
+          }
+        }, 60 + Math.random() * 40);
+      }, delay);
+    };
+    
+    scheduleFlash();
+  }
+}
 
 viewer.scene.preRender.addEventListener(function() {
     if (currentFlightSegment && isPlaying) {
@@ -229,30 +544,123 @@ fetch(`../data/${routeFile}?t=` + Date.now()).then(r => {
     }
     return r.json();
 }).then(data => {
-    window.allFlights = data.flights || [];
-    if (window.allFlights.length === 0) {
-        window.allFlights.push({ id: 'legacy', name: '默认航线', path: data.main_flight || [] });
+    if (!data) data = {};
+    if (!Array.isArray(data.flights)) {
+        if (Array.isArray(data.main_flight)) {
+            data.flights = [{ id: 'legacy', name: '默认航线', path: data.main_flight }];
+        } else {
+            data.flights = [];
+        }
     }
-    flightPath = window.allFlights[0].path;
+    data.flights.forEach(trk => {
+        if (!trk) return;
+        if (!Array.isArray(trk.path)) trk.path = [];
+        trk.path = trk.path.filter(Boolean).map((wp, idx) => {
+            wp.id = wp.id || 'evt_' + Date.now() + '_' + idx;
+            wp.name = wp.name || `未命名航点 ${idx + 1}`;
+            wp.lng = parseFloat(wp.lng) || 0.0;
+            wp.lat = parseFloat(wp.lat) || 0.0;
+            wp.ground_alt = parseFloat(wp.ground_alt) || 0.0;
+            wp.relative_alt = parseFloat(wp.relative_alt) || 100.0;
+            wp.heading = parseFloat(wp.heading) || 0.0;
+            wp.pitch = parseFloat(wp.pitch) || -30.0;
+            wp.roll = parseFloat(wp.roll) || 360.0;
+            wp.duration = parseFloat(wp.duration) || 5.0;
+            wp.wait_time = parseFloat(wp.wait_time) || 0.0;
+            wp.fov = parseFloat(wp.fov) || 60.0;
+            wp.shot_mode = wp.shot_mode || 'default';
+            wp.look_at_intent = wp.look_at_intent || 'forward';
+            wp.perspective_fov = wp.perspective_fov || 'natural';
+            wp.perspective_pitch = wp.perspective_pitch || 'oblique';
+            wp.speed_preset = wp.speed_preset || 'normal';
+            wp.wait_preset = wp.wait_preset || 'none';
+            wp.env_mode = wp.env_mode || 'none';
+            wp.weather = wp.weather || 'none';
+            return wp;
+        });
+    });
+
+    window.allFlights = data.flights;
+    flightPath = window.allFlights[0] ? window.allFlights[0].path : [];
     fullRoute = data.main || []; 
+    
+    // Dynamic project-specific branding override
+    const branding = data.branding || {};
+    window.currentBranding = branding;
+    
+    // Change overlay title and description
+    const overlayTitle = document.getElementById('overlay-title');
+    if (overlayTitle) {
+        overlayTitle.innerText = branding.overlayTitle || '2026马年大转山';
+    }
+    
+    const overlayDesc = document.getElementById('overlay-desc');
+    if (overlayDesc) {
+        overlayDesc.innerText = branding.overlayDesc || '一山之缘，众生之幸。愿以此行，祈福平安。';
+    }
+    
+    // Change header logo span
+    const headerLogo = document.querySelector('.map-title-header span');
+    if (headerLogo) {
+        headerLogo.innerText = branding.title || '2026马年大转山';
+    }
+    
+    // Change HTML title
+    if (branding.htmlTitle) {
+        document.title = branding.htmlTitle;
+    } else if (branding.title) {
+        document.title = branding.title + ' - 3D 漫游';
+    } else {
+        document.title = '神山转山 3D 漫游 - Kailash Kora';
+    }
+
+    // Change logo URL if customized
+    const overlayLogo = document.querySelector('.overlay-logo');
+    if (overlayLogo && branding.logoUrl) {
+        overlayLogo.src = branding.logoUrl;
+    }
     
     // Dynamic Multi-Track Buttons Generation
     const startButtonsContainer = document.getElementById('start-buttons');
-    if (startButtonsContainer && window.allFlights.length > 1) {
-        startButtonsContainer.innerHTML = ''; // Clear default buttons
-        window.allFlights.forEach((trk, idx) => {
+    if (startButtonsContainer) {
+        if (window.allFlights.length > 1) {
+            startButtonsContainer.innerHTML = ''; // Clear default buttons
+            window.allFlights.forEach((trk, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn primary';
+                if (idx > 0) {
+                    btn.style.background = 'rgba(0,255,170,0.2)';
+                    btn.style.borderColor = 'rgba(0,255,170,0.5)';
+                    btn.style.color = '#00ffaa';
+                }
+                btn.style.fontSize = '16px';
+                btn.style.padding = '12px 24px';
+                btn.innerHTML = `▶️ ${trk.name}`;
+                btn.onclick = () => {
+                    flightPath = trk.path;
+                    document.getElementById('fullscreen-overlay').classList.add('hidden');
+                    currentWaypoint = 0;
+                    
+                    // Clear existing progress variables
+                    currentProgressMileage = 0.0;
+                    currentProgressTime = 0.0;
+                    progressPositions = [];
+                    currentSegmentStartIdx = 0;
+                    currentSegmentEndIdx = 0;
+                    
+                    startBgm();
+                };
+                startButtonsContainer.appendChild(btn);
+            });
+        } else if (window.allFlights.length === 1) {
+            startButtonsContainer.innerHTML = ''; // Clear default buttons
             const btn = document.createElement('button');
             btn.className = 'btn primary';
-            if (idx > 0) {
-                btn.style.background = 'rgba(0,255,170,0.2)';
-                btn.style.borderColor = 'rgba(0,255,170,0.5)';
-                btn.style.color = '#00ffaa';
-            }
             btn.style.fontSize = '16px';
-            btn.style.padding = '12px 24px';
-            btn.innerHTML = `▶️ ${trk.name}`;
+            btn.style.padding = '12px 30px';
+            btn.innerHTML = `▶️ 开启巡航`;
             btn.onclick = () => {
-                flightPath = trk.path;
+                flightPath = window.allFlights[0].path;
                 document.getElementById('fullscreen-overlay').classList.add('hidden');
                 currentWaypoint = 0;
                 
@@ -266,7 +674,7 @@ fetch(`../data/${routeFile}?t=` + Date.now()).then(r => {
                 startBgm();
             };
             startButtonsContainer.appendChild(btn);
-        });
+        }
     }
     
     // 直接使用原始的真实地理坐标（新版数据为 [lng, lat] 格式）
@@ -571,7 +979,10 @@ function loadPoisAndStart(terrainProvider) {
                     poiPopups.push({ id: poi.id, element: popup, lng: fixedLng, lat: fixedLat, height: altitude });
                 }
             }
-            document.getElementById('tour-status').innerText = '漫游已就绪';
+            const tourStatusEl = document.getElementById('tour-status');
+            if (tourStatusEl) {
+                tourStatusEl.innerText = '漫游已就绪';
+            }
             
             if (flightPath && flightPath.length > 0) {
                 const firstPt = flightPath[0];
@@ -737,25 +1148,31 @@ function flyNext() {
         // 漫游结束，显示全屏谢幕
         const overlay = document.getElementById('fullscreen-overlay');
         if (overlay && currentWaypoint >= flightPath.length) {
-            document.getElementById('overlay-title').innerText = '航段飞行结束';
-            document.getElementById('overlay-desc').innerHTML = '您可以选择继续探索其他路线，或再次回味本段旅程。';
+            if (window.allFlights && window.allFlights.length === 1) {
+                const b = window.currentBranding || {};
+                document.getElementById('overlay-title').innerText = b.endingTitle || b.overlayTitle || '澜沧江河谷如美镇';
+                document.getElementById('overlay-desc').innerHTML = b.endingDesc || '再次巡航';
+                const replayBtn = document.getElementById('btn-overlay-replay');
+                if (replayBtn) {
+                    replayBtn.innerHTML = b.replayBtnText || '🔄 再次巡航';
+                    replayBtn.style.display = 'inline-block';
+                }
+                const startButtons = document.getElementById('start-buttons');
+                if (startButtons) startButtons.style.display = 'none';
+            } else {
+                const b = window.currentBranding || {};
+                document.getElementById('overlay-title').innerText = b.multiEndingTitle || '航段飞行结束';
+                document.getElementById('overlay-desc').innerHTML = b.multiEndingDesc || '您可以选择继续探索其他路线，或再次回味本段旅程。';
+                const replayBtn = document.getElementById('btn-overlay-replay');
+                if (replayBtn) {
+                    replayBtn.style.display = (window.allFlights && window.allFlights.length > 1) ? 'none' : 'inline-block';
+                }
+                const startButtons = document.getElementById('start-buttons');
+                if (startButtons) startButtons.style.display = 'flex';
+            }
             
             const btnStart = document.getElementById('btn-overlay-start');
             if (btnStart) btnStart.style.display = 'none';
-            
-            // Do NOT hide the inner/outer buttons, allowing the user to switch routes
-            const startButtons = document.getElementById('start-buttons');
-            if (startButtons) startButtons.style.display = 'flex';
-            
-            // Show replay if it's single track, hide if multi-track (since we have start buttons)
-            const replayBtn = document.getElementById('btn-overlay-replay');
-            if (replayBtn) {
-                if (window.allFlights && window.allFlights.length > 1) {
-                    replayBtn.style.display = 'none';
-                } else {
-                    replayBtn.style.display = 'inline-block';
-                }
-            }
             
             overlay.classList.remove('hidden');
         }
@@ -767,6 +1184,9 @@ function flyNext() {
     }
     
     const pt = flightPath[currentWaypoint];
+    
+    // 应用环境与天气增效
+    applyEnvEffectToCesium(pt);
     
     // 自动播放解说音频并进行 BGM 压限
     if (pt.narration_audio && isPlaying) {
@@ -1150,6 +1570,13 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
         }
     }
     const pt = flightPath[currentWaypoint];
+    
+    // 初始化环境增效，但暂存 clock time 用于首点俯冲过渡动画
+    const originalTime = viewer.clock.currentTime;
+    applyEnvEffectToCesium(pt);
+    if (typeof pt.timeOfDay === 'number') {
+        viewer.clock.currentTime = originalTime;
+    }
     
     const elevationVal = typeof pt.ground_alt === 'number' ? pt.ground_alt : (typeof pt.elevation === 'number' ? pt.elevation : 5000);
     const relativeAlt = typeof pt.relative_alt === 'number' ? pt.relative_alt : (typeof pt.range === 'number' ? pt.range : 500);
@@ -1991,14 +2418,8 @@ document.getElementById('flight-timeline-slider').addEventListener('input', (e) 
         }
     });
     
-    // 同步光照
-    if (typeof pt.timeOfDay === 'number') {
-        let hrs = Math.floor(pt.timeOfDay);
-        let mins = Math.floor((pt.timeOfDay - hrs) * 60);
-        hrs = Math.max(0, Math.min(23, hrs));
-        mins = Math.max(0, Math.min(59, mins));
-        viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(`2024-06-21T${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00Z`);
-    }
+    // 同步环境与光照
+    applyEnvEffectToCesium(pt);
 
     document.getElementById('timeline-total-time').textContent = `${currentWaypoint + 1} / ${flightPath.length} 航点`;
 });

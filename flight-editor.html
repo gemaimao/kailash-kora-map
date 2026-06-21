@@ -621,6 +621,9 @@
       transform: rotate(-180deg);
       color: var(--accent);
     }
+    .accordion-group.group-basic .accordion-header::after {
+      display: none !important;
+    }
     .accordion-body {
       padding: 0 12px;
       max-height: 0;
@@ -895,6 +898,36 @@
         font-size: 10px;
       }
     }
+    /* Environment Enhancement Slider Styling */
+    #envSliderInput, #timeOfDayInput {
+      flex: 1;
+      height: 8px !important;
+      -webkit-appearance: none;
+      appearance: none;
+      background: rgba(255,255,255,0.2) !important;
+      border-radius: 4px !important;
+      outline: none;
+    }
+    #envSliderInput::-webkit-slider-thumb, #timeOfDayInput::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px !important;
+      height: 18px !important;
+      border-radius: 50% !important;
+      background: #10b981 !important;
+      cursor: pointer;
+      border: 2px solid #ffffff !important;
+      box-shadow: 0 0 6px rgba(16, 185, 129, 0.8) !important;
+    }
+    #envSliderInput::-moz-range-thumb, #timeOfDayInput::-moz-range-thumb {
+      width: 18px !important;
+      height: 18px !important;
+      border-radius: 50% !important;
+      background: #10b981 !important;
+      cursor: pointer;
+      border: 2px solid #ffffff !important;
+      box-shadow: 0 0 6px rgba(16, 185, 129, 0.8) !important;
+    }
   </style>
 </head>
 <body>
@@ -903,8 +936,8 @@
     <div class="sidebar-left">
       <div class="sidebar-header" style="display: flex; align-items: center; justify-content: space-between; padding: 15px 20px;">
         <div style="font-weight: bold; font-size: 15px; color: #fff; text-shadow: 0 0 6px rgba(255,255,255,0.4); display: flex; align-items: center; gap: 6px; white-space: nowrap;">
-          <span>📍 航点列表</span>
-          <span style="font-size: 11px; font-weight: normal; color: rgba(255,255,255,0.5); font-style: italic; text-shadow: none;">(Shift多选)</span>
+          <span id="lblWpList">📍 航点列表</span>
+          <span style="font-size: 11px; font-weight: normal; color: rgba(255,255,255,0.5); font-style: italic; text-shadow: none;" id="lblWpListSub">(Shift多选)</span>
         </div>
         <span style="font-size: 14px; font-weight: bold; color: var(--accent-cyan); white-space: nowrap; text-shadow: 0 0 5px rgba(32,229,181,0.4);" id="keyframeCount">0 轨</span>
       </div>
@@ -918,29 +951,27 @@
       
       <!-- Group 1: Telemetry & Read-out (Basic) - Collapsible by default -->
       <div class="accordion-group group-basic" id="accordionDiag" style="margin: 0 16px 12px 16px; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; overflow: hidden; background: rgba(0,0,0,0.15);">
-        <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')" style="padding: 8px 12px; background: rgba(255,255,255,0.02); color: #cbd5e1; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 600; user-select: none;">📍 航点信息</div>
+        <div class="accordion-header" id="headerDiag" onclick="this.closest('.accordion-group').classList.toggle('active')" style="padding: 8px 12px; background: rgba(255,255,255,0.02); color: #22c55e; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 14px; font-weight: bold; user-select: none;">航点信息</div>
         <div class="accordion-body">
           <div id="diagnosticsContent" style="padding: 4px 0;">
-            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02);"><span class="diag-label" style="color: var(--text-dim);">当前位置</span><span class="diag-value" id="diagPos" style="color: #fff; font-weight: 500;">--</span></div>
-            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02);"><span class="diag-label" style="color: var(--text-dim);">累计里程</span><span class="diag-value" id="diagDist" style="color: #fff; font-weight: 500;">--</span></div>
-            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02);"><span class="diag-label" style="color: var(--text-dim);">地面海拔</span><span class="diag-value" id="diagGround" style="color: #fff; font-weight: 500;">--</span></div>
-            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02);"><span class="diag-label" style="color: var(--text-dim);">机位海拔</span><span class="diag-value" id="diagFlight" style="color: #fff; font-weight: 500;">--</span></div>
-            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02);"><span class="diag-label" style="color: var(--text-dim);">离地高度</span><span class="diag-value" id="diagRel" style="color: #fff; font-weight: 500;">--</span></div>
-            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02);"><span class="diag-label" style="color: var(--text-dim);">视线目标</span><span class="diag-value" id="diagTarget" style="color: #fff; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; max-width: 130px;">--</span></div>
-            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02);"><span class="diag-label" style="color: var(--text-dim);">当前航速</span><span class="diag-value" id="diagSpeed" style="color: #fff; font-weight: 500;">--</span></div>
-            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0;"><span class="diag-label" style="color: var(--text-dim);">段飞行用时</span><span class="diag-value" id="diagDuration" style="color: #fff; font-weight: 500;">--</span></div>
+            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02);"><span class="diag-label" id="lblDiagPos" style="color: var(--text-dim);">当前位置</span><span class="diag-value" id="diagPos" style="color: #fff; font-weight: 500;">--</span></div>
+            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02);"><span class="diag-label" id="lblDiagDist" style="color: var(--text-dim);">累计里程</span><span class="diag-value" id="diagDist" style="color: #fff; font-weight: 500;">--</span></div>
+            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02);"><span class="diag-label" id="lblDiagGround" style="color: var(--text-dim);">地面海拔</span><span class="diag-value" id="diagGround" style="color: #fff; font-weight: 500;">--</span></div>
+            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02);"><span class="diag-label" id="lblDiagFlight" style="color: var(--text-dim);">机位海拔</span><span class="diag-value" id="diagFlight" style="color: #fff; font-weight: 500;">--</span></div>
+            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02);"><span class="diag-label" id="lblDiagRel" style="color: var(--text-dim);">离地高度</span><span class="diag-value" id="diagRel" style="color: #fff; font-weight: 500;">--</span></div>
+            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02);"><span class="diag-label" id="lblDiagTarget" style="color: var(--text-dim);">视线目标</span><span class="diag-value" id="diagTarget" style="color: #fff; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; max-width: 130px;">--</span></div>
+            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02);"><span class="diag-label" id="lblDiagSpeed" style="color: var(--text-dim);">当前航速</span><span class="diag-value" id="diagSpeed" style="color: #fff; font-weight: 500;">--</span></div>
+            <div class="diag-row" style="display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0;"><span class="diag-label" id="lblDiagDuration" style="color: var(--text-dim);">段飞行用时</span><span class="diag-value" id="diagDuration" style="color: #fff; font-weight: 500;">--</span></div>
           </div>
         </div>
       </div>
-
-
-
+      
       <div class="action-bar">
         <button class="secondary-btn" style="flex:1" id="btnExport">导出 JSON</button>
         <button class="primary-btn" style="flex:1" id="btnSave">💾 保存航轨</button>
       </div>
       <div class="sidebar-edge-toolbar" style="position: absolute; right: -24px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 1000; width: 24px;">
-        <button class="sidebar-toggle-btn edge-btn" onclick="moveSelected(-1)" style="position: static; transform: none; height: 32px; width: 24px; border-bottom-right-radius: 0; padding:0; display: flex; justify-content: center; align-items: center;" title="上移选中项"><span style="font-size:12px">⬆</span></button>
+        <button class="sidebar-toggle-btn edge-btn" onclick="moveSelected(-1)" style="position: static; transform: none; height: 32px; width: 24px; border-bottom-right-radius: 0; padding:0; display: flex; justify-content: center; align-items: center;" id="btnWpMoveUp" title="上移选中项"><span style="font-size:12px">⬆</span></button>
         <button class="sidebar-toggle-btn" id="btnToggleSidebar" aria-label="Toggle Sidebar" style="position: static; transform: none; height: 56px; width: 24px; border-radius: 0;">
           <svg class="icon-collapse" width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M5 1L1 5L5 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -949,7 +980,7 @@
             <path d="M1 1L5 5L1 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
-        <button class="sidebar-toggle-btn edge-btn" onclick="moveSelected(1)" style="position: static; transform: none; height: 32px; width: 24px; border-top-right-radius: 0; padding:0; display: flex; justify-content: center; align-items: center;" title="下移选中项"><span style="font-size:12px">⬇</span></button>
+        <button class="sidebar-toggle-btn edge-btn" onclick="moveSelected(1)" style="position: static; transform: none; height: 32px; width: 24px; border-top-right-radius: 0; padding:0; display: flex; justify-content: center; align-items: center;" id="btnWpMoveDown" title="下移选中项"><span style="font-size:12px">⬇</span></button>
       </div>
     </div>
 
@@ -973,26 +1004,26 @@
       <!-- Top Left Overlay: Utilities Toolbar & Search -->
       <div class="map-overlay-tools">
         <div class="dropdown">
-          <button class="tool-btn" style="background: rgba(15, 40, 70, 0.8); border-color: rgba(60, 140, 255, 0.18);">📥 导入 ▼</button>
+          <button class="tool-btn" style="background: rgba(15, 40, 70, 0.8); border-color: rgba(60, 140, 255, 0.18);" id="btnImportDropdown">📥 导入 ▼</button>
           <div class="dropdown-content">
             <div class="dropdown-item">
-              <span>文件</span> <span>▶</span>
+              <span id="lblImportFile">文件</span> <span>▶</span>
               <div class="dropdown-submenu-content">
                 <a class="dropdown-sub-item" id="btnImportGeoTrack">Kml</a>
                 <input type="file" id="geoTrackFileInput" accept=".kml,.xml,.gpx" style="display: none;" />
-                <a class="dropdown-sub-item">Czml</a>
-                <a class="dropdown-sub-item">Gis</a>
+                <a class="dropdown-sub-item" id="lblImportCzml">Czml</a>
+                <a class="dropdown-sub-item" id="lblImportGis">Gis</a>
               </div>
             </div>
             <div class="dropdown-item">
-              <span>底图</span> <span>▶</span>
+              <span id="lblImportMap">底图</span> <span>▶</span>
               <div class="dropdown-submenu-content">
-                <a class="dropdown-sub-item" onclick="changeBaseMap('bing')">Bing 卫星(默认)</a>
-                <a class="dropdown-sub-item" onclick="changeBaseMap('google_satellite')">谷歌卫星图</a>
-                <a class="dropdown-sub-item" onclick="changeBaseMap('google_hybrid')">谷歌混合图</a>
-                <a class="dropdown-sub-item" onclick="changeBaseMap('google_roadmap')">谷歌街区图</a>
-                <a class="dropdown-sub-item" onclick="changeBaseMap('google_terrain')">谷歌地形图</a>
-                <a class="dropdown-sub-item" onclick="changeBaseMap('osm')">OSM 街区图</a>
+                <a class="dropdown-sub-item" onclick="changeBaseMap('bing')" id="lblBaseMapBing">Bing 卫星(默认)</a>
+                <a class="dropdown-sub-item" onclick="changeBaseMap('google_satellite')" id="lblBaseMapGoogleSat">谷歌卫星图</a>
+                <a class="dropdown-sub-item" onclick="changeBaseMap('google_hybrid')" id="lblBaseMapGoogleHyb">谷歌混合图</a>
+                <a class="dropdown-sub-item" onclick="changeBaseMap('google_roadmap')" id="lblBaseMapGoogleRoad">谷歌街区图</a>
+                <a class="dropdown-sub-item" onclick="changeBaseMap('google_terrain')" id="lblBaseMapGoogleTer">谷歌地形图</a>
+                <a class="dropdown-sub-item" onclick="changeBaseMap('osm')" id="lblBaseMapOsm">OSM 街区图</a>
               </div>
             </div>
           </div> <!-- Close dropdown-content -->
@@ -1013,10 +1044,10 @@
       <!-- Left Overlay: Zoom (Focal Length / FOV) Ring -->
       <div class="hud-zoom-ring" id="hudZoomRing">
         <div class="hud-ring-scale" id="fovScaleGroup">
-          <span class="scale-mark" data-val="ground">贴地</span>
-          <span class="scale-mark" data-val="vast">辽阔</span>
-          <span class="scale-mark" data-val="natural">自然</span>
-          <span class="scale-mark" data-val="compressed">压缩</span>
+          <span class="scale-mark" data-val="ground" id="lblZoomGround">贴地</span>
+          <span class="scale-mark" data-val="vast" id="lblZoomVast">辽阔</span>
+          <span class="scale-mark" data-val="natural" id="lblZoomNatural">自然</span>
+          <span class="scale-mark" data-val="compressed" id="lblZoomCompressed">压缩</span>
           <span class="scale-mark" data-val="custom" id="fovMarkCustom" style="display: none;">手动</span>
         </div>
         <input type="range" class="hud-vertical-slider" id="hudFovSlider" min="15" max="120" value="60">
@@ -1027,16 +1058,16 @@
       <!-- Right Overlay: Gimbal Pitch Ring -->
       <div class="hud-pitch-ring" id="hudPitchRing">
         <div class="hud-ring-scale" id="pitchScaleGroup">
-          <span class="scale-mark" data-val="lookup">仰视</span>
-          <span class="scale-mark" data-val="eyelevel">平视</span>
-          <span class="scale-mark" data-val="oblique">斜瞰</span>
-          <span class="scale-mark" data-val="overlook">俯瞰</span>
+          <span class="scale-mark" data-val="lookup" id="lblPitchLookup">仰视</span>
+          <span class="scale-mark" data-val="eyelevel" id="lblPitchEyelevel">平视</span>
+          <span class="scale-mark" data-val="oblique" id="lblPitchOblique">斜瞰</span>
+          <span class="scale-mark" data-val="overlook" id="lblPitchOverlook">俯瞰</span>
           <span class="scale-mark" data-val="custom" id="pitchMarkCustom" style="display: none;">手动</span>
         </div>
         <input type="range" class="hud-vertical-slider" id="hudPitchSlider" min="-90" max="90" value="-25">
         <div class="hud-ring-value" id="hudPitchValue">-25°</div>
-      
       </div>
+
 
       <!-- Right Overlay: Director Inspector Accordion Panel -->
       <div class="hud-director-inspector" id="hudDirectorInspector">
@@ -1045,7 +1076,7 @@
 
           <!-- Group 2: Target Lock (Camera Language) -->
           <div class="accordion-group active group-camera" id="accordionFocus">
-            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🎯 视线对焦</div>
+            <div class="accordion-header" id="headerFocus" onclick="this.closest('.accordion-group').classList.toggle('active')">🎯 视线对焦</div>
             <div class="accordion-body">
               <div class="target-status" style="display: none; margin-bottom: 6px;">
                 <strong id="hudTargetName">走向前方</strong>
@@ -1061,24 +1092,24 @@
               </div>
               <label style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 9px; color: var(--accent-cyan); margin-bottom: 6px; cursor: pointer; user-select: none;">
                 <input type="checkbox" id="chkLockCameraPreview" style="cursor: pointer; transform: scale(0.85); margin: 0;" />
-                🔒 锁定镜头视角（切换列表时不跳转）
+                <span id="lblLockCameraPreview">🔒 锁定镜头视角（切换列表时不跳转）</span>
               </label>
             </div>
           </div>
 
           <!-- Group 3: Shot Effects (Camera Language) -->
           <div class="accordion-group active group-camera" id="accordionShot">
-            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🎬 特技镜头</div>
+            <div class="accordion-header" id="headerShot" onclick="this.closest('.accordion-group').classList.toggle('active')">🎬 特技镜头</div>
             <div class="accordion-body">
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 6px; margin-top: 6px;">
-                <button class="hud-mini-btn shot-mode-btn" data-mode="pan_spin">🌀 自转环视</button>
-                <button class="hud-mini-btn shot-mode-btn" data-mode="orbit">🪐 绕圈环飞</button>
-                <button class="hud-mini-btn shot-mode-btn" data-mode="handheld">🤳 手持跟随</button>
-                <button class="hud-mini-btn shot-mode-btn" data-mode="hitchcock">🌌 希区柯克</button>
-                <button class="hud-mini-btn shot-mode-btn" data-mode="via">🎞️ 维亚</button>
-                <button class="hud-mini-btn shot-mode-btn" data-mode="crane">🏗️ 摇臂</button>
-                <button class="hud-mini-btn shot-mode-btn" data-mode="tunnel">🚇 隧道</button>
-                <button class="hud-mini-btn shot-mode-btn" data-mode="fisheye">🐟 鱼眼</button>
+                <button class="hud-mini-btn shot-mode-btn" data-mode="pan_spin" id="btnShotPanSpin">🌀 自转环视</button>
+                <button class="hud-mini-btn shot-mode-btn" data-mode="orbit" id="btnShotOrbit">🪐 绕圈环飞</button>
+                <button class="hud-mini-btn shot-mode-btn" data-mode="handheld" id="btnShotHandheld">🤳 手持跟随</button>
+                <button class="hud-mini-btn shot-mode-btn" data-mode="hitchcock" id="btnShotHitchcock">🌌 希区柯克</button>
+                <button class="hud-mini-btn shot-mode-btn" data-mode="via" id="btnShotVia">🎞️ 维亚</button>
+                <button class="hud-mini-btn shot-mode-btn" data-mode="crane" id="btnShotCrane">🏗️ 摇臂</button>
+                <button class="hud-mini-btn shot-mode-btn" data-mode="tunnel" id="btnShotTunnel">🚇 隧道</button>
+                <button class="hud-mini-btn shot-mode-btn" data-mode="fisheye" id="btnShotFisheye">🐟 鱼眼</button>
               </div>
               <!-- Parameter macro panel -->
               <div class="shot-params" id="shotParamsPanel" style="display: none; margin-top: 8px; margin-bottom: 6px;">
@@ -1103,51 +1134,77 @@
 
           <!-- Group 4: Camera Movement Style (Camera Language) -->
           <div class="accordion-group active group-camera" id="accordionVibe">
-            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🔮 运镜风格</div>
+            <div class="accordion-header" id="headerVibe" onclick="this.closest('.accordion-group').classList.toggle('active')">🔮 运镜风格</div>
             <div class="accordion-body">
               <div class="vibe-buttons" id="vibeButtonGroup">
-                <button class="vibe-btn" data-vibe="pilgrimage">📿 朝圣</button>
-                <button class="vibe-btn" data-vibe="solemn">🏔️ 庄严</button>
-                <button class="vibe-btn" data-vibe="exploratory">🚶 探索</button>
-                <button class="vibe-btn" data-vibe="solitude">🌌 孤独</button>
+                <button class="vibe-btn" data-vibe="pilgrimage" id="btnVibePilgrimage">📿 朝圣</button>
+                <button class="vibe-btn" data-vibe="solemn" id="btnVibeSolemn">🏔️ 庄严</button>
+                <button class="vibe-btn" data-vibe="exploratory" id="btnVibeExploratory">🚶 探索</button>
+                <button class="vibe-btn" data-vibe="solitude" id="btnVibeSolitude">🌌 孤独</button>
               </div>
             </div>
           </div>
 
-          <!-- Group 5: Environmental Enhancements (Environmental) -->
+          <!-- Group 5: Environmental & Lighting (Environmental) -->
           <div class="accordion-group active group-environment" id="accordionLighting">
-            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🌅 环境增效</div>
-            <div class="accordion-body">
-              <div class="shot-param-row">
-                <label>日照时间 (时)</label>
-                <input type="range" id="timeOfDayInput" min="0" max="24" step="0.1" value="10">
-                <span class="shot-param-val" id="timeOfDayVal" style="margin-top: 4px;">10:00</span>
+            <div class="accordion-header" id="headerLighting" onclick="this.closest('.accordion-group').classList.toggle('active')">🌅 环境增效</div>
+            <div class="accordion-body" style="padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;">
+              <!-- 1. Selection & Cancel -->
+              <div class="shot-param-row" style="gap: 6px; align-items: center; margin-bottom: 2px;">
+                <label style="font-size: 11px; color: var(--text-dim); margin: 0; min-width: 50px;" id="lblEnvModeTitle">增效场景</label>
+                <select id="selEnvMode" style="flex:1; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:2px 4px; border-radius:3px; font-size:11px; outline:none; cursor:pointer; height: 22px;">
+                  <option value="none" id="optEnvNone">无增效</option>
+                  <option value="time" id="optEnvTime">☀️ 太阳日照</option>
+                  <option value="rain" id="optEnvRain">🌧️ 阴雨绵绵</option>
+                  <option value="snow" id="optEnvSnow">❄️ 瑞雪纷飞</option>
+                  <option value="fog" id="optEnvFog">🌫️ 浓雾弥漫</option>
+                  <option value="lightning" id="optEnvLightning">⚡ 雷电交加</option>
+                </select>
+                <button id="btnCancelEnv" class="hud-mini-btn" style="margin: 0; padding: 2px 8px; border-color: rgba(255,255,255,0.2); font-size: 10px; height: 22px; display: flex; align-items: center;" title="取消增效">取消增效</button>
               </div>
-              <button class="hud-mini-btn" id="btnCaptureTime" style="width: 100%; border-color: var(--accent-cyan); color: var(--accent-cyan); justify-content: center; font-weight: bold; font-size: 9px; text-align: center; margin-top: 6px;">📸 捕获当前时间为本点光照</button>
+
+              <!-- 2. Dynamic Slider -->
+              <div id="envSliderRow" class="shot-param-row" style="display: none; flex-direction: column; gap: 4px; margin-top: 4px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                  <label id="envSliderLabel" style="font-size: 10px; color: var(--accent-cyan); margin: 0;">特效强度</label>
+                </div>
+                <input type="range" id="envSliderInput" min="1" max="4" step="1" value="2" style="width: 100%; margin: 4px 0; cursor: pointer;">
+              </div>
             </div>
           </div>
+
 
           <!-- Group 6: AI Voice Over & TTS Sync (Narration System) -->
           <div class="accordion-group active group-narration" id="accordionTts">
-            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🎙️ 解说生成</div>
+            <div class="accordion-header" id="headerTts" onclick="this.closest('.accordion-group').classList.toggle('active')">🎙️ 解说生成</div>
             <div class="accordion-body">
               <div class="hud-tts-panel" id="hudTtsPanel">
+                <!-- Dropdown selector for active audio track -->
+                <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 8px;">
+                  <select id="audioTrackSelector" style="flex: 1; font-size: 11px; height: 24px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; color: #fff; outline: none; cursor: pointer;"></select>
+                  <button id="btnEditAudioTrack" class="hud-mini-btn" style="margin: 0; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 10px; border-color: rgba(255,255,255,0.2);" title="音轨设置">⚙️</button>
+                  <button id="btnDeleteAudioTrack" class="hud-mini-btn" style="margin: 0; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 10px; border-color: rgba(255, 68, 68, 0.4); color: #ff4444;" title="删除音轨">🗑️</button>
+                </div>
+
                 <div style="margin-bottom: 6px;">
                   <textarea id="hudTtsText" style="font-size: 11px; min-height: 50px; padding: 6px 8px; width: 100%; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; color: #fff; resize: vertical; line-height: 1.4; outline: none;" placeholder="输入该航段的中文语音解说词..."></textarea>
                 </div>
                 
                 <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 6px;">
                   <select id="hudTtsVoice" style="flex: 1; font-size: 10px; height: 24px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; color: #fff; outline: none;">
-                    <option value="default">系统普通话 (Tingting)</option>
-                    <option value="local_clone">本地克隆声线 (GPT-SoVITS)</option>
-                    <option value="voxcpm">本地高清克隆 (VoxCPM)</option>
+                    <option value="default" id="optVoiceDefault">系统普通话 (Tingting)</option>
+                    <option value="local_clone" id="optVoiceLocalClone">本地克隆声线 (GPT-SoVITS)</option>
+                    <option value="voxcpm" id="optVoiceVoxCpm">本地高清克隆 (VoxCPM)</option>
                   </select>
                   <button id="btnHudTtsGenerate" style="font-size: 10px; height: 24px; padding: 0 10px; background: rgba(0, 255, 170, 0.2); border: 1px solid rgba(0, 255, 170, 0.4); color: var(--accent-cyan); border-radius: 4px; cursor: pointer; font-weight: bold; transition: all 0.2s;">🔊 合成</button>
+                  <button class="tool-btn" id="btnAddAudioTrack" title="新建音轨" style="background: rgba(255, 205, 85, 0.15); border-color: rgba(255, 205, 85, 0.3); color: #ffcd55; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; padding: 0; font-weight: bold; border-radius: 4px; cursor: pointer; margin: 0;">
+                    <span style="font-size: 12px;">➕</span>
+                  </button>
                 </div>
 
                 <!-- 🎙️ 声音克隆控制中心 -->
                 <div id="refVoiceUploadContainer" style="display: none; flex-direction: column; gap: 6px; margin-top: 6px; margin-bottom: 6px; padding: 8px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.08); border-radius: 6px;">
-                  <div style="font-size: 10px; color: var(--accent); font-weight: bold;">🎙️ 人声克隆配置 (Reference Audio)</div>
+                  <div style="font-size: 10px; color: var(--accent); font-weight: bold;" id="lblRefVoiceTitle">🎙️ 人声克隆配置 (Reference Audio)</div>
                   
                   <div style="display: flex; gap: 6px; align-items: center;">
                     <button type="button" class="hud-mini-btn" id="btnUploadRefAudio" style="margin: 0; flex: 1; height: 24px; padding: 0 8px;">📤 上传克隆样本 (.wav/.mp3)</button>
@@ -1161,33 +1218,11 @@
                 </div>
                 
                 <!-- Audio Player & Duration Display -->
-                <div id="hudTtsAudioContainer" style="display: none; align-items: center; gap: 6px; background: rgba(0,0,0,0.2); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.04);">
-                  <button id="btnPlayTtsAudio" style="background: none; border: none; color: var(--accent-cyan); font-size: 12px; cursor: pointer; padding: 2px;">▶ 试听</button>
-                  <span id="hudTtsDurationLabel" style="font-size: 10px; color: var(--text-dim); font-family: monospace;">时长: 0.0s</span>
-                  
-                  <button class="tool-btn" id="btnExit" style="background: rgba(255, 60, 60, 0.2); border-color: rgba(255, 60, 60, 0.3); color: #ff6b6b; padding: 6px 16px;">
-            <span style="font-size: 14px;">🚪</span> 退出
-          </button>
-          
-          <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.2); margin: 0 4px; align-self: center;"></div>
-          
-          <!-- 改为新建音轨 [+] 按钮 -->
-          <button class="tool-btn" id="btnAddAudioTrack" title="新建音轨" style="background: rgba(255, 205, 85, 0.15); border-color: rgba(255, 205, 85, 0.3); color: #ffcd55; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; padding: 0; font-weight: bold; border-radius: 4px; cursor: pointer;">
-            <span style="font-size: 14px;">➕</span>
-          </button>
-          
-                  <span style="font-size: 9px; color: #10b981; margin-left: auto;">已对齐 (+2s)</span>
-                </div>
-                
-                <!-- 已存音轨列表 -->
-                <div id="savedAudioTracksContainer" style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; display: none;">
-                  <div style="font-size: 11px; font-weight: bold; color: rgba(255,255,255,0.7); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
-                    <span>📁 已存音轨</span>
-                    <span id="savedAudioTracksCount" style="font-size: 10px; color: var(--text-dim);">0 个</span>
-                  </div>
-                  <div id="savedAudioTracksList" style="display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto; padding-right: 4px;">
-                    <!-- 动态生成 -->
-                  </div>
+                <div id="hudTtsAudioContainer" style="display: flex; opacity: 0.4; pointer-events: none; align-items: center; gap: 8px; background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.06); margin-top: 6px;">
+                  <button id="btnPlayTtsAudio" type="button" style="background: none; border: none; color: var(--accent-cyan); font-size: 13px; cursor: pointer; padding: 0 4px; outline: none; display: flex; align-items: center; justify-content: center;" title="播放/暂停">▶</button>
+                  <input type="range" id="ttsAudioProgress" min="0" max="100" value="0" style="flex: 1; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; outline: none; cursor: pointer; -webkit-appearance: none; margin: 0;">
+                  <span id="ttsAudioTimeLabel" style="font-size: 10px; color: var(--text-dim); font-family: monospace; white-space: nowrap;">0:00 / 0:00</span>
+                  <span style="font-size: 9px; color: #10b981; font-weight: bold; white-space: nowrap; margin-left: auto;" id="lblTtsAlign">对齐</span>
                 </div>
               </div>
             </div>
@@ -1195,24 +1230,24 @@
 
           <!-- Group 7: Track Visual Style (Dynamic Assist) -->
           <div class="accordion-group active group-assist" id="accordionTrackStyle">
-            <div class="accordion-header" onclick="this.closest('.accordion-group').classList.toggle('active')">🎨 地轨视觉</div>
+            <div class="accordion-header" id="headerTrackStyle" onclick="this.closest('.accordion-group').classList.toggle('active')">🎨 地轨视觉</div>
             <div class="accordion-body">
               <div class="shot-param-row" style="margin-bottom: 8px;">
-                <label style="width: 60px;">线体风格:</label>
+                <label style="width: 60px;" id="lblTrackLineType">线体风格:</label>
                 <select id="selTrackLineType" style="flex:1; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:2px 4px; border-radius:3px; font-size:11px;">
-                  <option value="dashed">虚线段 (默认)</option>
-                  <option value="dotted">虚点线</option>
-                  <option value="solid">实线</option>
-                  <option value="double">双边实线</option>
+                  <option value="dashed" id="optLineDashed">虚线段 (默认)</option>
+                  <option value="dotted" id="optLineDotted">虚点线</option>
+                  <option value="solid" id="optLineSolid">实线</option>
+                  <option value="double" id="optLineDouble">双边实线</option>
                 </select>
               </div>
               <div class="shot-param-row" style="margin-bottom: 4px;">
-                <label style="width: 60px;">动态特效:</label>
+                <label style="width: 60px;" id="lblTrackAnimation">动态特效:</label>
                 <select id="selTrackAnimation" style="flex:1; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:2px 4px; border-radius:3px; font-size:11px;">
-                  <option value="none">无特效</option>
-                  <option value="flash_yellow">黄光闪烁</option>
-                  <option value="flash_red">红光闪烁</option>
-                  <option value="flash_color">五彩闪烁</option>
+                  <option value="none" id="optAnimNone">无特效</option>
+                  <option value="flash_yellow" id="optAnimYellow">黄光闪烁</option>
+                  <option value="flash_red" id="optAnimRed">红光闪烁</option>
+                  <option value="flash_color" id="optAnimColor">五彩闪烁</option>
                 </select>
               </div>
             </div>
@@ -1231,7 +1266,7 @@
             
             <!-- 撤销/重做/清空/批量 组 -->
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 11px; font-weight: bold; color: rgba(255,255,255,0.7); display: flex; align-items: center; gap: 4px;">🎬 航轨选择</span>
+              <!-- Removed label -->
               
               <select id="trackSelector" class="tool-btn" style="padding: 2px 8px; font-size: 11px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 4px; cursor: pointer;"></select>
               <button class="tool-btn" id="btnEditTrack" style="padding: 2px 8px; font-size: 11px; background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); color: #60a5fa; border-radius: 4px; box-shadow: none;" title="编辑当前航轨">⚙️ 航轨设置</button>
@@ -1242,9 +1277,6 @@
               
               <button class="tool-btn" id="btnUndo" disabled>↩</button>
               <button class="tool-btn" id="btnRedo" disabled>↪</button>
-              
-              <button class="tool-btn" id="btnSelectAllWaypoints" style="display:none; padding: 2px 8px; font-size: 11px; background: transparent; border: none; min-width: unset; box-shadow: none;" title="选中全部">全选</button>
-              <button class="tool-btn" id="btnDeselectAllWaypoints" style="display:none; padding: 2px 8px; font-size: 11px; background: transparent; border: none; min-width: unset; box-shadow: none;" title="取消选中">取消选</button>
             </div>
             
             <div id="chartSelectionLabel" style="display:none; font-size: 11px; color: var(--accent-cyan); font-weight: bold; margin-left: 8px;">未选中轨道</div>
@@ -1259,25 +1291,25 @@
             <!-- 速度与悬停 组 -->
             <div style="display: flex; gap: 12px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; padding: 2px 12px; background: rgba(0,0,0,0.3); align-items: center; margin-right: 12px;">
               <div id="hudSpeedGroup" style="display: flex; align-items: center; gap: 8px; opacity: 0.4; transition: opacity 0.2s;" title="改变速度将自动重算时间">
-                <label style="font-size: 11px; color: var(--text-dim); margin:0;">飞行速度</label>
-                <div class="rhythm-value-display" id="hudSpeedValue" style="font-size: 11px; width: 45px; text-align: right; opacity: 0; transition: opacity 0.3s;">36 km/h</div>
-                <input type="range" id="hudSpeedSlider" min="0" max="1800" step="1" value="100" disabled style="width: 70px; height: 2px;">
+                <label style="font-size: 11px; color: var(--text-dim); margin:0;" id="lblSpeedTitle">飞速</label>
+                <div class="rhythm-value-display" id="hudSpeedValue" style="font-size: 11px; width: 65px; text-align: right; opacity: 1; transition: opacity 0.3s; white-space: nowrap;">36 km/h</div>
+                <input type="range" id="hudSpeedSlider" min="0" max="1800" step="1" value="100" disabled style="width: 90px; height: 2px;">
               </div>
               <div style="width: 1px; height: 16px; background: rgba(255,255,255,0.2);"></div>
               <div id="hudDurationGroup" style="display: flex; align-items: center; gap: 8px; opacity: 0.4; transition: opacity 0.2s;" title="直接锁定航段耗时，不受两点距离影响">
-                <label style="font-size: 11px; color: var(--text-dim); margin:0;">航段耗时</label>
-                <div class="hud-wait-value" id="hudDurationValue" style="font-size: 11px; width: 35px; text-align: right; opacity: 0; transition: opacity 0.3s;">2.5s</div>
-                <input type="range" id="hudDurationSlider" min="0.5" max="180" step="0.5" value="2.5" disabled style="width: 70px; height: 2px;">
+                <label style="font-size: 11px; color: var(--text-dim); margin:0;" id="lblDurationTitle">航段耗时</label>
+                <div class="hud-wait-value" id="hudDurationValue" style="font-size: 11px; width: 35px; text-align: right; opacity: 1; transition: opacity 0.3s;">2.5s</div>
+                <input type="range" id="hudDurationSlider" min="0" max="120" step="0.5" value="2.5" disabled style="width: 90px; height: 2px;">
               </div>
               <div style="width: 1px; height: 16px; background: rgba(255,255,255,0.2);"></div>
               <div id="hudWaitGroup" style="display: flex; align-items: center; gap: 8px; opacity: 0.4; transition: opacity 0.2s;">
-                <label style="font-size: 11px; color: var(--text-dim); margin:0;">航点悬停</label>
-                <div class="hud-wait-value" id="hudWaitValue" style="font-size: 11px; width: 25px; text-align: right; opacity: 0; transition: opacity 0.3s;">0s</div>
-                <input type="range" id="hudWaitSlider" min="0" max="15" step="0.5" value="0" disabled style="width: 70px; height: 2px;">
+                <label style="font-size: 11px; color: var(--text-dim); margin:0;" id="lblWaitTitle">航点悬停</label>
+                <div class="hud-wait-value" id="hudWaitValue" style="font-size: 11px; width: 25px; text-align: right; opacity: 1; transition: opacity 0.3s;">0s</div>
+                <input type="range" id="hudWaitSlider" min="0" max="15" step="0.5" value="0" disabled style="width: 90px; height: 2px;">
               </div>
             </div>
 
-            <button class="tool-btn" id="btnResampleHeights" style="padding: 2px 8px; font-size:11px; margin-right: 8px;">🏔️ 重新校准真实海拔</button>
+            <button class="tool-btn" id="btnResampleHeights" style="padding: 2px 8px; font-size:11px; margin-right: 8px;">🏔️ 校准真实海拔</button>
             <span style="display:none; font-size: 10px; color: var(--text-dim);">双击编辑高度 · 拖拽调整形状</span>
             <div class="chart-adjust-box" id="chartAdjustControls" style="display:none;">
               <button class="tool-btn" id="btnHeightDec" style="padding: 2px 8px; font-size:10px; font-weight:bold;">－ 10m</button>
@@ -1297,7 +1329,92 @@
   <div class="toast-msg" id="toastMsg">已保存</div>
 
   <script>
+    // Global Error Boundary Safeguard
+    window.onerror = function(message, source, lineno, colno, error) {
+      showErrorRecoveryUI(message, `${source}:${lineno}:${colno}`, error ? error.stack : '');
+      return false; // Let browser log it as well
+    };
+    window.onunhandledrejection = function(event) {
+      showErrorRecoveryUI(event.reason ? event.reason.message : 'Promise Rejection', 'Unhandled Promise', event.reason ? event.reason.stack : '');
+    };
+
+    function showErrorRecoveryUI(message, location, stack) {
+      if (document.getElementById('error-recovery-overlay')) return;
+      
+      const overlay = document.createElement('div');
+      overlay.id = 'error-recovery-overlay';
+      overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.95);z-index:999999;display:flex;align-items:center;justify-content:center;font-family:sans-serif;color:#f8fafc;padding:20px;';
+      
+      const card = document.createElement('div');
+      card.style.cssText = 'background:#1e293b;border:1px solid #ef4444;border-radius:12px;padding:30px;width:100%;max-width:540px;box-shadow:0 20px 50px rgba(0,0,0,0.6);display:flex;flex-direction:column;gap:16px;';
+      
+      const title = document.createElement('h2');
+      title.style.cssText = 'color:#ef4444;margin:0;font-size:18px;display:flex;align-items:center;gap:8px;';
+      title.innerHTML = '⚠️ 编辑器检测到运行异常 (Editor Crash Guard)';
+      card.appendChild(title);
+      
+      const desc = document.createElement('p');
+      desc.style.cssText = 'color:#cbd5e1;font-size:13px;margin:0;line-height:1.5;';
+      desc.textContent = '为了防止您的工作草稿丢失，系统已激活崩溃保护屏障。你可以选择重新加载、清理缓存，或导出当前未保存的路线数据进行备份。';
+      card.appendChild(desc);
+      
+      const errorBox = document.createElement('div');
+      errorBox.style.cssText = 'background:#0f172a;border:1px solid #334155;border-radius:6px;padding:12px;max-height:150px;overflow-y:auto;font-family:monospace;font-size:11px;color:#f43f5e;white-space:pre-wrap;';
+      errorBox.textContent = `Error: ${message}\nLoc: ${location}\nStack:\n${stack}`;
+      card.appendChild(errorBox);
+      
+      const btnRow = document.createElement('div');
+      btnRow.style.cssText = 'display:flex;gap:10px;margin-top:10px;justify-content:flex-end;flex-wrap:wrap;';
+      
+      const btnReload = document.createElement('button');
+      btnReload.textContent = '🔄 强制刷新 (Reload)';
+      btnReload.style.cssText = 'background:#3b82f6;color:white;border:none;padding:10px 18px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:bold;';
+      btnReload.onclick = () => window.location.reload(true);
+      btnRow.appendChild(btnReload);
+      
+      const btnReset = document.createElement('button');
+      btnReset.textContent = '🗑️ 重置本地缓存 (Reset)';
+      btnReset.style.cssText = 'background:transparent;color:#f43f5e;border:1px solid #f43f5e;padding:10px 18px;border-radius:4px;cursor:pointer;font-size:12px;';
+      btnReset.onclick = () => {
+        if (confirm('此操作将清空浏览器的本地缓存变量（包括上一次选中的项目语言等），确定吗？')) {
+          localStorage.clear();
+          window.location.reload(true);
+        }
+      };
+      btnRow.appendChild(btnReset);
+      
+      if (window.data) {
+        const btnDownload = document.createElement('button');
+        btnDownload.textContent = '📥 导出未保存草稿 (Rescue JSON)';
+        btnDownload.style.cssText = 'background:#10b981;color:white;border:none;padding:10px 18px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:bold;';
+        btnDownload.onclick = () => {
+          try {
+            const out = {
+              branding: window.data.branding,
+              main: window.data.main,
+              secondary: window.data.secondary,
+              main_flight: window.data.main_flight,
+              flights: window.data.flights
+            };
+            const blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'salvaged_flight_path.json';
+            a.click();
+          } catch (err) {
+            alert('草稿导出失败: ' + err.message);
+          }
+        };
+        btnRow.appendChild(btnDownload);
+      }
+      
+      card.appendChild(btnRow);
+      overlay.appendChild(card);
+      document.body.appendChild(overlay);
+    }
+
     // ---- State ----
+    let currentLang = localStorage.getItem('admin_lang') || 'zh';
     let data = {
       main: [],           // 地理轨 (物理主线坐标列表)
       secondary: [],      // 地理轨支线
@@ -1306,6 +1423,7 @@
     };
     
     let activeTrackIndex = 0;
+    let activeAudioTrackIndex = 0;
     
     let activeId = null;
     let selectedIds = []; // 批量选择的航点 ID 列表
@@ -1348,11 +1466,140 @@
 
     // ---- Helpers ----
     function showToast(msg) {
+      let displayMsg = msg;
+      if (currentLang === 'en') {
+        const translations = {
+          "🎯 镜头视线已锁定该点！": "🎯 Camera target locked to this point!",
+          "正在准备新建航轨...": "Preparing to create new path...",
+          "至少需要保留一条航轨": "At least one flight path must be kept",
+          "📤 人声参考样本上传成功！": "📤 Reference voice sample uploaded successfully!",
+          "🎙️ 语音合成成功，已自动对齐飞行时长！": "🎙️ TTS synthesized successfully, leg duration aligned!",
+          "该航点尚无合成语音解说": "No synthesized narration for this waypoint",
+          "已删除该航迹节点": "Waypoint node deleted",
+          "无历史操作可撤销": "No actions to undo",
+          "无历史操作可重做": "No actions to redo",
+          "正在高精度采样地形高度...": "Sampling terrain height with high precision...",
+          "📸 画面运镜坐标与角度捕获成功！": "📸 Camera view coordinates and angles captured successfully!",
+          "正在采样当前点地形高度...": "Sampling terrain height at current position...",
+          "➕ 成功添加当前镜头为新航点！": "➕ Successfully added current camera view as waypoint!",
+          "✅ 配置保存至服务器，已触发推送更新！": "✅ Configuration saved to server, hot reload triggered!",
+          "⚠️ 服务端保存失败，请点击 [导出 JSON] 备份": "⚠️ Server save failed, click [Export JSON] to backup",
+          "🚀 GitHub 同步成功，线上预览将自动刷新！": "🚀 GitHub sync successful, live preview will refresh!",
+          "轨道节点数值更新！": "Track node values updated!",
+          "🔓 视线锁定已解除": "🔓 Camera focus lock released",
+          "当前航轨信息已更新": "Flight path details updated",
+          "音轨已删除": "Audio track deleted",
+          "正在高精度采样地形高度，请稍候...": "Sampling terrain heights with high precision, please wait...",
+          "🏔️ 真实海拔校准同步成功！": "🏔️ True altitude calibration synced successfully!",
+          "无空间配置可供预览": "No flight path configuration to preview",
+          "开始完整飞行航线预览": "Starting full flight path preview playback",
+          "预览播放结束": "Preview playback finished"
+        };
+        
+        if (translations[msg] !== undefined) {
+          displayMsg = translations[msg];
+        } else {
+          // Handle dynamic strings with replacements or startsWith
+          if (msg.startsWith("成功导入地理轨")) {
+            const count = msg.match(/\d+/);
+            displayMsg = `Imported track successfully (${count ? count[0] : 0} points)`;
+          } else if (msg.startsWith("已创建新航轨: ")) {
+            displayMsg = "Created new path: " + msg.replace("已创建新航轨: ", "");
+          } else if (msg.startsWith("新建航轨出错: ")) {
+            displayMsg = "Failed to create path: " + msg.replace("新建航轨出错: ", "");
+          } else if (msg.startsWith("当前没有选中的航轨")) {
+            displayMsg = "No flight path selected";
+          } else if (msg.startsWith("🎙️ 已新建并切换到音轨: ")) {
+            displayMsg = "🎙️ Created and switched to audio track: " + msg.replace("🎙️ 已新建并切换到音轨: ", "");
+          } else if (msg.startsWith("已删除 ")) {
+            displayMsg = "Deleted path " + msg.replace("已删除 ", "");
+          } else if (msg.startsWith("离地高度已调整为 ")) {
+            displayMsg = "Relative altitude adjusted to " + msg.replace("离地高度已调整为 ", "");
+          } else if (msg.startsWith("批量调整了 ")) {
+            const count = msg.match(/\d+/);
+            displayMsg = `Batch adjusted relative altitude for ${count ? count[0] : 0} waypoints`;
+          } else if (msg.startsWith("↩ 已撤销上一步操作")) {
+            displayMsg = "↩ Undid last operation";
+          } else if (msg.startsWith("↪ 已重做操作")) {
+            displayMsg = "↪ Redid operation";
+          } else if (msg.startsWith("🔮 已批量载入")) {
+            const vibe = msg.includes("朝圣") ? "Devotion" : (msg.includes("庄严") ? "Majesty" : (msg.includes("探索") ? "Discovery" : "Solitude"));
+            displayMsg = `🔮 Batch loaded 【${vibe}】 camera style configuration!`;
+          } else if (msg.startsWith("⚠️ Git 同步错误: ")) {
+            displayMsg = "⚠️ Git sync error: " + msg.replace("⚠️ Git 同步错误: ", "");
+          } else if (msg.startsWith("已创建全新航轨: ")) {
+            displayMsg = "Created new path: " + msg.replace("已创建全新航轨: ", "");
+          } else if (msg.startsWith("已创建全新音轨: ")) {
+            displayMsg = "Created new audio track: " + msg.replace("已创建全新音轨: ", "");
+          } else if (msg.startsWith("音轨设置已更新: ")) {
+            displayMsg = "Audio track updated: " + msg.replace("音轨设置已更新: ", "");
+          } else if (msg.startsWith("编辑音轨出错: ")) {
+            displayMsg = "Failed to edit audio track: " + msg.replace("编辑音轨出错: ", "");
+          } else if (msg.startsWith("正在播放选中区间")) {
+            displayMsg = msg.replace("正在播放选中区间", "Playing selected range");
+          }
+        }
+      }
       const el = document.getElementById('toastMsg');
-      el.textContent = msg;
+      el.textContent = displayMsg;
       el.style.display = 'block';
       setTimeout(() => el.style.display = 'none', 2000);
     }
+
+    const originalConfirm = window.confirm;
+    window.confirm = function(msg) {
+      let displayMsg = msg;
+      if (currentLang === 'en') {
+        if (msg.startsWith("是否删除第 ")) {
+          const num = msg.match(/\d+/);
+          displayMsg = `Delete waypoint #${num ? num[0] : ''}?`;
+        } else if (msg.startsWith("⚠️ 确定要永久删除 ")) {
+          const name = msg.replace("⚠️ 确定要永久删除 ", "").replace(" 吗？", "");
+          displayMsg = `⚠️ Are you sure you want to permanently delete path: ${name}?`;
+        } else if (msg.startsWith("是否删除选中的 ")) {
+          const num = msg.match(/\d+/);
+          displayMsg = `Delete the selected ${num ? num[0] : ''} waypoints?`;
+        } else if (msg.startsWith("⚠️ 确定要将当前镜头的 3D 坐标覆盖到【")) {
+          const name = msg.replace("⚠️ 确定要将当前镜头的 3D 坐标覆盖到【", "").replace("】吗？", "");
+          displayMsg = `⚠️ Are you sure you want to overwrite 3D coordinates for 【${name}】 with the current view?`;
+        } else if (msg.startsWith("确定要删除音轨 \"")) {
+          const name = msg.replace("确定要删除音轨 \"", "").replace("\" 吗？", "");
+          displayMsg = `Are you sure you want to delete audio track "${name}"?`;
+        } else if (msg.startsWith("是否批量删除选中的 ")) {
+          const num = msg.match(/\d+/);
+          displayMsg = `Batch delete the selected ${num ? num[0] : ''} waypoints?`;
+        }
+      }
+      return originalConfirm(displayMsg);
+    };
+
+    const originalAlert = window.alert;
+    window.alert = function(msg) {
+      let displayMsg = msg;
+      if (currentLang === 'en') {
+        const translations = {
+          "未能在文件中解析出有效的 LineString 或 trkpt 经纬度坐标！": "No valid LineString or trkpt GPS coordinates parsed from file!",
+          "参考音频上传失败，请检查服务日志！": "Reference audio upload failed, check server logs!",
+          "请输入要合成的语音解说词！": "Please enter narration text to synthesize!",
+          "语音合成失败，请检查终端日志！": "Text-to-speech synthesis failed, check console/terminal logs!",
+          "名称不能为空！": "Name cannot be empty!"
+        };
+        if (translations[msg] !== undefined) {
+          displayMsg = translations[msg];
+        } else if (msg.startsWith("解析文件失败: ")) {
+          displayMsg = "Failed to parse file: " + msg.replace("解析文件失败: ", "");
+        } else if (msg.startsWith("新建音轨失败: ")) {
+          displayMsg = "Failed to create audio track: " + msg.replace("新建音轨失败: ", "");
+        } else if (msg.startsWith("selectKeyframe error: ")) {
+          displayMsg = msg.replace("selectKeyframe error: ", "Select waypoint error: ");
+        } else if (msg.startsWith("CRITICAL ERROR: ")) {
+          displayMsg = msg.replace("CRITICAL ERROR: ", "Critical Error: ");
+        } else if (msg.startsWith("新建/编辑航轨发生系统级错误: ")) {
+          displayMsg = msg.replace("新建/编辑航轨发生系统级错误: ", "System error creating/editing path: ");
+        }
+      }
+      return originalAlert(displayMsg);
+    };
 
     function changeBaseMap(type) {
       if (!viewer) return;
@@ -1547,11 +1794,30 @@
       }
       panel.style.display = 'block';
       const shotParams = (pt && pt.shot_params) || {};
+      
+      const paramLabelsMap = {
+        '视场': 'FOV',
+        '拉距': 'Distance',
+        '视野': 'FOV',
+        '角度': 'Angle',
+        '半径': 'Radius',
+        '云台': 'Gimbal Pitch',
+        '偏移': 'Offset',
+        '平滑': 'Smoothing',
+        '臂长': 'Arm Length',
+        '起仰': 'Start Pitch',
+        '终仰': 'End Pitch',
+        'FOV': 'FOV',
+        '倍速': 'Speed Mult',
+        '畸变': 'Distortion'
+      };
+
       config.params.forEach((p, i) => {
         const idx = i + 1;
         const row = document.getElementById('paramRow' + idx);
         row.style.display = 'flex';
-        document.getElementById('paramLabel' + idx).textContent = p.label;
+        const labelText = currentLang === 'zh' ? p.label : (paramLabelsMap[p.label] || p.label);
+        document.getElementById('paramLabel' + idx).textContent = labelText;
         const slider = document.getElementById('paramSlider' + idx);
         slider.min = p.min;
         slider.max = p.max;
@@ -1567,6 +1833,55 @@
       }
     }
 
+    function sanitizeRoutesData(raw) {
+      if (!raw) raw = {};
+      if (!Array.isArray(raw.main)) raw.main = [];
+      if (!Array.isArray(raw.secondary)) raw.secondary = [];
+      if (!Array.isArray(raw.flights)) {
+        if (Array.isArray(raw.main_flight)) {
+          raw.flights = [{
+            id: 'trk_' + Date.now(),
+            name: '默认航轨',
+            path: raw.main_flight
+          }];
+        } else {
+          raw.flights = [];
+        }
+      }
+      
+      raw.flights.forEach(trk => {
+        if (!trk) return;
+        if (!trk.id) trk.id = 'trk_' + Math.random().toString(36).substring(2, 9);
+        if (!trk.name) trk.name = '未命名航轨';
+        if (!Array.isArray(trk.path)) trk.path = [];
+        
+        trk.path = trk.path.filter(Boolean).map((wp, idx) => {
+          wp.id = wp.id || 'evt_' + Date.now() + '_' + idx;
+          wp.name = wp.name || `未命名航点 ${idx + 1}`;
+          wp.lng = parseFloat(wp.lng) || 0.0;
+          wp.lat = parseFloat(wp.lat) || 0.0;
+          wp.ground_alt = parseFloat(wp.ground_alt) || 0.0;
+          wp.relative_alt = parseFloat(wp.relative_alt) || 100.0;
+          wp.heading = parseFloat(wp.heading) || 0.0;
+          wp.pitch = parseFloat(wp.pitch) || -30.0;
+          wp.roll = parseFloat(wp.roll) || 360.0;
+          wp.duration = parseFloat(wp.duration) || 5.0;
+          wp.wait_time = parseFloat(wp.wait_time) || 0.0;
+          wp.fov = parseFloat(wp.fov) || 60.0;
+          wp.shot_mode = wp.shot_mode || 'default';
+          wp.look_at_intent = wp.look_at_intent || 'forward';
+          wp.perspective_fov = wp.perspective_fov || 'natural';
+          wp.perspective_pitch = wp.perspective_pitch || 'oblique';
+          wp.speed_preset = wp.speed_preset || 'normal';
+          wp.wait_preset = wp.wait_preset || 'none';
+          wp.env_mode = wp.env_mode || 'none';
+          wp.weather = wp.weather || 'none';
+          return wp;
+        });
+      });
+      return raw;
+    }
+
     // ---- Initialization ----
     async function init() {
       // 1. Fetch JSON Data
@@ -1580,9 +1895,10 @@ const projectPrefix = (pathSegments.length > 0 && knownProjects.includes(pathSeg
         const routeFile = routeType === 'inner' ? 'routes_inner.json' : 'routes.json';
         const res = await fetch(`${projectPrefix}data/${routeFile}?t=` + Date.now());
         if (res.ok) {
-          const raw = await res.json();
+          const raw = sanitizeRoutesData(await res.json());
           data.main = raw.main || [];
           data.secondary = raw.secondary || [];
+          data.branding = raw.branding || null;
           
           if (raw.flights && raw.flights.length > 0) {
             data.flights = raw.flights;
@@ -1595,9 +1911,12 @@ const projectPrefix = (pathSegments.length > 0 && knownProjects.includes(pathSeg
             }];
           }
           activeTrackIndex = 0;
+          activeAudioTrackIndex = 0;
           data.main_flight = data.flights[activeTrackIndex].path;
           
           updateTrackSelectorUI();
+          updateAudioTrackSelectorUI();
+          syncActiveAudioTrackToWaypoints();
           sortWaypointsByTrackOrder();
           renumberWaypoints();
         }
@@ -1633,6 +1952,156 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
 
       viewer.scene.postProcessStages.fxaa.enabled = true;
       viewer.scene.globe.depthTestAgainstTerrain = true;
+
+      // Polyfill for rain and snow post-process stages
+      if (typeof Cesium.PostProcessStageLibrary.createRainStage !== 'function') {
+        Cesium.PostProcessStageLibrary.createRainStage = function() {
+          const isWebGL2 = viewer.scene.context.webgl2;
+          const shader = isWebGL2 ? `
+            uniform sampler2D colorTexture;
+            in vec2 v_textureCoordinates;
+            uniform float speed;
+            out vec4 fragColor;
+            
+            float hash(float x) {
+              return fract(sin(x * 133.3) * 13.13);
+            }
+            
+            void main(void) {
+              float time = czm_frameNumber * speed * 0.005;
+              vec2 resolution = czm_viewport.zw;
+              vec2 uv = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);
+              
+              float a = -0.2;
+              float si = sin(a), co = cos(a);
+              uv *= mat2(co, -si, si, co);
+              uv *= length(uv + vec2(0.0, 4.9)) * 0.3 + 1.0;
+              
+              float v = 1.0 - sin(hash(floor(uv.x * 100.0)) * 2.0);
+              float b = clamp(abs(sin(20.0 * time * v + uv.y * (5.0 / (2.0 + v)))) - 0.95, 0.0, 1.0) * 20.0;
+              
+              vec3 rainColor = vec3(0.6, 0.7, 0.8) * v * b;
+              vec4 sceneColor = texture(colorTexture, v_textureCoordinates);
+              fragColor = mix(sceneColor, vec4(rainColor, 1.0), 0.3);
+            }
+          ` : `
+            uniform sampler2D colorTexture;
+            varying vec2 v_textureCoordinates;
+            uniform float speed;
+            
+            float hash(float x) {
+              return fract(sin(x * 133.3) * 13.13);
+            }
+            
+            void main(void) {
+              float time = czm_frameNumber * speed * 0.005;
+              vec2 resolution = czm_viewport.zw;
+              vec2 uv = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);
+              
+              float a = -0.2;
+              float si = sin(a), co = cos(a);
+              uv *= mat2(co, -si, si, co);
+              uv *= length(uv + vec2(0.0, 4.9)) * 0.3 + 1.0;
+              
+              float v = 1.0 - sin(hash(floor(uv.x * 100.0)) * 2.0);
+              float b = clamp(abs(sin(20.0 * time * v + uv.y * (5.0 / (2.0 + v)))) - 0.95, 0.0, 1.0) * 20.0;
+              
+              vec3 rainColor = vec3(0.6, 0.7, 0.8) * v * b;
+              vec4 sceneColor = texture2D(colorTexture, v_textureCoordinates);
+              gl_FragColor = mix(sceneColor, vec4(rainColor, 1.0), 0.3);
+            }
+          `;
+          return new Cesium.PostProcessStage({
+            name: 'czm_rain',
+            fragmentShader: shader,
+            uniforms: {
+              speed: 3.0
+            }
+          });
+        };
+      }
+
+      if (typeof Cesium.PostProcessStageLibrary.createSnowStage !== 'function') {
+        Cesium.PostProcessStageLibrary.createSnowStage = function() {
+          const isWebGL2 = viewer.scene.context.webgl2;
+          const shader = isWebGL2 ? `
+            uniform sampler2D colorTexture;
+            in vec2 v_textureCoordinates;
+            uniform float speed;
+            out vec4 fragColor;
+            
+            float hash(vec2 p) {
+              return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+            }
+            
+            void main(void) {
+              float time = czm_frameNumber * speed * 0.003;
+              vec2 resolution = czm_viewport.zw;
+              vec2 uv = gl_FragCoord.xy / resolution.xy;
+              
+              vec4 sceneColor = texture(colorTexture, v_textureCoordinates);
+              
+              float snow = 0.0;
+              for (int i = 0; i < 6; i++) {
+                float fi = float(i);
+                vec2 offset = vec2(fi * 1.5, fi * 3.0);
+                vec2 uv2 = uv * (3.0 + fi) + vec2(0.1 * sin(time + fi), time * (1.0 + fi * 0.2)) + offset;
+                vec2 ip = floor(uv2);
+                vec2 fp = fract(uv2);
+                float h = hash(ip);
+                if (h > 0.92) {
+                  float dist = length(fp - 0.5);
+                  snow += smoothstep(0.18, 0.0, dist) * (h - 0.92) * 12.0;
+                }
+              }
+              
+              vec3 snowColor = vec3(0.9, 0.9, 0.95);
+              fragColor = mix(sceneColor, vec4(snowColor, 1.0), clamp(snow, 0.0, 0.5));
+            }
+          ` : `
+            uniform sampler2D colorTexture;
+            varying vec2 v_textureCoordinates;
+            uniform float speed;
+            
+            float hash(vec2 p) {
+              return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+            }
+            
+            void main(void) {
+              float time = czm_frameNumber * speed * 0.003;
+              vec2 resolution = czm_viewport.zw;
+              vec2 uv = gl_FragCoord.xy / resolution.xy;
+              
+              vec4 sceneColor = texture2D(colorTexture, v_textureCoordinates);
+              
+              float snow = 0.0;
+              for (int i = 0; i < 6; i++) {
+                float fi = float(i);
+                vec2 offset = vec2(fi * 1.5, fi * 3.0);
+                vec2 uv2 = uv * (3.0 + fi) + vec2(0.1 * sin(time + fi), time * (1.0 + fi * 0.2)) + offset;
+                vec2 ip = floor(uv2);
+                vec2 fp = fract(uv2);
+                float h = hash(ip);
+                if (h > 0.92) {
+                  float dist = length(fp - 0.5);
+                  snow += smoothstep(0.18, 0.0, dist) * (h - 0.92) * 12.0;
+                }
+              }
+              
+              vec3 snowColor = vec3(0.9, 0.9, 0.95);
+              gl_FragColor = mix(sceneColor, vec4(snowColor, 1.0), clamp(snow, 0.0, 0.5));
+            }
+          `;
+          return new Cesium.PostProcessStage({
+            name: 'czm_snow',
+            fragmentShader: shader,
+            uniforms: {
+              speed: 2.5
+            }
+          });
+        };
+      }
+
 
       // --- Spotlight Effect Setup ---
       let spotlightEntity = null;
@@ -2116,6 +2585,9 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       // 7. Bind Height micro adjustments near elevation chart
       document.getElementById('btnHeightDec').addEventListener('click', () => adjustSelectedHeight(-10));
       document.getElementById('btnHeightInc').addEventListener('click', () => adjustSelectedHeight(10));
+      
+      // Initialize elevation chart dragging and scrubbing interaction
+      initElevationChartInteraction();
 
       // 8. Bind Viewport HUD Listeners
       setupHUDListeners();
@@ -2131,7 +2603,7 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       data.flights.forEach((trk, idx) => {
         const option = document.createElement('option');
         option.value = idx;
-        option.textContent = `${trk.name || ('航轨 ' + (idx+1))}`;
+        option.textContent = `${trk.name || (currentLang === 'zh' ? ('航轨 ' + (idx+1)) : ('Flight Path ' + (idx+1)))}`;
         if (idx === activeTrackIndex) option.selected = true;
         selector.appendChild(option);
       });
@@ -2160,6 +2632,10 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       if (ltSel) ltSel.value = curStyle.lineType || 'dashed';
       if (anSel) anSel.value = curStyle.animation || 'none';
       
+      // Reset active audio track for the new flight track
+      activeAudioTrackIndex = 0;
+      updateAudioTrackSelectorUI();
+      syncActiveAudioTrackToWaypoints();
       
       // Reset state
       historyStack = [];
@@ -2175,7 +2651,6 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       refreshKeyframeList();
       rebuildElevationChart();
       updateCount();
-      if (window.updateAudioTracksListUI) window.updateAudioTracksListUI();
     }
     
     async function createNewTrack() {
@@ -2217,6 +2692,167 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       }
     }
 
+    function migrateWaypointNarrationsToTracks(flight) {
+      if (!flight.audio_tracks) {
+        flight.audio_tracks = [];
+      }
+      if (flight.audio_tracks.length === 0) {
+        const defaultTrack = {
+          id: 'aud_default_' + Date.now(),
+          name: currentLang === 'zh' ? '默认解说轨' : 'Default Commentary',
+          musicStyle: currentLang === 'zh' ? '朝圣' : 'Devotion',
+          desc: currentLang === 'zh' ? '系统自动迁移的默认解说轨' : 'Default commentary track migrated by system',
+          segments: []
+        };
+        const pathList = flight.path || [];
+        pathList.forEach(pt => {
+          if (pt.narration_text || pt.narration_audio) {
+            defaultTrack.segments.push({
+              waypointIds: [pt.id],
+              text: pt.narration_text || '',
+              audioUrl: pt.narration_audio || '',
+              duration: pt.narration_duration || pt.duration || 0,
+              voice: pt.narration_voice || 'default'
+            });
+          }
+        });
+        flight.audio_tracks.push(defaultTrack);
+      }
+    }
+
+    function updateAudioTrackSelectorUI() {
+      const selector = document.getElementById('audioTrackSelector');
+      if (!selector) return;
+      selector.innerHTML = '';
+      
+      const activeFlight = data.flights[activeTrackIndex];
+      if (!activeFlight) {
+        document.getElementById('btnEditAudioTrack').style.display = 'none';
+        document.getElementById('btnDeleteAudioTrack').style.display = 'none';
+        return;
+      }
+      
+      // Make sure there's at least one track
+      migrateWaypointNarrationsToTracks(activeFlight);
+      
+      if (activeAudioTrackIndex >= activeFlight.audio_tracks.length) {
+        activeAudioTrackIndex = 0;
+      }
+      
+      activeFlight.audio_tracks.forEach((track, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        const trackName = track.name || (currentLang === 'zh' ? ('音轨 ' + (index+1)) : ('Audio Track ' + (index+1)));
+        const styleName = currentLang === 'zh' ? (track.musicStyle || '朝圣') : (track.musicStyle === '朝圣' ? 'Devotion' : (track.musicStyle === '庄严' ? 'Majesty' : (track.musicStyle === '探索' ? 'Discovery' : (track.musicStyle === '孤独' ? 'Solitude' : track.musicStyle))));
+        option.textContent = `${trackName} (${styleName})`;
+        if (index === activeAudioTrackIndex) option.selected = true;
+        selector.appendChild(option);
+      });
+      
+      selector.value = activeAudioTrackIndex;
+      
+      document.getElementById('btnEditAudioTrack').style.display = 'inline-block';
+      document.getElementById('btnDeleteAudioTrack').style.display = activeFlight.audio_tracks.length > 1 ? 'inline-block' : 'none';
+    }
+
+    function syncActiveAudioTrackToWaypoints() {
+      const activeFlight = data.flights[activeTrackIndex];
+      if (!activeFlight) return;
+      
+      migrateWaypointNarrationsToTracks(activeFlight);
+      
+      const curTrack = activeFlight.audio_tracks[activeAudioTrackIndex];
+      if (!curTrack) return;
+      
+      const segmentMap = {};
+      if (curTrack.segments) {
+        curTrack.segments.forEach(seg => {
+          if (seg.waypointIds) {
+            seg.waypointIds.forEach(wId => {
+              segmentMap[wId] = seg;
+            });
+          }
+        });
+      }
+      
+      data.main_flight.forEach(pt => {
+        const seg = segmentMap[pt.id];
+        if (seg) {
+          pt.narration_text = seg.text || '';
+          pt.narration_audio = seg.audioUrl || '';
+          pt.narration_duration = seg.duration || 0;
+          pt.narration_voice = seg.voice || 'default';
+          if (seg.audioUrl && seg.duration) {
+            pt.duration = parseFloat((seg.duration + 2.0).toFixed(1));
+          }
+        } else {
+          pt.narration_text = '';
+          pt.narration_audio = '';
+          pt.narration_duration = 0;
+          pt.narration_voice = 'default';
+        }
+      });
+      
+      if (activeId) {
+        const activePt = data.main_flight.find(p => p.id === activeId);
+        if (activePt) {
+          document.getElementById('hudTtsText').value = activePt.narration_text || '';
+          document.getElementById('hudTtsVoice').value = activePt.narration_voice || 'default';
+          
+          const audioContainer = document.getElementById('hudTtsAudioContainer');
+          const timeLabel = document.getElementById('ttsAudioTimeLabel');
+          const progressInput = document.getElementById('ttsAudioProgress');
+          
+          audioContainer.style.display = 'flex';
+          if (activePt.narration_audio) {
+            audioContainer.style.opacity = '1.0';
+            audioContainer.style.pointerEvents = 'auto';
+            const duration = activePt.narration_duration || activePt.duration || 0.0;
+            if (timeLabel) timeLabel.textContent = `0:00 / ${formatAudioTime(duration)}`;
+            if (progressInput) progressInput.value = 0;
+          } else {
+            audioContainer.style.opacity = '0.4';
+            audioContainer.style.pointerEvents = 'none';
+            if (timeLabel) timeLabel.textContent = `0:00 / 0:00`;
+            if (progressInput) progressInput.value = 0;
+          }
+        }
+      }
+      
+      refreshKeyframeList();
+      rebuildElevationChart();
+    }
+
+    function saveNarrationToActiveTrackSegment(waypointId, text, audioUrl, duration, voice) {
+      const activeFlight = data.flights[activeTrackIndex];
+      if (!activeFlight) return;
+      if (!activeFlight.audio_tracks) activeFlight.audio_tracks = [];
+      if (activeFlight.audio_tracks.length === 0) {
+        migrateWaypointNarrationsToTracks(activeFlight);
+      }
+      
+      const curTrack = activeFlight.audio_tracks[activeAudioTrackIndex];
+      if (!curTrack) return;
+      
+      if (!curTrack.segments) curTrack.segments = [];
+      let seg = curTrack.segments.find(s => s.waypointIds && s.waypointIds.includes(waypointId));
+      if (!seg) {
+        seg = {
+          waypointIds: [waypointId],
+          text: text || '',
+          audioUrl: audioUrl || '',
+          duration: duration || 0,
+          voice: voice || 'default'
+        };
+        curTrack.segments.push(seg);
+      } else {
+        if (text !== undefined) seg.text = text;
+        if (audioUrl !== undefined) seg.audioUrl = audioUrl;
+        if (duration !== undefined) seg.duration = duration;
+        if (voice !== undefined) seg.voice = voice;
+      }
+    }
+
     async function createNewAudioTrack() {
       const activeFlight = data.flights[activeTrackIndex];
       if (!activeFlight) {
@@ -2229,180 +2865,48 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       }
       
       const defaultName = `音轨 ${activeFlight.audio_tracks.length + 1}`;
-      const currentText = document.getElementById('hudTtsText').value.trim();
-      const activePt = data.main_flight.find(p => p.id === activeId);
-      
-      if (!activePt) {
-        showToast("请先选择要添加音轨的航点", true);
-        return;
-      }
       
       try {
         const result = await showCustomDialog("新建独立音轨", [
           { key: 'name', label: '音轨名称', default: defaultName },
           { key: 'musicStyle', label: '背景音乐风格', type: 'select', options: ['朝圣', '庄严', '探索', '孤独', '自定义'], default: '朝圣' },
-          { key: 'desc', label: '音轨说明/意图 (选填)', type: 'textarea', placeholder: '请输入音轨的描述或创作者意图...' },
-          { key: 'text', label: '解说词文本 (可编辑)', type: 'textarea', default: currentText || activePt.narration_text || '' }
-        ], '🔊 合成并保存');
+          { key: 'desc', label: '音轨说明/意图 (选填)', type: 'textarea', placeholder: '请输入音轨的描述或创作者意图...' }
+        ], '确认新建音轨');
         
         if (!result || !result.name) return;
-        
-        let audioUrl = activePt.narration_audio;
-        let duration = activePt.narration_duration || activePt.duration || 0;
-        const voiceVal = document.getElementById('hudTtsVoice').value || 'default';
-        
-        // 如果文本被修改或者还没合成过，就重新合成
-        if (result.text !== activePt.narration_text || !audioUrl) {
-          showToast("正在合成音频，请稍候...", false);
-          const res = await fetch("api/generate-tts", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              waypointId: activePt.id,
-              text: result.text,
-              voice: voiceVal,
-              refAudio: activePt.narration_ref_audio || "",
-              refText: activePt.narration_ref_text || ""
-            })
-          });
-          
-          const resData = await res.json();
-          if (resData.ok) {
-            audioUrl = resData.audioUrl;
-            duration = resData.duration;
-            activePt.narration_text = result.text;
-            activePt.narration_audio = audioUrl;
-            activePt.narration_duration = duration;
-            activePt.duration = parseFloat((duration + 2.0).toFixed(1));
-            
-            refreshKeyframeList();
-            rebuildElevationChart();
-            const idx = data.main_flight.findIndex(p => p.id === activeId);
-            updateDiagnosticsPanel(activePt, idx);
-          } else {
-            throw new Error(resData.error || "合成失败");
-          }
-        }
         
         const newTrack = {
           id: 'aud_' + Date.now() + Math.floor(Math.random()*1000),
           name: result.name,
           musicStyle: result.musicStyle,
           desc: result.desc || '',
-          segments: [
-            {
-              waypointIds: selectedIds.length > 0 ? [...selectedIds] : [activeId],
-              text: result.text,
-              audioUrl: audioUrl,
-              duration: duration,
-              voice: voiceVal
-            }
-          ]
+          segments: []
         };
         
+        // Clone current waypoint narration settings into the new track
+        data.main_flight.forEach(pt => {
+          if (pt.narration_text || pt.narration_audio) {
+            newTrack.segments.push({
+              waypointIds: [pt.id],
+              text: pt.narration_text || '',
+              audioUrl: pt.narration_audio || '',
+              duration: pt.narration_duration || pt.duration || 0,
+              voice: pt.narration_voice || 'default'
+            });
+          }
+        });
+        
         activeFlight.audio_tracks.push(newTrack);
+        activeAudioTrackIndex = activeFlight.audio_tracks.length - 1;
+        
         await saveToServer();
-        updateAudioTracksListUI();
-        showToast(`🎙️ 已保存新音轨: ${result.name}`);
+        updateAudioTrackSelectorUI();
+        syncActiveAudioTrackToWaypoints();
+        showToast(`🎙️ 已新建并切换到音轨: ${result.name}`);
       } catch (err) {
         console.error(err);
         alert("新建音轨失败: " + err.message);
       }
-    }
-    
-    function updateAudioTracksListUI() {
-      const container = document.getElementById('savedAudioTracksContainer');
-      const listEl = document.getElementById('savedAudioTracksList');
-      const countEl = document.getElementById('savedAudioTracksCount');
-      
-      if (!container || !listEl) return;
-      
-      const activeFlight = data.flights[activeTrackIndex];
-      if (!activeFlight || !activeFlight.audio_tracks || activeFlight.audio_tracks.length === 0) {
-        container.style.display = 'none';
-        return;
-      }
-      
-      container.style.display = 'block';
-      countEl.textContent = `${activeFlight.audio_tracks.length} 个`;
-      listEl.innerHTML = '';
-      
-      activeFlight.audio_tracks.forEach((track, index) => {
-        const item = document.createElement('div');
-        item.style.cssText = 'display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:4px;padding:6px 8px;gap:8px;font-size:10px;color:#f8fafc;margin-bottom:4px;';
-        
-        const infoCol = document.createElement('div');
-        infoCol.style.cssText = 'flex:1;display:flex;flex-direction:column;gap:2px;overflow:hidden;';
-        
-        const titleRow = document.createElement('div');
-        titleRow.style.cssText = 'display:flex;align-items:center;gap:6px;font-weight:bold;';
-        titleRow.textContent = track.name;
-        
-        const styleBadge = document.createElement('span');
-        styleBadge.style.cssText = 'background:rgba(255,205,85,0.15);border:1px solid rgba(255,205,85,0.3);color:#ffcd55;font-size:9px;padding:0px 4px;border-radius:2px;font-weight:normal;line-height:1.2;';
-        styleBadge.textContent = track.musicStyle || '朝圣';
-        titleRow.appendChild(styleBadge);
-        
-        const descText = document.createElement('div');
-        descText.style.cssText = 'color:#94a3b8;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;';
-        descText.textContent = track.desc || '暂无说明';
-        descText.title = track.desc || '';
-        
-        infoCol.appendChild(titleRow);
-        infoCol.appendChild(descText);
-        
-        const actions = document.createElement('div');
-        actions.style.cssText = 'display:flex;align-items:center;gap:8px;flex-shrink:0;';
-        
-        const playBtn = document.createElement('button');
-        playBtn.textContent = '▶ 播放';
-        playBtn.style.cssText = 'background:none;border:none;color:#10b981;cursor:pointer;font-size:10px;padding:2px 4px;font-weight:bold;';
-        playBtn.onclick = (e) => {
-          e.stopPropagation();
-          playAudioTrack(track);
-        };
-        
-        const delBtn = document.createElement('button');
-        delBtn.textContent = '🗑️';
-        delBtn.style.cssText = 'background:none;border:none;color:#ef4444;cursor:pointer;font-size:11px;padding:2px;';
-        delBtn.onclick = async (e) => {
-          e.stopPropagation();
-          if (confirm(`确定要永久删除音轨 "${track.name}" 吗？`)) {
-            activeFlight.audio_tracks.splice(index, 1);
-            await saveToServer();
-            updateAudioTracksListUI();
-            showToast("音轨已删除");
-          }
-        };
-        
-        actions.appendChild(playBtn);
-        actions.appendChild(delBtn);
-        
-        item.appendChild(infoCol);
-        item.appendChild(actions);
-        listEl.appendChild(item);
-      });
-    }
-    
-    function playAudioTrack(track) {
-      if (!track.segments || track.segments.length === 0) return;
-      let currentSegIdx = 0;
-      function playNextSegment() {
-        if (currentSegIdx >= track.segments.length) return;
-        const seg = track.segments[currentSegIdx];
-        if (seg.audioUrl) {
-          const audio = new Audio(seg.audioUrl + "?t=" + Date.now());
-          audio.onended = () => {
-            currentSegIdx++;
-            playNextSegment();
-          };
-          audio.play();
-        } else {
-          currentSegIdx++;
-          playNextSegment();
-        }
-      }
-      playNextSegment();
     }
     
     function deleteCurrentTrack() {
@@ -2553,9 +3057,8 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
             // 自动对齐飞行时长 = 语音时长 + 2.0s
             pt.duration = parseFloat((resData.duration + 2.0).toFixed(1));
             
-            // 播放生成的语音进行试听
-            const audio = new Audio(resData.audioUrl + "?t=" + Date.now());
-            audio.play();
+            // Sync to the active audio track segment
+            saveNarrationToActiveTrackSegment(pt.id, text, resData.audioUrl, resData.duration, voice);
 
             // 重新刷新视图
             refreshKeyframeList();
@@ -2575,21 +3078,483 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         }
       });
 
+      // Toggle play/pause for TTS preview
       document.getElementById('btnPlayTtsAudio').addEventListener('click', () => {
-        if (!activeId) return;
-        const idx = data.main_flight.findIndex(p => p.id === activeId);
-        if (idx === -1) return;
-        const pt = data.main_flight[idx];
-        if (pt.narration_audio) {
-          const audio = new Audio(pt.narration_audio + "?t=" + Date.now());
-          audio.play();
+        const btnPlay = document.getElementById('btnPlayTtsAudio');
+        const progressInput = document.getElementById('ttsAudioProgress');
+        const timeLabel = document.getElementById('ttsAudioTimeLabel');
+        
+        if (window.currentTtsAudioPlayer && !window.currentTtsAudioPlayer.paused) {
+          window.currentTtsAudioPlayer.pause();
+          btnPlay.textContent = '▶';
+        } else {
+          if (!activeId) return;
+          const pt = data.main_flight.find(p => p.id === activeId);
+          if (pt && pt.narration_audio) {
+            const isSameAudio = window.currentTtsAudioPlayer && window.currentTtsAudioPlayer.src.includes(pt.narration_audio);
+            if (!isSameAudio) {
+              if (window.currentTtsAudioPlayer) {
+                window.currentTtsAudioPlayer.pause();
+              }
+              window.currentTtsAudioPlayer = new Audio(pt.narration_audio + "?t=" + Date.now());
+            }
+            
+            btnPlay.textContent = '⏸';
+            
+            window.currentTtsAudioPlayer.ontimeupdate = () => {
+              const audio = window.currentTtsAudioPlayer;
+              if (audio && audio.duration) {
+                const pct = (audio.currentTime / audio.duration) * 100;
+                if (progressInput) progressInput.value = pct;
+                if (timeLabel) timeLabel.textContent = `${formatAudioTime(audio.currentTime)} / ${formatAudioTime(audio.duration)}`;
+              }
+            };
+            
+            window.currentTtsAudioPlayer.onloadedmetadata = () => {
+              const audio = window.currentTtsAudioPlayer;
+              if (audio) {
+                if (timeLabel) timeLabel.textContent = `0:00 / ${formatAudioTime(audio.duration)}`;
+              }
+            };
+            
+            window.currentTtsAudioPlayer.onended = () => {
+              btnPlay.textContent = '▶';
+              if (progressInput) progressInput.value = 0;
+              if (timeLabel) timeLabel.textContent = `0:00 / ${formatAudioTime(window.currentTtsAudioPlayer.duration)}`;
+            };
+            
+            window.currentTtsAudioPlayer.play().catch(err => {
+              console.error("Audio playback error:", err);
+              btnPlay.textContent = '▶';
+            });
+          } else {
+            showToast("该航点尚无合成语音解说", true);
+          }
         }
       });
+
+      document.getElementById('ttsAudioProgress').addEventListener('input', (e) => {
+        const audio = window.currentTtsAudioPlayer;
+        if (audio && audio.duration) {
+          const pct = parseFloat(e.target.value);
+          audio.currentTime = (pct / 100) * audio.duration;
+          
+          const timeLabel = document.getElementById('ttsAudioTimeLabel');
+          if (timeLabel) {
+            timeLabel.textContent = `${formatAudioTime(audio.currentTime)} / ${formatAudioTime(audio.duration)}`;
+          }
+        }
+      });
+
+      // Expose track methods globally from inside init() where they are defined
+      window.createNewTrack = createNewTrack;
+      window.createNewAudioTrack = createNewAudioTrack;
+      window.updateAudioTracksListUI = updateAudioTrackSelectorUI;
+      window.syncActiveAudioTrackToWaypoints = syncActiveAudioTrackToWaypoints;
 
       // 10. Real-time Camera Framing Change Listener
       setupCameraChangeListener();
       if (window.updateAudioTracksListUI) window.updateAudioTracksListUI();
+
+      // Define and expose applyEditorLanguage inside init() scope so it can access local UI update functions
+      window.applyEditorLanguage = function(lang) {
+        currentLang = lang;
+        const dict = i18nEditor[lang];
+        if (!dict) return;
+        
+        const elements = [
+          { id: 'btnAddWaypoint', key: 'btnAddWaypoint', isText: true },
+          { id: 'btnUpdateWaypoint', key: 'btnUpdateWaypoint', isText: true },
+          { id: 'headerDiag', key: 'headerDiag', isText: true },
+          { id: 'lblDiagPos', key: 'lblDiagPos', isText: true },
+          { id: 'lblDiagDist', key: 'lblDiagDist', isText: true },
+          { id: 'lblDiagGround', key: 'lblDiagGround', isText: true },
+          { id: 'lblDiagFlight', key: 'lblDiagFlight', isText: true },
+          { id: 'lblDiagRel', key: 'lblDiagRel', isText: true },
+          { id: 'lblDiagTarget', key: 'lblDiagTarget', isText: true },
+          { id: 'lblDiagSpeed', key: 'lblDiagSpeed', isText: true },
+          { id: 'lblDiagDuration', key: 'lblDiagDuration', isText: true },
+          { id: 'btnExport', key: 'btnExport', isText: true },
+          { id: 'btnSave', key: 'btnSave', isText: true },
+          { id: 'btnImportDropdown', key: 'btnImportDropdown', isText: true },
+          { id: 'lblImportFile', key: 'lblImportFile', isText: true },
+          { id: 'lblImportMap', key: 'lblImportMap', isText: true },
+          { id: 'lblBaseMapOsm', key: 'lblBaseMapOsm', isText: true },
+          { id: 'lblBaseMapBing', key: 'lblBaseMapBing', isText: true },
+          { id: 'lblBaseMapGoogleSat', key: 'lblBaseMapGoogleSat', isText: true },
+          { id: 'lblBaseMapGoogleHyb', key: 'lblBaseMapGoogleHyb', isText: true },
+          { id: 'lblBaseMapGoogleRoad', key: 'lblBaseMapGoogleRoad', isText: true },
+          { id: 'lblBaseMapGoogleTer', key: 'lblBaseMapGoogleTer', isText: true },
+          { id: 'lblZoomGround', key: 'lblZoomGround', isText: true },
+          { id: 'lblZoomVast', key: 'lblZoomVast', isText: true },
+          { id: 'lblZoomNatural', key: 'lblZoomNatural', isText: true },
+          { id: 'lblZoomCompressed', key: 'lblZoomCompressed', isText: true },
+          { id: 'fovMarkCustom', key: 'fovMarkCustom', isText: true },
+          { id: 'lblPitchLookup', key: 'lblPitchLookup', isText: true },
+          { id: 'lblPitchEyelevel', key: 'lblPitchEyelevel', isText: true },
+          { id: 'lblPitchOblique', key: 'lblPitchOblique', isText: true },
+          { id: 'lblPitchOverlook', key: 'lblPitchOverlook', isText: true },
+          { id: 'pitchMarkCustom', key: 'pitchMarkCustom', isText: true },
+          { id: 'headerFocus', key: 'headerFocus', isText: true },
+          { id: 'btnHudUnlock', key: 'btnHudUnlock', isText: true },
+          { id: 'btnHudLockForward', key: 'btnHudLockForward', isText: true },
+          { id: 'btnHudLockSummit', key: 'btnHudLockSummit', isText: true },
+          { id: 'btnHudLockSide', key: 'btnHudLockSide', isText: true },
+          { id: 'btnHudLockBird', key: 'btnHudLockBird', isText: true },
+          { id: 'btnHudLockPoi', key: 'btnHudLockPoi', isText: true },
+          { id: 'btnHudLockFree', key: 'btnHudLockFree', isText: true },
+          { id: 'lblLockCameraPreview', key: 'lblLockCameraPreview', isText: true },
+          { id: 'headerShot', key: 'headerShot', isText: true },
+          { id: 'btnShotPanSpin', key: 'btnShotPanSpin', isText: true },
+          { id: 'btnShotOrbit', key: 'btnShotOrbit', isText: true },
+          { id: 'btnShotHandheld', key: 'btnShotHandheld', isText: true },
+          { id: 'btnShotHitchcock', key: 'btnShotHitchcock', isText: true },
+          { id: 'btnShotVia', key: 'btnShotVia', isText: true },
+          { id: 'btnShotCrane', key: 'btnShotCrane', isText: true },
+          { id: 'btnShotTunnel', key: 'btnShotTunnel', isText: true },
+          { id: 'btnShotFisheye', key: 'btnShotFisheye', isText: true },
+          { id: 'headerVibe', key: 'headerVibe', isText: true },
+          { id: 'btnVibePilgrimage', key: 'btnVibePilgrimage', isText: true },
+          { id: 'btnVibeSolemn', key: 'btnVibeSolemn', isText: true },
+          { id: 'btnVibeExploratory', key: 'btnVibeExploratory', isText: true },
+          { id: 'btnVibeSolitude', key: 'btnVibeSolitude', isText: true },
+          { id: 'headerLighting', key: 'headerLighting', isText: true },
+          { id: 'lblEnvModeTitle', key: 'lblEnvModeTitle', isText: true },
+          { id: 'optEnvNone', key: 'optEnvNone', isText: true },
+          { id: 'optEnvTime', key: 'optEnvTime', isText: true },
+          { id: 'optEnvRain', key: 'optEnvRain', isText: true },
+          { id: 'optEnvSnow', key: 'optEnvSnow', isText: true },
+          { id: 'optEnvFog', key: 'optEnvFog', isText: true },
+          { id: 'optEnvLightning', key: 'optEnvLightning', isText: true },
+          { id: 'btnCancelEnv', key: 'btnCancelEnv', isText: true },
+          { id: 'envSliderLabel', key: 'envSliderLabel', isText: true },
+          { id: 'headerTts', key: 'headerTts', isText: true },
+          { id: 'optVoiceDefault', key: 'optVoiceDefault', isText: true },
+          { id: 'optVoiceLocalClone', key: 'optVoiceLocalClone', isText: true },
+          { id: 'optVoiceVoxCpm', key: 'optVoiceVoxCpm', isText: true },
+          { id: 'btnHudTtsGenerate', key: 'btnHudTtsGenerate', isText: true },
+          { id: 'lblRefVoiceTitle', key: 'lblRefVoiceTitle', isText: true },
+          { id: 'btnUploadRefAudio', key: 'btnUploadRefAudio', isText: true },
+          { id: 'lblTtsAlign', key: 'lblTtsAlign', isText: true },
+          { id: 'headerTrackStyle', key: 'headerTrackStyle', isText: true },
+          { id: 'lblTrackLineType', key: 'lblTrackLineType', isText: true },
+          { id: 'optLineDashed', key: 'optLineDashed', isText: true },
+          { id: 'optLineDotted', key: 'optLineDotted', isText: true },
+          { id: 'optLineSolid', key: 'optLineSolid', isText: true },
+          { id: 'optLineDouble', key: 'optLineDouble', isText: true },
+          { id: 'lblTrackAnimation', key: 'lblTrackAnimation', isText: true },
+          { id: 'optAnimNone', key: 'optAnimNone', isText: true },
+          { id: 'optAnimYellow', key: 'optAnimYellow', isText: true },
+          { id: 'optAnimRed', key: 'optAnimRed', isText: true },
+          { id: 'optAnimColor', key: 'optAnimColor', isText: true },
+          { id: 'btnEditTrack', key: 'btnEditTrackTitle', isText: true },
+          { id: 'btnDeleteTrack', key: 'btnDeleteTrackTitle', isText: true },
+          { id: 'chartSelectionLabel', key: 'chartSelectionLabel', isText: true },
+          { id: 'lblSpeedTitle', key: 'lblSpeedTitle', isText: true },
+          { id: 'lblDurationTitle', key: 'lblDurationTitle', isText: true },
+          { id: 'lblWaitTitle', key: 'lblWaitTitle', isText: true },
+          { id: 'btnResampleHeights', key: 'btnResampleHeights', isText: true }
+        ];
+        
+        elements.forEach(item => {
+          const el = document.getElementById(item.id);
+          if (el) {
+            if (item.isText) el.textContent = dict[item.key];
+          }
+        });
+        
+        // Update attributes (title, placeholder)
+        const btnAddWaypoint = document.getElementById('btnAddWaypoint');
+        if (btnAddWaypoint) btnAddWaypoint.title = dict.btnAddWaypointTitle;
+        
+        const btnUpdateWaypoint = document.getElementById('btnUpdateWaypoint');
+        if (btnUpdateWaypoint) btnUpdateWaypoint.title = dict.btnUpdateWaypointTitle;
+        
+        const btnWpMoveUp = document.getElementById('btnWpMoveUp');
+        if (btnWpMoveUp) btnWpMoveUp.title = dict.btnWpMoveUpTitle;
+        
+        const btnWpMoveDown = document.getElementById('btnWpMoveDown');
+        if (btnWpMoveDown) btnWpMoveDown.title = dict.btnWpMoveDownTitle;
+        
+        const btnEditAudioTrack = document.getElementById('btnEditAudioTrack');
+        if (btnEditAudioTrack) btnEditAudioTrack.title = dict.btnEditAudioTrackTitle;
+        
+        const btnDeleteAudioTrack = document.getElementById('btnDeleteAudioTrack');
+        if (btnDeleteAudioTrack) btnDeleteAudioTrack.title = dict.btnDeleteAudioTrackTitle;
+        
+        const btnAddAudioTrack = document.getElementById('btnAddAudioTrack');
+        if (btnAddAudioTrack) btnAddAudioTrack.title = dict.btnAddAudioTrackTitle;
+        
+        const btnPlayTtsAudio = document.getElementById('btnPlayTtsAudio');
+        if (btnPlayTtsAudio) btnPlayTtsAudio.title = dict.btnPlayTtsAudioTitle;
+        
+        const hudTtsText = document.getElementById('hudTtsText');
+        if (hudTtsText) hudTtsText.placeholder = dict.hudTtsTextPlaceholder;
+        
+        const txtRefAudioText = document.getElementById('txtRefAudioText');
+        if (txtRefAudioText) txtRefAudioText.placeholder = dict.txtRefAudioTextPlaceholder;
+        
+        // Refresh dynamic UI elements
+        refreshKeyframeList();
+        updateCount();
+        updateAudioTrackSelectorUI();
+        updateTrackSelectorUI();
+        
+        if (activeId !== null) {
+          const activeIdx = data.main_flight.findIndex(f => f.id === activeId);
+          if (activeIdx !== -1) {
+            const pt = data.main_flight[activeIdx];
+            updateEnvSliderUI(pt);
+            updateShotParamsPanel(pt.shot_mode || 'default', pt);
+          }
+        }
+      };
+
+      // postMessage message listener
+      window.addEventListener('message', (e) => {
+        if (e.data && e.data.type === 'setLanguage') {
+          window.applyEditorLanguage(e.data.lang);
+        }
+      });
     }
+
+    let activeWeatherStage = null;
+    let lightningTimeout = null;
+    function formatTimeOfDay(val) {
+      let hrs = Math.floor(val);
+      let mins = Math.round((val - hrs) * 60);
+      if (mins === 60) {
+        hrs = (hrs + 1) % 24;
+        mins = 0;
+      }
+      return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+    }
+
+    function formatAudioTime(secs) {
+      if (isNaN(secs) || secs <= 0) return '0:00';
+      const m = Math.floor(secs / 60);
+      const s = Math.floor(secs % 60);
+      return `${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+
+    function updateEnvSliderUI(pt) {
+      const mode = pt.env_mode || 'none';
+      const paramRow = document.getElementById('envSliderRow');
+      const paramInput = document.getElementById('envSliderInput');
+      const paramLabel = document.getElementById('envSliderLabel');
+      
+      if (mode === 'none') {
+        paramRow.style.display = 'none';
+      } else if (mode === 'time') {
+        paramRow.style.display = 'flex';
+        paramInput.min = '0';
+        paramInput.max = '24';
+        paramInput.step = '0.1';
+        const val = typeof pt.timeOfDay === 'number' ? pt.timeOfDay : 12.0;
+        paramInput.value = val;
+        
+        let hrs = Math.floor(val);
+        let mins = Math.round((val - hrs) * 60);
+        if (mins === 60) { hrs += 1; mins = 0; }
+        const prefix = currentLang === 'zh' ? '日照时间: ' : 'Daylight: ';
+        paramLabel.textContent = `${prefix}${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+      } else {
+        paramRow.style.display = 'flex';
+        paramInput.min = '1';
+        paramInput.max = '4';
+        paramInput.step = '1';
+        const val = typeof pt.env_param === 'number' ? pt.env_param : 2;
+        paramInput.value = Math.round(val);
+        
+        let levelText = '';
+        if (mode === 'rain') {
+          const labels = currentLang === 'zh' ? 
+            { 1: '小雨', 2: '中雨', 3: '大雨', 4: '暴雨' } :
+            { 1: 'Light Rain', 2: 'Moderate Rain', 3: 'Heavy Rain', 4: 'Downpour' };
+          levelText = labels[Math.round(val)] || (currentLang === 'zh' ? '中雨' : 'Moderate Rain');
+        } else if (mode === 'snow') {
+          const labels = currentLang === 'zh' ?
+            { 1: '小雪', 2: '中雪', 3: '大雪', 4: '暴雪' } :
+            { 1: 'Light Snow', 2: 'Moderate Snow', 3: 'Heavy Snow', 4: 'Blizzard' };
+          levelText = labels[Math.round(val)] || (currentLang === 'zh' ? '中雪' : 'Moderate Snow');
+        } else if (mode === 'fog') {
+          const labels = currentLang === 'zh' ?
+            { 1: '轻雾', 2: '中雾', 3: '大雾', 4: '浓雾' } :
+            { 1: 'Light Fog', 2: 'Moderate Fog', 3: 'Heavy Fog', 4: 'Dense Fog' };
+          levelText = labels[Math.round(val)] || (currentLang === 'zh' ? '中雾' : 'Moderate Fog');
+        } else if (mode === 'lightning') {
+          const labels = currentLang === 'zh' ?
+            { 1: '疏落', 2: '频密', 3: '狂暴', 4: '极度狂暴' } :
+            { 1: 'Sparse', 2: 'Frequent', 3: 'Violent', 4: 'Extreme' };
+          levelText = labels[Math.round(val)] || (currentLang === 'zh' ? '频密' : 'Frequent');
+        }
+        const prefix = currentLang === 'zh' ? '特效强度: ' : 'Intensity: ';
+        paramLabel.textContent = `${prefix}${levelText || Math.round(val)}`;
+      }
+    }
+
+
+    function applyEnvEffectToCesium(pt) {
+      if (!viewer) return;
+      
+      const mode = pt.env_mode || 'none';
+      
+      // Remove active stage if any
+      if (activeWeatherStage) {
+        viewer.scene.postProcessStages.remove(activeWeatherStage);
+        activeWeatherStage = null;
+      }
+      
+      // Clear lightning timeout if any
+      if (lightningTimeout) {
+        clearTimeout(lightningTimeout);
+        lightningTimeout = null;
+      }
+      
+      // Reset Light Intensity
+      if (viewer.scene.light) {
+        viewer.scene.light.intensity = 1.0;
+      }
+      
+      // Clear/Reset Fog
+      viewer.scene.fog.enabled = true;
+      viewer.scene.fog.density = 0.0002;
+      
+      // Always apply time of day first
+      const timeVal = typeof pt.timeOfDay === 'number' ? pt.timeOfDay : 12.0;
+      let hrs = Math.floor(timeVal);
+      let mins = Math.floor((timeVal - hrs) * 60);
+      viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(`2024-06-21T${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00Z`);
+      
+      if (mode === 'none' || mode === 'time') {
+        pt.weather = 'none';
+        pt.weather_param = undefined;
+        return;
+      }
+      
+      const val = typeof pt.env_param === 'number' ? pt.env_param : 2;
+      
+      if (mode === 'rain') {
+          pt.weather = 'rain';
+          const speeds = { 1: 1.5, 2: 3.0, 3: 5.0, 4: 8.0 };
+          const speed = speeds[Math.round(val)] || 3.0;
+          pt.weather_param = speed;
+          
+          activeWeatherStage = Cesium.PostProcessStageLibrary.createRainStage();
+          activeWeatherStage.uniforms.speed = speed;
+          viewer.scene.postProcessStages.add(activeWeatherStage);
+          viewer.scene.fog.density = 0.0005 + (Math.round(val) * 0.0005);
+        } else if (mode === 'snow') {
+          pt.weather = 'snow';
+          const speeds = { 1: 1.0, 2: 2.5, 3: 4.5, 4: 7.0 };
+          const speed = speeds[Math.round(val)] || 2.5;
+          pt.weather_param = speed;
+          
+          activeWeatherStage = Cesium.PostProcessStageLibrary.createSnowStage();
+          activeWeatherStage.uniforms.speed = speed;
+          viewer.scene.postProcessStages.add(activeWeatherStage);
+          viewer.scene.fog.density = 0.0004 + (Math.round(val) * 0.0004);
+        } else if (mode === 'fog') {
+          pt.weather = 'fog';
+          const densities = { 1: 0.0008, 2: 0.002, 3: 0.004, 4: 0.008 };
+          const density = densities[Math.round(val)] || 0.002;
+          pt.weather_param = density;
+          
+          viewer.scene.fog.density = density;
+        } else if (mode === 'lightning') {
+          pt.weather = 'lightning';
+          const speeds = { 1: 1.0, 2: 2.0, 3: 3.5, 4: 5.0 };
+          const speed = speeds[Math.round(val)] || 2.0;
+          pt.weather_param = speed;
+          
+          viewer.scene.fog.density = 0.003;
+          
+          activeWeatherStage = Cesium.PostProcessStageLibrary.createRainStage();
+          activeWeatherStage.uniforms.speed = 3.0;
+          viewer.scene.postProcessStages.add(activeWeatherStage);
+          
+          if (!viewer.scene.light) {
+            try {
+              viewer.scene.light = new Cesium.SunLight();
+            } catch (e) {
+              try {
+                viewer.scene.light = new Cesium.DirectionalLight({
+                  direction: new Cesium.Cartesian3(-0.5, -0.5, -0.5),
+                  color: Cesium.Color.WHITE,
+                  intensity: 1.0
+                });
+              } catch (err) {
+                console.warn("Could not create Cesium light:", err);
+              }
+            }
+          }
+          
+          if (viewer.scene.light) {
+            viewer.scene.light.intensity = 0.25;
+          }
+          
+          const isLightningActive = () => {
+            if (!viewer || !viewer.scene) return false;
+            const currentPt = data.main_flight.find(p => p.id === activeId);
+            return currentPt && currentPt.env_mode === 'lightning';
+          };
+
+          const scheduleFlash = () => {
+            if (!isLightningActive()) {
+              if (viewer.scene.light) viewer.scene.light.intensity = 1.0;
+              return;
+            }
+            
+            let minDelay, maxDelay;
+            const v = Math.round(val);
+            if (v === 1) {
+              minDelay = 8000; maxDelay = 14000;
+            } else if (v === 3) {
+              minDelay = 2500; maxDelay = 5000;
+            } else if (v === 4) {
+              minDelay = 1000; maxDelay = 2500;
+            } else {
+              minDelay = 4500; maxDelay = 8500;
+            }
+            const delay = minDelay + Math.random() * (maxDelay - minDelay);
+            
+            lightningTimeout = setTimeout(() => {
+              if (!isLightningActive()) return;
+              if (viewer.scene.light) {
+                viewer.scene.light.intensity = 12.0;
+              }
+              
+              lightningTimeout = setTimeout(() => {
+                if (!isLightningActive()) return;
+                if (viewer.scene.light) {
+                  viewer.scene.light.intensity = 0.25;
+                }
+                
+                if (Math.random() < 0.65) {
+                  lightningTimeout = setTimeout(() => {
+                    if (!isLightningActive()) return;
+                    if (viewer.scene.light) {
+                      viewer.scene.light.intensity = 7.0;
+                    }
+                    lightningTimeout = setTimeout(() => {
+                      if (!isLightningActive()) return;
+                      if (viewer.scene.light) {
+                        viewer.scene.light.intensity = 0.25;
+                      }
+                      scheduleFlash();
+                    }, 50);
+                  }, 60 + Math.random() * 40);
+                } else {
+                  scheduleFlash();
+                }
+              }, 60 + Math.random() * 40);
+            }, delay);
+          };
+          
+          scheduleFlash();
+        }
+      }
 
     // ---- Render Reference Geo Lines ----
     function drawRefLines() {
@@ -2855,6 +3820,7 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
     // ---- Sidebar Waypoints List Render ----
     function refreshKeyframeList() {
       const container = document.getElementById('keyframeList');
+      if (!container) return;
       container.innerHTML = '';
 
       const list = data.main_flight;
@@ -2864,23 +3830,21 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         const item = document.createElement('div');
         item.className = `keyframe-item ${isActive ? 'active' : ''} ${isSelected ? 'selected' : ''}`;
         
-        let directionLabel = "向前";
-        if (pt.look_at_intent === 'summit') directionLabel = "凝望";
-        else if (pt.look_at_intent === 'side') directionLabel = "横扫";
-        else if (pt.look_at_intent === 'orbit') directionLabel = "环绕";
-        else if (pt.look_at_intent === 'poi') directionLabel = "地标";
-        else if (pt.look_at_intent === 'custom_target') directionLabel = "锁定";
-        else if (pt.look_at_intent === 'custom') directionLabel = "自由";
+        const defaultName = currentLang === 'zh' ? ('导演空间轨 ' + (idx + 1)) : ('Director Track ' + (idx + 1));
+        const heightText = currentLang === 'zh' ? '高: ' : 'Alt: ';
+        const approxText = currentLang === 'zh' ? ' · 约 ' : ' · approx. ';
+        const secSuffix = currentLang === 'zh' ? 's' : 's';
+        const deleteTitle = currentLang === 'zh' ? '删除' : 'Delete';
 
         item.innerHTML = `
           <div class="keyframe-idx">${idx + 1}</div>
           <div class="keyframe-info">
-            <input type="text" class="keyframe-name-input" value="${pt.name || ('导演空间轨 ' + (idx + 1))}" 
+            <input type="text" class="keyframe-name-input" value="${pt.name || defaultName}" 
               data-idx="${idx}">
-            <div class="keyframe-meta">高: ${pt.relative_alt}m · 约 ${pt.duration}s</div>
+            <div class="keyframe-meta">${heightText}${pt.relative_alt}m${approxText}${pt.duration}${secSuffix}</div>
           </div>
           <div class="keyframe-actions" onclick="event.stopPropagation()">
-            <button class="action-icon-btn danger" onclick="confirmDeleteKeyframe(${idx})" title="删除">✕</button>
+            <button class="action-icon-btn danger" onclick="confirmDeleteKeyframe(${idx})" title="${deleteTitle}">✕</button>
           </div>
         `;
         
@@ -2912,20 +3876,6 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         
         container.appendChild(item);
       });
-
-      // Update selection UI buttons in toolbar
-      const btnSelectAll = document.getElementById('btnSelectAllWaypoints');
-      const btnDeselectAll = document.getElementById('btnDeselectAllWaypoints');
-      if (selectedIds.length > 1) {
-        if (btnSelectAll) btnSelectAll.style.display = 'inline-block';
-        if (btnDeselectAll) btnDeselectAll.style.display = 'inline-block';
-      } else if (activeId) {
-        if (btnSelectAll) btnSelectAll.style.display = 'inline-block';
-        if (btnDeselectAll) btnDeselectAll.style.display = 'inline-block';
-      } else {
-        if (btnSelectAll) btnSelectAll.style.display = 'none';
-        if (btnDeselectAll) btnDeselectAll.style.display = 'none';
-      }
     }
 
     function handleKeyframeClick(idx, event) {
@@ -2988,32 +3938,45 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
 
     function updateCount() {
       const len = data.main_flight.length;
-      document.getElementById('keyframeCount').textContent = len + " 点";
+      const countEl = document.getElementById('keyframeCount');
+      if (countEl) countEl.textContent = len + (currentLang === 'zh' ? " 点" : " Pts");
       
       let statusText = "";
       if (isPreviewPlaying) {
-        statusText = `正在播放预览 (${previewIndex + 1}/${len})`;
+        statusText = currentLang === 'zh' ? `正在播放预览 (${previewIndex + 1}/${len})` : `Playing Preview (${previewIndex + 1}/${len})`;
       } else {
         if (len === 0) {
-          statusText = "请在地图上点击添加航点，或导入地理轨";
+          statusText = currentLang === 'zh' ? "请在地图上点击添加航点，或导入地理轨" : "Click map to add waypoints or import track";
         } else if (selectedIds.length > 1) {
           const list = data.main_flight;
           const indices = selectedIds.map(id => list.findIndex(f => f.id === id)).filter(idx => idx !== -1);
           const minIdx = Math.min(...indices);
           const maxIdx = Math.max(...indices);
-          statusText = `▶ 点击播放选中区间 (#${minIdx + 1} - #${maxIdx + 1})`;
+          statusText = currentLang === 'zh' ? `▶ 点击播放选中区间 (#${minIdx + 1} - #${maxIdx + 1})` : `▶ Play Selected Range (#${minIdx + 1} - #${maxIdx + 1})`;
         } else if (activeId) {
           const activeIdx = data.main_flight.findIndex(f => f.id === activeId);
-          statusText = `▶ 点击从当前航点 #${activeIdx + 1} 播放至终点`;
+          statusText = currentLang === 'zh' ? `▶ 点击从当前航点 #${activeIdx + 1} 播放至终点` : `▶ Play from Waypoint #${activeIdx + 1} to End`;
         } else {
-          statusText = "▶ 点击开始完整航线预览";
+          statusText = currentLang === 'zh' ? "▶ 点击开始完整航线预览" : "▶ Click to start full preview";
         }
       }
-      document.getElementById('previewStatus').textContent = statusText;
+      const statusEl = document.getElementById('previewStatus');
+      if (statusEl) statusEl.textContent = statusText;
     }
 
     // ---- Selected Keyframe State Update ----
     function selectKeyframe(idx, keepSelection = false) {
+      // Stop current TTS playing if any
+      const btnPlay = document.getElementById('btnPlayTtsAudio');
+      if (btnPlay) btnPlay.textContent = '▶';
+      const progressInput = document.getElementById('ttsAudioProgress');
+      if (progressInput) progressInput.value = 0;
+      const timeLabel = document.getElementById('ttsAudioTimeLabel');
+      if (timeLabel) timeLabel.textContent = '0:00 / 0:00';
+      if (window.currentTtsAudioPlayer) {
+        window.currentTtsAudioPlayer.pause();
+        window.currentTtsAudioPlayer = null;
+      }
       try {
         const pt = data.main_flight[idx];
         if (!pt) {
@@ -3086,19 +4049,6 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       document.getElementById('hudDurationValue').textContent = `${dur}s`;
       document.getElementById('hudDurationGroup').style.opacity = (idx === 0) ? '0.4' : '1.0';
 
-
-      // Lighting
-      const todVal = typeof pt.timeOfDay === 'number' ? pt.timeOfDay : 10.0;
-      document.getElementById('timeOfDayInput').value = todVal;
-      
-      let hrs = Math.floor(todVal);
-      let mins = Math.floor((todVal - hrs) * 60);
-      document.getElementById('timeOfDayVal').textContent = `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
-      
-      // Realtime preview of the lighting
-      if (viewer && viewer.clock) {
-        viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(`2024-06-21T${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00Z`);
-      }
       const waitVal = pt.wait_time || 0.0;
       document.getElementById('hudWaitSlider').value = waitVal;
       document.getElementById('hudWaitSlider').disabled = false;
@@ -3189,6 +4139,13 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
     function deselectKeyframe() {
       activeId = null;
       selectedIds = [];
+      if (lightningTimeout) {
+        clearTimeout(lightningTimeout);
+        lightningTimeout = null;
+      }
+      if (viewer && viewer.scene && viewer.scene.light) {
+        viewer.scene.light.intensity = 1.0;
+      }
       document.getElementById('hudZoomRing').style.display = 'none';
       document.getElementById('hudPitchRing').style.display = 'none';
       document.getElementById('hudDirectorInspector').style.display = 'none';
@@ -3266,11 +4223,19 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
 
       // Load TTS fields
       document.getElementById('hudTtsText').value = pt.narration_text || '';
+      const audioContainer = document.getElementById('hudTtsAudioContainer');
+      audioContainer.style.display = 'flex';
       if (pt.narration_audio) {
-        document.getElementById('hudTtsAudioContainer').style.display = 'flex';
-        document.getElementById('hudTtsDurationLabel').textContent = `时长: ${(pt.narration_duration || pt.duration || 0.0).toFixed(1)}s`;
+        audioContainer.style.opacity = '1.0';
+        audioContainer.style.pointerEvents = 'auto';
+        const duration = pt.narration_duration || pt.duration || 0.0;
+        document.getElementById('ttsAudioTimeLabel').textContent = `0:00 / ${formatAudioTime(duration)}`;
+        document.getElementById('ttsAudioProgress').value = 0;
       } else {
-        document.getElementById('hudTtsAudioContainer').style.display = 'none';
+        audioContainer.style.opacity = '0.4';
+        audioContainer.style.pointerEvents = 'none';
+        document.getElementById('ttsAudioTimeLabel').textContent = `0:00 / 0:00`;
+        document.getElementById('ttsAudioProgress').value = 0;
       }
 
       // Load voice style dropdown and reference clone container
@@ -3295,6 +4260,35 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         document.getElementById('lblRefAudioName').title = "使用系统缺省克隆样本";
       }
       document.getElementById('txtRefAudioText').value = pt.narration_ref_text || '';
+
+      // Load environmental & lighting fields
+      const envSel = document.getElementById('selEnvMode');
+      if (envSel) {
+        // Fallback for older waypoint models
+        if (!pt.env_mode) {
+          if (pt.weather && pt.weather !== 'none') {
+            pt.env_mode = pt.weather;
+            if (pt.weather === 'rain') {
+              const speeds = { 1.5: 1, 3.0: 2, 5.0: 3, 8.0: 4 };
+              pt.env_param = speeds[pt.weather_param] || 2;
+            } else if (pt.weather === 'snow') {
+              const speeds = { 1.0: 1, 2.5: 2, 4.5: 3, 7.0: 4 };
+              pt.env_param = speeds[pt.weather_param] || 2;
+            } else if (pt.weather === 'fog') {
+              const densities = { 0.0008: 1, 0.002: 2, 0.004: 3, 0.008: 4 };
+              pt.env_param = densities[pt.weather_param] || 2;
+            }
+          } else if (typeof pt.timeOfDay === 'number') {
+            pt.env_mode = 'time';
+          } else {
+            pt.env_mode = 'none';
+          }
+        }
+        
+        envSel.value = pt.env_mode;
+        updateEnvSliderUI(pt);
+        applyEnvEffectToCesium(pt);
+      }
     }
 
     function updateTargetLockUI(pt) {
@@ -3500,11 +4494,68 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
 
     function renumberWaypoints() {
       if (!data || !data.main_flight) return;
+      const defaultPrefixes = [
+        "自定义航点", "Custom Waypoint",
+        "导演空间轨", "Director Track",
+        "空间混合轨道", "导演航点", "Waypoint", "航点"
+      ];
       data.main_flight.forEach((pt, idx) => {
-        if (!pt.name || pt.name.startsWith("空间混合轨道")) {
-          pt.name = `空间混合轨道 ${idx + 1}`;
+        let isDefault = false;
+        let matchedPrefix = "导演空间轨";
+        if (!pt.name) {
+          isDefault = true;
+          matchedPrefix = currentLang === 'zh' ? "导演空间轨" : "Director Track";
+        } else {
+          for (const prefix of defaultPrefixes) {
+            if (pt.name.startsWith(prefix)) {
+              isDefault = true;
+              matchedPrefix = prefix;
+              break;
+            }
+          }
+        }
+        if (isDefault) {
+          pt.name = `${matchedPrefix} ${idx + 1}`;
         }
       });
+    }
+
+    function moveSelected(direction) {
+      if (!activeId) return;
+      const idx = data.main_flight.findIndex(f => f.id === activeId);
+      if (idx !== -1) {
+        moveKeyframeIndex(idx, direction);
+        setTimeout(() => {
+          const activeEl = document.querySelector('.keyframe-item.active');
+          if (activeEl) {
+            activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        }, 50);
+      }
+    }
+
+    function moveKeyframeIndex(idx, direction) {
+      const targetIdx = idx + direction;
+      if (targetIdx < 0 || targetIdx >= data.main_flight.length) {
+        showToast(currentLang === 'zh' ? "已到达队列边界" : "Boundary reached");
+        return;
+      }
+
+      pushHistoryState();
+      const temp = data.main_flight[idx];
+      data.main_flight[idx] = data.main_flight[targetIdx];
+      data.main_flight[targetIdx] = temp;
+
+      renumberWaypoints();
+
+      refreshKeyframeList();
+      rebuildMarkers();
+      rebuildElevationChart();
+      selectKeyframe(targetIdx);
+      saveToServer();
+      showToast(direction === -1 ? 
+        (currentLang === 'zh' ? "空间单元上移" : "Waypoint moved up") : 
+        (currentLang === 'zh' ? "空间单元下移" : "Waypoint moved down"));
     }
 
     function projectToTrack(lng, lat) {
@@ -3816,6 +4867,7 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       }
       
       const out = {
+        branding: data.branding || undefined,
         main: data.main,
         secondary: data.secondary,
         main_flight: data.flights[0] ? data.flights[0].path : [], // Fallback for systems that don't read flights array
@@ -4440,6 +5492,95 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
 
     // ---- Viewport HUD Controls Setup ----
     function setupHUDListeners() {
+      // 0. Speed, Duration, and Hover/Wait Sliders listeners
+      document.getElementById('hudSpeedSlider').addEventListener('input', e => {
+        if (!activeId) return;
+        const activeIdx = data.main_flight.findIndex(p => p.id === activeId);
+        if (activeIdx <= 0) return;
+        const pt = data.main_flight[activeIdx];
+        const speedVal = parseFloat(e.target.value);
+        
+        document.getElementById('hudSpeedValue').textContent = `${Math.round(speedVal)} km/h`;
+        
+        const prevPt = data.main_flight[activeIdx - 1];
+        const prevAlt = (prevPt.ground_alt || 5000) + (prevPt.relative_alt || 500);
+        const curAlt = (pt.ground_alt || 5000) + (pt.relative_alt || 500);
+        const dist = haversine(prevPt.lat, prevPt.lng, prevAlt, pt.lat, pt.lng, curAlt);
+        
+        if (speedVal === 0) {
+          pt.duration = undefined;
+          const defaultDur = 2.5;
+          document.getElementById('hudDurationSlider').value = defaultDur;
+          document.getElementById('hudDurationValue').textContent = `${defaultDur}s`;
+        } else {
+          let dur = (dist * 3.6) / speedVal;
+          dur = Math.max(0.5, Math.min(120, parseFloat(dur.toFixed(1))));
+          pt.duration = dur;
+          document.getElementById('hudDurationSlider').value = dur;
+          document.getElementById('hudDurationValue').textContent = `${dur}s`;
+        }
+        
+        saveToServerDebounced();
+        rebuildElevationChart();
+        refreshKeyframeList();
+      });
+
+      document.getElementById('hudDurationSlider').addEventListener('input', e => {
+        if (!activeId) return;
+        const activeIdx = data.main_flight.findIndex(p => p.id === activeId);
+        if (activeIdx <= 0) return;
+        const pt = data.main_flight[activeIdx];
+        const durVal = parseFloat(e.target.value);
+        
+        document.getElementById('hudDurationValue').textContent = `${durVal}s`;
+        
+        const prevPt = data.main_flight[activeIdx - 1];
+        const prevAlt = (prevPt.ground_alt || 5000) + (prevPt.relative_alt || 500);
+        const curAlt = (pt.ground_alt || 5000) + (pt.relative_alt || 500);
+        const dist = haversine(prevPt.lat, prevPt.lng, prevAlt, pt.lat, pt.lng, curAlt);
+        
+        if (durVal === 0) {
+          pt.duration = undefined;
+          const defaultDur = 2.5;
+          document.getElementById('hudDurationSlider').value = defaultDur;
+          document.getElementById('hudDurationValue').textContent = `${defaultDur}s`;
+          
+          let speedKmh = 0;
+          if (dist > 0.1) {
+            speedKmh = Math.round((dist / defaultDur) * 3.6);
+          }
+          document.getElementById('hudSpeedSlider').value = speedKmh;
+          document.getElementById('hudSpeedValue').textContent = `${speedKmh} km/h`;
+        } else {
+          pt.duration = durVal;
+          let speedKmh = 0;
+          if (dist > 0.1) {
+            speedKmh = Math.round((dist / durVal) * 3.6);
+          }
+          document.getElementById('hudSpeedSlider').value = speedKmh;
+          document.getElementById('hudSpeedValue').textContent = `${speedKmh} km/h`;
+        }
+        
+        saveToServerDebounced();
+        rebuildElevationChart();
+        refreshKeyframeList();
+      });
+
+      document.getElementById('hudWaitSlider').addEventListener('input', e => {
+        if (!activeId) return;
+        const activeIdx = data.main_flight.findIndex(p => p.id === activeId);
+        if (activeIdx === -1) return;
+        const pt = data.main_flight[activeIdx];
+        const waitVal = parseFloat(e.target.value);
+        
+        pt.wait_time = waitVal;
+        document.getElementById('hudWaitValue').textContent = `${waitVal}s`;
+        
+        saveToServerDebounced();
+        rebuildElevationChart();
+        refreshKeyframeList();
+      });
+
       // 1. Lens Zoom Slider
       const fovSlider = document.getElementById('hudFovSlider');
       fovSlider.addEventListener('input', e => {
@@ -4641,29 +5782,9 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       // Capture Camera button
       document.getElementById('btnUpdateWaypoint').addEventListener('click', captureCurrentCamera);
 
-      // Lighting Event Listeners
-      document.getElementById('timeOfDayInput').addEventListener('input', (e) => {
-        const val = parseFloat(e.target.value);
-        let hrs = Math.floor(val);
-        let mins = Math.floor((val - hrs) * 60);
-        document.getElementById('timeOfDayVal').textContent = `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
-        if (viewer && viewer.clock) {
-          viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(`2024-06-21T${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00Z`);
-        }
-      });
 
-      document.getElementById('btnCaptureTime').addEventListener('click', () => {
-        if (!activeId) {
-          showToast("请先在左侧选择一个航点", true);
-          return;
-        }
-        const pt = data.main_flight.find(p => p.id === activeId);
-        if (pt) {
-          pt.timeOfDay = parseFloat(document.getElementById('timeOfDayInput').value);
-          saveToServer();
-          showToast("🌅 光照时间已捕获: " + document.getElementById('timeOfDayVal').textContent);
-        }
-      });
+
+
 
       // Document handlers for track switching
       document.getElementById('trackSelector').addEventListener('change', (e) => {
@@ -4730,19 +5851,174 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         }
       });
 
-      window.createNewTrack = createNewTrack; // Expose globally
-      window.createNewAudioTrack = createNewAudioTrack; // Expose globally
-      window.updateAudioTracksListUI = updateAudioTracksListUI; // Expose globally
-      
-      document.getElementById('btnAddTrack').addEventListener('click', () => {
-        console.log("btnAddTrack event listener fired!");
-        if (window.createNewTrack) window.createNewTrack();
-      });
+      // Track methods exposed globally in init() instead of here
+
       document.getElementById('btnAddAudioTrack').addEventListener('click', () => {
         console.log("btnAddAudioTrack event listener fired!");
         if (window.createNewAudioTrack) window.createNewAudioTrack();
       });
       
+      // Audio track dropdown selector event listener
+      document.getElementById('audioTrackSelector').addEventListener('change', (e) => {
+        activeAudioTrackIndex = parseInt(e.target.value);
+        syncActiveAudioTrackToWaypoints();
+        saveToServerDebounced();
+      });
+
+      // Edit and delete audio track listeners
+      document.getElementById('btnEditAudioTrack').addEventListener('click', async () => {
+        try {
+          const activeFlight = data.flights[activeTrackIndex];
+          if (!activeFlight || !activeFlight.audio_tracks || activeFlight.audio_tracks.length === 0) return;
+          const curTrack = activeFlight.audio_tracks[activeAudioTrackIndex];
+          if (!curTrack) return;
+          
+          const result = await showCustomDialog("音轨设置", [
+            { key: 'name', label: '音轨名称', default: curTrack.name || `音轨 ${activeAudioTrackIndex + 1}`, showAddBtn: true },
+            { key: 'musicStyle', label: '背景音乐风格', type: 'select', options: ['朝圣', '庄严', '探索', '孤独', '自定义'], default: curTrack.musicStyle || '朝圣' },
+            { key: 'desc', label: '音轨说明/意图 (选填)', type: 'textarea', default: curTrack.desc || '', placeholder: '请输入音轨的描述或创作者意图...' }
+          ]);
+          if (!result || !result.name) return;
+          
+          if (result.action === 'new') {
+            const newTrack = {
+              id: 'aud_' + Date.now() + Math.floor(Math.random()*1000),
+              name: result.name,
+              musicStyle: result.musicStyle,
+              desc: result.desc || '',
+              segments: []
+            };
+            if (curTrack.segments) {
+              newTrack.segments = JSON.parse(JSON.stringify(curTrack.segments));
+            }
+            activeFlight.audio_tracks.push(newTrack);
+            activeAudioTrackIndex = activeFlight.audio_tracks.length - 1;
+            showToast(`已创建全新音轨: ${result.name}`);
+          } else {
+            curTrack.name = result.name;
+            curTrack.musicStyle = result.musicStyle;
+            curTrack.desc = result.desc || '';
+            showToast(`音轨设置已更新: ${result.name}`);
+          }
+          
+          await saveToServer();
+          updateAudioTrackSelectorUI();
+          syncActiveAudioTrackToWaypoints();
+        } catch (e) {
+          showToast("编辑音轨出错: " + e.message, true);
+        }
+      });
+
+      document.getElementById('btnDeleteAudioTrack').addEventListener('click', async () => {
+        const activeFlight = data.flights[activeTrackIndex];
+        if (!activeFlight || !activeFlight.audio_tracks || activeFlight.audio_tracks.length === 0) return;
+        const curTrack = activeFlight.audio_tracks[activeAudioTrackIndex];
+        if (!curTrack) return;
+        
+        if (confirm(`确定要删除音轨 "${curTrack.name}" 吗？`)) {
+          activeFlight.audio_tracks.splice(activeAudioTrackIndex, 1);
+          activeAudioTrackIndex = Math.max(0, activeAudioTrackIndex - 1);
+          await saveToServer();
+          updateAudioTrackSelectorUI();
+          syncActiveAudioTrackToWaypoints();
+          showToast("音轨已删除");
+        }
+      });
+
+      // Environment Mode & Parameter listeners
+      document.getElementById('selEnvMode').addEventListener('change', (e) => {
+        if (!activeId) return;
+        const idx = data.main_flight.findIndex(p => p.id === activeId);
+        if (idx === -1) return;
+        const pt = data.main_flight[idx];
+        const val = e.target.value;
+        pt.env_mode = val;
+        
+        // Initialize default param based on new mode
+        if (val === 'none') {
+          pt.env_param = undefined;
+          pt.timeOfDay = undefined;
+        } else if (val === 'time') {
+          pt.timeOfDay = typeof pt.timeOfDay === 'number' ? pt.timeOfDay : 12.0;
+          pt.env_param = undefined;
+        } else {
+          pt.env_param = typeof pt.env_param === 'number' ? pt.env_param : 2.0;
+          pt.timeOfDay = undefined;
+        }
+        
+        updateEnvSliderUI(pt);
+        applyEnvEffectToCesium(pt);
+        saveToServerDebounced();
+      });
+      
+      document.getElementById('btnCancelEnv').addEventListener('click', () => {
+        if (!activeId) return;
+        const idx = data.main_flight.findIndex(p => p.id === activeId);
+        if (idx === -1) return;
+        const pt = data.main_flight[idx];
+        pt.env_mode = 'none';
+        pt.env_param = undefined;
+        pt.timeOfDay = undefined;
+        
+        document.getElementById('selEnvMode').value = 'none';
+        updateEnvSliderUI(pt);
+        applyEnvEffectToCesium(pt);
+        saveToServerDebounced();
+      });
+      
+      document.getElementById('envSliderInput').addEventListener('input', (e) => {
+        if (!activeId) return;
+        const idx = data.main_flight.findIndex(p => p.id === activeId);
+        if (idx === -1) return;
+        const pt = data.main_flight[idx];
+        const val = parseFloat(e.target.value);
+        
+        if (pt.env_mode === 'time') {
+          pt.timeOfDay = val;
+        } else if (pt.env_mode !== 'none') {
+          pt.env_param = val;
+        }
+        
+        // Update label immediately on slide
+        const paramLabel = document.getElementById('envSliderLabel');
+        if (pt.env_mode === 'time') {
+          let hrs = Math.floor(val);
+          let mins = Math.round((val - hrs) * 60);
+          if (mins === 60) { hrs += 1; mins = 0; }
+          const prefix = currentLang === 'zh' ? '日照时间: ' : 'Daylight: ';
+          paramLabel.textContent = `${prefix}${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+        } else {
+          let levelText = '';
+          if (pt.env_mode === 'rain') {
+            const labels = currentLang === 'zh' ? 
+              { 1: '小雨', 2: '中雨', 3: '大雨', 4: '暴雨' } :
+              { 1: 'Light Rain', 2: 'Moderate Rain', 3: 'Heavy Rain', 4: 'Downpour' };
+            levelText = labels[Math.round(val)] || (currentLang === 'zh' ? '中雨' : 'Moderate Rain');
+          } else if (pt.env_mode === 'snow') {
+            const labels = currentLang === 'zh' ?
+              { 1: '小雪', 2: '中雪', 3: '大雪', 4: '暴雪' } :
+              { 1: 'Light Snow', 2: 'Moderate Snow', 3: 'Heavy Snow', 4: 'Blizzard' };
+            levelText = labels[Math.round(val)] || (currentLang === 'zh' ? '中雪' : 'Moderate Snow');
+          } else if (pt.env_mode === 'fog') {
+            const labels = currentLang === 'zh' ?
+              { 1: '轻雾', 2: '中雾', 3: '大雾', 4: '浓雾' } :
+              { 1: 'Light Fog', 2: 'Moderate Fog', 3: 'Heavy Fog', 4: 'Dense Fog' };
+            levelText = labels[Math.round(val)] || (currentLang === 'zh' ? '中雾' : 'Moderate Fog');
+          } else if (pt.env_mode === 'lightning') {
+            const labels = currentLang === 'zh' ?
+              { 1: '疏落', 2: '频密', 3: '狂暴', 4: '极度狂暴' } :
+              { 1: 'Sparse', 2: 'Frequent', 3: 'Violent', 4: 'Extreme' };
+            levelText = labels[Math.round(val)] || (currentLang === 'zh' ? '频密' : 'Frequent');
+          }
+          const prefix = currentLang === 'zh' ? '特效强度: ' : 'Intensity: ';
+          paramLabel.textContent = `${prefix}${levelText || Math.round(val)}`;
+        }
+        
+        applyEnvEffectToCesium(pt);
+        saveToServerDebounced();
+      });
+
+
       // 添加快捷键绑定：按下 Shift + N 也可以新建航轨
       document.addEventListener('keydown', (e) => {
         if (e.shiftKey && (e.key === 'N' || e.key === 'n')) {
@@ -4750,10 +6026,6 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
           console.log("Shift+N fired!");
           if (window.createNewTrack) window.createNewTrack();
         }
-      });
-      document.getElementById('btnAddTrack').addEventListener('click', () => {
-        console.log("btnAddTrack event listener fired!");
-        if (window.createNewTrack) window.createNewTrack();
       });
       document.getElementById('btnDeleteTrack').addEventListener('click', () => {
         deleteCurrentTrack();
@@ -4782,32 +6054,6 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
           }
       });
       // btnDeleteSelected removed
-
-      // Batch selection actions
-      document.getElementById('btnSelectAllWaypoints').addEventListener('click', () => {
-        if (data.main_flight.length === 0) {
-          showToast("无可选择的航点");
-          return;
-        }
-        selectedIds = data.main_flight.map(f => f.id);
-        activeId = selectedIds[selectedIds.length - 1]; // Set active to last
-        
-        document.querySelectorAll('.keyframe-item').forEach(item => {
-          item.classList.add('selected');
-        });
-        
-        const lastIdx = data.main_flight.length - 1;
-        selectKeyframe(lastIdx, true);
-        showToast(`已全选所有 ${selectedIds.length} 个航点，可一键应用氛围预设！`);
-      });
-
-      document.getElementById('btnDeselectAllWaypoints').addEventListener('click', () => {
-        deselectKeyframe();
-        document.querySelectorAll('.keyframe-item').forEach(item => {
-          item.classList.remove('selected', 'active');
-        });
-        showToast("已清除所有选中状态");
-      });
 
       // Resample Heights button
       document.getElementById('btnResampleHeights').addEventListener('click', async () => {
@@ -5353,12 +6599,8 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       // Redundant mileage block removed
       const absoluteAlt = (pt.ground_alt || 5000) + (pt.relative_alt || 500);
 
-      // Apply Lighting
-      if (typeof pt.timeOfDay === 'number') {
-        let hrs = Math.floor(pt.timeOfDay);
-        let mins = Math.floor((pt.timeOfDay - hrs) * 60);
-        viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(`2024-06-21T${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00Z`);
-      }
+      // Apply Lighting and Environment effects
+      applyEnvEffectToCesium(pt);
 
       // Play narration audio if configured
       if (pt.narration_audio) {
@@ -5464,7 +6706,10 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         }
       });
     }
-    function showCustomDialog(title, fields, confirmLabel = '保存修改') {
+    function showCustomDialog(title, fields, confirmLabel = null) {
+      if (!confirmLabel) {
+        confirmLabel = currentLang === 'zh' ? '保存修改' : 'Save Changes';
+      }
       return new Promise((resolve) => {
         const overlay = document.createElement('div');
         overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;';
@@ -5519,22 +6764,29 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
             const addBtn = document.createElement('button');
             addBtn.textContent = '➕';
             addBtn.style.cssText = 'background:#10b981;border:none;border-radius:4px;color:#fff;width:28px;height:28px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;';
-            addBtn.title = '切换到新建模式';
+            addBtn.title = currentLang === 'zh' ? '切换到新建模式' : 'Switch to create mode';
             addBtn.onclick = () => {
                 // Change to new mode
                 if (inputs['name'].value === (f.default || '')) {
                     inputs['name'].value = '';
                 }
-                if (inputs['desc'] && fields.find(x => x.key === 'desc') && inputs['desc'].value === (fields.find(x => x.key === 'desc').default || '')) {
+                const descField = fields.find(x => x.key === 'desc');
+                if (inputs['desc'] && descField && inputs['desc'].value === (descField.default || '')) {
                     inputs['desc'].value = '';
                 }
                 inputs['name'].focus();
-                inputs['name'].placeholder = '请填写新航轨名称...';
+                
+                const isAudio = title.includes("音轨") || title.includes("解说轨") || title.includes("Audio") || title.includes("Commentary");
+                inputs['name'].placeholder = isAudio ? 
+                  (currentLang === 'zh' ? '请填写新音轨名称...' : 'Enter new audio track name...') : 
+                  (currentLang === 'zh' ? '请填写新航轨名称...' : 'Enter new flight path name...');
                 
                 const btn = document.getElementById('dialogConfirmBtn');
                 if (btn) {
                     btn.dataset.mode = 'new';
-                    btn.textContent = '✓ 确认新建航轨';
+                    btn.textContent = isAudio ? 
+                      (currentLang === 'zh' ? '✓ 确认新建音轨' : '✓ Confirm New Audio Track') : 
+                      (currentLang === 'zh' ? '✓ 确认新建航轨' : '✓ Confirm New Flight Path');
                     btn.style.background = '#10b981';
                 }
             };
@@ -5550,7 +6802,7 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
         btnRow.style.cssText = 'display:flex;justify-content:flex-end;gap:8px;margin-top:8px;';
         
         const cancelBtn = document.createElement('button');
-        cancelBtn.textContent = '取消';
+        cancelBtn.textContent = currentLang === 'zh' ? '取消' : 'Cancel';
         cancelBtn.style.cssText = 'background:transparent;border:1px solid #475569;color:#cbd5e1;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:12px;';
         cancelBtn.onclick = () => { document.body.removeChild(overlay); resolve(null); };
         
@@ -5562,7 +6814,7 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
           const result = {};
           fields.forEach(f => result[f.key] = inputs[f.key].value.trim());
           if (!result.name) {
-              alert("名称不能为空！");
+              alert(currentLang === 'zh' ? "名称不能为空！" : "Name cannot be empty!");
               inputs['name'].focus();
               return;
           }
@@ -5584,9 +6836,224 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
       });
     }
 
+    // ---- Bilingual Translation Dictionary & Methods ----
+    const i18nEditor = {
+      zh: {
+        btnAddWaypoint: "➕ 捕获当前镜头为新航点",
+        btnAddWaypointTitle: "新增航点（若当前已选中某航点，新点将自动插入其后）",
+        btnUpdateWaypoint: "📍 重新捕获本航点三维坐标",
+        btnUpdateWaypointTitle: "请选中需要调整的航点后使用（此操作将覆盖该点的原坐标）",
+        headerDiag: "航点信息",
+        lblDiagPos: "当前位置",
+        lblDiagDist: "累计里程",
+        lblDiagGround: "地面海拔",
+        lblDiagFlight: "机位海拔",
+        lblDiagRel: "离地高度",
+        lblDiagTarget: "视线目标",
+        lblDiagSpeed: "当前航速",
+        lblDiagDuration: "段飞行用时",
+        btnExport: "导出 JSON",
+        btnSave: "💾 保存航轨",
+        btnWpMoveUpTitle: "上移选中项",
+        btnWpMoveDownTitle: "下移选中项",
+        btnImportDropdown: "📥 导入 ▼",
+        lblImportFile: "文件",
+        lblImportMap: "底图",
+        lblBaseMapOsm: "OSM 街区图",
+        lblBaseMapBing: "Bing 卫星(默认)",
+        lblBaseMapGoogleSat: "谷歌卫星图",
+        lblBaseMapGoogleHyb: "谷歌混合图",
+        lblBaseMapGoogleRoad: "谷歌街区图",
+        lblBaseMapGoogleTer: "谷歌地形图",
+        lblZoomGround: "贴地",
+        lblZoomVast: "辽阔",
+        lblZoomNatural: "自然",
+        lblZoomCompressed: "压缩",
+        fovMarkCustom: "手动",
+        lblPitchLookup: "仰视",
+        lblPitchEyelevel: "平视",
+        lblPitchOblique: "斜瞰",
+        lblPitchOverlook: "俯瞰",
+        pitchMarkCustom: "手动",
+        headerFocus: "🎯 视线对焦",
+        btnHudUnlock: "🔓 解除视线锁定",
+        btnHudLockForward: "➡️ 轨道对齐",
+        btnHudLockSummit: "🏔️ 锁定主体",
+        btnHudLockSide: "↗️ 航侧 90°",
+        btnHudLockBird: "🦅 飞鸟视角",
+        btnHudLockPoi: "🎯 POI 对焦",
+        btnHudLockFree: "👁️ 自由跟随",
+        lblLockCameraPreview: "🔒 锁定镜头视角（切换列表时不跳转）",
+        headerShot: "🎬 特技镜头",
+        btnShotPanSpin: "🌀 自转环视",
+        btnShotOrbit: "🪐 绕圈环飞",
+        btnShotHandheld: "🤳 手持跟随",
+        btnShotHitchcock: "🌌 希区柯克",
+        btnShotVia: "🎞️ 维亚",
+        btnShotCrane: "🏗️ 摇臂",
+        btnShotTunnel: "🚇 隧道",
+        btnShotFisheye: "🐟 鱼眼",
+        headerVibe: "🔮 运镜风格",
+        btnVibePilgrimage: "📿 朝圣",
+        btnVibeSolemn: "🏔️ 庄严",
+        btnVibeExploratory: "🚶 探索",
+        btnVibeSolitude: "🌌 孤独",
+        headerLighting: "🌅 环境增效",
+        lblEnvModeTitle: "增效场景",
+        optEnvNone: "无增效",
+        optEnvTime: "☀️ 太阳日照",
+        optEnvRain: "🌧️ 阴雨绵绵",
+        optEnvSnow: "❄️ 瑞雪纷飞",
+        optEnvFog: "🌫️ 浓雾弥漫",
+        optEnvLightning: "⚡ 雷电交加",
+        btnCancelEnv: "取消增效",
+        envSliderLabel: "特效强度",
+        headerTts: "🎙️ 解说生成",
+        btnEditAudioTrackTitle: "音轨设置",
+        btnDeleteAudioTrackTitle: "删除音轨",
+        hudTtsTextPlaceholder: "输入该航段的中文语音解说词...",
+        optVoiceDefault: "系统普通话 (Tingting)",
+        optVoiceLocalClone: "本地克隆声线 (GPT-SoVITS)",
+        optVoiceVoxCpm: "本地高清克隆 (VoxCPM)",
+        btnHudTtsGenerate: "🔊 合成",
+        btnAddAudioTrackTitle: "新建音轨",
+        lblRefVoiceTitle: "🎙️ 人声克隆配置 (Reference Audio)",
+        btnUploadRefAudio: "📤 上传克隆样本 (.wav/.mp3)",
+        lblRefAudioNameDefault: "无样本 (默认音色)",
+        txtRefAudioTextPlaceholder: "输入克隆音频中说的话 (提示词原文)",
+        btnPlayTtsAudioTitle: "播放/暂停",
+        lblTtsAlign: "对齐",
+        headerTrackStyle: "🎨 地轨视觉",
+        lblTrackLineType: "线体风格:",
+        optLineDashed: "虚线段 (默认)",
+        optLineDotted: "虚点线",
+        optLineSolid: "实线",
+        optLineDouble: "双边实线",
+        lblTrackAnimation: "动态特效:",
+        optAnimNone: "无特效",
+        optAnimYellow: "黄光闪烁",
+        optAnimRed: "红光闪烁",
+        optAnimColor: "五彩闪烁",
+        btnEditTrackTitle: "⚙️ 航轨设置",
+        btnDeleteTrackTitle: "删除航轨",
+        chartSelectionLabel: "未选中轨道",
+        lblSpeedTitle: "飞速",
+        lblDurationTitle: "航段耗时",
+        lblWaitTitle: "航点悬停",
+        btnResampleHeights: "🏔️ 校准真实海拔"
+      },
+      en: {
+        btnAddWaypoint: "➕ Capture Current View as Waypoint",
+        btnAddWaypointTitle: "Add waypoint (will be inserted after selected waypoint if any)",
+        btnUpdateWaypoint: "📍 Recapture 3D Coordinates for Waypoint",
+        btnUpdateWaypointTitle: "Use after selecting waypoint to update (this will overwrite its coordinates)",
+        headerDiag: "Waypoint Telemetry",
+        lblDiagPos: "Current Position",
+        lblDiagDist: "Total Mileage",
+        lblDiagGround: "Ground Elevation",
+        lblDiagFlight: "Camera Elevation",
+        lblDiagRel: "Relative Altitude",
+        lblDiagTarget: "Target Focus",
+        lblDiagSpeed: "Current Speed",
+        lblDiagDuration: "Leg Duration",
+        btnExport: "Export JSON",
+        btnSave: "💾 Save Flight Path",
+        btnWpMoveUpTitle: "Move Selected Up",
+        btnWpMoveDownTitle: "Move Selected Down",
+        btnImportDropdown: "📥 Import ▼",
+        lblImportFile: "File",
+        lblImportMap: "Basemap",
+        lblBaseMapOsm: "OSM Standard",
+        lblBaseMapBing: "Bing Aerial (Default)",
+        lblBaseMapGoogleSat: "Google Satellite",
+        lblBaseMapGoogleHyb: "Google Hybrid",
+        lblBaseMapGoogleRoad: "Google Roadmap",
+        lblBaseMapGoogleTer: "Google Terrain",
+        lblZoomGround: "Ground",
+        lblZoomVast: "Vast",
+        lblZoomNatural: "Natural",
+        lblZoomCompressed: "Compressed",
+        fovMarkCustom: "Manual",
+        lblPitchLookup: "Lookup",
+        lblPitchEyelevel: "Eye-level",
+        lblPitchOblique: "Oblique",
+        lblPitchOverlook: "Overlook",
+        pitchMarkCustom: "Manual",
+        headerFocus: "🎯 Target Focus",
+        btnHudUnlock: "🔓 Unlock Target",
+        btnHudLockForward: "➡️ Track Align",
+        btnHudLockSummit: "🏔️ Lock Subject",
+        btnHudLockSide: "↗️ Sideways 90°",
+        btnHudLockBird: "🦅 Bird's Eye",
+        btnHudLockPoi: "🎯 POI Focus",
+        btnHudLockFree: "👁️ Free Follow",
+        lblLockCameraPreview: "🔒 Lock Camera Angle (No jump when selecting list)",
+        headerShot: "🎬 Cinematic Tricks",
+        btnShotPanSpin: "🌀 Spin Pan",
+        btnShotOrbit: "🪐 Orbit Flyby",
+        btnShotHandheld: "🤳 Handheld Move",
+        btnShotHitchcock: "🌌 Hitchcock Zoom",
+        btnShotVia: "🎞️ Cable Cam",
+        btnShotCrane: "🏗️ Jib / Crane",
+        btnShotTunnel: "🚇 Tunnel Vision",
+        btnShotFisheye: "🐟 Fisheye Lens",
+        headerVibe: "🔮 Camera Style",
+        btnVibePilgrimage: "📿 Devotion",
+        btnVibeSolemn: "🏔️ Majesty",
+        btnVibeExploratory: "🚶 Discovery",
+        btnVibeSolitude: "🌌 Solitude",
+        headerLighting: "🌅 Weather & Env",
+        lblEnvModeTitle: "Env Preset",
+        optEnvNone: "No Effect",
+        optEnvTime: "☀️ Sun & Daylight",
+        optEnvRain: "🌧️ Rainy Mood",
+        optEnvSnow: "❄️ Snowy Sky",
+        optEnvFog: "🌫️ Misty Fog",
+        optEnvLightning: "⚡ Stormy Lightning",
+        btnCancelEnv: "Clear Effect",
+        envSliderLabel: "Effect Intensity",
+        headerTts: "🎙️ AI Narration",
+        btnEditAudioTrackTitle: "Track Settings",
+        btnDeleteAudioTrackTitle: "Delete Track",
+        hudTtsTextPlaceholder: "Enter narration text for this waypoint...",
+        optVoiceDefault: "Default Mandarin (Tingting)",
+        optVoiceLocalClone: "Local Voice Clone (GPT-SoVITS)",
+        optVoiceVoxCpm: "Local HD Clone (VoxCPM)",
+        btnHudTtsGenerate: "🔊 Synthesize",
+        btnAddAudioTrackTitle: "New Track",
+        lblRefVoiceTitle: "🎙️ Voice Cloning (Reference Audio)",
+        btnUploadRefAudio: "📤 Upload Reference (.wav/.mp3)",
+        lblRefAudioNameDefault: "No reference (default voice)",
+        txtRefAudioTextPlaceholder: "Enter words spoken in reference audio (prompt)...",
+        btnPlayTtsAudioTitle: "Play / Pause",
+        lblTtsAlign: "Align",
+        headerTrackStyle: "🎨 Path Overlay",
+        lblTrackLineType: "Line Style:",
+        optLineDashed: "Dashed (Default)",
+        optLineDotted: "Dotted",
+        optLineSolid: "Solid",
+        optLineDouble: "Double Solid",
+        lblTrackAnimation: "Animation:",
+        optAnimNone: "None",
+        optAnimYellow: "Yellow Flash",
+        optAnimRed: "Red Flash",
+        optAnimColor: "Rainbow Flash",
+        btnEditTrackTitle: "⚙️ Path Settings",
+        btnDeleteTrackTitle: "Delete Path",
+        chartSelectionLabel: "No Path Selected",
+        lblSpeedTitle: "Speed",
+        lblDurationTitle: "Duration",
+        lblWaitTitle: "Hover",
+        btnResampleHeights: "🏔️ Calibrate Altitudes"
+      }
+    };
+
+
+
     document.addEventListener('DOMContentLoaded', async () => {
       try {
-        init();
+        await init();
+        window.applyEditorLanguage(currentLang);
       } catch (err) {
         alert("CRITICAL ERROR: " + err.message + "\n" + err.stack);
         console.error(err);

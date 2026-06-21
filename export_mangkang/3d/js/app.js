@@ -21,9 +21,324 @@ viewer.terrainShadows = Cesium.ShadowMode.DISABLED; viewer.scene.globe.dynamicAt
 viewer.clock.shouldAnimate = false;
 viewer.clock.currentTime = Cesium.JulianDate.fromIso8601("2024-06-21T02:00:00Z"); // Default morning (10:00 Beijing time)
 
+// Polyfill for rain and snow post-process stages
+if (typeof Cesium.PostProcessStageLibrary.createRainStage !== 'function') {
+  Cesium.PostProcessStageLibrary.createRainStage = function() {
+    const isWebGL2 = viewer.scene.context.webgl2;
+    const shader = isWebGL2 ? `
+      uniform sampler2D colorTexture;
+      in vec2 v_textureCoordinates;
+      uniform float speed;
+      out vec4 fragColor;
+      
+      float hash(float x) {
+        return fract(sin(x * 133.3) * 13.13);
+      }
+      
+      void main(void) {
+        float time = czm_frameNumber * speed * 0.005;
+        vec2 resolution = czm_viewport.zw;
+        vec2 uv = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);
+        
+        float a = -0.2;
+        float si = sin(a), co = cos(a);
+        uv *= mat2(co, -si, si, co);
+        uv *= length(uv + vec2(0.0, 4.9)) * 0.3 + 1.0;
+        
+        float v = 1.0 - sin(hash(floor(uv.x * 100.0)) * 2.0);
+        float b = clamp(abs(sin(20.0 * time * v + uv.y * (5.0 / (2.0 + v)))) - 0.95, 0.0, 1.0) * 20.0;
+        
+        vec3 rainColor = vec3(0.6, 0.7, 0.8) * v * b;
+        vec4 sceneColor = texture(colorTexture, v_textureCoordinates);
+        fragColor = mix(sceneColor, vec4(rainColor, 1.0), 0.3);
+      }
+    ` : `
+      uniform sampler2D colorTexture;
+      varying vec2 v_textureCoordinates;
+      uniform float speed;
+      
+      float hash(float x) {
+        return fract(sin(x * 133.3) * 13.13);
+      }
+      
+      void main(void) {
+        float time = czm_frameNumber * speed * 0.005;
+        vec2 resolution = czm_viewport.zw;
+        vec2 uv = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);
+        
+        float a = -0.2;
+        float si = sin(a), co = cos(a);
+        uv *= mat2(co, -si, si, co);
+        uv *= length(uv + vec2(0.0, 4.9)) * 0.3 + 1.0;
+        
+        float v = 1.0 - sin(hash(floor(uv.x * 100.0)) * 2.0);
+        float b = clamp(abs(sin(20.0 * time * v + uv.y * (5.0 / (2.0 + v)))) - 0.95, 0.0, 1.0) * 20.0;
+        
+        vec3 rainColor = vec3(0.6, 0.7, 0.8) * v * b;
+        vec4 sceneColor = texture2D(colorTexture, v_textureCoordinates);
+        gl_FragColor = mix(sceneColor, vec4(rainColor, 1.0), 0.3);
+      }
+    `;
+    return new Cesium.PostProcessStage({
+      name: 'czm_rain',
+      fragmentShader: shader,
+      uniforms: {
+        speed: 3.0
+      }
+    });
+  };
+}
+
+if (typeof Cesium.PostProcessStageLibrary.createSnowStage !== 'function') {
+  Cesium.PostProcessStageLibrary.createSnowStage = function() {
+    const isWebGL2 = viewer.scene.context.webgl2;
+    const shader = isWebGL2 ? `
+      uniform sampler2D colorTexture;
+      in vec2 v_textureCoordinates;
+      uniform float speed;
+      out vec4 fragColor;
+      
+      float hash(vec2 p) {
+        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+      }
+      
+      void main(void) {
+        float time = czm_frameNumber * speed * 0.003;
+        vec2 resolution = czm_viewport.zw;
+        vec2 uv = gl_FragCoord.xy / resolution.xy;
+        
+        vec4 sceneColor = texture(colorTexture, v_textureCoordinates);
+        
+        float snow = 0.0;
+        for (int i = 0; i < 6; i++) {
+          float fi = float(i);
+          vec2 offset = vec2(fi * 1.5, fi * 3.0);
+          vec2 uv2 = uv * (3.0 + fi) + vec2(0.1 * sin(time + fi), time * (1.0 + fi * 0.2)) + offset;
+          vec2 ip = floor(uv2);
+          vec2 fp = fract(uv2);
+          float h = hash(ip);
+          if (h > 0.92) {
+            float dist = length(fp - 0.5);
+            snow += smoothstep(0.18, 0.0, dist) * (h - 0.92) * 12.0;
+          }
+        }
+        
+        vec3 snowColor = vec3(0.9, 0.9, 0.95);
+        fragColor = mix(sceneColor, vec4(snowColor, 1.0), clamp(snow, 0.0, 0.5));
+      }
+    ` : `
+      uniform sampler2D colorTexture;
+      varying vec2 v_textureCoordinates;
+      uniform float speed;
+      
+      float hash(vec2 p) {
+        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+      }
+      
+      void main(void) {
+        float time = czm_frameNumber * speed * 0.003;
+        vec2 resolution = czm_viewport.zw;
+        vec2 uv = gl_FragCoord.xy / resolution.xy;
+        
+        vec4 sceneColor = texture2D(colorTexture, v_textureCoordinates);
+        
+        float snow = 0.0;
+        for (int i = 0; i < 6; i++) {
+          float fi = float(i);
+          vec2 offset = vec2(fi * 1.5, fi * 3.0);
+          vec2 uv2 = uv * (3.0 + fi) + vec2(0.1 * sin(time + fi), time * (1.0 + fi * 0.2)) + offset;
+          vec2 ip = floor(uv2);
+          vec2 fp = fract(uv2);
+          float h = hash(ip);
+          if (h > 0.92) {
+            float dist = length(fp - 0.5);
+            snow += smoothstep(0.18, 0.0, dist) * (h - 0.92) * 12.0;
+          }
+        }
+        
+        vec3 snowColor = vec3(0.9, 0.9, 0.95);
+        gl_FragColor = mix(sceneColor, vec4(snowColor, 1.0), clamp(snow, 0.0, 0.5));
+      }
+    `;
+    return new Cesium.PostProcessStage({
+      name: 'czm_snow',
+      fragmentShader: shader,
+      uniforms: {
+        speed: 2.5
+      }
+    });
+  };
+}
+
+// Environment & Weather global variables
+let activeWeatherStage = null;
+let lightningTimeout = null;
+
 // 光照时间推移（延时摄影）引擎全局变量
 let sunlightTransition = null;
 let currentFlightSegment = null;
+
+function applyEnvEffectToCesium(pt) {
+  if (!viewer) return;
+  if (!pt) return;
+  
+  const mode = pt.env_mode || 'none';
+  
+  // Remove active stage if any
+  if (activeWeatherStage) {
+    viewer.scene.postProcessStages.remove(activeWeatherStage);
+    activeWeatherStage = null;
+  }
+  
+  // Clear lightning timeout if any
+  if (lightningTimeout) {
+    clearTimeout(lightningTimeout);
+    lightningTimeout = null;
+  }
+  
+  // Reset Light Intensity
+  if (viewer.scene.light) {
+    viewer.scene.light.intensity = 1.0;
+  }
+  
+  // Clear/Reset Fog
+  viewer.scene.fog.enabled = true;
+  viewer.scene.fog.density = 0.0002;
+  
+  // Always apply time of day first
+  const timeVal = typeof pt.timeOfDay === 'number' ? pt.timeOfDay : 12.0;
+  let hrs = Math.floor(timeVal);
+  let mins = Math.floor((timeVal - hrs) * 60);
+  viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(`2024-06-21T${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00Z`);
+  
+  if (mode === 'none' || mode === 'time') {
+    pt.weather = 'none';
+    pt.weather_param = undefined;
+    return;
+  }
+  
+  const val = typeof pt.env_param === 'number' ? pt.env_param : 2;
+  
+  if (mode === 'rain') {
+    pt.weather = 'rain';
+    const speeds = { 1: 1.5, 2: 3.0, 3: 5.0, 4: 8.0 };
+    const speed = speeds[Math.round(val)] || 3.0;
+    pt.weather_param = speed;
+    
+    activeWeatherStage = Cesium.PostProcessStageLibrary.createRainStage();
+    activeWeatherStage.uniforms.speed = speed;
+    viewer.scene.postProcessStages.add(activeWeatherStage);
+    viewer.scene.fog.density = 0.0005 + (Math.round(val) * 0.0005);
+  } else if (mode === 'snow') {
+    pt.weather = 'snow';
+    const speeds = { 1: 1.0, 2: 2.5, 3: 4.5, 4: 7.0 };
+    const speed = speeds[Math.round(val)] || 2.5;
+    pt.weather_param = speed;
+    
+    activeWeatherStage = Cesium.PostProcessStageLibrary.createSnowStage();
+    activeWeatherStage.uniforms.speed = speed;
+    viewer.scene.postProcessStages.add(activeWeatherStage);
+    viewer.scene.fog.density = 0.0004 + (Math.round(val) * 0.0004);
+  } else if (mode === 'fog') {
+    pt.weather = 'fog';
+    const densities = { 1: 0.0008, 2: 0.002, 3: 0.004, 4: 0.008 };
+    const density = densities[Math.round(val)] || 0.002;
+    pt.weather_param = density;
+    
+    viewer.scene.fog.density = density;
+  } else if (mode === 'lightning') {
+    pt.weather = 'lightning';
+    const speeds = { 1: 1.0, 2: 2.0, 3: 3.5, 4: 5.0 };
+    const speed = speeds[Math.round(val)] || 2.0;
+    pt.weather_param = speed;
+    
+    viewer.scene.fog.density = 0.003;
+    
+    activeWeatherStage = Cesium.PostProcessStageLibrary.createRainStage();
+    activeWeatherStage.uniforms.speed = 3.0;
+    viewer.scene.postProcessStages.add(activeWeatherStage);
+    
+    if (!viewer.scene.light) {
+      try {
+        viewer.scene.light = new Cesium.SunLight();
+      } catch (e) {
+        try {
+          viewer.scene.light = new Cesium.DirectionalLight({
+            direction: new Cesium.Cartesian3(-0.5, -0.5, -0.5),
+            color: Cesium.Color.WHITE,
+            intensity: 1.0
+          });
+        } catch (err) {
+          console.warn("Could not create Cesium light:", err);
+        }
+      }
+    }
+    
+    if (viewer.scene.light) {
+      viewer.scene.light.intensity = 0.25;
+    }
+    
+    const isLightningActive = () => {
+      if (!viewer || !viewer.scene) return false;
+      const currentPt = (typeof flightPath !== 'undefined') ? flightPath[currentWaypoint] : null;
+      return currentPt && currentPt.env_mode === 'lightning';
+    };
+
+    const scheduleFlash = () => {
+      if (!isLightningActive()) {
+        if (viewer.scene.light) viewer.scene.light.intensity = 1.0;
+        return;
+      }
+      
+      let minDelay, maxDelay;
+      const v = Math.round(val);
+      if (v === 1) {
+        minDelay = 8000; maxDelay = 14000;
+      } else if (v === 3) {
+        minDelay = 2500; maxDelay = 5000;
+      } else if (v === 4) {
+        minDelay = 1000; maxDelay = 2500;
+      } else {
+        minDelay = 4500; maxDelay = 8500;
+      }
+      const delay = minDelay + Math.random() * (maxDelay - minDelay);
+      
+      lightningTimeout = setTimeout(() => {
+        if (!isLightningActive()) return;
+        if (viewer.scene.light) {
+          viewer.scene.light.intensity = 12.0;
+        }
+        
+        lightningTimeout = setTimeout(() => {
+          if (!isLightningActive()) return;
+          if (viewer.scene.light) {
+            viewer.scene.light.intensity = 0.25;
+          }
+          
+          if (Math.random() < 0.65) {
+            lightningTimeout = setTimeout(() => {
+              if (!isLightningActive()) return;
+              if (viewer.scene.light) {
+                viewer.scene.light.intensity = 7.0;
+              }
+              lightningTimeout = setTimeout(() => {
+                if (!isLightningActive()) return;
+                if (viewer.scene.light) {
+                  viewer.scene.light.intensity = 0.25;
+                }
+                scheduleFlash();
+              }, 50);
+            }, 60 + Math.random() * 40);
+          } else {
+            scheduleFlash();
+          }
+        }, 60 + Math.random() * 40);
+      }, delay);
+    };
+    
+    scheduleFlash();
+  }
+}
 
 viewer.scene.preRender.addEventListener(function() {
     if (currentFlightSegment && isPlaying) {
@@ -42,9 +357,14 @@ viewer.scene.preRender.addEventListener(function() {
         const currentVal = sunlightTransition.startVal + (sunlightTransition.endVal - sunlightTransition.startVal) * progress;
         let hrs = Math.floor(currentVal);
         let mins = Math.floor((currentVal - hrs) * 60);
-        // Ensure hrs and mins are within bounds
-        hrs = Math.max(0, Math.min(23, hrs));
-        mins = Math.max(0, Math.min(59, mins));
+        
+        if (currentVal >= 23.99) {
+            hrs = 23;
+            mins = 59;
+        } else {
+            hrs = Math.max(0, Math.min(23, hrs));
+            mins = Math.max(0, Math.min(59, mins));
+        }
         
         viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(`2024-06-21T${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00Z`);
         
@@ -54,24 +374,89 @@ viewer.scene.preRender.addEventListener(function() {
     }
 });
 
-// 监听 POI 选中事件，如果 POI 包含自定义 3D 相机视角则自动飞往该视角
+// ========================================================
+// POI 全景环视特技 (Cinematic POI Orbit)
+// ========================================================
+let isOrbitingPoi = false;
+let orbitRemoveCallback = null;
+
+function stopPoiOrbit() {
+    isOrbitingPoi = false;
+    if (orbitRemoveCallback) {
+        orbitRemoveCallback();
+        orbitRemoveCallback = null;
+    }
+}
+
+// 监听用户交互，打断自动旋转（但不解除视角锁定，允许用户手动360°观察POI）
+const interruptPoiOrbit = () => {
+    if (isOrbitingPoi) {
+        stopPoiOrbit();
+        const _ts = document.getElementById('timeline-status');
+        if (_ts) _ts.textContent = '自由探索模式';
+    }
+};
+viewer.scene.canvas.addEventListener('mousedown', interruptPoiOrbit);
+viewer.scene.canvas.addEventListener('wheel', interruptPoiOrbit);
+viewer.scene.canvas.addEventListener('touchstart', interruptPoiOrbit);
+
+// 当点击/取消选择 POI 时
 viewer.selectedEntityChanged.addEventListener(function(selectedEntity) {
     if (Cesium.defined(selectedEntity) && selectedEntity.id && selectedEntity.id.startsWith('poi_')) {
         const id = selectedEntity.id.replace('poi_', '');
         const poi = allPoisData.find(p => p.id === id);
-        if (poi && typeof poi.camLng === 'number' && typeof poi.camLat === 'number' && typeof poi.camHeight === 'number') {
-            viewer.camera.flyTo({
-                destination: Cesium.Cartesian3.fromDegrees(poi.camLng, poi.camLat, poi.camHeight),
-                orientation: {
-                    heading: Cesium.Math.toRadians(typeof poi.heading === 'number' ? poi.heading : 0.0),
-                    pitch: Cesium.Math.toRadians(typeof poi.pitch === 'number' ? poi.pitch : -35.0),
-                    roll: Cesium.Math.toRadians(typeof poi.roll === 'number' ? poi.roll : 0.0)
-                },
-                duration: 2.0
-            });
+        
+        stopPoiOrbit();
+        // 记录点击前是否正在巡航
+        let wasPlaying = false;
+        if (typeof isPlaying !== 'undefined' && isPlaying) {
+            wasPlaying = true;
+            // 临时打断巡航（不设 isPlaying = false，以保持 UI 状态，但取消当前飞行段）
+            viewer.camera.cancelFlight();
+            currentFlightSegment = null; 
         }
+
+        const targetPos = selectedEntity.position.getValue(viewer.clock.currentTime);
+        if (!targetPos) return;
+
+        // 计算距离与角度
+        const h = typeof poi.heading === 'number' ? poi.heading : 0;
+        const p = typeof poi.pitch === 'number' ? poi.pitch : -20; // 稍微抬起视角，适合低空飞掠
+        // 飞掠模式：拉低高度，更贴近 POI
+        const distance = typeof poi.camHeight === 'number' ? poi.camHeight : 800; 
+        
+        const offset = new Cesium.HeadingPitchRange(
+            Cesium.Math.toRadians(h),
+            Cesium.Math.toRadians(p),
+            distance
+        );
+
+        // 飞向 POI (C 点)
+        viewer.camera.flyToBoundingSphere(new Cesium.BoundingSphere(targetPos, 0), {
+            offset: offset,
+            duration: 2.0,
+            easingFunction: Cesium.EasingFunction.QUADRATIC_IN_OUT,
+            complete: function() {
+                // 如果之前是在巡航中，则短暂飞掠（停留 1.5 秒）后立即返回原航线 (B 点)
+                if (wasPlaying) {
+                    setTimeout(() => {
+                        if (isPlaying && typeof flyNext === 'function') {
+                            flyNext(); // 重新向 B 点进发
+                        }
+                    }, 1500);
+                } else {
+                    // 如果不是巡航状态，只是普通浏览，则解除锁定，让用户自由看
+                    viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+                }
+            }
+        });
+    } else {
+        // 取消选择 POI，解除相机锁定
+        stopPoiOrbit();
+        viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
     }
 });
+// ========================================================
 
 // 默认开启抗锯齿
 viewer.scene.postProcessStages.fxaa.enabled = true;
@@ -159,8 +544,105 @@ fetch(`../data/${routeFile}?t=` + Date.now()).then(r => {
     }
     return r.json();
 }).then(data => {
-    flightPath = data.main_flight || [];
+    window.allFlights = data.flights || [];
+    if (window.allFlights.length === 0) {
+        window.allFlights.push({ id: 'legacy', name: '默认航线', path: data.main_flight || [] });
+    }
+    flightPath = window.allFlights[0].path;
     fullRoute = data.main || []; 
+    
+    // Dynamic project-specific branding override
+    const branding = data.branding || {};
+    window.currentBranding = branding;
+    
+    // Change overlay title and description
+    const overlayTitle = document.getElementById('overlay-title');
+    if (overlayTitle) {
+        overlayTitle.innerText = branding.overlayTitle || '2026马年大转山';
+    }
+    
+    const overlayDesc = document.getElementById('overlay-desc');
+    if (overlayDesc) {
+        overlayDesc.innerText = branding.overlayDesc || '一山之缘，众生之幸。愿以此行，祈福平安。';
+    }
+    
+    // Change header logo span
+    const headerLogo = document.querySelector('.map-title-header span');
+    if (headerLogo) {
+        headerLogo.innerText = branding.title || '2026马年大转山';
+    }
+    
+    // Change HTML title
+    if (branding.htmlTitle) {
+        document.title = branding.htmlTitle;
+    } else if (branding.title) {
+        document.title = branding.title + ' - 3D 漫游';
+    } else {
+        document.title = '神山转山 3D 漫游 - Kailash Kora';
+    }
+
+    // Change logo URL if customized
+    const overlayLogo = document.querySelector('.overlay-logo');
+    if (overlayLogo && branding.logoUrl) {
+        overlayLogo.src = branding.logoUrl;
+    }
+    
+    // Dynamic Multi-Track Buttons Generation
+    const startButtonsContainer = document.getElementById('start-buttons');
+    if (startButtonsContainer) {
+        if (window.allFlights.length > 1) {
+            startButtonsContainer.innerHTML = ''; // Clear default buttons
+            window.allFlights.forEach((trk, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn primary';
+                if (idx > 0) {
+                    btn.style.background = 'rgba(0,255,170,0.2)';
+                    btn.style.borderColor = 'rgba(0,255,170,0.5)';
+                    btn.style.color = '#00ffaa';
+                }
+                btn.style.fontSize = '16px';
+                btn.style.padding = '12px 24px';
+                btn.innerHTML = `▶️ ${trk.name}`;
+                btn.onclick = () => {
+                    flightPath = trk.path;
+                    document.getElementById('fullscreen-overlay').classList.add('hidden');
+                    currentWaypoint = 0;
+                    
+                    // Clear existing progress variables
+                    currentProgressMileage = 0.0;
+                    currentProgressTime = 0.0;
+                    progressPositions = [];
+                    currentSegmentStartIdx = 0;
+                    currentSegmentEndIdx = 0;
+                    
+                    startBgm();
+                };
+                startButtonsContainer.appendChild(btn);
+            });
+        } else if (window.allFlights.length === 1) {
+            startButtonsContainer.innerHTML = ''; // Clear default buttons
+            const btn = document.createElement('button');
+            btn.className = 'btn primary';
+            btn.style.fontSize = '16px';
+            btn.style.padding = '12px 30px';
+            btn.innerHTML = `▶️ 开启巡航`;
+            btn.onclick = () => {
+                flightPath = window.allFlights[0].path;
+                document.getElementById('fullscreen-overlay').classList.add('hidden');
+                currentWaypoint = 0;
+                
+                // Clear existing progress variables
+                currentProgressMileage = 0.0;
+                currentProgressTime = 0.0;
+                progressPositions = [];
+                currentSegmentStartIdx = 0;
+                currentSegmentEndIdx = 0;
+                
+                startBgm();
+            };
+            startButtonsContainer.appendChild(btn);
+        }
+    }
     
     // 直接使用原始的真实地理坐标（新版数据为 [lng, lat] 格式）
     const rawPositions = fullRoute.map(pt => {
@@ -260,30 +742,7 @@ fetch(`../data/${routeFile}?t=` + Date.now()).then(r => {
         return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     }
 
-    viewer.entities.add({
-        name: 'Kora Route Progress Head Info',
-        position: new Cesium.CallbackProperty(() => {
-            if (!isPlaying || progressPositions.length === 0) return undefined;
-            return progressPositions[progressPositions.length - 1];
-        }, false),
-        label: {
-            text: new Cesium.CallbackProperty(() => {
-                return `🏁 ${currentProgressMileage.toFixed(1)} km\n⏱️ ${formatProgressTime(currentProgressTime)}`;
-            }, false),
-            font: 'bold 11px monospace, "PingFang SC", sans-serif',
-            fillColor: Cesium.Color.fromCssColorString('#ffcd55'),
-            outlineColor: Cesium.Color.fromCssColorString('#090d16'),
-            outlineWidth: 3,
-            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-            showBackground: true,
-            backgroundColor: Cesium.Color.fromCssColorString('#0f172a').withAlpha(0.85),
-            backgroundPadding: new Cesium.Cartesian2(8, 6),
-            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-            pixelOffset: new Cesium.Cartesian2(0, -15),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY,
-            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
-        }
-    });
+    // "小黑旗" entity removed per request
 });
 
 // =========================================================
@@ -487,7 +946,10 @@ function loadPoisAndStart(terrainProvider) {
                     poiPopups.push({ id: poi.id, element: popup, lng: fixedLng, lat: fixedLat, height: altitude });
                 }
             }
-            document.getElementById('tour-status').innerText = '漫游已就绪';
+            const tourStatusEl = document.getElementById('tour-status');
+            if (tourStatusEl) {
+                tourStatusEl.innerText = '漫游已就绪';
+            }
             
             if (flightPath && flightPath.length > 0) {
                 const firstPt = flightPath[0];
@@ -534,7 +996,9 @@ function loadPoisAndStart(terrainProvider) {
     }).catch(e => console.error("加载 POI 数据失败:", e));
 }
 
-Cesium.createWorldTerrainAsync().then(terrainProvider => {
+Cesium.createWorldTerrainAsync({
+    requestVertexNormals: true
+}).then(terrainProvider => {
     loadPoisAndStart(terrainProvider);
 }).catch(e => {
     console.error("地形引擎初始化失败，正在以默认模式启动：", e);
@@ -651,15 +1115,32 @@ function flyNext() {
         // 漫游结束，显示全屏谢幕
         const overlay = document.getElementById('fullscreen-overlay');
         if (overlay && currentWaypoint >= flightPath.length) {
-            document.getElementById('overlay-title').innerText = '愿转山者吉祥';
-            document.getElementById('overlay-desc').innerHTML = '感谢长久以来<br>为神山圣湖在地文化贡献信仰之力与纪录的所有人！';
-                        const btnStart = document.getElementById('btn-overlay-start');
+            if (window.allFlights && window.allFlights.length === 1) {
+                const b = window.currentBranding || {};
+                document.getElementById('overlay-title').innerText = b.endingTitle || b.overlayTitle || '澜沧江河谷如美镇';
+                document.getElementById('overlay-desc').innerHTML = b.endingDesc || '再次巡航';
+                const replayBtn = document.getElementById('btn-overlay-replay');
+                if (replayBtn) {
+                    replayBtn.innerHTML = b.replayBtnText || '🔄 再次巡航';
+                    replayBtn.style.display = 'inline-block';
+                }
+                const startButtons = document.getElementById('start-buttons');
+                if (startButtons) startButtons.style.display = 'none';
+            } else {
+                const b = window.currentBranding || {};
+                document.getElementById('overlay-title').innerText = b.multiEndingTitle || '航段飞行结束';
+                document.getElementById('overlay-desc').innerHTML = b.multiEndingDesc || '您可以选择继续探索其他路线，或再次回味本段旅程。';
+                const replayBtn = document.getElementById('btn-overlay-replay');
+                if (replayBtn) {
+                    replayBtn.style.display = (window.allFlights && window.allFlights.length > 1) ? 'none' : 'inline-block';
+                }
+                const startButtons = document.getElementById('start-buttons');
+                if (startButtons) startButtons.style.display = 'flex';
+            }
+            
+            const btnStart = document.getElementById('btn-overlay-start');
             if (btnStart) btnStart.style.display = 'none';
-            const btnStartOuter = document.getElementById('btn-overlay-start-outer');
-            if (btnStartOuter) btnStartOuter.style.display = 'none';
-            const btnStartInner = document.getElementById('btn-overlay-start-inner');
-            if (btnStartInner) btnStartInner.style.display = 'none';
-            document.getElementById('btn-overlay-replay').style.display = 'inline-block';
+            
             overlay.classList.remove('hidden');
         }
         
@@ -670,6 +1151,9 @@ function flyNext() {
     }
     
     const pt = flightPath[currentWaypoint];
+    
+    // 应用环境与天气增效
+    applyEnvEffectToCesium(pt);
     
     // 自动播放解说音频并进行 BGM 压限
     if (pt.narration_audio && isPlaying) {
@@ -720,10 +1204,12 @@ function flyNext() {
         currentSegmentStartIdx = findClosestIndex(fullRoute, lastPt.lat, lastPt.lng);
         currentSegmentEndIdx = findClosestIndex(fullRoute, pt.lat, pt.lng);
         
-        // 计算两点之间的物理距离
+        const lastAlt = (typeof lastPt.ground_alt === 'number' ? lastPt.ground_alt : (typeof lastPt.elevation === 'number' ? lastPt.elevation : 5000)) + (typeof lastPt.relative_alt === 'number' ? lastPt.relative_alt : (typeof lastPt.range === 'number' ? lastPt.range : 500));
+        const ptAlt = (typeof pt.ground_alt === 'number' ? pt.ground_alt : (typeof pt.elevation === 'number' ? pt.elevation : 5000)) + (typeof pt.relative_alt === 'number' ? pt.relative_alt : (typeof pt.range === 'number' ? pt.range : 500));
+        // 计算两点之间的真实物理 3D 距离
         const distMeters = Cesium.Cartesian3.distance(
-            Cesium.Cartesian3.fromDegrees(lastPt.lng, lastPt.lat),
-            Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat)
+            Cesium.Cartesian3.fromDegrees(lastPt.lng, lastPt.lat, lastAlt),
+            Cesium.Cartesian3.fromDegrees(pt.lng, pt.lat, ptAlt)
         );
         
         // 平滑速度控制：设定舒适观看速度为 40米/秒，点位密集时最少给 2.5 秒缓冲
@@ -755,12 +1241,13 @@ function flyNext() {
         if (pt.shot_mode === 'side') {
             finalHeading += 90.0;
         } else if (pt.shot_mode === 'back') {
+        } else if (pt.shot_mode === 'back') {
             finalHeading += 180.0;
         }
     }
 
-    // 启用/禁用手震呼吸感
-    updateHandheldShake(pt.shot_mode === 'handheld');
+    // 启用/禁用手震呼吸感 (飞鸟视角也共用此类细微晃动)
+    updateHandheldShake(pt.shot_mode === 'handheld' || pt.look_at_intent === 'bird');
     
     const flyDur = pt._actualDuration || (pt.duration * 1.5) || 2.5;
     
@@ -792,14 +1279,77 @@ function flyNext() {
         duration: flyDur,
         easingFunction: Cesium.EasingFunction.LINEAR_NONE, // 匀速平滑过渡，不卡顿
         complete: () => {
-            const waitTime = typeof pt.wait_time === 'number' ? pt.wait_time : 0.0;
+            const explicitWait = typeof pt.wait_time === 'number' ? pt.wait_time : 0.0;
+            const isLastPoint = (currentWaypoint === flightPath.length - 1);
+            const waitTime = isLastPoint ? Math.max(explicitWait, 3.0) : explicitWait;
+            
             if (waitTime > 0 && isPlaying) {
-                setTimeout(() => {
-                    if (isPlaying) {
-                        currentWaypoint++;
-                        flyNext();
+                if (pt.shot_mode === 'pan_spin' || pt.shot_mode === 'orbit') {
+                    const startTime = performance.now();
+                    const startHeading = viewer.camera.heading;
+                    const startPitch = viewer.camera.pitch;
+                    
+                    let targetPos = null;
+                    let orbitRange = 1000;
+                    
+                    if (pt.shot_mode === 'orbit') {
+                        const params = pt.shot_params || {};
+                        orbitRange = params.orbit_radius || 1000;
+                        
+                        targetPos = Cesium.Cartesian3.fromDegrees(81.312, 31.066, 6656); // 默认主峰
+                        if (pt.look_at_target) {
+                            targetPos = Cesium.Cartesian3.fromDegrees(pt.look_at_target.lng, pt.look_at_target.lat, pt.look_at_target.alt || 5000);
+                        } else if (typeof nearbyPois !== 'undefined' && nearbyPois && nearbyPois.length > 0) {
+                            let closestPoi = nearbyPois[0];
+                            targetPos = Cesium.Cartesian3.fromDegrees(closestPoi.lng + (typeof OFFSET_LNG !== 'undefined' ? OFFSET_LNG : 0), closestPoi.lat + (typeof OFFSET_LAT !== 'undefined' ? OFFSET_LAT : 0), closestPoi.elevation || 5000);
+                        }
                     }
-                }, waitTime * 1000);
+
+                    function animateWaitEffect(now) {
+                        if (!isPlaying) {
+                            if (pt.shot_mode === 'orbit') viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+                            return;
+                        }
+                        const elapsed = (now - startTime) / 1000;
+                        if (elapsed >= waitTime) {
+                            if (pt.shot_mode === 'orbit') viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+                            currentWaypoint++;
+                            flyNext();
+                            return;
+                        }
+
+                        const progress = elapsed / waitTime;
+                        const params = pt.shot_params || {};
+                        
+                        if (pt.shot_mode === 'pan_spin') {
+                            const totalAngle = Cesium.Math.toRadians(params.pan_angle !== undefined ? params.pan_angle : 360);
+                            const currentHeading = startHeading + progress * totalAngle;
+                            viewer.camera.setView({
+                                orientation: {
+                                    heading: currentHeading,
+                                    pitch: startPitch,
+                                    roll: viewer.camera.roll
+                                }
+                            });
+                        } else if (pt.shot_mode === 'orbit') {
+                            // 绕圈环飞 (Orbit)
+                            const totalAngle = Math.PI * 2; // 默认 360度
+                            const currentHeading = startHeading + progress * totalAngle;
+                            const orbitPitch = Cesium.Math.toRadians(params.orbit_pitch !== undefined ? params.orbit_pitch : -35);
+                            viewer.camera.lookAt(targetPos, new Cesium.HeadingPitchRange(currentHeading, orbitPitch, orbitRange));
+                        }
+                        
+                        requestAnimationFrame(animateWaitEffect);
+                    }
+                    requestAnimationFrame(animateWaitEffect);
+                } else {
+                    setTimeout(() => {
+                        if (isPlaying) {
+                            currentWaypoint++;
+                            flyNext();
+                        }
+                    }, waitTime * 1000);
+                }
             } else {
                 currentWaypoint++;
                 flyNext();
@@ -872,9 +1422,15 @@ document.getElementById('btn-overlay-replay').addEventListener('click', () => {
 // 绑定按钮事件：点击后开始巡航
 document.getElementById('btn-start-tour').addEventListener('click', async () => {
     
-    // 点击画面可以暂停/继续
+    // 点击画面可以暂停/继续，但需排除点击 POI 的情况
     if (!window.__canvasClickListenerAdded) {
-        viewer.canvas.addEventListener('click', () => {
+        viewer.canvas.addEventListener('click', (e) => {
+            // 如果点击到了任何实体（如 POI 图标），则不要触发暂停/播放逻辑
+            const pickedObject = viewer.scene.pick(new Cesium.Cartesian2(e.clientX, e.clientY));
+            if (Cesium.defined(pickedObject) && Cesium.defined(pickedObject.id)) {
+                return;
+            }
+
             const timeline = document.getElementById('flight-timeline-container');
             if (flightPath.length > 0 && timeline && timeline.style.display !== 'none') {
                 isPlaying = !isPlaying;
@@ -925,6 +1481,8 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
     const ticksContainer = document.getElementById('timeline-ticks');
     if (slider && ticksContainer && flightPath.length > 0) {
         slider.max = flightPath.length - 1;
+        slider.value = 0;
+        slider.style.background = 'linear-gradient(to right, #20e5b5 0%, rgba(255,255,255,0.15) 0%)';
         ticksContainer.innerHTML = '';
         for (let i = 0; i < flightPath.length; i++) {
             const tick = document.createElement('div');
@@ -980,6 +1538,13 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
     }
     const pt = flightPath[currentWaypoint];
     
+    // 初始化环境增效，但暂存 clock time 用于首点俯冲过渡动画
+    const originalTime = viewer.clock.currentTime;
+    applyEnvEffectToCesium(pt);
+    if (typeof pt.timeOfDay === 'number') {
+        viewer.clock.currentTime = originalTime;
+    }
+    
     const elevationVal = typeof pt.ground_alt === 'number' ? pt.ground_alt : (typeof pt.elevation === 'number' ? pt.elevation : 5000);
     const relativeAlt = typeof pt.relative_alt === 'number' ? pt.relative_alt : (typeof pt.range === 'number' ? pt.range : 500);
     const absoluteAltitude = elevationVal + relativeAlt;
@@ -1011,11 +1576,9 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
     // 动态计算过渡飞行时间与最大飞行高度，避免长距离瞬间拉扯与大尺度旋转带来的眩晕感
     let flyDuration = 3.5;
     
-    currentFlightSegment = {
-        startTime: Date.now(),
-        duration: flyDuration,
-        progress: 0.0
-    };
+    // Do NOT set currentFlightSegment here! 
+    // We want the progress bar to stay at 0% during the initial swoop-in (俯冲).
+    currentFlightSegment = null;
 
     // 初始化时段过渡 (Swoop-in transition)
     if (typeof pt.timeOfDay === 'number') {
@@ -1058,7 +1621,10 @@ document.getElementById('btn-start-tour').addEventListener('click', async () => 
                     playNarration(pt.narration_audio);
                 }
 
-                const waitTime = typeof pt.wait_time === 'number' ? pt.wait_time : 0.0;
+                const explicitWait = typeof pt.wait_time === 'number' ? pt.wait_time : 0.0;
+                // 强制要求首个航点默认悬停至少 3.5 秒
+                const waitTime = Math.max(explicitWait, 3.5);
+                
                 if (waitTime > 0) {
                     setTimeout(() => {
                         if (isPlaying) {
@@ -1499,7 +2065,7 @@ if (dragHandle && uiPanel && poiBody) {
             return;
         }
 
-        // 最小化状态下，点击面板任意部分（包括背景 and 手柄）直接展开
+        // 最小化状态下，点击面板任意部分（包括背景和手柄）直接展开
         if (uiPanel.classList.contains('minimized')) {
             uiPanel.classList.remove('minimized');
             poiBody.style.height = '';
@@ -1769,12 +2335,28 @@ document.getElementById('flight-timeline-slider').addEventListener('input', (e) 
     sunlightTransition = null; // 打断光照插值
     currentFlightSegment = null;
     
-    document.getElementById('timeline-status').textContent = '拖拽跳转中...';
-    document.getElementById('timeline-status').style.color = '#f59e0b';
+    const _tsInput = document.getElementById('timeline-status');
+    if (_tsInput) { _tsInput.textContent = '拖拽跳转中...'; _tsInput.style.color = '#f59e0b'; }
     
     // 计算目标航点索引
     const progress = parseFloat(e.target.value);
     const targetIdx = Math.max(0, Math.min(flightPath.length - 1, Math.round(progress)));
+    
+    // 实时更新进度条填充颜色和里程浮动框位置
+    const maxVal = parseFloat(e.target.max || 1);
+    const pct = progress / maxVal;
+    e.target.style.background = `linear-gradient(to right, #20e5b5 ${pct * 100}%, rgba(255,255,255,0.15) ${pct * 100}%)`;
+    
+    const mileageLabel = document.getElementById('timeline-mileage-label');
+    if (mileageLabel) {
+        mileageLabel.style.left = `${pct * 100}%`;
+        const exactIdx = Math.floor((fullRouteDistances.length - 1) * pct);
+        if (fullRouteDistances && fullRouteDistances.length > exactIdx) {
+            currentProgressMileage = fullRouteDistances[exactIdx];
+        }
+        mileageLabel.textContent = `${currentProgressMileage.toFixed(1)}km`;
+        mileageLabel.style.display = 'block';
+    }
     
     // 如果想要在拖拽时具备吸附感，可以取消下一行的注释，但保留平滑滑动可能体验更好
     // e.target.value = targetIdx; 
@@ -1803,14 +2385,8 @@ document.getElementById('flight-timeline-slider').addEventListener('input', (e) 
         }
     });
     
-    // 同步光照
-    if (typeof pt.timeOfDay === 'number') {
-        let hrs = Math.floor(pt.timeOfDay);
-        let mins = Math.floor((pt.timeOfDay - hrs) * 60);
-        hrs = Math.max(0, Math.min(23, hrs));
-        mins = Math.max(0, Math.min(59, mins));
-        viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(`2024-06-21T${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00Z`);
-    }
+    // 同步环境与光照
+    applyEnvEffectToCesium(pt);
 
     document.getElementById('timeline-total-time').textContent = `${currentWaypoint + 1} / ${flightPath.length} 航点`;
 });
@@ -1819,12 +2395,12 @@ document.getElementById('flight-timeline-slider').addEventListener('change', (e)
     if (!isScrubbing || flightPath.length === 0) return;
     isScrubbing = false;
     isPlaying = true;
-    document.getElementById('timeline-status').textContent = '巡航中';
-    document.getElementById('timeline-status').style.color = '#20e5b5';
+    const _tsChange = document.getElementById('timeline-status');
+    if (_tsChange) { _tsChange.textContent = '巡航中'; _tsChange.style.color = '#20e5b5'; }
     
     // 重新校准游览时间，防止时间突变
     // 假设当前时间的比例
-    const progressPercent = parseFloat(e.target.value) / 100.0;
+    const progressPercent = parseFloat(e.target.value) / parseFloat(e.target.max || 1);
     const estimatedTotalTime = currentProgressTime > 0 ? (currentProgressTime / (currentWaypoint === 0 ? 0.01 : (currentWaypoint / flightPath.length))) : 120;
     currentProgressTime = estimatedTotalTime * progressPercent;
     tourStartTime = Date.now() - (currentProgressTime * 1000);
@@ -1859,7 +2435,22 @@ setInterval(() => {
                 document.getElementById('timeline-current-time').textContent = window.formatProgressTime(currentProgressTime);
             }
             document.getElementById('timeline-total-time').textContent = `${currentWaypoint + 1} / ${flightPath.length} 航点`;
+            
+            // Update mileage label to follow thumb
+            const mileageLabel = document.getElementById('timeline-mileage-label');
+            if (mileageLabel && slider.max > 0) {
+                const pct = slider.value / slider.max;
+                mileageLabel.style.left = `${pct * 100}%`;
+                mileageLabel.textContent = `${currentProgressMileage.toFixed(1)}km`;
+                mileageLabel.style.display = 'block';
+                
+                // 动态更新进度条轨道左侧填充样式，保持与滑块位置精准对齐
+                slider.style.background = `linear-gradient(to right, #20e5b5 ${pct * 100}%, rgba(255,255,255,0.15) ${pct * 100}%)`;
+            }
         }
+    } else {
+        const mileageLabel = document.getElementById('timeline-mileage-label');
+        if (mileageLabel) mileageLabel.style.display = 'none';
     }
 }, 100); // 提高刷新频率到 100ms
 // ========================================================
