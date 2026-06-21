@@ -302,7 +302,11 @@
       "wait_preset": "none",
       "env_mode": "none",
       "weather": "none",
-      "look_at_target": null
+      "look_at_target": null,
+      "narration_text": "",
+      "narration_audio": "",
+      "narration_duration": 0,
+      "narration_voice": "default"
     },
     {
       "id": "evt_1781688591682",
@@ -691,7 +695,11 @@
           "wait_preset": "none",
           "env_mode": "none",
           "weather": "none",
-          "look_at_target": null
+          "look_at_target": null,
+          "narration_text": "",
+          "narration_audio": "",
+          "narration_duration": 0,
+          "narration_voice": "default"
         },
         {
           "id": "evt_1781688591682",
