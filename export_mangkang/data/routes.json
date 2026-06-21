@@ -35,7 +35,7 @@
       "speed_preset": "custom",
       "wait_preset": "custom",
       "narration_text": "这里是澜沧江河谷318国道上的大竹卡段。竹卡在藏语中是渡口。现在这里却因为如美大型水电站的建设而成为了新型的能源小镇，我们选择这里做为横断山脉核心区三江并流区域的飞行第一站。",
-      "narration_audio": "/mangkang/media/narratives/evt_1781688379062.mp3",
+      "narration_audio": "..../media/narratives/evt_1781688379062.mp3",
       "narration_duration": 38.10933333333333,
       "narration_voice": "default",
       "env_mode": "none",
@@ -428,7 +428,7 @@
           "speed_preset": "custom",
           "wait_preset": "custom",
           "narration_text": "这里是澜沧江河谷318国道上的大竹卡段。竹卡在藏语中是渡口。现在这里却因为如美大型水电站的建设而成为了新型的能源小镇，我们选择这里做为横断山脉核心区三江并流区域的飞行第一站。",
-          "narration_audio": "/mangkang/media/narratives/evt_1781688379062.mp3",
+          "narration_audio": "..../media/narratives/evt_1781688379062.mp3",
           "narration_duration": 38.10933333333333,
           "narration_voice": "default",
           "env_mode": "none",
@@ -810,7 +810,7 @@
                 "evt_1781688379062"
               ],
               "text": "这里是澜沧江河谷318国道上的大竹卡段。竹卡在藏语中是渡口。现在这里却因为如美大型水电站的建设而成为了新型的能源小镇，我们选择这里做为横断山脉核心区三江并流区域的飞行第一站。",
-              "audioUrl": "/mangkang/media/narratives/evt_1781688379062.mp3",
+              "audioUrl": "..../media/narratives/evt_1781688379062.mp3",
               "duration": 38.10933333333333,
               "voice": "default"
             }
