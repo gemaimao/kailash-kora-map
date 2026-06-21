@@ -25,10 +25,8 @@
       "narration_audio": "/mangkang/media/narratives/evt_1781688379062.mp3",
       "narration_duration": 38.10933333333333,
       "narration_voice": "default",
-      "env_mode": "lightning",
-      "weather": "lightning",
-      "weather_param": 2,
-      "env_param": 2
+      "env_mode": "none",
+      "weather": "none"
     },
     {
       "id": "evt_1781688410195",
@@ -412,10 +410,8 @@
           "narration_audio": "/mangkang/media/narratives/evt_1781688379062.mp3",
           "narration_duration": 38.10933333333333,
           "narration_voice": "default",
-          "env_mode": "lightning",
-          "weather": "lightning",
-          "weather_param": 2,
-          "env_param": 2
+          "env_mode": "none",
+          "weather": "none"
         },
         {
           "id": "evt_1781688410195",
