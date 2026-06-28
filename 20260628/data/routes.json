@@ -1276,6 +1276,31 @@
       "env_mode": "time",
       "weather": "none",
       "timeOfDay": 9.8
+    },
+    {
+      "id": "evt_1782660717469",
+      "name": "措木及日湖尾",
+      "desc": "",
+      "camera_lang": "大景别展示",
+      "effect": "",
+      "lng": 94.381867,
+      "lat": 29.801041,
+      "ground_alt": 4655,
+      "relative_alt": 752,
+      "heading": 92,
+      "pitch": -15.8,
+      "roll": 360,
+      "duration": 2.5,
+      "wait_time": 0,
+      "fov": 60,
+      "shot_mode": "default",
+      "look_at_intent": "forward",
+      "perspective_fov": "natural",
+      "perspective_pitch": "oblique",
+      "speed_preset": "normal",
+      "wait_preset": "none",
+      "env_mode": "none",
+      "weather": "none"
     }
   ],
   "flights": [
@@ -1308,6 +1333,31 @@
           "env_mode": "time",
           "weather": "none",
           "timeOfDay": 9.8
+        },
+        {
+          "id": "evt_1782660717469",
+          "name": "措木及日湖尾",
+          "desc": "",
+          "camera_lang": "大景别展示",
+          "effect": "",
+          "lng": 94.381867,
+          "lat": 29.801041,
+          "ground_alt": 4655,
+          "relative_alt": 752,
+          "heading": 92,
+          "pitch": -15.8,
+          "roll": 360,
+          "duration": 2.5,
+          "wait_time": 0,
+          "fov": 60,
+          "shot_mode": "default",
+          "look_at_intent": "forward",
+          "perspective_fov": "natural",
+          "perspective_pitch": "oblique",
+          "speed_preset": "normal",
+          "wait_preset": "none",
+          "env_mode": "none",
+          "weather": "none"
         }
       ],
       "audio_tracks": [
