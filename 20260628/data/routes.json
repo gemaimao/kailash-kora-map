@@ -1273,8 +1273,9 @@
       "perspective_pitch": "custom",
       "speed_preset": "normal",
       "wait_preset": "none",
-      "env_mode": "none",
-      "weather": "none"
+      "env_mode": "time",
+      "weather": "none",
+      "timeOfDay": 12
     }
   ],
   "flights": [
@@ -1304,8 +1305,9 @@
           "perspective_pitch": "custom",
           "speed_preset": "normal",
           "wait_preset": "none",
-          "env_mode": "none",
-          "weather": "none"
+          "env_mode": "time",
+          "weather": "none",
+          "timeOfDay": 12
         }
       ],
       "audio_tracks": [
