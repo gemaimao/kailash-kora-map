@@ -1275,7 +1275,7 @@
       "wait_preset": "none",
       "env_mode": "time",
       "weather": "none",
-      "timeOfDay": 12
+      "timeOfDay": 9.8
     }
   ],
   "flights": [
@@ -1307,7 +1307,7 @@
           "wait_preset": "none",
           "env_mode": "time",
           "weather": "none",
-          "timeOfDay": 12
+          "timeOfDay": 9.8
         }
       ],
       "audio_tracks": [
